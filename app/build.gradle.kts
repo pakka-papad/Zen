@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "tech.zemn.mobile"
-    compileSdk = 32
+    compileSdk = Api.compileSdk
 
     defaultConfig {
         applicationId = "tech.zemn.mobile"
-        minSdk = 23
-        targetSdk = 32
+        minSdk = Api.minSdk
+        targetSdk = Api.targetSdk
         versionCode = 1
         versionName = "1.0"
 
@@ -45,7 +45,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.1.1"
+        kotlinCompilerExtensionVersion = Versions.androidxComposeCompiler
     }
 
     packagingOptions {
@@ -56,19 +56,21 @@ android {
 }
 
 dependencies {
+    implementation(Libraries.androidxCore)
 
-    val composeUiVersion = rootProject.extra.get("compose_ui_version") as String
+    implementation(Libraries.androidxLifecycle)
 
-    implementation("androidx.core:core-ktx:1.7.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
-    implementation("androidx.activity:activity-compose:1.5.1")
-    implementation("androidx.compose.ui:ui:$composeUiVersion")
-    implementation("androidx.compose.ui:ui-tooling-preview:$composeUiVersion")
-    implementation("androidx.compose.material:material:1.2.1")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeUiVersion")
-    debugImplementation("androidx.compose.ui:ui-tooling:$composeUiVersion")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:$composeUiVersion")
+    implementation(Libraries.androidxActivityCompose)
+
+    implementation(Libraries.androidxComposeUi)
+    implementation(Libraries.androidxComposeUiToolingPreview)
+    debugImplementation(Libraries.androidxComposeUiTooling)
+    debugImplementation(Libraries.androidxComposeUiTestManifest)
+    androidTestImplementation(Libraries.androidxComposeUiTestJunit4)
+
+    implementation(Libraries.androidxComposeMaterial)
+
+    testImplementation(Libraries.junit)
+    androidTestImplementation(Libraries.androidxJunit)
+    androidTestImplementation(Libraries.androidxEspresso)
 }
