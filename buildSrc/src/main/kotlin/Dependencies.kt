@@ -12,6 +12,16 @@ object Versions {
     const val androidxEspresso = "3.4.0"
 
     const val junit = "4.13.2"
+
+    const val leakcanary = "2.9.1"
+
+    const val hilt = "2.38.1"
+
+    const val timber = "5.0.1"
+}
+
+object Plugins {
+    const val hiltGradlePlugin = "com.google.dagger:hilt-android-gradle-plugin:${Versions.hilt}"
 }
 
 object Libraries {
@@ -32,11 +42,21 @@ object Libraries {
     const val junit = "junit:junit:${Versions.junit}"
     const val androidxJunit = "androidx.test.ext:junit:${Versions.androidxJunit}"
     const val androidxEspresso = "androidx.test.espresso:espresso-core:${Versions.androidxEspresso}"
+
+    const val leakcanary = "com.squareup.leakcanary:leakcanary-android:${Versions.leakcanary}"
+
+    const val hilt = "com.google.dagger:hilt-android:${Versions.hilt}"
+
+    const val timber = "com.jakewharton.timber:timber:${Versions.timber}"
 }
 
 object Api {
     const val compileSdk = 32
     const val minSdk = 23
     const val targetSdk = 32
+}
+
+object AnnotationProcessors {
+    const val hiltCompiler = "com.google.dagger:hilt-android-compiler:${Versions.hilt}"
 }
 
