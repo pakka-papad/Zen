@@ -18,6 +18,8 @@ object Versions {
     const val hilt = "2.38.1"
 
     const val timber = "5.0.1"
+
+    const val exoPlayer = "r2.18.1"
 }
 
 object Plugins {
@@ -48,6 +50,8 @@ object Libraries {
     const val hilt = "com.google.dagger:hilt-android:${Versions.hilt}"
 
     const val timber = "com.jakewharton.timber:timber:${Versions.timber}"
+
+    const val exoPlayer = "com.google.android.exoplayer:exoplayer:${Versions.exoPlayer}"
 }
 
 object Api {
