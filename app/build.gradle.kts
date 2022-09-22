@@ -3,6 +3,7 @@ plugins {
     id ("org.jetbrains.kotlin.android")
     kotlin("kapt")
     id("dagger.hilt.android.plugin")
+    id("androidx.navigation.safeargs.kotlin")
 }
 
 android {
@@ -44,6 +45,8 @@ android {
 
     buildFeatures {
         compose = true
+        viewBinding = true
+        dataBinding = true
     }
 
     composeOptions {
@@ -72,6 +75,10 @@ dependencies {
 
     implementation(Libraries.androidxComposeMaterial)
 
+    implementation(Libraries.appCompat)
+    implementation(Libraries.navigationUi)
+    implementation(Libraries.navigationFragment)
+
     testImplementation(Libraries.junit)
     androidTestImplementation(Libraries.androidxJunit)
     androidTestImplementation(Libraries.androidxEspresso)
@@ -82,4 +89,8 @@ dependencies {
     kapt(AnnotationProcessors.hiltCompiler)
 
     implementation(Libraries.timber)
+
+    implementation(Libraries.roomRuntime)
+    implementation(Libraries.roomKtx)
+    kapt(AnnotationProcessors.roomCompiler)
 }

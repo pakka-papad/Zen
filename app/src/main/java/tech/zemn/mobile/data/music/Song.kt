@@ -1,33 +1,42 @@
 package tech.zemn.mobile.data.music
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import tech.zemn.mobile.Constants
+
+@Entity(tableName = Constants.Tables.SONG_TABLE)
 data class Song(
-    val location: String = "",
-    val title: String?,
-    val album: String? = "",
+    @PrimaryKey val location: String = "",
+    val title: String,
+    val album: String = "",
     val size: Float = 0f,
-    val addedTimestamp: String? = "",
-    val modifiedTimestamp: String? = "",
-    val fileName: String = "",
-    val encoding: String = "",
-    val channels: String = "",
-    val lastPlayedTimestamp: Long = 0,
-    val played: Int = 0,
-    val metadata: Metadata
+    val addedTimestamp: Long,
+    val modifiedTimestamp: Long,
+    val artist: String,
+    val albumArtist: String,
+    val composer: String,
+    val genre: String,
+    val lyricist: String,
+    val year: Int,
+    val comment: String? = null,
+    val duration: Long,
+    val bitrate: Float,
+    val sampleRate: Float,
+    val bitsPerSample: Int = 0,
+    val mimeType: String? = null,
 ){
     data class Metadata(
-        val artist: String? = "",
-        val albumArtist: String? = "",
-        val composer: String? = "",
-        val genre: String? = "",
-        val lyricist: String? = "",
-        val trackNumber: String? = "",
-        val discNumber: String? = "",
-        val year: String? = "",
-        val comment: String = "",
-        val duration: String? = "",
-        val bitrate: String? = "",
-        val sampleRate: Float = 0f,
+        val artist: String,
+        val albumArtist: String,
+        val composer: String,
+        val genre: String,
+        val lyricist: String,
+        val year: Int,
+        val comment: String? = null,
+        val duration: Long,
+        val bitrate: Float,
+        val sampleRate: Float,
         val bitsPerSample: Int = 0,
-        val format: String? = "",
+        val mimeType: String? = null,
     )
 }

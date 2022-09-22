@@ -1,6 +1,8 @@
 buildscript {
     dependencies {
-        classpath(Plugins.hiltGradlePlugin)
+        classpath(Plugins.hilt)
+        classpath(Plugins.kotlin)
+        classpath(Plugins.navSafeArgs)
     }
 }
 

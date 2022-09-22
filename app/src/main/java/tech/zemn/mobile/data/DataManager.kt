@@ -1,23 +1,24 @@
 package tech.zemn.mobile.data
 
-import android.app.Application
+import android.content.Context
 import android.provider.MediaStore.Audio
 import tech.zemn.mobile.data.music.MetadataExtractor
 import tech.zemn.mobile.data.music.Song
+import tech.zemn.mobile.data.music.SongDao
+import tech.zemn.mobile.data.notification.ZemnNotificationManager
 import timber.log.Timber
 import java.io.File
 
 class DataManager(
-    private val context: Application,
+    private val context: Context,
+    private val notificationManager: ZemnNotificationManager,
+    private val songDao: SongDao
 ) {
 
-    val allSongs = mutableListOf<Song>()
+    val allSongs = songDao.getAllSongs()
 
-    val albumMap = mutableMapOf<String,ArrayList<Song>>()
-
-    val artistMap = mutableMapOf<String,ArrayList<Song>>()
-
-    fun scanForMusic() {
+    suspend fun scanForMusic() {
+        notificationManager.sendScanningNotification()
         val selection = Audio.Media.IS_MUSIC + " != 0"
         val projection = arrayOf(
             Audio.Media.DATA,
@@ -38,36 +39,43 @@ class DataManager(
         if (cursor != null) {
             cursor.moveToFirst()
             val mExtractor = MetadataExtractor()
+            val songs = ArrayList<Song>()
             do {
                 try {
                     val file = File(cursor.getString(0))
                     if (file.exists()) {
+                        val songMetadata = mExtractor.getSongMetadata(file.path)
                         val song = Song(
                             location = file.path,
                             title = cursor.getString(1),
                             album = cursor.getString(2),
                             size = cursor.getFloat(3),
-                            addedTimestamp = cursor.getString(4),
-                            modifiedTimestamp = cursor.getString(5),
-                            metadata = mExtractor.getSongMetadata(file.path)
+                            addedTimestamp = cursor.getString(4).toLong(),
+                            modifiedTimestamp = cursor.getString(5).toLong(),
+                            artist = songMetadata.artist,
+                            albumArtist = songMetadata.albumArtist,
+                            composer = songMetadata.composer,
+                            genre = songMetadata.genre,
+                            lyricist = songMetadata.lyricist,
+                            year = songMetadata.year,
+                            comment = songMetadata.comment,
+                            duration = songMetadata.duration,
+                            bitrate = songMetadata.bitrate,
+                            sampleRate = songMetadata.sampleRate,
+                            bitsPerSample = songMetadata.bitsPerSample,
+                            mimeType = songMetadata.mimeType,
                         )
-                        allSongs.add(song)
-                        if (song.album == null || !albumMap.containsKey(song.album)){
-                            albumMap[song.album ?: "default"] = ArrayList()
-                        }
-                        albumMap[song.album ?: "default"]!!.add(song)
-                        if (song.metadata.artist == null || !artistMap.containsKey(song.metadata.artist)){
-                            artistMap[song.metadata.artist ?: "Unknown"] = ArrayList()
-                        }
-                        artistMap[song.metadata.artist ?: "Unknown"]!!.add(song)
+                        songs.add(song)
                         Timber.d(song.toString())
                     }
                 } catch (e: Exception) {
                     Timber.e(e.message ?: e.localizedMessage ?: "FILE_DOES_NOT_EXIST")
                 }
             } while (cursor.moveToNext())
+            songDao.insertAllSongs(songs)
         }
         cursor?.close()
+        notificationManager.removeScanningNotification()
     }
 
 }
