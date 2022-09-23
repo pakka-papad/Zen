@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -20,18 +21,19 @@ import tech.zemn.mobile.data.music.Song
 
 @Composable
 fun AllSongs(
-    songs: List<Song>
+    songs: List<Song>,
+    onSongClicked: (Song) -> Unit,
 ) {
+    val listState = rememberLazyListState()
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+        state = listState
     ) {
         items(songs) { song ->
             SongCard(
                 song = song,
-                onSongClicked = {
-
-                }
+                onSongClicked = onSongClicked
             )
         }
     }

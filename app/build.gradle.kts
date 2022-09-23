@@ -93,4 +93,8 @@ dependencies {
     implementation(Libraries.roomRuntime)
     implementation(Libraries.roomKtx)
     kapt(AnnotationProcessors.roomCompiler)
+
+    implementation(Libraries.exoPlayer)
+    implementation(Libraries.media3ExoPlayer)
+    implementation(Libraries.media3Transformer)
 }

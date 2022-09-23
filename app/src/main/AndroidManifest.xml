@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools" >
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <application
         android:allowBackup="true"
@@ -30,6 +31,8 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
+        <service android:name=".player.ZemnPlayer"
+            android:foregroundServiceType="mediaPlayback" />
     </application>
 
 </manifest>

@@ -1,6 +1,7 @@
 package tech.zemn.mobile.di
 
 import android.content.Context
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.room.Room
 import dagger.Module
 import dagger.Provides
@@ -47,5 +48,13 @@ object AppModule {
     @Provides
     fun providesNotificationManager(@ApplicationContext context: Context): ZemnNotificationManager {
         return ZemnNotificationManager(context)
+    }
+
+    @Singleton
+    @Provides
+    fun providesExoPlayer(
+        @ApplicationContext context: Context
+    ): ExoPlayer {
+        return ExoPlayer.Builder(context).build()
     }
 }

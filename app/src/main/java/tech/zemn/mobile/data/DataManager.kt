@@ -1,11 +1,13 @@
 package tech.zemn.mobile.data
 
 import android.content.Context
+import android.content.Intent
 import android.provider.MediaStore.Audio
 import tech.zemn.mobile.data.music.MetadataExtractor
 import tech.zemn.mobile.data.music.Song
 import tech.zemn.mobile.data.music.SongDao
 import tech.zemn.mobile.data.notification.ZemnNotificationManager
+import tech.zemn.mobile.player.ZemnPlayer
 import timber.log.Timber
 import java.io.File
 
@@ -78,4 +80,39 @@ class DataManager(
         notificationManager.removeScanningNotification()
     }
 
+    private var callback: Callback? = null
+    private val queue = ArrayList<Song>()
+
+    @Synchronized
+    fun updateQueue(newQueue: List<Song>){
+        queue.clear()
+        queue.addAll(newQueue)
+        if (callback == null){
+            val intent = Intent(context,ZemnPlayer::class.java)
+            context.startForegroundService(intent)
+        } else {
+            callback?.updateQueue(newQueue)
+        }
+    }
+
+    @Synchronized
+    fun play() = callback?.play()
+
+    @Synchronized
+    fun pause() = callback?.pause()
+
+    fun setPlayerRunning(callback: Callback) {
+        this.callback = callback
+        this.callback?.updateQueue(queue)
+    }
+
+    fun stopPlayerRunning(){
+        this.callback = null
+    }
+
+    interface Callback {
+        fun updateQueue(newQueue: List<Song>)
+        fun play()
+        fun pause()
+    }
 }

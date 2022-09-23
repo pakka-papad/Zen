@@ -26,7 +26,8 @@ object Versions {
 
     const val timber = "5.0.1"
 
-    const val exoPlayer = "r2.18.1"
+    const val exoPlayer = "2.18.1"
+    const val media3 = "1.0.0-beta02"
 }
 
 object Plugins {
@@ -70,6 +71,8 @@ object Libraries {
     const val timber = "com.jakewharton.timber:timber:${Versions.timber}"
 
     const val exoPlayer = "com.google.android.exoplayer:exoplayer:${Versions.exoPlayer}"
+    const val media3ExoPlayer = "androidx.media3:media3-exoplayer:${Versions.media3}"
+    const val media3Transformer = "androidx.media3:media3-transformer:${Versions.media3}"
 }
 
 object Api {

@@ -27,11 +27,12 @@ class SharedViewModel @Inject constructor(
                 _songs.value = it
             }
         }
-    }
-
-    fun foo(){
         viewModelScope.launch(Dispatchers.IO) {
             manager.scanForMusic()
         }
+    }
+
+    fun onSongClicked(song: Song){
+        manager.updateQueue(listOf(song))
     }
 }

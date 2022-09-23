@@ -27,18 +27,13 @@ fun HomeScreen(
         content = {
             when(currentScreen){
                 is Screens.Home.AllSongs -> {
-                    AllSongs(songs = songs)
+                    AllSongs(
+                        songs = songs,
+                        onSongClicked = viewModel::onSongClicked
+                    )
                 }
                 is Screens.Home.Albums -> {
-                    Button(
-                        onClick = {
-                            viewModel.foo()
-                        }
-                    ) {
-                        Text(
-                            text = "Scan"
-                        )
-                    }
+
                 }
                 is Screens.Home.Artists -> {
 
