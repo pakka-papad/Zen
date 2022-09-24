@@ -73,6 +73,7 @@ object Libraries {
     const val exoPlayer = "com.google.android.exoplayer:exoplayer:${Versions.exoPlayer}"
     const val media3ExoPlayer = "androidx.media3:media3-exoplayer:${Versions.media3}"
     const val media3Transformer = "androidx.media3:media3-transformer:${Versions.media3}"
+    const val exoPlayerUi = "com.google.android.exoplayer:exoplayer-ui:${Versions.exoPlayer}"
 }
 
 object Api {

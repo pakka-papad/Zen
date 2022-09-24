@@ -12,6 +12,7 @@ import tech.zemn.mobile.Constants
 import tech.zemn.mobile.data.AppDatabase
 import tech.zemn.mobile.data.DataManager
 import tech.zemn.mobile.data.notification.ZemnNotificationManager
+import tech.zemn.mobile.player.ZemnBroadcastReceiver
 import javax.inject.Singleton
 
 @Module
@@ -56,5 +57,11 @@ object AppModule {
         @ApplicationContext context: Context
     ): ExoPlayer {
         return ExoPlayer.Builder(context).build()
+    }
+
+    @Singleton
+    @Provides
+    fun providesBroadcastReceiver(): ZemnBroadcastReceiver {
+        return ZemnBroadcastReceiver()
     }
 }

@@ -28,7 +28,7 @@ class SharedViewModel @Inject constructor(
             }
         }
         viewModelScope.launch(Dispatchers.IO) {
-            manager.scanForMusic()
+//            manager.scanForMusic()
         }
     }
 

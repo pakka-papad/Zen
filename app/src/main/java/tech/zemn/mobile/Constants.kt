@@ -5,4 +5,5 @@ object Constants {
     object Tables {
         const val SONG_TABLE = "song_table"
     }
+    const val PACKAGE_NAME = "tech.zemn.mobile"
 }

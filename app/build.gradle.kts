@@ -97,4 +97,5 @@ dependencies {
     implementation(Libraries.exoPlayer)
     implementation(Libraries.media3ExoPlayer)
     implementation(Libraries.media3Transformer)
+    implementation(Libraries.exoPlayerUi)
 }
