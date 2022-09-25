@@ -21,6 +21,9 @@ class SharedViewModel @Inject constructor(
     private val _songs = MutableStateFlow(listOf<Song>())
     val songs = _songs.asStateFlow()
 
+    private val _currentSong = MutableStateFlow<Song?>(null)
+    val currentSong = _currentSong.asStateFlow()
+
     init {
         viewModelScope.launch {
             manager.allSongs.collect {
@@ -33,6 +36,7 @@ class SharedViewModel @Inject constructor(
     }
 
     fun onSongClicked(song: Song){
+        _currentSong.value = song
         manager.updateQueue(listOf(song))
     }
 }

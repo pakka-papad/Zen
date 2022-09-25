@@ -1,13 +1,12 @@
 package tech.zemn.mobile.home
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -28,9 +27,9 @@ import tech.zemn.mobile.data.music.Song
 fun AllSongs(
     songs: List<Song>,
     onSongClicked: (Song) -> Unit,
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
+    listState: LazyListState
 ) {
-    val listState = rememberLazyListState()
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
