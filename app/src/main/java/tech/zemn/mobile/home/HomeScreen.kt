@@ -2,6 +2,7 @@ package tech.zemn.mobile.home
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -12,7 +13,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import tech.zemn.mobile.Screens
 import tech.zemn.mobile.SharedViewModel
 
@@ -24,12 +28,25 @@ fun HomeScreen(
 ){
     val songs by viewModel.songs.collectAsState()
     Scaffold(
-        content = {
+        topBar = {
+             TopAppBar {
+                 Text(
+                     text = "Zemn Music Player",
+                     fontSize = 20.sp,
+                     fontWeight = FontWeight.Bold,
+                     modifier = Modifier
+                         .padding(start = 5.dp),
+                     color = Color.White
+                 )
+             }
+        },
+        content = { paddingValues ->
             when(currentScreen){
                 is Screens.Home.AllSongs -> {
                     AllSongs(
                         songs = songs,
-                        onSongClicked = viewModel::onSongClicked
+                        onSongClicked = viewModel::onSongClicked,
+                        paddingValues = paddingValues
                     )
                 }
                 is Screens.Home.Albums -> {

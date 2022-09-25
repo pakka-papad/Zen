@@ -1,6 +1,9 @@
 package tech.zemn.mobile.home
 
+import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -8,11 +11,13 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,11 +28,13 @@ import tech.zemn.mobile.data.music.Song
 fun AllSongs(
     songs: List<Song>,
     onSongClicked: (Song) -> Unit,
+    paddingValues: PaddingValues
 ) {
     val listState = rememberLazyListState()
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = paddingValues.calculateBottomPadding()),
         state = listState
     ) {
         items(songs) { song ->
@@ -44,66 +51,121 @@ fun SongCard(
     song: Song,
     onSongClicked: (Song) -> Unit
 ) {
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp)
+            .height(85.dp)
+            .clickable(
+                onClick = {
+                    onSongClicked(song)
+                }
+            ),
+        contentAlignment = Alignment.BottomCenter
     ) {
-        Column(
+        Row(
             modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .fillMaxHeight()
-                .padding(start = 10.dp)
-                .clickable(
-                    onClick = {
-                        onSongClicked(song)
-                    }
-                )
+                .fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = song.title,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .fillMaxHeight()
+                    .padding(start = 20.dp),
+                verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = song.artist,
-                    fontSize = 14.sp
+                    text = song.title,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    maxLines = 1,
+                    modifier = Modifier.fillMaxWidth(),
                 )
-                Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = song.duration.toString(),
-                    fontSize = 14.sp
+                    text = "${song.artist}  •  ${song.duration}",
+                    maxLines = 1,
+                    fontSize = 14.sp,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.FavoriteBorder,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clickable(
+                            onClick = {
+
+                            },
+                            indication = rememberRipple(
+                                bounded = false,
+                                radius = 20.dp
+                            ),
+                            interactionSource = MutableInteractionSource()
+                        )
+                        .padding(8.dp)
+                )
+                Icon(
+                    imageVector = Icons.Outlined.MoreVert,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clickable(
+                            onClick = {
+
+                            },
+                            indication = rememberRipple(
+                                bounded = false,
+                                radius = 20.dp
+                            ),
+                            interactionSource = MutableInteractionSource()
+                        )
+                        .padding(8.dp)
                 )
             }
         }
-        Row(
+        Spacer(
             modifier = Modifier
+                .padding(horizontal = 20.dp)
                 .fillMaxWidth()
-                .fillMaxHeight(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(imageVector = Icons.Outlined.Favorite, contentDescription = null)
-            Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = null)
-        }
+                .height(0.8.dp)
+                .background(color = Color.Black.copy(alpha = 0.1f))
+        )
     }
 }
 
 @Composable
 @Preview(showBackground = true)
 fun SongCardPreview() {
-//    SongCard(
-//        song = Song(
-//            title = "Shape of You",
-//            metadata = Song.Metadata(
-//                artist = "Ed Sheeran",
-//                duration = "5 m"
-//            ),
-//        )
-//    ) {
-//
-//    }
+    SongCard(
+        song = Song(
+            location = "",
+            title = "Shape of You",
+            album = "",
+            size = 0f,
+            addedTimestamp = 0,
+            modifiedTimestamp = 0,
+            artist = "Ed Sheeran",
+            albumArtist = "",
+            composer = "",
+            genre = "",
+            lyricist = "",
+            year = 0,
+            comment = null,
+            duration = 18000,
+            bitrate = 0f,
+            sampleRate = 0f,
+            bitsPerSample = 0,
+            mimeType = "audio/mpeg",
+        )
+    ) {
+
+    }
 }

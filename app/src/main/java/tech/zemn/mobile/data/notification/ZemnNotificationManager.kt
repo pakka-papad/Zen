@@ -71,7 +71,7 @@ class ZemnNotificationManager(
         }
     }
 
-    private var previousAction = NotificationCompat.Action.Builder(
+    private val previousAction = NotificationCompat.Action.Builder(
         IconCompat.createWithResource(context,R.drawable.ic_baseline_skip_previous_24),
         "Previous",
         PendingIntent.getBroadcast(

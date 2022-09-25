@@ -5,6 +5,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 private val DarkColorPalette = darkColors(
     primary = Purple200,
@@ -27,6 +28,14 @@ private val LightColorPalette = lightColors(
     */
 )
 
+private val theme = lightColors(
+    primary = Color(0xFF17C379),
+    primaryVariant = Color(0xFF469DA4),
+    secondary = Color(0xFFA7A4E7),
+    secondaryVariant = Color(0xFFA8F3C2),
+    surface = Color(0xFFE0F7E3),
+)
+
 @Composable
 fun ZemnTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val colors = if (darkTheme) {
@@ -36,7 +45,7 @@ fun ZemnTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable (
     }
 
     MaterialTheme(
-        colors = colors,
+        colors = theme,
         typography = Typography,
         shapes = Shapes,
         content = content
