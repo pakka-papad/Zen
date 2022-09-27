@@ -83,23 +83,19 @@ class DataManager(
     private var callback: Callback? = null
     private val queue = ArrayList<Song>()
 
-    @Synchronized
-    fun updateQueue(newQueue: List<Song>){
-        queue.clear()
-        queue.addAll(newQueue)
+    init {
         if (callback == null){
             val intent = Intent(context,ZemnPlayer::class.java)
             context.startForegroundService(intent)
-        } else {
-            callback?.updateQueue(newQueue)
         }
     }
 
     @Synchronized
-    fun play() = callback?.play()
-
-    @Synchronized
-    fun pause() = callback?.pause()
+    fun updateQueue(newQueue: List<Song>){
+        queue.clear()
+        queue.addAll(newQueue)
+        callback?.updateQueue(newQueue)
+    }
 
     fun setPlayerRunning(callback: Callback) {
         this.callback = callback
@@ -112,7 +108,5 @@ class DataManager(
 
     interface Callback {
         fun updateQueue(newQueue: List<Song>)
-        fun play()
-        fun pause()
     }
 }

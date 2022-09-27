@@ -1,8 +1,13 @@
 package tech.zemn.mobile
 
 import android.app.Application
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,14 +20,17 @@ import javax.inject.Inject
 @HiltViewModel
 class SharedViewModel @Inject constructor(
     private val context: Application,
-    private val manager: DataManager
+    private val manager: DataManager,
+    private val exoPlayer: ExoPlayer,
 ): ViewModel() {
 
     private val _songs = MutableStateFlow(listOf<Song>())
     val songs = _songs.asStateFlow()
 
     private val _currentSong = MutableStateFlow<Song?>(null)
+    private val _currentSongBitmap = MutableStateFlow<Bitmap?>(null)
     val currentSong = _currentSong.asStateFlow()
+    val currentSongBitmap = _currentSongBitmap.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -31,12 +39,37 @@ class SharedViewModel @Inject constructor(
             }
         }
         viewModelScope.launch(Dispatchers.IO) {
-//            manager.scanForMusic()
+            manager.scanForMusic()
         }
+    }
+
+    private val _currentSongPlaying = MutableStateFlow<Boolean?>(null)
+    val currentSongPlaying = _currentSongPlaying.asStateFlow()
+
+    private val exoPlayerListener = object: Player.Listener {
+        override fun onEvents(player: Player, events: Player.Events) {
+            super.onEvents(player, events)
+            _currentSongPlaying.value = exoPlayer.isPlaying
+        }
+    }
+
+    init {
+        exoPlayer.addListener(exoPlayerListener)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        exoPlayer.removeListener(exoPlayerListener)
     }
 
     fun onSongClicked(song: Song){
         _currentSong.value = song
+        val extractor = MediaMetadataRetriever()
+        extractor.setDataSource(song.location)
+        if (extractor.embeddedPicture != null){
+            _currentSongBitmap.value =
+                BitmapFactory.decodeByteArray(extractor.embeddedPicture,0,extractor.embeddedPicture!!.size)
+        }
         manager.updateQueue(listOf(song))
     }
 }

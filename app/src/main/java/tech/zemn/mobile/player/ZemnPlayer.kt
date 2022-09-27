@@ -104,7 +104,7 @@ class ZemnPlayer : Service(), DataManager.Callback, ZemnBroadcastReceiver.Callba
             notificationManager.getPlayerNotification(
                 session = mediaSession,
                 showPreviousButton = false,
-                showPlayButton = false,
+                showPlayButton = true,
                 showNextButton = false,
             )
         )
@@ -215,16 +215,6 @@ class ZemnPlayer : Service(), DataManager.Callback, ZemnBroadcastReceiver.Callba
             )
         )
 
-    }
-
-    @Synchronized
-    override fun play() {
-        exoPlayer.play()
-    }
-
-    @Synchronized
-    override fun pause() {
-        exoPlayer.pause()
     }
 
     override fun onBroadcastPausePlay() {
