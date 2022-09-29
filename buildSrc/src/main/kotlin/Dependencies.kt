@@ -10,6 +10,7 @@ object Versions {
     const val androidxActivity = "1.5.1"
     const val androidxJunit = "1.1.3"
     const val androidxEspresso = "3.4.0"
+    const val androidxComposeConstraintLayout = "1.0.1"
 
     const val appCompat = "1.4.2"
     const val navigation = "2.4.2"
@@ -48,6 +49,7 @@ object Libraries {
     const val androidxComposeUiTooling = "androidx.compose.ui:ui-tooling:${Versions.androidxComposeUi}"
     const val androidxComposeUiTestManifest = "androidx.compose.ui:ui-test-manifest:${Versions.androidxComposeUi}"
     const val androidxComposeUiTestJunit4 = "androidx.compose.ui:ui-test-junit4:${Versions.androidxComposeUi}"
+    const val androidxComposeConstraintLayout = "androidx.constraintlayout:constraintlayout-compose:${Versions.androidxComposeConstraintLayout}"
 
     const val roomRuntime = "androidx.room:room-runtime:${Versions.room}"
     const val roomKtx = "androidx.room:room-ktx:${Versions.room}"

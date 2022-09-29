@@ -72,6 +72,7 @@ dependencies {
     debugImplementation(Libraries.androidxComposeUiTooling)
     debugImplementation(Libraries.androidxComposeUiTestManifest)
     androidTestImplementation(Libraries.androidxComposeUiTestJunit4)
+    implementation(Libraries.androidxComposeConstraintLayout)
 
     implementation(Libraries.androidxComposeMaterial)
 

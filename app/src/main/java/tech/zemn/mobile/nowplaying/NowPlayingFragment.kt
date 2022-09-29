@@ -1,5 +1,7 @@
 package tech.zemn.mobile.nowplaying
 
+import android.app.PendingIntent
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,13 +9,16 @@ import android.view.ViewGroup
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
+import tech.zemn.mobile.Constants
 import tech.zemn.mobile.SharedViewModel
+import tech.zemn.mobile.player.ZemnBroadcastReceiver
 import tech.zemn.mobile.ui.theme.ZemnTheme
 
 @AndroidEntryPoint
@@ -36,6 +41,17 @@ class NowPlayingFragment : Fragment() {
             setContent {
                 ZemnTheme {
                     val song by viewModel.currentSong.collectAsState()
+                    val songPlaying by viewModel.currentSongPlaying.collectAsState()
+                    val pendingPausePlayIntent = remember{
+                        PendingIntent.getBroadcast(
+                            context, ZemnBroadcastReceiver.PAUSE_PLAY_ACTION_REQUEST_CODE,
+                            Intent(Constants.PACKAGE_NAME).putExtra(
+                                ZemnBroadcastReceiver.AUDIO_CONTROL,
+                                ZemnBroadcastReceiver.ZEMN_PLAYER_PAUSE_PLAY
+                            ),
+                            PendingIntent.FLAG_IMMUTABLE
+                        )
+                    }
                     Scaffold(
                         topBar = {
                             NowPlayingTopBar(
@@ -49,9 +65,13 @@ class NowPlayingFragment : Fragment() {
                             NowPlayingScreen(
                                 paddingValues = paddingValues,
                                 song = song!!,
-                                onPausePlayPressed = {  },
+                                onPausePlayPressed = {
+                                     pendingPausePlayIntent.send()
+                                },
                                 onPreviousPressed = {  },
-                                onNextPressed = {  }
+                                onNextPressed = {  },
+                                albumArt = viewModel.currentSongBitmap.value,
+                                showPlayButton = !songPlaying!!
                             )
                         }
                     )

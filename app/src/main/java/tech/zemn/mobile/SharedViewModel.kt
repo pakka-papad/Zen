@@ -47,8 +47,8 @@ class SharedViewModel @Inject constructor(
     val currentSongPlaying = _currentSongPlaying.asStateFlow()
 
     private val exoPlayerListener = object: Player.Listener {
-        override fun onEvents(player: Player, events: Player.Events) {
-            super.onEvents(player, events)
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            super.onIsPlayingChanged(isPlaying)
             _currentSongPlaying.value = exoPlayer.isPlaying
         }
     }
