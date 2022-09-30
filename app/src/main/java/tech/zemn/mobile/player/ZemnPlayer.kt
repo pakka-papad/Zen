@@ -126,6 +126,7 @@ class ZemnPlayer : Service(), DataManager.Callback, ZemnBroadcastReceiver.Callba
         exoPlayer.clearMediaItems()
         dataManager.stopPlayerRunning()
         broadcastReceiver.stopListening()
+        systemNotificationManager.cancel(ZemnNotificationManager.PLAYER_NOTIFICATION_ID)
         stopForeground(true)
         stopSelf()
     }

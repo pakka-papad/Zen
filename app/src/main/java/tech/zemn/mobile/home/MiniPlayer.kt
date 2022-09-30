@@ -44,11 +44,11 @@ fun MiniPlayer(
             )
             .clickable(
                 onClick = onMiniPlayerClicked,
-                interactionSource = MutableInteractionSource(),
-                indication = rememberRipple(
-                    bounded = true,
-                    radius = 100.dp
-                )
+//                interactionSource = MutableInteractionSource(),
+//                indication = rememberRipple(
+//                    bounded = true,
+//                    radius = 100.dp
+//                )
             ),
     ) {
         if (albumArt != null) {

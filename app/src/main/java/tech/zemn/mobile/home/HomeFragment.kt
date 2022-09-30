@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.*
@@ -57,6 +58,8 @@ class HomeFragment : Fragment() {
                             PendingIntent.FLAG_IMMUTABLE
                         )
                     }
+                    val albums by viewModel.albums.collectAsState()
+                    val allAlbumsGridState = rememberLazyGridState()
                     Scaffold(
                         topBar = {
                             HomeTopBar()
@@ -72,6 +75,9 @@ class HomeFragment : Fragment() {
                                     songs = songs,
                                     allSongsListState = allSongsListState,
                                     paddingValues = paddingValues,
+                                    albums = albums,
+                                    allAlbumsGridState = allAlbumsGridState,
+                                    onAlbumClicked = viewModel::onAlbumClicked,
                                 )
                                 if (currentSong != null && songPlaying != null) {
                                     MiniPlayer(

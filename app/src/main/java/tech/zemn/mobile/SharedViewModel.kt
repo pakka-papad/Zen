@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import tech.zemn.mobile.data.DataManager
 import tech.zemn.mobile.data.music.Song
+import tech.zemn.mobile.data.music.Album
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,7 +23,7 @@ class SharedViewModel @Inject constructor(
     private val context: Application,
     private val manager: DataManager,
     private val exoPlayer: ExoPlayer,
-): ViewModel() {
+) : ViewModel() {
 
     private val _songs = MutableStateFlow(listOf<Song>())
     val songs = _songs.asStateFlow()
@@ -36,17 +37,62 @@ class SharedViewModel @Inject constructor(
         viewModelScope.launch {
             manager.allSongs.collect {
                 _songs.value = it
+                launch(Dispatchers.Default) {
+                    computeAlbumData(it)
+                }
             }
         }
         viewModelScope.launch(Dispatchers.IO) {
-            manager.scanForMusic()
+//            manager.scanForMusic()
         }
+    }
+
+    private val albumMap = HashMap<String, Album>()
+    private val _albums = MutableStateFlow<List<Album>>(listOf())
+    val albums = _albums.asStateFlow()
+
+    private fun computeAlbumData(songs: List<Song>) {
+        val imageMap = HashMap<String,Bitmap?>()
+        val songsMap = HashMap<String,ArrayList<Song>>()
+        songs.forEach { song ->
+            if (!imageMap.containsKey(song.album)){
+                imageMap[song.album] = null
+            }
+            if (imageMap[song.album] == null) {
+                val extractor = MediaMetadataRetriever()
+                extractor.setDataSource(song.location)
+                if (extractor.embeddedPicture != null) {
+                    imageMap[song.album] =
+                        BitmapFactory.decodeByteArray(
+                            extractor.embeddedPicture,
+                            0,
+                            extractor.embeddedPicture!!.size
+                        )
+                }
+            }
+            if (!songsMap.containsKey(song.album)){
+                songsMap[song.album] = ArrayList()
+            }
+            songsMap[song.album]!!.add(song)
+        }
+        val result = ArrayList<Album>()
+        songsMap.forEach { (albumName, songList) ->
+            val album = Album(
+                name = albumName,
+                songs = songList,
+                albumArt = imageMap[albumName]
+            )
+            result.add(album)
+            albumMap[album.name] = album
+        }
+        result.sortBy { it.name }
+        _albums.value = result
     }
 
     private val _currentSongPlaying = MutableStateFlow<Boolean?>(null)
     val currentSongPlaying = _currentSongPlaying.asStateFlow()
 
-    private val exoPlayerListener = object: Player.Listener {
+    private val exoPlayerListener = object : Player.Listener {
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             super.onIsPlayingChanged(isPlaying)
             _currentSongPlaying.value = exoPlayer.isPlaying
@@ -62,14 +108,22 @@ class SharedViewModel @Inject constructor(
         exoPlayer.removeListener(exoPlayerListener)
     }
 
-    fun onSongClicked(song: Song){
+    fun onSongClicked(song: Song) {
         _currentSong.value = song
         val extractor = MediaMetadataRetriever()
         extractor.setDataSource(song.location)
-        if (extractor.embeddedPicture != null){
+        if (extractor.embeddedPicture != null) {
             _currentSongBitmap.value =
-                BitmapFactory.decodeByteArray(extractor.embeddedPicture,0,extractor.embeddedPicture!!.size)
+                BitmapFactory.decodeByteArray(
+                    extractor.embeddedPicture,
+                    0,
+                    extractor.embeddedPicture!!.size
+                )
         }
         manager.updateQueue(listOf(song))
+    }
+
+    fun onAlbumClicked(album: String){
+
     }
 }
