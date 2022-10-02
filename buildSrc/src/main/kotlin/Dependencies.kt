@@ -29,6 +29,8 @@ object Versions {
 
     const val exoPlayer = "2.18.1"
     const val media3 = "1.0.0-beta02"
+
+    const val coilCompose = "2.2.2"
 }
 
 object Plugins {
@@ -76,6 +78,8 @@ object Libraries {
     const val media3ExoPlayer = "androidx.media3:media3-exoplayer:${Versions.media3}"
     const val media3Transformer = "androidx.media3:media3-transformer:${Versions.media3}"
     const val exoPlayerUi = "com.google.android.exoplayer:exoplayer-ui:${Versions.exoPlayer}"
+
+    const val coilCompose = "io.coil-kt:coil-compose:${Versions.coilCompose}"
 }
 
 object Api {

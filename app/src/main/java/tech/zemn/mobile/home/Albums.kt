@@ -1,6 +1,5 @@
 package tech.zemn.mobile.home
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,19 +15,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import tech.zemn.mobile.data.music.Album
+import coil.compose.AsyncImage
+import tech.zemn.mobile.data.music.AlbumWithSongs
+import timber.log.Timber
 
 @Composable
 fun Albums(
     paddingValues: PaddingValues,
-    albums: List<Album>,
+    albumsWithSongs: List<AlbumWithSongs>,
     gridState: LazyGridState,
-    onAlbumClicked: (String) -> Unit
+    onAlbumClicked: (AlbumWithSongs) -> Unit
 ) {
     LazyVerticalGrid(
         modifier = Modifier
@@ -37,9 +37,9 @@ fun Albums(
         state = gridState,
         columns = GridCells.Fixed(2),
     ){
-        items(albums){ album ->
+        items(albumsWithSongs){ album ->
             AlbumCard(
-                album = album,
+                albumWithSongs = album,
                 onAlbumClicked = onAlbumClicked
             )
         }
@@ -48,8 +48,8 @@ fun Albums(
 
 @Composable
 fun AlbumCard(
-    album: Album,
-    onAlbumClicked: (String) -> Unit,
+    albumWithSongs: AlbumWithSongs,
+    onAlbumClicked: (AlbumWithSongs) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -63,22 +63,28 @@ fun AlbumCard(
             .clip(RoundedCornerShape(10.dp))
             .clickable(
                 onClick = {
-                    onAlbumClicked(album.name)
+                    onAlbumClicked(albumWithSongs)
                 },
             ),
     ) {
-        if (album.albumArt != null) {
-            Image(
-                bitmap = album.albumArt.asImageBitmap(),
-                contentDescription = null,
-                modifier = Modifier
-                    .aspectRatio(ratio = 1f, matchHeightConstraintsFirst = false)
-                    .fillMaxWidth(),
-                contentScale = ContentScale.Crop
-            )
-        }
+        AsyncImage(
+            model = albumWithSongs.album.albumArtUri,
+            contentDescription = null,
+            modifier = Modifier
+                .aspectRatio(ratio = 1f, matchHeightConstraintsFirst = false)
+                .fillMaxWidth(),
+            contentScale = ContentScale.Crop,
+            onError = {
+                Timber.e(albumWithSongs.album.albumArtUri)
+                Timber.e(it.result.throwable.message)
+                Timber.e("AsyncImageError")
+            },
+            onSuccess = {
+                Timber.i("AsyncImageSuccess")
+            }
+        )
         Text(
-            text = album.name,
+            text = albumWithSongs.album.name,
             fontSize = 16.sp,
             modifier = Modifier
                 .fillMaxWidth()

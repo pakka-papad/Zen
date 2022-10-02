@@ -1,9 +1,11 @@
 package tech.zemn.mobile.data.music
 
-import android.graphics.Bitmap
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import tech.zemn.mobile.Constants
 
+@Entity(tableName = Constants.Tables.ALBUM_TABLE)
 data class Album(
-    val name: String,
-    val albumArt: Bitmap? = null,
-    val songs: List<Song> = emptyList()
+    @PrimaryKey val name: String,
+    val albumArtUri: String? = null,
 )

@@ -99,4 +99,6 @@ dependencies {
     implementation(Libraries.media3ExoPlayer)
     implementation(Libraries.media3Transformer)
     implementation(Libraries.exoPlayerUi)
+
+    implementation(Libraries.coilCompose)
 }

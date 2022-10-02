@@ -58,7 +58,7 @@ class HomeFragment : Fragment() {
                             PendingIntent.FLAG_IMMUTABLE
                         )
                     }
-                    val albums by viewModel.albums.collectAsState()
+                    val albumsWithSongs by viewModel.albumsWithSongs.collectAsState()
                     val allAlbumsGridState = rememberLazyGridState()
                     Scaffold(
                         topBar = {
@@ -75,7 +75,7 @@ class HomeFragment : Fragment() {
                                     songs = songs,
                                     allSongsListState = allSongsListState,
                                     paddingValues = paddingValues,
-                                    albums = albums,
+                                    albumsWithSongs = albumsWithSongs,
                                     allAlbumsGridState = allAlbumsGridState,
                                     onAlbumClicked = viewModel::onAlbumClicked,
                                 )

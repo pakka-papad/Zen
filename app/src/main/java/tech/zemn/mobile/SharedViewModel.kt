@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import tech.zemn.mobile.data.DataManager
 import tech.zemn.mobile.data.music.Song
-import tech.zemn.mobile.data.music.Album
+import tech.zemn.mobile.data.music.AlbumWithSongs
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,6 +28,9 @@ class SharedViewModel @Inject constructor(
     private val _songs = MutableStateFlow(listOf<Song>())
     val songs = _songs.asStateFlow()
 
+    private val _albumsWithSongs = MutableStateFlow(listOf<AlbumWithSongs>())
+    val albumsWithSongs = _albumsWithSongs.asStateFlow()
+
     private val _currentSong = MutableStateFlow<Song?>(null)
     private val _currentSongBitmap = MutableStateFlow<Bitmap?>(null)
     val currentSong = _currentSong.asStateFlow()
@@ -37,56 +40,16 @@ class SharedViewModel @Inject constructor(
         viewModelScope.launch {
             manager.allSongs.collect {
                 _songs.value = it
-                launch(Dispatchers.Default) {
-                    computeAlbumData(it)
-                }
+            }
+        }
+        viewModelScope.launch {
+            manager.allAlbums.collect {
+                _albumsWithSongs.value = it
             }
         }
         viewModelScope.launch(Dispatchers.IO) {
-//            manager.scanForMusic()
+            manager.scanForMusic()
         }
-    }
-
-    private val albumMap = HashMap<String, Album>()
-    private val _albums = MutableStateFlow<List<Album>>(listOf())
-    val albums = _albums.asStateFlow()
-
-    private fun computeAlbumData(songs: List<Song>) {
-        val imageMap = HashMap<String,Bitmap?>()
-        val songsMap = HashMap<String,ArrayList<Song>>()
-        songs.forEach { song ->
-            if (!imageMap.containsKey(song.album)){
-                imageMap[song.album] = null
-            }
-            if (imageMap[song.album] == null) {
-                val extractor = MediaMetadataRetriever()
-                extractor.setDataSource(song.location)
-                if (extractor.embeddedPicture != null) {
-                    imageMap[song.album] =
-                        BitmapFactory.decodeByteArray(
-                            extractor.embeddedPicture,
-                            0,
-                            extractor.embeddedPicture!!.size
-                        )
-                }
-            }
-            if (!songsMap.containsKey(song.album)){
-                songsMap[song.album] = ArrayList()
-            }
-            songsMap[song.album]!!.add(song)
-        }
-        val result = ArrayList<Album>()
-        songsMap.forEach { (albumName, songList) ->
-            val album = Album(
-                name = albumName,
-                songs = songList,
-                albumArt = imageMap[albumName]
-            )
-            result.add(album)
-            albumMap[album.name] = album
-        }
-        result.sortBy { it.name }
-        _albums.value = result
     }
 
     private val _currentSongPlaying = MutableStateFlow<Boolean?>(null)
@@ -123,7 +86,7 @@ class SharedViewModel @Inject constructor(
         manager.updateQueue(listOf(song))
     }
 
-    fun onAlbumClicked(album: String){
+    fun onAlbumClicked(album: AlbumWithSongs){
 
     }
 }
