@@ -1,9 +1,6 @@
 package tech.zemn.mobile
 
 import android.app.Application
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.media.MediaMetadataRetriever
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.Player
@@ -32,9 +29,7 @@ class SharedViewModel @Inject constructor(
     val albumsWithSongs = _albumsWithSongs.asStateFlow()
 
     private val _currentSong = MutableStateFlow<Song?>(null)
-    private val _currentSongBitmap = MutableStateFlow<Bitmap?>(null)
     val currentSong = _currentSong.asStateFlow()
-    val currentSongBitmap = _currentSongBitmap.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -73,16 +68,6 @@ class SharedViewModel @Inject constructor(
 
     fun onSongClicked(song: Song) {
         _currentSong.value = song
-        val extractor = MediaMetadataRetriever()
-        extractor.setDataSource(song.location)
-        if (extractor.embeddedPicture != null) {
-            _currentSongBitmap.value =
-                BitmapFactory.decodeByteArray(
-                    extractor.embeddedPicture,
-                    0,
-                    extractor.embeddedPicture!!.size
-                )
-        }
         manager.updateQueue(listOf(song))
     }
 

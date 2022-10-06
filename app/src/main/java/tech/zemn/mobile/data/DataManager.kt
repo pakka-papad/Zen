@@ -10,7 +10,10 @@ import tech.zemn.mobile.data.music.MetadataExtractor
 import tech.zemn.mobile.data.music.Song
 import tech.zemn.mobile.data.music.SongDao
 import tech.zemn.mobile.data.notification.ZemnNotificationManager
+import tech.zemn.mobile.formatToDate
 import tech.zemn.mobile.player.ZemnPlayer
+import tech.zemn.mobile.toMBfromB
+import tech.zemn.mobile.toMinutesAndSeconds
 import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
@@ -66,9 +69,9 @@ class DataManager(
                     location = file.path,
                     title = cursor.getString(titleIndex),
                     album = cursor.getString(albumIndex).trim(),
-                    size = cursor.getFloat(sizeIndex),
-                    addedTimestamp = cursor.getString(dateAddedIndex).toLong(),
-                    modifiedTimestamp = cursor.getString(dateModifiedIndex).toLong(),
+                    size = cursor.getFloat(sizeIndex).toMBfromB(),
+                    addedDate = cursor.getString(dateAddedIndex).toLong().formatToDate(),
+                    modifiedDate = cursor.getString(dateModifiedIndex).toLong().formatToDate(),
                     artist = songMetadata.artist,
                     albumArtist = songMetadata.albumArtist,
                     composer = songMetadata.composer,
@@ -76,7 +79,8 @@ class DataManager(
                     lyricist = songMetadata.lyricist,
                     year = songMetadata.year,
                     comment = songMetadata.comment,
-                    duration = songMetadata.duration,
+                    durationMillis = songMetadata.duration,
+                    durationFormatted = songMetadata.duration.toMinutesAndSeconds(),
                     bitrate = songMetadata.bitrate,
                     sampleRate = songMetadata.sampleRate,
                     bitsPerSample = songMetadata.bitsPerSample,

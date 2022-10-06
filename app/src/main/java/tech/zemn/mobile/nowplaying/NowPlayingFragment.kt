@@ -70,7 +70,6 @@ class NowPlayingFragment : Fragment() {
                                 },
                                 onPreviousPressed = {  },
                                 onNextPressed = {  },
-                                albumArt = viewModel.currentSongBitmap.value,
                                 showPlayButton = !songPlaying!!
                             )
                         }

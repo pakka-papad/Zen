@@ -86,7 +86,6 @@ class HomeFragment : Fragment() {
                                             pendingPausePlayIntent.send()
                                         },
                                         song = currentSong!!,
-                                        albumArt = viewModel.currentSongBitmap.value,
                                         paddingValues = paddingValues,
                                         onMiniPlayerClicked = {
                                             navController.navigate(R.id.action_homeFragment_to_nowPlaying)

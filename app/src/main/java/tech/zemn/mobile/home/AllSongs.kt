@@ -18,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import tech.zemn.mobile.data.music.Song
@@ -81,7 +80,7 @@ fun SongCard(
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Text(
-                    text = "${song.artist}  •  ${song.duration}",
+                    text = "${song.artist}  •  ${song.durationFormatted}",
                     maxLines = 1,
                     fontSize = 14.sp,
                     modifier = Modifier.fillMaxWidth(),
@@ -137,34 +136,5 @@ fun SongCard(
                 .height(0.8.dp)
                 .background(color = Color.Black.copy(alpha = 0.1f))
         )
-    }
-}
-
-@Composable
-@Preview(showBackground = true)
-fun SongCardPreview() {
-    SongCard(
-        song = Song(
-            location = "",
-            title = "Shape of You",
-            album = "",
-            size = 0f,
-            addedTimestamp = 0,
-            modifiedTimestamp = 0,
-            artist = "Ed Sheeran",
-            albumArtist = "",
-            composer = "",
-            genre = "",
-            lyricist = "",
-            year = 0,
-            comment = null,
-            duration = 18000,
-            bitrate = 0f,
-            sampleRate = 0f,
-            bitsPerSample = 0,
-            mimeType = "audio/mpeg",
-        )
-    ) {
-
     }
 }

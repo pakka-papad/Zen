@@ -23,4 +23,10 @@ class MetadataExtractor {
         retriever.release()
         return mData
     }
+
+    fun getSongEmbeddedPicture(path: String): ByteArray? {
+        val extractor = MediaMetadataRetriever()
+        extractor.setDataSource(path)
+        return extractor.embeddedPicture
+    }
 }

@@ -162,7 +162,7 @@ class ZemnPlayer : Service(), DataManager.Callback, ZemnBroadcastReceiver.Callba
                 }
                 putLong(
                     MediaMetadataCompat.METADATA_KEY_DURATION,
-                    currentSong.duration
+                    currentSong.durationMillis
                 )
             }.build()
         )

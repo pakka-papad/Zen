@@ -1,6 +1,6 @@
 package tech.zemn.mobile.home
 
-import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,17 +10,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import tech.zemn.mobile.R
 import tech.zemn.mobile.data.music.Song
 
@@ -29,10 +28,16 @@ fun MiniPlayer(
     showPlayButton: Boolean,
     onPausePlayPressed: () -> Unit,
     song: Song,
-    albumArt: Bitmap?,
     paddingValues: PaddingValues,
     onMiniPlayerClicked: () -> Unit
 ) {
+    var picture by remember { mutableStateOf<ByteArray?>(null) }
+    LaunchedEffect(key1 = song.location){
+        val extractor = MediaMetadataRetriever().apply {
+            setDataSource(song.location)
+        }
+        picture = extractor.embeddedPicture
+    }
     Box(
         modifier = Modifier
             .padding(bottom = paddingValues.calculateBottomPadding() + 10.dp)
@@ -44,23 +49,16 @@ fun MiniPlayer(
             )
             .clickable(
                 onClick = onMiniPlayerClicked,
-//                interactionSource = MutableInteractionSource(),
-//                indication = rememberRipple(
-//                    bounded = true,
-//                    radius = 100.dp
-//                )
             ),
     ) {
-        if (albumArt != null) {
-            Image(
-                bitmap = albumArt.asImageBitmap(),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(60.dp)
-                    .padding(8.dp)
-                    .clip(RoundedCornerShape(8.dp))
-            )
-        }
+        AsyncImage(
+            model = picture,
+            contentDescription = null,
+            modifier = Modifier
+                .size(60.dp)
+                .padding(8.dp)
+                .clip(RoundedCornerShape(8.dp)),
+        )
         Text(
             modifier = Modifier
                 .padding(horizontal = 64.dp, vertical = 6.dp)
@@ -90,36 +88,4 @@ fun MiniPlayer(
             colorFilter = ColorFilter.tint(Color.White),
         )
     }
-}
-
-@Preview
-@Composable
-fun MiniPlayerPreview() {
-    MiniPlayer(
-        showPlayButton = true,
-        onPausePlayPressed = {  },
-        song = Song(
-            location = "",
-            title = "Shape of You",
-            album = "",
-            size = 0f,
-            addedTimestamp = 0,
-            modifiedTimestamp = 0,
-            artist = "Ed Sheeran",
-            albumArtist = "",
-            composer = "",
-            genre = "",
-            lyricist = "",
-            year = 0,
-            comment = null,
-            duration = 18000,
-            bitrate = 0f,
-            sampleRate = 0f,
-            bitsPerSample = 0,
-            mimeType = "audio/mpeg",
-        ),
-        albumArt = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888),
-        paddingValues = PaddingValues(all = 0.dp),
-        onMiniPlayerClicked = {}
-    )
 }

@@ -1,6 +1,6 @@
 package tech.zemn.mobile.nowplaying
 
-import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,22 +10,21 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import coil.compose.AsyncImage
 import tech.zemn.mobile.R
 import tech.zemn.mobile.data.music.Song
 
@@ -33,12 +32,18 @@ import tech.zemn.mobile.data.music.Song
 fun NowPlayingScreen(
     paddingValues: PaddingValues,
     song: Song,
-    albumArt: Bitmap?,
     onPausePlayPressed: () -> Unit,
     onPreviousPressed: () -> Unit,
     onNextPressed: () -> Unit,
     showPlayButton: Boolean,
 ) {
+    var picture by remember { mutableStateOf<ByteArray?>(null) }
+    LaunchedEffect(key1 = song.location){
+        val extractor = MediaMetadataRetriever().apply {
+            setDataSource(song.location)
+        }
+        picture = extractor.embeddedPicture
+    }
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize(),
@@ -158,55 +163,20 @@ fun NowPlayingScreen(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            if (albumArt != null) {
-                Image(
-                    bitmap = albumArt.asImageBitmap(),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth(fraction = 0.8f)
-                        .aspectRatio(ratio = 1f, matchHeightConstraintsFirst = false)
-                        .shadow(
-                            elevation = 20.dp,
-                            shape = RoundedCornerShape(20.dp),
-                            clip = false,
-                        )
-                        .clip(RoundedCornerShape(20.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            }
+            AsyncImage(
+                model = picture,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth(fraction = 0.8f)
+                    .aspectRatio(ratio = 1f, matchHeightConstraintsFirst = false)
+                    .shadow(
+                        elevation = 20.dp,
+                        shape = RoundedCornerShape(20.dp),
+                        clip = false,
+                    )
+                    .clip(RoundedCornerShape(20.dp)),
+                contentScale = ContentScale.Crop,
+            )
         }
     }
-}
-
-@Preview(showSystemUi = true, showBackground = true)
-@Composable
-fun NowPlayingScreenPreview() {
-    NowPlayingScreen(
-        paddingValues = PaddingValues(),
-        song = Song(
-            location = "",
-            title = "Shape of You",
-            album = "Random Album",
-            size = 0f,
-            addedTimestamp = 0,
-            modifiedTimestamp = 0,
-            artist = "Ed Sheeran",
-            albumArtist = "",
-            composer = "",
-            genre = "",
-            lyricist = "",
-            year = 0,
-            comment = null,
-            duration = 18000,
-            bitrate = 0f,
-            sampleRate = 0f,
-            bitsPerSample = 0,
-            mimeType = "audio/mpeg",
-        ),
-        onPausePlayPressed = { },
-        onPreviousPressed = { },
-        albumArt = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888),
-        onNextPressed = { },
-        showPlayButton = true
-    )
 }
