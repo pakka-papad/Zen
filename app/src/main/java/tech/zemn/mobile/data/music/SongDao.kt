@@ -23,4 +23,11 @@ interface SongDao {
     @Transaction
     @Query("SELECT * FROM ${Constants.Tables.ALBUM_TABLE} ORDER BY name ASC")
     fun getAllAlbumsWithSongs(): Flow<List<AlbumWithSongs>>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAllArtists(data: List<Artist>)
+
+    @Transaction
+    @Query("SELECT * FROM ${Constants.Tables.ARTIST_TABLE} ORDER BY name ASC")
+    fun getAllArtistsWithSongs(): Flow<List<ArtistWithSongs>>
 }

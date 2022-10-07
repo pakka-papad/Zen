@@ -60,6 +60,8 @@ class HomeFragment : Fragment() {
                     }
                     val albumsWithSongs by viewModel.albumsWithSongs.collectAsState()
                     val allAlbumsGridState = rememberLazyGridState()
+                    val artistsWithSongs by viewModel.artistsWithSongs.collectAsState()
+                    val allArtistsListState = rememberLazyListState()
                     Scaffold(
                         topBar = {
                             HomeTopBar()
@@ -78,6 +80,9 @@ class HomeFragment : Fragment() {
                                     albumsWithSongs = albumsWithSongs,
                                     allAlbumsGridState = allAlbumsGridState,
                                     onAlbumClicked = viewModel::onAlbumClicked,
+                                    artistsWithSongs = artistsWithSongs,
+                                    onArtistClicked = viewModel::onArtistClicked,
+                                    allArtistsListState = allArtistsListState,
                                 )
                                 if (currentSong != null && songPlaying != null) {
                                     MiniPlayer(

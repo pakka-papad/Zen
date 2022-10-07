@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import tech.zemn.mobile.data.DataManager
 import tech.zemn.mobile.data.music.Song
 import tech.zemn.mobile.data.music.AlbumWithSongs
+import tech.zemn.mobile.data.music.ArtistWithSongs
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,6 +29,9 @@ class SharedViewModel @Inject constructor(
     private val _albumsWithSongs = MutableStateFlow(listOf<AlbumWithSongs>())
     val albumsWithSongs = _albumsWithSongs.asStateFlow()
 
+    private val _artistsWithSongs = MutableStateFlow(listOf<ArtistWithSongs>())
+    val artistsWithSongs = _artistsWithSongs.asStateFlow()
+
     private val _currentSong = MutableStateFlow<Song?>(null)
     val currentSong = _currentSong.asStateFlow()
 
@@ -40,6 +44,11 @@ class SharedViewModel @Inject constructor(
         viewModelScope.launch {
             manager.allAlbums.collect {
                 _albumsWithSongs.value = it
+            }
+        }
+        viewModelScope.launch {
+            manager.allArtists.collect {
+                _artistsWithSongs.value = it
             }
         }
         viewModelScope.launch(Dispatchers.IO) {
@@ -71,7 +80,11 @@ class SharedViewModel @Inject constructor(
         manager.updateQueue(listOf(song))
     }
 
-    fun onAlbumClicked(album: AlbumWithSongs){
+    fun onAlbumClicked(albumWithSongs: AlbumWithSongs){
+
+    }
+
+    fun onArtistClicked(artistWithSongs: ArtistWithSongs){
 
     }
 }

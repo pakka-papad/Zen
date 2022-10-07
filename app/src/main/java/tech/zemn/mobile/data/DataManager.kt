@@ -5,10 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.MediaStore.Audio
-import tech.zemn.mobile.data.music.Album
-import tech.zemn.mobile.data.music.MetadataExtractor
-import tech.zemn.mobile.data.music.Song
-import tech.zemn.mobile.data.music.SongDao
+import tech.zemn.mobile.data.music.*
 import tech.zemn.mobile.data.notification.ZemnNotificationManager
 import tech.zemn.mobile.formatToDate
 import tech.zemn.mobile.player.ZemnPlayer
@@ -17,6 +14,7 @@ import tech.zemn.mobile.toMinutesAndSeconds
 import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
+import java.util.TreeSet
 
 class DataManager(
     private val context: Context,
@@ -26,6 +24,7 @@ class DataManager(
 
     val allSongs = songDao.getAllSongs()
     val allAlbums = songDao.getAllAlbumsWithSongs()
+    val allArtists = songDao.getAllArtistsWithSongs()
 
     suspend fun scanForMusic() {
         notificationManager.sendScanningNotification()
@@ -60,6 +59,7 @@ class DataManager(
         val dateModifiedIndex = cursor.getColumnIndex(Audio.Media.DATE_MODIFIED)
         val songCover = Uri.parse("content://media/external/audio/albumart")
         val albumArtMap = HashMap<String,String?>()
+        val artistSet = TreeSet<String>()
         do {
             try {
                 val file = File(cursor.getString(dataIndex))
@@ -87,9 +87,7 @@ class DataManager(
                     mimeType = songMetadata.mimeType,
                 )
                 songs.add(song)
-                if (!albumArtMap.containsKey(song.album)) {
-                    albumArtMap[song.album] = null
-                }
+                artistSet.add(song.artist)
                 if (albumArtMap[song.album] == null){
                     albumArtMap[song.album] = ContentUris.withAppendedId(songCover, cursor.getLong(albumIdIndex)).toString()
                 }
@@ -103,6 +101,7 @@ class DataManager(
         }
         songDao.insertAllSongs(songs)
         songDao.insertAllAlbums(albums)
+        songDao.insertAllArtists(artistSet.map { Artist(it) })
         notificationManager.removeScanningNotification()
     }
 

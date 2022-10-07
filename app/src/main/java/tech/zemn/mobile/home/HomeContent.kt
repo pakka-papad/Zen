@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
 import tech.zemn.mobile.Screens
 import tech.zemn.mobile.data.music.AlbumWithSongs
+import tech.zemn.mobile.data.music.ArtistWithSongs
 import tech.zemn.mobile.data.music.Song
 
 @Composable
@@ -18,6 +19,9 @@ fun HomeContent(
     albumsWithSongs: List<AlbumWithSongs>,
     allAlbumsGridState: LazyGridState,
     onAlbumClicked: (AlbumWithSongs) -> Unit,
+    artistsWithSongs: List<ArtistWithSongs>,
+    allArtistsListState: LazyListState,
+    onArtistClicked: (ArtistWithSongs) -> Unit,
 ){
     when(currentScreen){
         is Screens.Home.AllSongs -> {
@@ -37,7 +41,12 @@ fun HomeContent(
             )
         }
         is Screens.Home.Artists -> {
-
+            Artists(
+                paddingValues = paddingValues,
+                artistsWithSongs = artistsWithSongs,
+                onArtistClicked = onArtistClicked,
+                listState = allArtistsListState
+            )
         }
         else -> throw RuntimeException("Invalid currentScreen parameter")
     }
