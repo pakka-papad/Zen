@@ -52,7 +52,7 @@ class ZemnNotificationManager(
 
     fun sendScanningNotification() {
         val notification = NotificationCompat.Builder(context, RUNNING_SCAN).apply {
-            setSmallIcon(R.drawable.ic_launcher_foreground)
+            setSmallIcon(R.mipmap.ic_notification)
             setContentTitle("Scanning")
             setContentText("Looking for music \uD83E\uDDD0")
             setOngoing(true)
@@ -129,7 +129,7 @@ class ZemnNotificationManager(
         val mediaStyle = androidx.media.app.NotificationCompat.MediaStyle()
             .setMediaSession(session.sessionToken)
         return NotificationCompat.Builder(context, PLAYER_SERVICE).apply {
-            setSmallIcon(R.drawable.ic_launcher_foreground)
+            setSmallIcon(R.mipmap.ic_notification)
             setContentTitle("Now Playing")
             setContentText("")
             setOngoing(true)
