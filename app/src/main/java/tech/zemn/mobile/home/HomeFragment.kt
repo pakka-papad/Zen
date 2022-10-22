@@ -79,9 +79,15 @@ class HomeFragment : Fragment() {
                                     paddingValues = paddingValues,
                                     albumsWithSongs = albumsWithSongs,
                                     allAlbumsGridState = allAlbumsGridState,
-                                    onAlbumClicked = viewModel::onAlbumClicked,
+                                    onAlbumClicked = { albumWithSongs ->
+                                        viewModel.onAlbumClicked(albumWithSongs)
+                                        navController.navigate(R.id.action_homeFragment_to_playlistFragment)
+                                    },
                                     artistsWithSongs = artistsWithSongs,
-                                    onArtistClicked = viewModel::onArtistClicked,
+                                    onArtistClicked = { artistWithSongs ->
+                                        viewModel.onArtistClicked(artistWithSongs)
+                                        navController.navigate(R.id.action_homeFragment_to_playlistFragment)
+                                    },
                                     allArtistsListState = allArtistsListState,
                                 )
                                 if (currentSong != null && songPlaying != null) {

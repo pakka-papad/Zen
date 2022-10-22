@@ -1,12 +1,10 @@
 package tech.zemn.mobile.nowplaying
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
@@ -19,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -28,11 +27,16 @@ fun NowPlayingTopBar(
     title: String,
 ) {
     TopAppBar(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(96.dp)
+            .background(Color(0xFF17C379)),
         navigationIcon = {
             Box(
                 modifier = Modifier
-                    .aspectRatio(ratio = 1f, matchHeightConstraintsFirst = true)
-                    .fillMaxSize(),
+                    .fillMaxHeight()
+                    .width(56.dp)
+                    .padding(top = 40.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
@@ -55,22 +59,24 @@ fun NowPlayingTopBar(
         title = {
             Box(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .padding(top = 40.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = title,
                     fontSize = 20.sp,
                     maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         },
         actions = {
             Box(
                 modifier = Modifier
-                    .aspectRatio(ratio = 1f, matchHeightConstraintsFirst = true)
-                    .fillMaxSize()
-                    .fillMaxSize(),
+                    .fillMaxHeight()
+                    .width(56.dp)
+                    .padding(top = 40.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Image(

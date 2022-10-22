@@ -187,7 +187,7 @@ class ZemnPlayer : Service(), DataManager.Callback, ZemnBroadcastReceiver.Callba
     }
 
     @Synchronized
-    override fun updateQueue(newQueue: List<Song>) {
+    override fun setQueue(newQueue: List<Song>) {
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
         val mediaItems = newQueue.map {
@@ -216,6 +216,26 @@ class ZemnPlayer : Service(), DataManager.Callback, ZemnBroadcastReceiver.Callba
             )
         )
 
+    }
+
+    @Synchronized
+    override fun addToQueue(song: Song) {
+        queue.add(song)
+        exoPlayer.addMediaItem(MediaItem.fromUri(song.location))
+        updateMediaSessionMetadata()
+        updateMediaSessionState(
+            showPrevious = false,
+            showNext = false,
+        )
+        systemNotificationManager.notify(
+            ZemnNotificationManager.PLAYER_NOTIFICATION_ID,
+            notificationManager.getPlayerNotification(
+                session = mediaSession,
+                showPreviousButton = false,
+                showPlayButton = false,
+                showNextButton = false,
+            )
+        )
     }
 
     override fun onBroadcastPausePlay() {

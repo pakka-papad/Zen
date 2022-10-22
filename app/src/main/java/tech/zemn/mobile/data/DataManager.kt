@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.MediaStore.Audio
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import tech.zemn.mobile.data.music.*
 import tech.zemn.mobile.data.notification.ZemnNotificationManager
 import tech.zemn.mobile.formatToDate
@@ -106,25 +108,43 @@ class DataManager(
     }
 
     private var callback: Callback? = null
-    private val queue = ArrayList<Song>()
 
-    init {
-        if (callback == null) {
-            val intent = Intent(context, ZemnPlayer::class.java)
+    private val _queue = MutableStateFlow(listOf<Song>())
+    val queue = _queue.asStateFlow()
+
+    private val _currentSong = MutableStateFlow<Song?>(null)
+    val currentSong = _currentSong.asStateFlow()
+
+    private val _currentSongIndexInQueue = MutableStateFlow<Int?>(null)
+    val currentSongIndexInQueue = _currentSongIndexInQueue.asStateFlow()
+
+
+    @Synchronized
+    fun setQueue(newQueue: List<Song>) {
+        if (newQueue.isEmpty()) return
+        _queue.value = _queue.value.toMutableList().apply {
+            clear()
+            addAll(newQueue)
+        }
+        _currentSong.value = newQueue[0]
+        _currentSongIndexInQueue.value = 0
+        if (callback == null){
+            val intent = Intent(context,ZemnPlayer::class.java)
             context.startForegroundService(intent)
+        } else {
+            callback?.setQueue(newQueue)
         }
     }
 
     @Synchronized
-    fun updateQueue(newQueue: List<Song>) {
-        queue.clear()
-        queue.addAll(newQueue)
-        callback?.updateQueue(newQueue)
+    fun addToQueue(song: Song) {
+        _queue.value.toMutableList().apply { add(song) }
+        callback?.addToQueue(song)
     }
 
     fun setPlayerRunning(callback: Callback) {
         this.callback = callback
-        this.callback?.updateQueue(queue)
+        this.callback?.setQueue(_queue.value)
     }
 
     fun stopPlayerRunning() {
@@ -132,6 +152,7 @@ class DataManager(
     }
 
     interface Callback {
-        fun updateQueue(newQueue: List<Song>)
+        fun setQueue(newQueue: List<Song>)
+        fun addToQueue(song: Song)
     }
 }

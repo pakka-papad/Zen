@@ -11,10 +11,17 @@
         <action
             android:id="@+id/action_homeFragment_to_nowPlaying"
             app:destination="@id/nowPlaying" />
+        <action
+            android:id="@+id/action_homeFragment_to_playlistFragment"
+            app:destination="@id/playlistFragment" />
     </fragment>
     <fragment
         android:id="@+id/nowPlaying"
         android:name="tech.zemn.mobile.nowplaying.NowPlayingFragment"
         android:label="NowPlaying" >
     </fragment>
+    <fragment
+        android:id="@+id/playlistFragment"
+        android:name="tech.zemn.mobile.playlist.PlaylistFragment"
+        android:label="PlaylistFragment" />
 </navigation>

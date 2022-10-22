@@ -11,9 +11,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import tech.zemn.mobile.data.DataManager
-import tech.zemn.mobile.data.music.Song
 import tech.zemn.mobile.data.music.AlbumWithSongs
 import tech.zemn.mobile.data.music.ArtistWithSongs
+import tech.zemn.mobile.data.music.Song
+import tech.zemn.mobile.playlist.PlaylistUi
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,8 +33,9 @@ class SharedViewModel @Inject constructor(
     private val _artistsWithSongs = MutableStateFlow(listOf<ArtistWithSongs>())
     val artistsWithSongs = _artistsWithSongs.asStateFlow()
 
-    private val _currentSong = MutableStateFlow<Song?>(null)
-    val currentSong = _currentSong.asStateFlow()
+    val currentSong = manager.currentSong
+
+    val queue = manager.queue
 
     init {
         viewModelScope.launch {
@@ -52,7 +54,7 @@ class SharedViewModel @Inject constructor(
             }
         }
         viewModelScope.launch(Dispatchers.IO) {
-            manager.scanForMusic()
+//            manager.scanForMusic()
         }
     }
 
@@ -67,6 +69,7 @@ class SharedViewModel @Inject constructor(
     }
 
     init {
+        _currentSongPlaying.value = exoPlayer.isPlaying
         exoPlayer.addListener(exoPlayerListener)
     }
 
@@ -76,15 +79,32 @@ class SharedViewModel @Inject constructor(
     }
 
     fun onSongClicked(song: Song) {
-        _currentSong.value = song
-        manager.updateQueue(listOf(song))
+        manager.setQueue(listOf(song))
     }
 
-    fun onAlbumClicked(albumWithSongs: AlbumWithSongs){
+    private val _playlist = MutableStateFlow(PlaylistUi())
+    val playlist = _playlist.asStateFlow()
 
+    fun onAlbumClicked(albumWithSongs: AlbumWithSongs) {
+        _playlist.value = PlaylistUi(
+            songs = albumWithSongs.songs,
+            topBarTitle = albumWithSongs.album.name,
+            topBarBackgroundImageUri = albumWithSongs.album.albumArtUri ?: ""
+        )
     }
 
-    fun onArtistClicked(artistWithSongs: ArtistWithSongs){
+    fun onArtistClicked(artistWithSongs: ArtistWithSongs) {
+        _playlist.value = PlaylistUi(
+            songs = artistWithSongs.songs,
+            topBarTitle = artistWithSongs.artist.name,
+        )
+    }
 
+    fun addToQueue(song: Song) {
+        manager.addToQueue(song)
+    }
+
+    fun setQueue(songs: List<Song>) {
+        manager.setQueue(songs)
     }
 }
