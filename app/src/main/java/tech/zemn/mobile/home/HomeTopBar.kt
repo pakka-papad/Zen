@@ -15,7 +15,7 @@ fun HomeTopBar() {
     TopAppBar(
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp)
+            .height(96.dp)
             .background(Color(0xFF17C379)),
         title = {
             Box(

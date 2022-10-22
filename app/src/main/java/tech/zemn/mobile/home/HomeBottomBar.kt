@@ -27,9 +27,9 @@ fun HomeBottomBar(
         elevation = 10.dp
     ) {
         BottomNavigationItem(
-            selected = (currentScreen == Screens.Home.AllSongs),
+            selected = (currentScreen == Screens.AllSongs),
             onClick = {
-                onScreenChange(Screens.Home.AllSongs)
+                onScreenChange(Screens.AllSongs)
             },
             icon = {
                 Icon(
@@ -40,9 +40,9 @@ fun HomeBottomBar(
             }
         )
         BottomNavigationItem(
-            selected = (currentScreen == Screens.Home.Albums),
+            selected = (currentScreen == Screens.Albums),
             onClick = {
-                onScreenChange(Screens.Home.Albums)
+                onScreenChange(Screens.Albums)
             },
             icon = {
                 Icon(
@@ -53,9 +53,9 @@ fun HomeBottomBar(
             }
         )
         BottomNavigationItem(
-            selected = (currentScreen == Screens.Home.Artists),
+            selected = (currentScreen == Screens.Artists),
             onClick = {
-                onScreenChange(Screens.Home.Artists)
+                onScreenChange(Screens.Artists)
             },
             icon = {
                 Icon(

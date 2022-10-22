@@ -74,7 +74,7 @@ class DataManager(
                     size = cursor.getFloat(sizeIndex).toMBfromB(),
                     addedDate = cursor.getString(dateAddedIndex).toLong().formatToDate(),
                     modifiedDate = cursor.getString(dateModifiedIndex).toLong().formatToDate(),
-                    artist = songMetadata.artist,
+                    artist = songMetadata.artist.trim(),
                     albumArtist = songMetadata.albumArtist,
                     composer = songMetadata.composer,
                     genre = songMetadata.genre,

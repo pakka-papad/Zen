@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -20,12 +21,10 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
-import tech.zemn.mobile.Constants
-import tech.zemn.mobile.Screens
-import tech.zemn.mobile.SharedViewModel
+import tech.zemn.mobile.*
+import tech.zemn.mobile.R
 import tech.zemn.mobile.player.ZemnBroadcastReceiver
 import tech.zemn.mobile.ui.theme.ZemnTheme
-import tech.zemn.mobile.R
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
@@ -43,7 +42,7 @@ class HomeFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 ZemnTheme {
-                    var currentScreen by remember { mutableStateOf<Screens>(Screens.Home.AllSongs) }
+                    var currentScreen by rememberSaveable { mutableStateOf(Screens.AllSongs) }
                     val songs by viewModel.songs.collectAsState()
                     val allSongsListState = rememberLazyListState()
                     val currentSong by viewModel.currentSong.collectAsState()

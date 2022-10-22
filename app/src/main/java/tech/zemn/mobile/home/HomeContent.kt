@@ -24,7 +24,7 @@ fun HomeContent(
     onArtistClicked: (ArtistWithSongs) -> Unit,
 ){
     when(currentScreen){
-        is Screens.Home.AllSongs -> {
+        Screens.AllSongs -> {
             AllSongs(
                 songs = songs,
                 onSongClicked = onSongClicked,
@@ -32,7 +32,7 @@ fun HomeContent(
                 listState = allSongsListState
             )
         }
-        is Screens.Home.Albums -> {
+        Screens.Albums -> {
             Albums(
                 paddingValues = paddingValues,
                 albumsWithSongs = albumsWithSongs,
@@ -40,7 +40,7 @@ fun HomeContent(
                 onAlbumClicked = onAlbumClicked
             )
         }
-        is Screens.Home.Artists -> {
+        Screens.Artists -> {
             Artists(
                 paddingValues = paddingValues,
                 artistsWithSongs = artistsWithSongs,
@@ -48,6 +48,5 @@ fun HomeContent(
                 listState = allArtistsListState
             )
         }
-        else -> throw RuntimeException("Invalid currentScreen parameter")
     }
 }
