@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
@@ -20,6 +21,7 @@ import tech.zemn.mobile.Constants
 import tech.zemn.mobile.SharedViewModel
 import tech.zemn.mobile.player.ZemnBroadcastReceiver
 import tech.zemn.mobile.ui.theme.ZemnTheme
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class NowPlayingFragment : Fragment() {
@@ -27,6 +29,9 @@ class NowPlayingFragment : Fragment() {
     private val viewModel by activityViewModels<SharedViewModel>()
 
     private lateinit var navController: NavController
+
+    @Inject
+    lateinit var exoPlayer: ExoPlayer
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -70,7 +75,8 @@ class NowPlayingFragment : Fragment() {
                                 },
                                 onPreviousPressed = {  },
                                 onNextPressed = {  },
-                                showPlayButton = !songPlaying!!
+                                showPlayButton = !songPlaying!!,
+                                exoPlayer = exoPlayer,
                             )
                         }
                     )

@@ -32,3 +32,10 @@ fun Long.toMinutesAndSeconds(): String {
     else if (seconds == 0L) "$minutes mins"
     else "$minutes mins $seconds secs"
 }
+
+fun Long.toMS(): String {
+    val totalSeconds = this/1000
+    val minutes = totalSeconds/60
+    val seconds = totalSeconds%60
+    return "${if(minutes < 10) "0" else ""}${minutes}:${if (seconds < 10) "0"  else ""}${seconds}"
+}

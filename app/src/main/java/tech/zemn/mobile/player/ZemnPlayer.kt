@@ -104,7 +104,7 @@ class ZemnPlayer : Service(), DataManager.Callback, ZemnBroadcastReceiver.Callba
             notificationManager.getPlayerNotification(
                 session = mediaSession,
                 showPreviousButton = false,
-                showPlayButton = true,
+                showPlayButton = false,
                 showNextButton = false,
             )
         )

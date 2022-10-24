@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.media3.exoplayer.ExoPlayer
 import coil.compose.AsyncImage
 import tech.zemn.mobile.R
 import tech.zemn.mobile.data.music.Song
@@ -36,6 +37,7 @@ fun NowPlayingScreen(
     onPreviousPressed: () -> Unit,
     onNextPressed: () -> Unit,
     showPlayButton: Boolean,
+    exoPlayer: ExoPlayer,
 ) {
     var picture by remember { mutableStateOf<ByteArray?>(null) }
     LaunchedEffect(key1 = song.location){
@@ -48,7 +50,7 @@ fun NowPlayingScreen(
         modifier = Modifier
             .fillMaxSize(),
     ) {
-        val (control, songInfo, displayImage) = createRefs()
+        val (control, songInfo, displayImage, musicSlider) = createRefs()
 
         Row(
             modifier = Modifier
@@ -120,12 +122,27 @@ fun NowPlayingScreen(
             )
         }
 
+        MusicSlider(
+            modifier = Modifier
+                .constrainAs(
+                    ref = musicSlider,
+                    constrainBlock = {
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        bottom.linkTo(control.top,20.dp)
+                    }
+                )
+                .padding(horizontal = 30.dp),
+            mediaPlayer = exoPlayer,
+            duration = song.durationMillis.toInt()
+        )
+
         Column(
             modifier = Modifier
                 .constrainAs(
                     ref = songInfo,
                     constrainBlock = {
-                        bottom.linkTo(control.top, 20.dp)
+                        bottom.linkTo(musicSlider.top,20.dp)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     }
