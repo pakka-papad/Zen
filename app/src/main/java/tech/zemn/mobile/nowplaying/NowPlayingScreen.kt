@@ -21,6 +21,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -134,7 +135,7 @@ fun NowPlayingScreen(
                 )
                 .padding(horizontal = 30.dp),
             mediaPlayer = exoPlayer,
-            duration = song.durationMillis.toInt()
+            duration = song.durationMillis
         )
 
         Column(
@@ -146,7 +147,8 @@ fun NowPlayingScreen(
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     }
-                ),
+                )
+                .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -154,16 +156,22 @@ fun NowPlayingScreen(
                 fontSize = 25.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
             Text(
                 text = song.artist,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
             Text(
                 text = song.album,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
 

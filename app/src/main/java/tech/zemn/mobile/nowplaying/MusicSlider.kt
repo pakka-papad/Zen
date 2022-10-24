@@ -1,24 +1,27 @@
 package tech.zemn.mobile.nowplaying
 
 import android.widget.SeekBar
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import kotlinx.coroutines.delay
-import kotlin.time.Duration.Companion.seconds
 import tech.zemn.mobile.R
 import tech.zemn.mobile.toMS
-import timber.log.Timber
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun MusicSlider(
     modifier: Modifier,
     mediaPlayer: ExoPlayer,
-    duration: Int,
+    duration: Long,
 ) {
     var currentValue by remember { mutableStateOf(0L) }
     var isPlaying by remember { mutableStateOf(mediaPlayer.isPlaying) }
@@ -38,7 +41,6 @@ fun MusicSlider(
         LaunchedEffect(Unit) {
             while (true) {
                 currentValue = mediaPlayer.currentPosition
-                Timber.d("Updated")
                 delay(1.seconds / 30)
             }
         }
@@ -73,12 +75,11 @@ fun MusicSlider(
                     )
                     thumb = resources.getDrawable(R.drawable.seekbar_thumb, null)
                     progressDrawable = resources.getDrawable(R.drawable.progress, null)
-                    max = duration
+                    max = duration.toInt()
                 }
             },
             update = { seekBar ->
                 seekBar.progress = currentValue.toInt()
-                Timber.d("seekbar")
             },
             modifier = Modifier.fillMaxWidth()
         )
@@ -86,8 +87,14 @@ fun MusicSlider(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = currentValue.toMS())
-            Text(text = duration.toLong().toMS())
+            Text(
+                text = currentValue.toMS(),
+                fontSize = 14.sp,
+            )
+            Text(
+                text = duration.toMS(),
+                fontSize = 14.sp,
+            )
         }
     }
 }
