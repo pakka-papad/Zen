@@ -7,12 +7,12 @@ import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Email
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import tech.zemn.mobile.R
 import tech.zemn.mobile.Screens
 
 @Composable
@@ -23,7 +23,7 @@ fun HomeBottomBar(
     BottomNavigation(
         modifier = Modifier
             .fillMaxWidth()
-            .height(60.dp),
+            .height(70.dp),
         elevation = 10.dp
     ) {
         BottomNavigationItem(
@@ -33,9 +33,9 @@ fun HomeBottomBar(
             },
             icon = {
                 Icon(
-                    imageVector = Icons.Outlined.Home,
+                    imageVector = Icons.Outlined.List,
                     contentDescription = null,
-                    modifier = Modifier.size(30.dp)
+                    modifier = Modifier.size(36.dp)
                 )
             }
         )
@@ -46,9 +46,9 @@ fun HomeBottomBar(
             },
             icon = {
                 Icon(
-                    imageVector = Icons.Outlined.Email,
+                    painter = painterResource(R.drawable.ic_baseline_album_24),
                     contentDescription = null,
-                    modifier = Modifier.size(30.dp)
+                    modifier = Modifier.size(36.dp)
                 )
             }
         )
@@ -59,9 +59,9 @@ fun HomeBottomBar(
             },
             icon = {
                 Icon(
-                    imageVector = Icons.Outlined.Refresh,
+                    imageVector = Icons.Outlined.Person,
                     contentDescription = null,
-                    modifier = Modifier.size(30.dp)
+                    modifier = Modifier.size(36.dp)
                 )
             }
         )
