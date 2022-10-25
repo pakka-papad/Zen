@@ -116,30 +116,34 @@ class DataManager(
     private val _currentSong = MutableStateFlow<Song?>(null)
     val currentSong = _currentSong.asStateFlow()
 
-    private val _currentSongIndexInQueue = MutableStateFlow<Int?>(null)
-    val currentSongIndexInQueue = _currentSongIndexInQueue.asStateFlow()
-
     suspend fun updateSong(song: Song) {
         if (_currentSong.value?.location == song.location){
            _currentSong.value = song
         }
+        if (_queue.value.any { it.location == song.location }){
+            _queue.value = _queue.value.map {
+                if (it.location == song.location) song else it
+            }
+        }
         songDao.updateSong(song)
     }
 
+    private var remIdx = 0
+
     @Synchronized
-    fun setQueue(newQueue: List<Song>) {
+    fun setQueue(newQueue: List<Song>, startPlayingFromIndex: Int) {
         if (newQueue.isEmpty()) return
         _queue.value = _queue.value.toMutableList().apply {
             clear()
             addAll(newQueue)
         }
-        _currentSong.value = newQueue[0]
-        _currentSongIndexInQueue.value = 0
+        _currentSong.value = newQueue[startPlayingFromIndex]
         if (callback == null){
             val intent = Intent(context,ZemnPlayer::class.java)
             context.startForegroundService(intent)
+            remIdx = startPlayingFromIndex
         } else {
-            callback?.setQueue(newQueue)
+            callback?.setQueue(newQueue,startPlayingFromIndex)
         }
     }
 
@@ -151,7 +155,11 @@ class DataManager(
 
     fun setPlayerRunning(callback: Callback) {
         this.callback = callback
-        this.callback?.setQueue(_queue.value)
+        this.callback?.setQueue(_queue.value,remIdx)
+    }
+
+    fun updateCurrentSong(song: Song) {
+        _currentSong.value = song
     }
 
     fun stopPlayerRunning() {
@@ -159,7 +167,7 @@ class DataManager(
     }
 
     interface Callback {
-        fun setQueue(newQueue: List<Song>)
+        fun setQueue(newQueue: List<Song>, startPlayingFromIndex: Int)
         fun addToQueue(song: Song)
     }
 }

@@ -11,14 +11,16 @@ fun PlaylistContent(
     paddingValues: PaddingValues,
     songs: List<Song>,
     songsListState: LazyListState,
-    onSongClicked: (Song) -> Unit,
+    onSongClicked: (index: Int, song: Song) -> Unit,
     onSongFavouriteClicked: (Song) -> Unit,
+    currentSong: Song?,
 ) {
     AllSongs(
         songs = songs,
         onSongClicked = onSongClicked,
         paddingValues = paddingValues,
         listState = songsListState,
-        onFavouriteClicked = onSongFavouriteClicked
+        onFavouriteClicked = onSongFavouriteClicked,
+        currentSong = currentSong,
     )
 }

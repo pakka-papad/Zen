@@ -87,7 +87,17 @@ class ZemnPlayer : Service(), DataManager.Callback, ZemnBroadcastReceiver.Callba
                     super.onMediaItemTransition(mediaItem, reason)
 
                     updateMediaSessionMetadata()
-
+                    updateMediaSessionState(
+                        showPrevious = false,
+                        showNext = false,
+                    )
+                    try {
+                        dataManager.updateCurrentSong(
+                            queue[exoPlayer.currentMediaItemIndex]
+                        )
+                    } catch (e: Exception){
+                        Timber.e(e)
+                    }
                 }
                 override fun onEvents(player: Player, events: Player.Events) {
                     super.onEvents(player, events)
@@ -166,6 +176,15 @@ class ZemnPlayer : Service(), DataManager.Callback, ZemnBroadcastReceiver.Callba
                 )
             }.build()
         )
+        systemNotificationManager.notify(
+            ZemnNotificationManager.PLAYER_NOTIFICATION_ID,
+            notificationManager.getPlayerNotification(
+                session = mediaSession,
+                showPreviousButton = false,
+                showPlayButton = !exoPlayer.isPlaying,
+                showNextButton = false,
+            )
+        )
     }
 
     private fun updateMediaSessionState(
@@ -187,7 +206,7 @@ class ZemnPlayer : Service(), DataManager.Callback, ZemnBroadcastReceiver.Callba
     }
 
     @Synchronized
-    override fun setQueue(newQueue: List<Song>) {
+    override fun setQueue(newQueue: List<Song>, startPlayingFromIndex: Int) {
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
         val mediaItems = newQueue.map {
@@ -197,6 +216,9 @@ class ZemnPlayer : Service(), DataManager.Callback, ZemnBroadcastReceiver.Callba
         queue.addAll(newQueue)
         exoPlayer.addMediaItems(mediaItems)
         exoPlayer.prepare()
+        repeat(startPlayingFromIndex){
+            exoPlayer.seekToNextMediaItem()
+        }
         exoPlayer.play()
 
         updateMediaSessionMetadata()

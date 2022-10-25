@@ -74,10 +74,10 @@ fun MusicSlider(
                     )
                     thumb = resources.getDrawable(R.drawable.seekbar_thumb, null)
                     progressDrawable = resources.getDrawable(R.drawable.progress, null)
-                    max = duration.toInt()
                 }
             },
             update = { seekBar ->
+                seekBar.max = duration.toInt()
                 seekBar.progress = currentValue.toInt()
             },
             modifier = Modifier.fillMaxWidth()

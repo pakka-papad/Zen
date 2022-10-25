@@ -5,13 +5,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -21,6 +23,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import tech.zemn.mobile.nowplaying.NowPlayingTopBar
 
@@ -28,7 +31,9 @@ import tech.zemn.mobile.nowplaying.NowPlayingTopBar
 fun PlaylistTopBar(
     topBarTitle: String,
     topBarBackgroundImageUri: String,
-    onBackArrowPressed: () -> Unit
+    onBackArrowPressed: () -> Unit,
+    onPlayAllPressed: () -> Unit,
+    onPlaylistAddToQueuePressed: () -> Unit,
 ) {
     if (topBarBackgroundImageUri.isEmpty()) {
         NowPlayingTopBar(
@@ -76,6 +81,7 @@ fun PlaylistTopBar(
                     .align(Alignment.TopCenter)
 
             )
+            var dropDownMenuExpanded by remember { mutableStateOf(false) }
             TopAppBar(
                 modifier = Modifier.fillMaxSize(),
                 navigationIcon = {
@@ -139,14 +145,49 @@ fun PlaylistTopBar(
                                         radius = 25.dp,
                                         color = Color.White,
                                     ),
-                                    onClick = { }
+                                    onClick = {
+                                        dropDownMenuExpanded = true
+                                    }
                                 ),
                             colorFilter = ColorFilter.tint(Color.White),
+                        )
+                        DropdownMenu(
+                            expanded = dropDownMenuExpanded,
+                            onDismissRequest = {
+                                dropDownMenuExpanded = false
+                            },
+                            content = {
+                                DropdownMenuItem(
+                                    onClick = {
+                                        onPlayAllPressed()
+                                        dropDownMenuExpanded = false
+                                    },
+                                    content = {
+                                        Text(
+                                            text = "Play all",
+                                            fontSize = 14.sp,
+                                        )
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    onClick = {
+                                        onPlaylistAddToQueuePressed()
+                                        dropDownMenuExpanded = false
+                                    },
+                                    content = {
+                                        Text(
+                                            text = "Add playlist to queue",
+                                            fontSize = 14.sp,
+                                        )
+                                    },
+                                )
+                            },
                         )
                     }
                 },
                 backgroundColor = Color.Transparent,
             )
+
         }
     }
 }

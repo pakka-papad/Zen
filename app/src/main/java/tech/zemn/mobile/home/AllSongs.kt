@@ -10,8 +10,9 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -34,10 +35,11 @@ import tech.zemn.mobile.data.music.Song
 @Composable
 fun AllSongs(
     songs: List<Song>,
-    onSongClicked: (Song) -> Unit,
+    onSongClicked: (index: Int, song: Song) -> Unit,
     paddingValues: PaddingValues,
     listState: LazyListState,
-    onFavouriteClicked: (Song) -> Unit
+    onFavouriteClicked: (Song) -> Unit,
+    currentSong: Song?,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -45,13 +47,16 @@ fun AllSongs(
             .padding(bottom = paddingValues.calculateBottomPadding()),
         state = listState
     ) {
-        items(songs) { song ->
+        itemsIndexed(songs) { index, song ->
             SongCard(
                 song = song,
-                onSongClicked = onSongClicked,
+                onSongClicked = {
+                    onSongClicked(index,song)
+                },
                 onFavouriteClicked = {
                     onFavouriteClicked(song)
-                }
+                },
+                currentlyPlaying = song.location == currentSong?.location
             )
         }
     }
@@ -60,17 +65,22 @@ fun AllSongs(
 @Composable
 fun SongCard(
     song: Song,
-    onSongClicked: (Song) -> Unit,
+    onSongClicked: () -> Unit,
     onFavouriteClicked: () -> Unit,
+    currentlyPlaying: Boolean = false,
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(85.dp)
             .clickable(
-                onClick = {
-                    onSongClicked(song)
-                }
+                onClick = onSongClicked
+            )
+            .then(
+                if (currentlyPlaying) {
+                    Modifier
+                        .background(MaterialTheme.colors.primaryVariant.copy(alpha = 0.3f))
+                } else Modifier
             ),
         contentAlignment = Alignment.BottomCenter
     ) {

@@ -49,6 +49,7 @@ fun NowPlayingScreen(
     showPlayButton: Boolean,
     exoPlayer: ExoPlayer,
     onFavouriteClicked: () -> Unit,
+    onQueueClicked: () -> Unit,
 ) {
     var picture by remember { mutableStateOf<ByteArray?>(null) }
     LaunchedEffect(key1 = song.location) {
@@ -181,7 +182,7 @@ fun NowPlayingScreen(
                 modifier = Modifier
                     .size(50.dp)
                     .clickable(
-                        onClick = { },
+                        onClick = onQueueClicked,
                         indication = rememberRipple(
                             bounded = false,
                             radius = 25.dp

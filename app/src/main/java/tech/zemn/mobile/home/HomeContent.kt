@@ -12,7 +12,7 @@ import tech.zemn.mobile.data.music.Song
 @Composable
 fun HomeContent(
     currentScreen: Screens,
-    onSongClicked: (Song) -> Unit,
+    onSongClicked: (index: Int, song: Song) -> Unit,
     songs: List<Song>,
     allSongsListState: LazyListState,
     paddingValues: PaddingValues,
@@ -23,6 +23,7 @@ fun HomeContent(
     allArtistsListState: LazyListState,
     onArtistClicked: (ArtistWithSongs) -> Unit,
     onSongFavouriteClicked: (Song) -> Unit,
+    currentSong: Song?
 ){
     when(currentScreen){
         Screens.AllSongs -> {
@@ -31,7 +32,8 @@ fun HomeContent(
                 onSongClicked = onSongClicked,
                 paddingValues = paddingValues,
                 listState = allSongsListState,
-                onFavouriteClicked = onSongFavouriteClicked
+                onFavouriteClicked = onSongFavouriteClicked,
+                currentSong = currentSong
             )
         }
         Screens.Albums -> {

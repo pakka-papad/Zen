@@ -36,6 +36,7 @@ class PlaylistFragment: Fragment() {
                 ZemnTheme {
                     val playlistUi by viewModel.playlist.collectAsState()
                     val songsListState = rememberLazyListState()
+                    val currentSong by viewModel.currentSong.collectAsState()
                     Scaffold(
                         topBar = {
                             PlaylistTopBar(
@@ -43,6 +44,12 @@ class PlaylistFragment: Fragment() {
                                 topBarBackgroundImageUri = playlistUi.topBarBackgroundImageUri,
                                 onBackArrowPressed = {
                                     navController.popBackStack()
+                                },
+                                onPlayAllPressed = {
+                                    viewModel.setQueue(playlistUi.songs)
+                                },
+                                onPlaylistAddToQueuePressed = {
+                                    viewModel.addToQueue(playlistUi.songs)
                                 }
                             )
                         },
@@ -51,10 +58,11 @@ class PlaylistFragment: Fragment() {
                                 paddingValues = paddingValues,
                                 songs = playlistUi.songs,
                                 songsListState = songsListState,
-                                onSongClicked = {
-
+                                onSongClicked = { index, song ->
+                                    viewModel.setQueue(playlistUi.songs, index)
                                 },
-                                onSongFavouriteClicked = viewModel::changeFavouriteValue
+                                onSongFavouriteClicked = viewModel::changeFavouriteValue,
+                                currentSong = currentSong,
                             )
                         }
                     )

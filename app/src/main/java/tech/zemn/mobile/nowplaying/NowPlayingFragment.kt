@@ -6,21 +6,31 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.material.Scaffold
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import tech.zemn.mobile.Constants
 import tech.zemn.mobile.SharedViewModel
 import tech.zemn.mobile.player.ZemnBroadcastReceiver
 import tech.zemn.mobile.ui.theme.ZemnTheme
+import java.util.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -33,6 +43,7 @@ class NowPlayingFragment : Fragment() {
     @Inject
     lateinit var exoPlayer: ExoPlayer
 
+    @OptIn(ExperimentalMaterialApi::class)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -57,7 +68,12 @@ class NowPlayingFragment : Fragment() {
                             PendingIntent.FLAG_IMMUTABLE
                         )
                     }
-                    Scaffold(
+                    val queue by viewModel.queue.collectAsState()
+                    val currentSongIndexInQueue by viewModel.currentSongIndexInQueue.collectAsState()
+                    val scope = rememberCoroutineScope()
+                    val scaffoldState = rememberBottomSheetScaffoldState()
+                    BottomSheetScaffold(
+                        scaffoldState = scaffoldState,
                         topBar = {
                             NowPlayingTopBar(
                                 onBackArrowPressed = {
@@ -77,9 +93,47 @@ class NowPlayingFragment : Fragment() {
                                 onNextPressed = {  },
                                 showPlayButton = !songPlaying!!,
                                 exoPlayer = exoPlayer,
-                                onFavouriteClicked = viewModel::changeFavouriteValue
+                                onFavouriteClicked = viewModel::changeFavouriteValue,
+                                onQueueClicked = {
+                                    scope.launch {
+                                        scaffoldState.bottomSheetState.expand()
+                                    }
+                                }
                             )
-                        }
+                        },
+                        sheetContent = {
+                            Icon(
+                                imageVector = Icons.Outlined.KeyboardArrowDown,
+                                contentDescription = "drop down icon",
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .align(Alignment.CenterHorizontally)
+                                    .clickable(
+                                        onClick = {
+                                            scope.launch {
+                                                scaffoldState.bottomSheetState.collapse()
+                                            }
+                                        },
+                                        indication = rememberRipple(
+                                            bounded = true,
+                                            radius = 18.dp
+                                        ),
+                                        interactionSource = MutableInteractionSource()
+                                    ),
+                            )
+                            Queue(
+                                queue = queue,
+                                onSongClicked = { index ->
+
+                                },
+                                onFavouriteClicked = viewModel::changeFavouriteValue,
+                                currentSongIndexInQueue = currentSongIndexInQueue!!,
+                            )
+                        },
+                        sheetShape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
+                        sheetElevation = 20.dp,
+                        sheetPeekHeight = 0.dp,
+                        sheetGesturesEnabled = true,
                     )
                 }
             }
