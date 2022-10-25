@@ -107,4 +107,19 @@ class SharedViewModel @Inject constructor(
     fun setQueue(songs: List<Song>) {
         manager.setQueue(songs)
     }
+
+    fun changeFavouriteValue(song: Song? = currentSong.value) {
+        if (song == null) return
+        val updatedSong = song.copy(favourite = !song.favourite)
+        if (_playlist.value.songs.any { it.location == song.location }) {
+            _playlist.value = _playlist.value.copy(
+                songs = _playlist.value.songs.map {
+                    if (it.location == song.location) updatedSong else it
+                }
+            )
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            manager.updateSong(updatedSong)
+        }
+    }
 }

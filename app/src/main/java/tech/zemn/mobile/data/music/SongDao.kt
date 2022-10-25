@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 import tech.zemn.mobile.Constants
 
@@ -16,6 +17,9 @@ interface SongDao {
 
     @Query("SELECT * FROM ${Constants.Tables.SONG_TABLE} ORDER BY title ASC")
     fun getAllSongs(): Flow<List<Song>>
+
+    @Update
+    suspend fun updateSong(song: Song)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAllAlbums(data: List<Album>)

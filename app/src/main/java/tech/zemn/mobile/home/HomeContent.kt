@@ -22,6 +22,7 @@ fun HomeContent(
     artistsWithSongs: List<ArtistWithSongs>,
     allArtistsListState: LazyListState,
     onArtistClicked: (ArtistWithSongs) -> Unit,
+    onSongFavouriteClicked: (Song) -> Unit,
 ){
     when(currentScreen){
         Screens.AllSongs -> {
@@ -29,7 +30,8 @@ fun HomeContent(
                 songs = songs,
                 onSongClicked = onSongClicked,
                 paddingValues = paddingValues,
-                listState = allSongsListState
+                listState = allSongsListState,
+                onFavouriteClicked = onSongFavouriteClicked
             )
         }
         Screens.Albums -> {

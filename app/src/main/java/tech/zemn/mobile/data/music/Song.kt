@@ -25,6 +25,7 @@ data class Song(
     val sampleRate: Float,
     val bitsPerSample: Int = 0,
     val mimeType: String? = null,
+    val favourite: Boolean = false,
 ){
     data class Metadata(
         val artist: String,

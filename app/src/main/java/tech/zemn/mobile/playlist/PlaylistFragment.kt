@@ -53,7 +53,8 @@ class PlaylistFragment: Fragment() {
                                 songsListState = songsListState,
                                 onSongClicked = {
 
-                                }
+                                },
+                                onSongFavouriteClicked = viewModel::changeFavouriteValue
                             )
                         }
                     )

@@ -15,7 +15,6 @@ import androidx.media3.exoplayer.ExoPlayer
 import kotlinx.coroutines.delay
 import tech.zemn.mobile.R
 import tech.zemn.mobile.toMS
-import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun MusicSlider(
@@ -23,7 +22,7 @@ fun MusicSlider(
     mediaPlayer: ExoPlayer,
     duration: Long,
 ) {
-    var currentValue by remember { mutableStateOf(0L) }
+    var currentValue by remember { mutableStateOf(mediaPlayer.currentPosition) }
     var isPlaying by remember { mutableStateOf(mediaPlayer.isPlaying) }
 
     DisposableEffect(Unit) {
@@ -41,7 +40,7 @@ fun MusicSlider(
         LaunchedEffect(Unit) {
             while (true) {
                 currentValue = mediaPlayer.currentPosition
-                delay(1.seconds / 30)
+                delay(33)
             }
         }
     }

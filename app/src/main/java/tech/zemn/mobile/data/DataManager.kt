@@ -107,6 +107,7 @@ class DataManager(
         notificationManager.removeScanningNotification()
     }
 
+
     private var callback: Callback? = null
 
     private val _queue = MutableStateFlow(listOf<Song>())
@@ -118,6 +119,12 @@ class DataManager(
     private val _currentSongIndexInQueue = MutableStateFlow<Int?>(null)
     val currentSongIndexInQueue = _currentSongIndexInQueue.asStateFlow()
 
+    suspend fun updateSong(song: Song) {
+        if (_currentSong.value?.location == song.location){
+           _currentSong.value = song
+        }
+        songDao.updateSong(song)
+    }
 
     @Synchronized
     fun setQueue(newQueue: List<Song>) {

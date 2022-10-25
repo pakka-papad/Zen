@@ -88,6 +88,7 @@ class HomeFragment : Fragment() {
                                         navController.navigate(R.id.action_homeFragment_to_playlistFragment)
                                     },
                                     allArtistsListState = allArtistsListState,
+                                    onSongFavouriteClicked = viewModel::changeFavouriteValue
                                 )
                                 if (currentSong != null && songPlaying != null) {
                                     MiniPlayer(

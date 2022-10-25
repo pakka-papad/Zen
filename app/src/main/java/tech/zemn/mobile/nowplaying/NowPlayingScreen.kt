@@ -1,6 +1,10 @@
 package tech.zemn.mobile.nowplaying
 
 import android.media.MediaMetadataRetriever
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,11 +13,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -27,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.media3.exoplayer.ExoPlayer
 import coil.compose.AsyncImage
+import kotlinx.coroutines.launch
 import tech.zemn.mobile.R
 import tech.zemn.mobile.data.music.Song
 
@@ -39,9 +48,10 @@ fun NowPlayingScreen(
     onNextPressed: () -> Unit,
     showPlayButton: Boolean,
     exoPlayer: ExoPlayer,
+    onFavouriteClicked: () -> Unit,
 ) {
     var picture by remember { mutableStateOf<ByteArray?>(null) }
-    LaunchedEffect(key1 = song.location){
+    LaunchedEffect(key1 = song.location) {
         val extractor = MediaMetadataRetriever().apply {
             setDataSource(song.location)
         }
@@ -66,9 +76,53 @@ fun NowPlayingScreen(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            val scope = rememberCoroutineScope()
+            val favouriteButtonScale = remember { Animatable(1f) }
+            Image(
+                imageVector = if (song.favourite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                contentDescription = "favourite button",
+                modifier = Modifier
+                    .size(50.dp)
+                    .scale(favouriteButtonScale.value)
+                    .clickable(
+                        onClick = {
+                            onFavouriteClicked()
+                            scope.launch {
+                                favouriteButtonScale.animateTo(
+                                    targetValue = 1.2f,
+                                    animationSpec = tween(
+                                        durationMillis = 300,
+                                        easing = FastOutLinearInEasing,
+                                    )
+                                )
+                                favouriteButtonScale.animateTo(
+                                    targetValue = 0.8f,
+                                    animationSpec = tween(
+                                        durationMillis = 200,
+                                        easing = LinearEasing,
+                                    )
+                                )
+                                favouriteButtonScale.animateTo(
+                                    targetValue = 1f,
+                                    animationSpec = tween(
+                                        durationMillis = 100,
+                                        easing = FastOutLinearInEasing,
+                                    )
+                                )
+                            }
+                        },
+                        indication = rememberRipple(
+                            bounded = false,
+                            radius = 25.dp
+                        ),
+                        interactionSource = MutableInteractionSource()
+                    )
+                    .padding(10.dp),
+                colorFilter = ColorFilter.tint(if (song.favourite) Color.Red else Color.Black)
+            )
             Image(
                 painter = painterResource(R.drawable.ic_baseline_skip_previous_24),
-                contentDescription = null,
+                contentDescription = "previous button",
                 modifier = Modifier
                     .size(70.dp)
                     .clip(RoundedCornerShape(35.dp))
@@ -86,7 +140,7 @@ fun NowPlayingScreen(
                 painter = painterResource(
                     if (showPlayButton) R.drawable.ic_baseline_play_arrow_24 else R.drawable.ic_baseline_pause_24
                 ),
-                contentDescription = null,
+                contentDescription = "play/pause button",
                 modifier = Modifier
                     .size(70.dp)
                     .clip(RoundedCornerShape(35.dp))
@@ -107,7 +161,7 @@ fun NowPlayingScreen(
             )
             Image(
                 painter = painterResource(R.drawable.ic_baseline_skip_next_24),
-                contentDescription = null,
+                contentDescription = "next button",
                 modifier = Modifier
                     .size(70.dp)
                     .clip(RoundedCornerShape(35.dp))
@@ -121,6 +175,21 @@ fun NowPlayingScreen(
                     )
                     .padding(10.dp),
             )
+            Image(
+                painter = painterResource(R.drawable.ic_baseline_queue_music_24),
+                contentDescription = "queue button",
+                modifier = Modifier
+                    .size(50.dp)
+                    .clickable(
+                        onClick = { },
+                        indication = rememberRipple(
+                            bounded = false,
+                            radius = 25.dp
+                        ),
+                        interactionSource = MutableInteractionSource()
+                    )
+                    .padding(10.dp)
+            )
         }
 
         MusicSlider(
@@ -130,7 +199,7 @@ fun NowPlayingScreen(
                     constrainBlock = {
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
-                        bottom.linkTo(control.top,20.dp)
+                        bottom.linkTo(control.top, 20.dp)
                     }
                 )
                 .padding(horizontal = 30.dp),
@@ -143,7 +212,7 @@ fun NowPlayingScreen(
                 .constrainAs(
                     ref = songInfo,
                     constrainBlock = {
-                        bottom.linkTo(musicSlider.top,20.dp)
+                        bottom.linkTo(musicSlider.top, 20.dp)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     }
@@ -180,7 +249,7 @@ fun NowPlayingScreen(
                 .constrainAs(
                     ref = displayImage,
                     constrainBlock = {
-                        top.linkTo(parent.top,paddingValues.calculateTopPadding(),)
+                        top.linkTo(parent.top, paddingValues.calculateTopPadding())
                         bottom.linkTo(songInfo.top)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)

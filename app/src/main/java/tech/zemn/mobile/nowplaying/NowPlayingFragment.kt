@@ -77,6 +77,7 @@ class NowPlayingFragment : Fragment() {
                                 onNextPressed = {  },
                                 showPlayButton = !songPlaying!!,
                                 exoPlayer = exoPlayer,
+                                onFavouriteClicked = viewModel::changeFavouriteValue
                             )
                         }
                     )
