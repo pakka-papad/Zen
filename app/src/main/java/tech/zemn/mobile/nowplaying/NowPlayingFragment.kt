@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.size
@@ -50,7 +51,7 @@ class NowPlayingFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         navController = findNavController()
-        if (viewModel.currentSong.value == null){
+        if (viewModel.currentSong.value == null) {
             navController.popBackStack()
         }
         return ComposeView(requireContext()).apply {
@@ -58,7 +59,7 @@ class NowPlayingFragment : Fragment() {
                 ZemnTheme {
                     val song by viewModel.currentSong.collectAsState()
                     val songPlaying by viewModel.currentSongPlaying.collectAsState()
-                    val pendingPausePlayIntent = remember{
+                    val pendingPausePlayIntent = remember {
                         PendingIntent.getBroadcast(
                             context, ZemnBroadcastReceiver.PAUSE_PLAY_ACTION_REQUEST_CODE,
                             Intent(Constants.PACKAGE_NAME).putExtra(
@@ -68,10 +69,37 @@ class NowPlayingFragment : Fragment() {
                             PendingIntent.FLAG_IMMUTABLE
                         )
                     }
+                    val pendingPreviousIntent = remember {
+                        PendingIntent.getBroadcast(
+                            context, ZemnBroadcastReceiver.PREVIOUS_ACTION_REQUEST_CODE,
+                            Intent(Constants.PACKAGE_NAME).putExtra(
+                                ZemnBroadcastReceiver.AUDIO_CONTROL,
+                                ZemnBroadcastReceiver.ZEMN_PLAYER_PREVIOUS
+                            ),
+                            PendingIntent.FLAG_IMMUTABLE
+                        )
+                    }
+                    val pendingNextIntent = remember {
+                        PendingIntent.getBroadcast(
+                            context, ZemnBroadcastReceiver.NEXT_ACTION_REQUEST_CODE,
+                            Intent(Constants.PACKAGE_NAME).putExtra(
+                                ZemnBroadcastReceiver.AUDIO_CONTROL,
+                                ZemnBroadcastReceiver.ZEMN_PLAYER_NEXT
+                            ),
+                            PendingIntent.FLAG_IMMUTABLE
+                        )
+                    }
                     val queue by viewModel.queue.collectAsState()
-                    val currentSongIndexInQueue by viewModel.currentSongIndexInQueue.collectAsState()
                     val scope = rememberCoroutineScope()
                     val scaffoldState = rememberBottomSheetScaffoldState()
+                    BackHandler(
+                        enabled = scaffoldState.bottomSheetState.isExpanded,
+                        onBack = {
+                            scope.launch {
+                                scaffoldState.bottomSheetState.collapse()
+                            }
+                        }
+                    )
                     BottomSheetScaffold(
                         scaffoldState = scaffoldState,
                         topBar = {
@@ -87,10 +115,14 @@ class NowPlayingFragment : Fragment() {
                                 paddingValues = paddingValues,
                                 song = song!!,
                                 onPausePlayPressed = {
-                                     pendingPausePlayIntent.send()
+                                    pendingPausePlayIntent.send()
                                 },
-                                onPreviousPressed = {  },
-                                onNextPressed = {  },
+                                onPreviousPressed = {
+                                    pendingPreviousIntent.send()
+                                },
+                                onNextPressed = {
+                                    pendingNextIntent.send()
+                                },
                                 showPlayButton = !songPlaying!!,
                                 exoPlayer = exoPlayer,
                                 onFavouriteClicked = viewModel::changeFavouriteValue,
@@ -127,10 +159,15 @@ class NowPlayingFragment : Fragment() {
 
                                 },
                                 onFavouriteClicked = viewModel::changeFavouriteValue,
-                                currentSongIndexInQueue = currentSongIndexInQueue!!,
+                                currentSong = song,
                             )
                         },
-                        sheetShape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
+                        sheetShape = RoundedCornerShape(
+                            topStart = 30.dp,
+                            topEnd = 30.dp,
+                            bottomStart = 0.dp,
+                            bottomEnd = 0.dp
+                        ),
                         sheetElevation = 20.dp,
                         sheetPeekHeight = 0.dp,
                         sheetGesturesEnabled = true,

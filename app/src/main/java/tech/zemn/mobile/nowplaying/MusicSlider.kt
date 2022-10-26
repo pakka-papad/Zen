@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import kotlinx.coroutines.delay
@@ -29,6 +30,11 @@ fun MusicSlider(
         val listener = object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying_: Boolean) {
                 isPlaying = isPlaying_
+            }
+
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                super.onMediaItemTransition(mediaItem, reason)
+                currentValue = 0L
             }
         }
         mediaPlayer.addListener(listener)

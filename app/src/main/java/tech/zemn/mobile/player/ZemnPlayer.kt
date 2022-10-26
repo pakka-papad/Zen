@@ -12,10 +12,12 @@ import android.os.IBinder
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.widget.Toast
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.*
 import tech.zemn.mobile.Constants
 import tech.zemn.mobile.data.DataManager
 import tech.zemn.mobile.data.music.Song
@@ -40,6 +42,9 @@ class ZemnPlayer : Service(), DataManager.Callback, ZemnBroadcastReceiver.Callba
 
     private lateinit var systemNotificationManager: NotificationManager
 
+    private val job = SupervisorJob()
+    private val scope = CoroutineScope(job + Dispatchers.Default)
+
     companion object {
         const val MEDIA_SESSION = "media_session"
     }
@@ -47,7 +52,53 @@ class ZemnPlayer : Service(), DataManager.Callback, ZemnBroadcastReceiver.Callba
     private lateinit var mediaSession: MediaSessionCompat
 
     override fun onBind(intent: Intent?): IBinder? = null
-    private val queue = ArrayList<Song>()
+
+    private val exoPlayerListener = object : Player.Listener {
+        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            super.onMediaItemTransition(mediaItem, reason)
+
+            try {
+                dataManager.updateCurrentSong(exoPlayer.currentMediaItemIndex)
+            } catch (e: Exception) {
+                Timber.e(e)
+            }
+            updateMediaSessionState()
+            updateMediaSessionMetadata()
+        }
+
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            super.onIsPlayingChanged(isPlaying)
+            updateMediaSessionState()
+            updateMediaSessionMetadata()
+        }
+    }
+
+    private val mediaSessionCallback = object : MediaSessionCompat.Callback() {
+        override fun onPlay() {
+            super.onPlay()
+            onBroadcastPausePlay()
+        }
+
+        override fun onPause() {
+            super.onPause()
+            onBroadcastPausePlay()
+        }
+
+        override fun onSkipToNext() {
+            super.onSkipToNext()
+            onBroadcastNext()
+        }
+
+        override fun onSkipToPrevious() {
+            super.onSkipToPrevious()
+            onBroadcastPrevious()
+        }
+
+        override fun onSeekTo(pos: Long) {
+            super.onSeekTo(pos)
+            exoPlayer.seekTo(pos)
+        }
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         mediaSession = MediaSessionCompat(this, MEDIA_SESSION)
@@ -58,64 +109,16 @@ class ZemnPlayer : Service(), DataManager.Callback, ZemnBroadcastReceiver.Callba
         }
         broadcastReceiver.startListening(this)
 
-//        mediaSession.setCallback(
-//            object : MediaSessionCompat.Callback() {
-//                override fun onPlay() {
-//                    super.onPlay()
-//                    Timber.d("on play")
-//                }
-//
-//                override fun onPause() {
-//                    super.onPause()
-//                    Timber.d("on pause")
-//                }
-//
-//                override fun onSkipToNext() {
-//                    super.onSkipToNext()
-//                    Timber.d("on next")
-//                }
-//
-//                override fun onSkipToPrevious() {
-//                    super.onSkipToPrevious()
-//                    Timber.d("on previous")
-//                }
-//            }
-//        )
-        exoPlayer.addListener(
-            object : Player.Listener {
-                override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-                    super.onMediaItemTransition(mediaItem, reason)
-
-                    updateMediaSessionMetadata()
-                    updateMediaSessionState(
-                        showPrevious = false,
-                        showNext = false,
-                    )
-                    try {
-                        dataManager.updateCurrentSong(
-                            queue[exoPlayer.currentMediaItemIndex]
-                        )
-                    } catch (e: Exception){
-                        Timber.e(e)
-                    }
-                }
-                override fun onEvents(player: Player, events: Player.Events) {
-                    super.onEvents(player, events)
-                    updateMediaSessionState(
-                        showPrevious = false,
-                        showNext = false
-                    )
-                }
-            }
-        )
+        mediaSession.setCallback(mediaSessionCallback)
+        exoPlayer.addListener(exoPlayerListener)
 
         startForeground(
             ZemnNotificationManager.PLAYER_NOTIFICATION_ID,
             notificationManager.getPlayerNotification(
                 session = mediaSession,
-                showPreviousButton = false,
+                showPreviousButton = true,
                 showPlayButton = false,
-                showNextButton = false,
+                showNextButton = true,
             )
         )
 
@@ -130,10 +133,15 @@ class ZemnPlayer : Service(), DataManager.Callback, ZemnBroadcastReceiver.Callba
         stopService()
     }
 
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
     private fun stopService() {
         unregisterReceiver(broadcastReceiver)
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
+        exoPlayer.removeListener(exoPlayerListener)
         dataManager.stopPlayerRunning()
         broadcastReceiver.stopListening()
         systemNotificationManager.cancel(ZemnNotificationManager.PLAYER_NOTIFICATION_ID)
@@ -141,12 +149,8 @@ class ZemnPlayer : Service(), DataManager.Callback, ZemnBroadcastReceiver.Callba
         stopSelf()
     }
 
-    private fun updateMediaSessionMetadata(){
-        val currentSong = try {
-            queue[exoPlayer.currentMediaItemIndex]
-        } catch (e: Exception) {
-            null
-        } ?: return
+    private fun updateMediaSessionMetadata() {
+        val currentSong = dataManager.getSongAtIndex(exoPlayer.currentMediaItemIndex) ?: return
 
         val extractor = MediaMetadataRetriever()
         extractor.setDataSource(currentSong.location)
@@ -176,33 +180,44 @@ class ZemnPlayer : Service(), DataManager.Callback, ZemnBroadcastReceiver.Callba
                 )
             }.build()
         )
-        systemNotificationManager.notify(
-            ZemnNotificationManager.PLAYER_NOTIFICATION_ID,
-            notificationManager.getPlayerNotification(
-                session = mediaSession,
-                showPreviousButton = false,
-                showPlayButton = !exoPlayer.isPlaying,
-                showNextButton = false,
-            )
-        )
+
+        scope.launch {
+            delay(100)
+            withContext(Dispatchers.Main) {
+                systemNotificationManager.notify(
+                    ZemnNotificationManager.PLAYER_NOTIFICATION_ID,
+                    notificationManager.getPlayerNotification(
+                        session = mediaSession,
+                        showPreviousButton = true,
+                        showPlayButton = !exoPlayer.isPlaying,
+                        showNextButton = true,
+                    )
+                )
+            }
+        }
     }
 
-    private fun updateMediaSessionState(
-        showPrevious: Boolean = false,
-        showNext: Boolean = false,
-    ){
-        mediaSession.setPlaybackState(
-            PlaybackStateCompat.Builder().apply {
-                setState(
-                    if (exoPlayer.isPlaying) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED,
-                    exoPlayer.currentPosition,
-                    1f,
+    private fun updateMediaSessionState() {
+        scope.launch {
+            delay(100)
+            withContext(Dispatchers.Main) {
+                mediaSession.setPlaybackState(
+                    PlaybackStateCompat.Builder().apply {
+                        setState(
+                            if (exoPlayer.isPlaying) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED,
+                            exoPlayer.currentPosition,
+                            1f,
+                        )
+                        setActions(
+                            (if (exoPlayer.isPlaying) PlaybackStateCompat.ACTION_PAUSE else PlaybackStateCompat.ACTION_PLAY)
+                                    or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+                                    or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                                    or PlaybackStateCompat.ACTION_SEEK_TO
+                        )
+                    }.build()
                 )
-                setActions(if (exoPlayer.isPlaying) PlaybackStateCompat.ACTION_PAUSE else PlaybackStateCompat.ACTION_PLAY)
-                if (showPrevious) setActions(PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
-                if (showNext) setActions(PlaybackStateCompat.ACTION_SKIP_TO_NEXT)
-            }.build()
-        )
+            }
+        }
     }
 
     @Synchronized
@@ -212,78 +227,48 @@ class ZemnPlayer : Service(), DataManager.Callback, ZemnBroadcastReceiver.Callba
         val mediaItems = newQueue.map {
             MediaItem.fromUri(it.location)
         }
-        queue.clear()
-        queue.addAll(newQueue)
         exoPlayer.addMediaItems(mediaItems)
         exoPlayer.prepare()
-        repeat(startPlayingFromIndex){
+        repeat(startPlayingFromIndex) {
             exoPlayer.seekToNextMediaItem()
         }
         exoPlayer.play()
-
+        updateMediaSessionState()
         updateMediaSessionMetadata()
-
-        updateMediaSessionState(
-            showPrevious = false,
-            showNext = false,
-        )
-
-        systemNotificationManager.notify(
-            ZemnNotificationManager.PLAYER_NOTIFICATION_ID,
-            notificationManager.getPlayerNotification(
-                session = mediaSession,
-                showPreviousButton = false,
-                showPlayButton = false,
-                showNextButton = false,
-            )
-        )
-
     }
 
     @Synchronized
     override fun addToQueue(song: Song) {
-        queue.add(song)
         exoPlayer.addMediaItem(MediaItem.fromUri(song.location))
-        updateMediaSessionMetadata()
-        updateMediaSessionState(
-            showPrevious = false,
-            showNext = false,
-        )
-        systemNotificationManager.notify(
-            ZemnNotificationManager.PLAYER_NOTIFICATION_ID,
-            notificationManager.getPlayerNotification(
-                session = mediaSession,
-                showPreviousButton = false,
-                showPlayButton = false,
-                showNextButton = false,
-            )
-        )
     }
 
     override fun onBroadcastPausePlay() {
         Timber.d("broadcast received")
         if (exoPlayer.isPlaying) exoPlayer.pause() else exoPlayer.play()
-        systemNotificationManager.notify(
-            ZemnNotificationManager.PLAYER_NOTIFICATION_ID,
-            notificationManager.getPlayerNotification(
-                session = mediaSession,
-                showPreviousButton = false,
-                showPlayButton = !exoPlayer.isPlaying,
-                showNextButton = false,
-            )
-        )
-        updateMediaSessionState(
-            showPrevious = false,
-            showNext = false,
-        )
+        updateMediaSessionState()
+        updateMediaSessionMetadata()
     }
 
     override fun onBroadcastNext() {
+        if (!exoPlayer.hasNextMediaItem()) {
+            showToast("No next song in queue")
+            return
+        }
         exoPlayer.seekToNextMediaItem()
+        // not needed as below functions will be triggered in onMediaItemTransition
+//        updateMediaSessionState()
+//        updateMediaSessionMetadata()
     }
 
     override fun onBroadcastPrevious() {
+        if (!exoPlayer.hasPreviousMediaItem()) {
+            showToast("No previous song in queue")
+            return
+        }
         exoPlayer.seekToPreviousMediaItem()
+        // not needed as below functions will be triggered in onMediaItemTransition
+//        updateMediaSessionState()
+//        updateMediaSessionMetadata()
     }
 
 }

@@ -3,7 +3,6 @@ package tech.zemn.mobile
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,9 +37,6 @@ class SharedViewModel @Inject constructor(
 
     val queue = manager.queue
 
-    private val _currentSongIndexInQueue = MutableStateFlow<Int?>(null)
-    val currentSongIndexInQueue = _currentSongIndexInQueue.asStateFlow()
-
     init {
         viewModelScope.launch {
             manager.allSongs.collect {
@@ -70,16 +66,10 @@ class SharedViewModel @Inject constructor(
             super.onIsPlayingChanged(isPlaying)
             _currentSongPlaying.value = exoPlayer.isPlaying
         }
-
-        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-            super.onMediaItemTransition(mediaItem, reason)
-            _currentSongIndexInQueue.value = exoPlayer.currentMediaItemIndex
-        }
     }
 
     init {
         _currentSongPlaying.value = exoPlayer.isPlaying
-        _currentSongIndexInQueue.value = exoPlayer.currentMediaItemIndex
         exoPlayer.addListener(exoPlayerListener)
     }
 

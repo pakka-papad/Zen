@@ -149,7 +149,7 @@ class DataManager(
 
     @Synchronized
     fun addToQueue(song: Song) {
-        _queue.value.toMutableList().apply { add(song) }
+        _queue.value = _queue.value.toMutableList().apply { add(song) }
         callback?.addToQueue(song)
     }
 
@@ -158,8 +158,14 @@ class DataManager(
         this.callback?.setQueue(_queue.value,remIdx)
     }
 
-    fun updateCurrentSong(song: Song) {
-        _currentSong.value = song
+    fun updateCurrentSong(currentSongIndex: Int) {
+        if (currentSongIndex < 0 || currentSongIndex >= _queue.value.size) return
+        _currentSong.value = _queue.value[currentSongIndex]
+    }
+
+    fun getSongAtIndex(index: Int): Song? {
+        if (index < 0 || index >= _queue.value.size) return null
+        return _queue.value[index]
     }
 
     fun stopPlayerRunning() {

@@ -16,13 +16,13 @@ fun Queue(
     queue: List<Song>,
     onSongClicked: (index: Int) -> Unit,
     onFavouriteClicked: (Song) -> Unit,
-    currentSongIndexInQueue: Int,
+    currentSong: Song?,
 ) {
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 30.dp)
-            .heightIn(min = 120.dp),
+            .heightIn(min = 120.dp, max = 700.dp),
     ) {
         itemsIndexed(queue) { index, song ->
             SongCard(
@@ -33,7 +33,7 @@ fun Queue(
                 onFavouriteClicked = {
                     onFavouriteClicked(song)
                 },
-                currentlyPlaying = (index == currentSongIndexInQueue),
+                currentlyPlaying = (song.location == currentSong?.location),
             )
         }
     }
