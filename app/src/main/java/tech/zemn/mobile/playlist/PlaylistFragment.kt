@@ -63,6 +63,7 @@ class PlaylistFragment: Fragment() {
                                 },
                                 onSongFavouriteClicked = viewModel::changeFavouriteValue,
                                 currentSong = currentSong,
+                                onAddToQueueClicked = viewModel::addToQueue
                             )
                         }
                     )

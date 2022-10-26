@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.MediaStore.Audio
+import android.widget.Toast
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import tech.zemn.mobile.data.music.*
@@ -107,6 +108,9 @@ class DataManager(
         notificationManager.removeScanningNotification()
     }
 
+    private fun showToast(message: String) {
+        Toast.makeText(context,message,Toast.LENGTH_SHORT).show()
+    }
 
     private var callback: Callback? = null
 
@@ -149,6 +153,10 @@ class DataManager(
 
     @Synchronized
     fun addToQueue(song: Song) {
+        if (_queue.value.any { it.location == song.location }) {
+            showToast("Song already in queue")
+            return
+        }
         _queue.value = _queue.value.toMutableList().apply { add(song) }
         callback?.addToQueue(song)
     }

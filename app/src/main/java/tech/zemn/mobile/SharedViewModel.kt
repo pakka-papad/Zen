@@ -101,11 +101,19 @@ class SharedViewModel @Inject constructor(
     }
 
     fun addToQueue(song: Song) {
-        manager.addToQueue(song)
+        if (queue.value.isEmpty()) {
+            manager.setQueue(listOf(song),0)
+        } else {
+            manager.addToQueue(song)
+        }
     }
 
     fun addToQueue(songs: List<Song>) {
-        songs.forEach { manager.addToQueue(it) }
+        if (queue.value.isEmpty()){
+            manager.setQueue(songs,0)
+        } else {
+            songs.forEach { manager.addToQueue(it) }
+        }
     }
 
     fun setQueue(songs: List<Song>, startPlayingFromIndex: Int = 0) {

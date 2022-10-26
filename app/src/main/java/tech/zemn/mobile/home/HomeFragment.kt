@@ -89,7 +89,8 @@ class HomeFragment : Fragment() {
                                     },
                                     allArtistsListState = allArtistsListState,
                                     onSongFavouriteClicked = viewModel::changeFavouriteValue,
-                                    currentSong = currentSong
+                                    currentSong = currentSong,
+                                    onAddToQueueClicked = viewModel::addToQueue
                                 )
                                 if (currentSong != null && songPlaying != null) {
                                     MiniPlayer(

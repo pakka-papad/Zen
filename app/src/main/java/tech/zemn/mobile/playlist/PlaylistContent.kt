@@ -14,6 +14,7 @@ fun PlaylistContent(
     onSongClicked: (index: Int, song: Song) -> Unit,
     onSongFavouriteClicked: (Song) -> Unit,
     currentSong: Song?,
+    onAddToQueueClicked: (Song) -> Unit,
 ) {
     AllSongs(
         songs = songs,
@@ -22,5 +23,6 @@ fun PlaylistContent(
         listState = songsListState,
         onFavouriteClicked = onSongFavouriteClicked,
         currentSong = currentSong,
+        onAddToQueueClicked = onAddToQueueClicked,
     )
 }

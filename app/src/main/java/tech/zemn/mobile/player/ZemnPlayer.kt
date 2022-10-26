@@ -97,6 +97,8 @@ class ZemnPlayer : Service(), DataManager.Callback, ZemnBroadcastReceiver.Callba
         override fun onSeekTo(pos: Long) {
             super.onSeekTo(pos)
             exoPlayer.seekTo(pos)
+            updateMediaSessionState()
+            updateMediaSessionMetadata()
         }
     }
 

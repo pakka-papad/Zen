@@ -11,22 +11,19 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
@@ -40,6 +37,7 @@ fun AllSongs(
     listState: LazyListState,
     onFavouriteClicked: (Song) -> Unit,
     currentSong: Song?,
+    onAddToQueueClicked: (Song) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -51,12 +49,15 @@ fun AllSongs(
             SongCard(
                 song = song,
                 onSongClicked = {
-                    onSongClicked(index,song)
+                    onSongClicked(index, song)
                 },
                 onFavouriteClicked = {
                     onFavouriteClicked(song)
                 },
-                currentlyPlaying = song.location == currentSong?.location
+                currentlyPlaying = song.location == currentSong?.location,
+                onAddToQueueClicked = {
+                    onAddToQueueClicked(song)
+                }
             )
         }
     }
@@ -68,6 +69,7 @@ fun SongCard(
     onSongClicked: () -> Unit,
     onFavouriteClicked: () -> Unit,
     currentlyPlaying: Boolean = false,
+    onAddToQueueClicked: () -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -161,6 +163,7 @@ fun SongCard(
                         .padding(8.dp),
                     tint = if (song.favourite) Color.Red else Color.Black,
                 )
+                var dropDownMenuExpanded by remember { mutableStateOf(false) }
                 Icon(
                     imageVector = Icons.Outlined.MoreVert,
                     contentDescription = null,
@@ -168,7 +171,7 @@ fun SongCard(
                         .size(40.dp)
                         .clickable(
                             onClick = {
-
+                                dropDownMenuExpanded = true
                             },
                             indication = rememberRipple(
                                 bounded = false,
@@ -177,6 +180,27 @@ fun SongCard(
                             interactionSource = MutableInteractionSource()
                         )
                         .padding(8.dp)
+                )
+                DropdownMenu(
+                    expanded = dropDownMenuExpanded,
+                    onDismissRequest = {
+                        dropDownMenuExpanded = false
+                    },
+                    content = {
+                        DropdownMenuItem(
+                            onClick = {
+                                onAddToQueueClicked()
+                                dropDownMenuExpanded = false
+                            },
+                            content = {
+                                Text(
+                                    text = "Add to queue",
+                                    fontSize = 14.sp
+                                )
+                            }
+                        )
+                    },
+                    offset = DpOffset(x = 0.dp, y = (-20).dp)
                 )
             }
         }
