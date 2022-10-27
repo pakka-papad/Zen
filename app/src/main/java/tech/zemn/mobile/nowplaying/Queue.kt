@@ -20,10 +20,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import tech.zemn.mobile.ZemnApp
 import tech.zemn.mobile.data.music.Song
 
 @Composable
@@ -33,10 +35,12 @@ fun Queue(
     onFavouriteClicked: (Song) -> Unit,
     currentSong: Song?,
 ) {
+    val density = LocalDensity.current
+    val navBarHeight by remember { mutableStateOf(with(density) { ZemnApp.navBarHeight.toDp() }) }
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 30.dp)
+            .padding(bottom = navBarHeight)
             .heightIn(min = 120.dp, max = 700.dp),
     ) {
         itemsIndexed(queue) { index, song ->

@@ -12,31 +12,38 @@ import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import tech.zemn.mobile.ZemnApp
 
 @Composable
 fun NowPlayingTopBar(
     onBackArrowPressed: () -> Unit,
     title: String,
 ) {
+    val density = LocalDensity.current
+    val statusBarHeight by remember { mutableStateOf(with(density) { ZemnApp.statusBarHeight.toDp() }) }
     TopAppBar(
         modifier = Modifier
             .fillMaxWidth()
-            .height(96.dp)
+            .height(56.dp + statusBarHeight)
             .background(Color(0xFF17C379)),
         navigationIcon = {
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
                     .width(56.dp)
-                    .padding(top = 40.dp),
+                    .padding(top = statusBarHeight),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
@@ -60,7 +67,7 @@ fun NowPlayingTopBar(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 40.dp),
+                    .padding(top = statusBarHeight),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -76,7 +83,7 @@ fun NowPlayingTopBar(
                 modifier = Modifier
                     .fillMaxHeight()
                     .width(56.dp)
-                    .padding(top = 40.dp),
+                    .padding(top = statusBarHeight),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
