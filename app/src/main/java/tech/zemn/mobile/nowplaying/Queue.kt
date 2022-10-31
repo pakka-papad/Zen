@@ -61,7 +61,6 @@ fun Queue(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(navBarHeight)
-                    .background(Color.Black.copy(alpha = 0.2f))
             )
         }
     }
