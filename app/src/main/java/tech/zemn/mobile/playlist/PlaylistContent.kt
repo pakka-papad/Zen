@@ -1,8 +1,14 @@
 package tech.zemn.mobile.playlist
 
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import tech.zemn.mobile.MainActivity
 import tech.zemn.mobile.data.music.Song
 import tech.zemn.mobile.home.AllSongs
 
@@ -16,13 +22,27 @@ fun PlaylistContent(
     currentSong: Song?,
     onAddToQueueClicked: (Song) -> Unit,
 ) {
-    AllSongs(
-        songs = songs,
-        onSongClicked = onSongClicked,
-        paddingValues = paddingValues,
-        listState = songsListState,
-        onFavouriteClicked = onSongFavouriteClicked,
-        currentSong = currentSong,
-        onAddToQueueClicked = onAddToQueueClicked,
-    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+
+        AllSongs(
+            songs = songs,
+            onSongClicked = onSongClicked,
+            paddingValues = paddingValues,
+            listState = songsListState,
+            onFavouriteClicked = onSongFavouriteClicked,
+            currentSong = currentSong,
+            onAddToQueueClicked = onAddToQueueClicked,
+        )
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(MainActivity.bottom.dp)
+                .background(Color.Black.copy(0.2f))
+                .align(Alignment.BottomCenter)
+        )
+    }
+
 }

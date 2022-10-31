@@ -11,24 +11,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import tech.zemn.mobile.MainActivity
 import tech.zemn.mobile.R
 import tech.zemn.mobile.Screens
-import tech.zemn.mobile.ZemnApp
 
 @Composable
 fun HomeBottomBar(
     currentScreen: Screens,
     onScreenChange: (Screens) -> Unit,
 ) {
-    val density = LocalDensity.current
-    val navBarHeight by remember { mutableStateOf(with(density) { ZemnApp.navBarHeight.toDp() }) }
+    val navBarHeight = MainActivity.bottom.dp
     BottomNavigation(
         modifier = Modifier
             .fillMaxWidth()

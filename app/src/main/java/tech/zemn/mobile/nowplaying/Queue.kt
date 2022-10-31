@@ -10,22 +10,25 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
-import tech.zemn.mobile.ZemnApp
+import tech.zemn.mobile.MainActivity
 import tech.zemn.mobile.data.music.Song
 
 @Composable
@@ -35,12 +38,10 @@ fun Queue(
     onFavouriteClicked: (Song) -> Unit,
     currentSong: Song?,
 ) {
-    val density = LocalDensity.current
-    val navBarHeight by remember { mutableStateOf(with(density) { ZemnApp.navBarHeight.toDp() }) }
+    val navBarHeight = MainActivity.bottom.dp
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = navBarHeight)
             .heightIn(min = 120.dp, max = 700.dp),
     ) {
         itemsIndexed(queue) { index, song ->
@@ -53,6 +54,14 @@ fun Queue(
                     onFavouriteClicked(song)
                 },
                 currentlyPlaying = (song.location == currentSong?.location),
+            )
+        }
+        item {
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(navBarHeight)
+                    .background(Color.Black.copy(alpha = 0.2f))
             )
         }
     }

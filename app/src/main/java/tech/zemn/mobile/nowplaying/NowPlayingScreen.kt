@@ -26,7 +26,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,8 +36,8 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.media3.exoplayer.ExoPlayer
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
+import tech.zemn.mobile.MainActivity
 import tech.zemn.mobile.R
-import tech.zemn.mobile.ZemnApp
 import tech.zemn.mobile.data.music.Song
 
 @Composable
@@ -60,8 +59,7 @@ fun NowPlayingScreen(
         }
         picture = extractor.embeddedPicture
     }
-    val density = LocalDensity.current
-    val navBarHeight by remember { mutableStateOf(with(density) { ZemnApp.navBarHeight.toDp() }) }
+    val navBarHeight = MainActivity.bottom.dp
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize(),
@@ -72,7 +70,7 @@ fun NowPlayingScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(navBarHeight)
-                .background(Color.Black.copy(0.3f))
+                .background(Color.Black.copy(0.2f))
                 .constrainAs(
                     ref = bottomSpacer,
                     constrainBlock = {

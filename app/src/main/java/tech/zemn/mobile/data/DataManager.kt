@@ -4,6 +4,7 @@ import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.MediaStore.Audio
 import android.widget.Toast
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +18,7 @@ import tech.zemn.mobile.toMinutesAndSeconds
 import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
-import java.util.TreeSet
+import java.util.*
 
 class DataManager(
     private val context: Context,
@@ -144,7 +145,11 @@ class DataManager(
         _currentSong.value = newQueue[startPlayingFromIndex]
         if (callback == null){
             val intent = Intent(context,ZemnPlayer::class.java)
-            context.startForegroundService(intent)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
             remIdx = startPlayingFromIndex
         } else {
             callback?.setQueue(newQueue,startPlayingFromIndex)

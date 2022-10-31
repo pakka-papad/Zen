@@ -16,13 +16,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
-import tech.zemn.mobile.*
+import tech.zemn.mobile.Constants
 import tech.zemn.mobile.R
+import tech.zemn.mobile.Screens
+import tech.zemn.mobile.SharedViewModel
 import tech.zemn.mobile.player.ZemnBroadcastReceiver
 import tech.zemn.mobile.ui.theme.ZemnTheme
 
@@ -39,6 +42,9 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         navController = findNavController()
+        requireActivity().window.apply {
+            navigationBarColor = ContextCompat.getColor(requireContext(),R.color.primary)
+        }
         return ComposeView(requireContext()).apply {
             setContent {
                 ZemnTheme {

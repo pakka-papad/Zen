@@ -41,8 +41,7 @@ fun AllSongs(
 ) {
     LazyColumn(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = paddingValues.calculateBottomPadding()),
+            .fillMaxSize(),
         state = listState
     ) {
         itemsIndexed(songs) { index, song ->
@@ -58,6 +57,13 @@ fun AllSongs(
                 onAddToQueueClicked = {
                     onAddToQueueClicked(song)
                 }
+            )
+        }
+        item {
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(paddingValues.calculateBottomPadding())
             )
         }
     }

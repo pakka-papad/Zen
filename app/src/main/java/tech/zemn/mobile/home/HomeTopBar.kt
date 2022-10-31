@@ -5,21 +5,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import tech.zemn.mobile.ZemnApp
+import tech.zemn.mobile.MainActivity
 
 @Composable
 fun HomeTopBar() {
-    val density = LocalDensity.current
-    val statusBarHeight by remember { mutableStateOf(with(density) { ZemnApp.statusBarHeight.toDp() }) }
+    val statusBarHeight = MainActivity.top.dp
     TopAppBar(
         modifier = Modifier
             .fillMaxWidth()
@@ -29,8 +24,8 @@ fun HomeTopBar() {
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .padding(top = statusBarHeight, bottom = 16.dp),
-                contentAlignment = Alignment.BottomStart,
+                    .padding(top = statusBarHeight),
+                contentAlignment = Alignment.CenterStart,
             ) {
                 Text(
                     text = "Zemn Music Player",

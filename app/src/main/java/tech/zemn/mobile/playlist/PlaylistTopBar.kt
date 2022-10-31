@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import tech.zemn.mobile.MainActivity
 import tech.zemn.mobile.nowplaying.NowPlayingTopBar
 
 @Composable
@@ -41,6 +42,7 @@ fun PlaylistTopBar(
             title = topBarTitle,
         )
     } else {
+        val statusBarHeight = MainActivity.top.dp
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -69,7 +71,7 @@ fun PlaylistTopBar(
             Spacer(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(40.dp)
+                    .height(statusBarHeight)
                     .background(
                         Brush.verticalGradient(
                             listOf(

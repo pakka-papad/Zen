@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.media3.exoplayer.ExoPlayer
@@ -28,6 +29,7 @@ import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import tech.zemn.mobile.Constants
+import tech.zemn.mobile.R
 import tech.zemn.mobile.SharedViewModel
 import tech.zemn.mobile.player.ZemnBroadcastReceiver
 import tech.zemn.mobile.ui.theme.ZemnTheme
@@ -53,6 +55,9 @@ class NowPlayingFragment : Fragment() {
         navController = findNavController()
         if (viewModel.currentSong.value == null) {
             navController.popBackStack()
+        }
+        requireActivity().window.apply {
+            navigationBarColor = ContextCompat.getColor(requireContext(), R.color.scrim_color)
         }
         return ComposeView(requireContext()).apply {
             setContent {
