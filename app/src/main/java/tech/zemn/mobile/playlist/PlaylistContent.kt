@@ -17,16 +17,17 @@ fun PlaylistContent(
     paddingValues: PaddingValues,
     songs: List<Song>,
     songsListState: LazyListState,
-    onSongClicked: (index: Int, song: Song) -> Unit,
+    onSongClicked: (index: Int) -> Unit,
     onSongFavouriteClicked: (Song) -> Unit,
     currentSong: Song?,
     onAddToQueueClicked: (Song) -> Unit,
+    onPlayAllClicked: () -> Unit,
+    onShuffleClicked: () -> Unit,
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
-
         AllSongs(
             songs = songs,
             onSongClicked = onSongClicked,
@@ -35,6 +36,8 @@ fun PlaylistContent(
             onFavouriteClicked = onSongFavouriteClicked,
             currentSong = currentSong,
             onAddToQueueClicked = onAddToQueueClicked,
+            onPlayAllClicked = onPlayAllClicked,
+            onShuffleClicked = onShuffleClicked,
         )
         Spacer(
             modifier = Modifier

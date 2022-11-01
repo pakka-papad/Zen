@@ -6,8 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Scaffold
@@ -16,6 +15,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -67,6 +67,10 @@ class HomeFragment : Fragment() {
                     val allAlbumsGridState = rememberLazyGridState()
                     val artistsWithSongs by viewModel.artistsWithSongs.collectAsState()
                     val allArtistsListState = rememberLazyListState()
+                    var showMiniPlayer by remember { mutableStateOf(false) }
+                    LaunchedEffect(key1 = currentSong, key2 = songPlaying) {
+                        showMiniPlayer = currentSong != null && songPlaying != null
+                    }
                     Scaffold(
                         topBar = {
                             HomeTopBar()
@@ -78,10 +82,14 @@ class HomeFragment : Fragment() {
                             ) {
                                 HomeContent(
                                     currentScreen = currentScreen,
-                                    onSongClicked = viewModel::onSongClicked,
+                                    onSongClicked = { index ->
+                                        viewModel.setQueue(songs,index)
+                                    },
                                     songs = songs,
                                     allSongsListState = allSongsListState,
-                                    paddingValues = paddingValues,
+                                    paddingValues = PaddingValues(
+                                        bottom = paddingValues.calculateBottomPadding() + if (showMiniPlayer) 80.dp else 0.dp
+                                    ),
                                     albumsWithSongs = albumsWithSongs,
                                     allAlbumsGridState = allAlbumsGridState,
                                     onAlbumClicked = { albumWithSongs ->
@@ -96,9 +104,15 @@ class HomeFragment : Fragment() {
                                     allArtistsListState = allArtistsListState,
                                     onSongFavouriteClicked = viewModel::changeFavouriteValue,
                                     currentSong = currentSong,
-                                    onAddToQueueClicked = viewModel::addToQueue
+                                    onAddToQueueClicked = viewModel::addToQueue,
+                                    onPlayAllClicked = {
+                                        viewModel.setQueue(songs,0)
+                                    },
+                                    onShuffleClicked = {
+                                        viewModel.shufflePlay(songs)
+                                    }
                                 )
-                                if (currentSong != null && songPlaying != null) {
+                                if (showMiniPlayer) {
                                     MiniPlayer(
                                         showPlayButton = !songPlaying!!,
                                         onPausePlayPressed = {

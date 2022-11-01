@@ -78,10 +78,14 @@ class SharedViewModel @Inject constructor(
         exoPlayer.removeListener(exoPlayerListener)
     }
 
-    fun onSongClicked(index: Int, song: Song) {
-        manager.setQueue(listOf(song),0)
-    }
+    /**
+     * Shuffle the queue and start playing from first song
+     */
+    fun shufflePlay(songs: List<Song>) = setQueue(songs.shuffled(),0)
 
+    /**
+     * The playlist to display in playlist fragment
+     */
     private val _playlist = MutableStateFlow(PlaylistUi())
     val playlist = _playlist.asStateFlow()
 
@@ -100,6 +104,9 @@ class SharedViewModel @Inject constructor(
         )
     }
 
+    /**
+     * Adds a song to the end of queue
+     */
     fun addToQueue(song: Song) {
         if (queue.value.isEmpty()) {
             manager.setQueue(listOf(song),0)
@@ -108,6 +115,9 @@ class SharedViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Adds a list of songs to the end queue
+     */
     fun addToQueue(songs: List<Song>) {
         if (queue.value.isEmpty()){
             manager.setQueue(songs,0)
@@ -116,10 +126,20 @@ class SharedViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Create and set a new queue in exoplayer.
+     * Old queue is discarded.
+     * Playing starts immediately
+     * @param songs queue items
+     * @param startPlayingFromIndex index of song from which playing should start
+     */
     fun setQueue(songs: List<Song>, startPlayingFromIndex: Int = 0) {
         manager.setQueue(songs, startPlayingFromIndex)
     }
 
+    /**
+     * Toggle the favourite value of a song
+     */
     fun changeFavouriteValue(song: Song? = currentSong.value) {
         if (song == null) return
         val updatedSong = song.copy(favourite = !song.favourite)

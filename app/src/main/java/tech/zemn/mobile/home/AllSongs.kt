@@ -32,23 +32,32 @@ import tech.zemn.mobile.data.music.Song
 @Composable
 fun AllSongs(
     songs: List<Song>,
-    onSongClicked: (index: Int, song: Song) -> Unit,
+    onSongClicked: (index: Int) -> Unit,
     paddingValues: PaddingValues,
     listState: LazyListState,
     onFavouriteClicked: (Song) -> Unit,
     currentSong: Song?,
     onAddToQueueClicked: (Song) -> Unit,
+    onPlayAllClicked: () -> Unit,
+    onShuffleClicked: () -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize(),
-        state = listState
+        state = listState,
+        contentPadding = paddingValues
     ) {
+        item {
+            PlayShuffleCard(
+                onPlayAllClicked = onPlayAllClicked,
+                onShuffleClicked = onShuffleClicked,
+            )
+        }
         itemsIndexed(songs) { index, song ->
             SongCard(
                 song = song,
                 onSongClicked = {
-                    onSongClicked(index, song)
+                    onSongClicked(index)
                 },
                 onFavouriteClicked = {
                     onFavouriteClicked(song)
@@ -57,13 +66,6 @@ fun AllSongs(
                 onAddToQueueClicked = {
                     onAddToQueueClicked(song)
                 }
-            )
-        }
-        item {
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(paddingValues.calculateBottomPadding())
             )
         }
     }

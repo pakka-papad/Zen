@@ -138,10 +138,7 @@ class DataManager(
     @Synchronized
     fun setQueue(newQueue: List<Song>, startPlayingFromIndex: Int) {
         if (newQueue.isEmpty()) return
-        _queue.value = _queue.value.toMutableList().apply {
-            clear()
-            addAll(newQueue)
-        }
+        _queue.value = newQueue
         _currentSong.value = newQueue[startPlayingFromIndex]
         if (callback == null){
             val intent = Intent(context,ZemnPlayer::class.java)

@@ -66,12 +66,18 @@ class PlaylistFragment: Fragment() {
                                 paddingValues = PaddingValues(bottom = MainActivity.bottom.dp),
                                 songs = playlistUi.songs,
                                 songsListState = songsListState,
-                                onSongClicked = { index, song ->
+                                onSongClicked = { index ->
                                     viewModel.setQueue(playlistUi.songs, index)
                                 },
                                 onSongFavouriteClicked = viewModel::changeFavouriteValue,
                                 currentSong = currentSong,
-                                onAddToQueueClicked = viewModel::addToQueue
+                                onAddToQueueClicked = viewModel::addToQueue,
+                                onPlayAllClicked = {
+                                    viewModel.setQueue(playlistUi.songs,0)
+                                },
+                                onShuffleClicked = {
+                                    viewModel.shufflePlay(playlistUi.songs)
+                                }
                             )
                         }
                     )

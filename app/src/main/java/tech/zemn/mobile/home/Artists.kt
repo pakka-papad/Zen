@@ -30,9 +30,9 @@ fun Artists(
 ) {
     LazyColumn(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = paddingValues.calculateBottomPadding()),
-        state = listState
+            .fillMaxSize(),
+        state = listState,
+        contentPadding = paddingValues
     ) {
         items(artistsWithSongs) { artist ->
             ArtistCard(

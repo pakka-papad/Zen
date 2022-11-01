@@ -231,9 +231,7 @@ class ZemnPlayer : Service(), DataManager.Callback, ZemnBroadcastReceiver.Callba
         }
         exoPlayer.addMediaItems(mediaItems)
         exoPlayer.prepare()
-        repeat(startPlayingFromIndex) {
-            exoPlayer.seekToNextMediaItem()
-        }
+        exoPlayer.seekTo(startPlayingFromIndex,0)
         exoPlayer.play()
         updateMediaSessionState()
         updateMediaSessionMetadata()

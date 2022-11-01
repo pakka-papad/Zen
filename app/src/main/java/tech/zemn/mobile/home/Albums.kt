@@ -32,10 +32,10 @@ fun Albums(
 ) {
     LazyVerticalGrid(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = paddingValues.calculateBottomPadding()),
+            .fillMaxSize(),
         state = gridState,
         columns = GridCells.Fixed(2),
+        contentPadding = paddingValues,
     ){
         items(albumsWithSongs){ album ->
             AlbumCard(
