@@ -76,6 +76,10 @@ dependencies {
     implementation(Libraries.androidxComposeConstraintLayout)
 
     implementation(Libraries.androidxComposeMaterial)
+    implementation(Libraries.material3)
+    implementation(Libraries.material3WindowSizeClass)
+
+    implementation(Libraries.accompanistSystemUiController)
 
     implementation(Libraries.appCompat)
     implementation(Libraries.navigationUi)

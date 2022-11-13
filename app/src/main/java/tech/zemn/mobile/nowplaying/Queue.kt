@@ -10,13 +10,13 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -28,7 +28,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
-import tech.zemn.mobile.MainActivity
 import tech.zemn.mobile.data.music.Song
 
 @Composable
@@ -38,13 +37,18 @@ fun Queue(
     onFavouriteClicked: (Song) -> Unit,
     currentSong: Song?,
 ) {
-    val navBarHeight = MainActivity.bottom.dp
+    val navBarHeight = 0.dp
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 120.dp, max = 700.dp),
     ) {
-        itemsIndexed(queue) { index, song ->
+        itemsIndexed(
+            items = queue,
+            key = { index, song ->
+                song.location
+            }
+        ) { index, song ->
             QueueSongCard(
                 song = song,
                 onSongClicked = {
@@ -83,7 +87,7 @@ fun QueueSongCard(
             .then(
                 if (currentlyPlaying) {
                     Modifier
-                        .background(MaterialTheme.colors.primaryVariant.copy(alpha = 0.3f))
+                        .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.3f))
                 } else Modifier
             ),
         contentAlignment = Alignment.BottomCenter

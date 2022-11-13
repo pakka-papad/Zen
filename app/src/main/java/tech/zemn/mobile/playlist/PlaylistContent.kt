@@ -8,7 +8,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import tech.zemn.mobile.MainActivity
 import tech.zemn.mobile.data.music.Song
 import tech.zemn.mobile.home.AllSongs
 
@@ -42,7 +41,7 @@ fun PlaylistContent(
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(MainActivity.bottom.dp)
+                .height(0.dp)
                 .background(Color.Black.copy(0.2f))
                 .align(Alignment.BottomCenter)
         )

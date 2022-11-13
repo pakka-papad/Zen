@@ -11,12 +11,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +36,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.media3.exoplayer.ExoPlayer
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
-import tech.zemn.mobile.MainActivity
 import tech.zemn.mobile.R
 import tech.zemn.mobile.data.music.Song
 
@@ -59,7 +58,7 @@ fun NowPlayingScreen(
         }
         picture = extractor.embeddedPicture
     }
-    val navBarHeight = MainActivity.bottom.dp
+    val navBarHeight = 0.dp
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize(),
@@ -171,7 +170,7 @@ fun NowPlayingScreen(
                         )
                     )
                     .background(
-                        color = MaterialTheme.colors.primary,
+                        color = MaterialTheme.colorScheme.primary,
                         shape = RoundedCornerShape(35.dp)
                     )
                     .padding(10.dp),

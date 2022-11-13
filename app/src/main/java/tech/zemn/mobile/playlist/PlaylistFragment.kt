@@ -6,7 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Scaffold
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
@@ -16,7 +17,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
-import tech.zemn.mobile.MainActivity
 import tech.zemn.mobile.R
 import tech.zemn.mobile.SharedViewModel
 import tech.zemn.mobile.ui.theme.ZemnTheme
@@ -27,6 +27,7 @@ class PlaylistFragment: Fragment() {
 
     private lateinit var navController: NavController
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -63,7 +64,7 @@ class PlaylistFragment: Fragment() {
                         },
                         content = { paddingValues ->
                             PlaylistContent(
-                                paddingValues = PaddingValues(bottom = MainActivity.bottom.dp),
+                                paddingValues = PaddingValues(bottom = 0.dp),
                                 songs = playlistUi.songs,
                                 songsListState = songsListState,
                                 onSongClicked = { index ->

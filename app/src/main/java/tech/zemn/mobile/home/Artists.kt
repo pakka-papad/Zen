@@ -7,15 +7,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,7 +34,10 @@ fun Artists(
         state = listState,
         contentPadding = paddingValues
     ) {
-        items(artistsWithSongs) { artist ->
+        items(
+            items = artistsWithSongs,
+            key = { it.artist.name }
+        ) { artist ->
             ArtistCard(
                 artistWithSongs = artist,
                 onArtistClicked = onArtistClicked,
@@ -116,7 +119,7 @@ fun ArtistCard(
                 .padding(horizontal = 20.dp)
                 .fillMaxWidth()
                 .height(0.8.dp)
-                .background(color = Color.Black.copy(alpha = 0.1f))
+                .background(color = MaterialTheme.colorScheme.surfaceVariant)
         )
     }
 }

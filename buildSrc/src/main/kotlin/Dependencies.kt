@@ -17,7 +17,8 @@ object Versions {
 
     const val room = "2.4.3"
 
-    const val material3 = "1.0.0-alpha01"
+    const val material3 = "1.0.0-alpha14"
+    const val accompanist = "0.25.1"
 
     const val junit = "4.13.2"
 
@@ -67,6 +68,9 @@ object Libraries {
     const val navigationUi = "androidx.navigation:navigation-ui-ktx:${Versions.navigation}"
 
     const val material3 = "androidx.compose.material3:material3:${Versions.material3}"
+    const val material3WindowSizeClass = "androidx.compose.material3:material3-window-size-class:${Versions.material3}"
+
+    const val accompanistSystemUiController = "com.google.accompanist:accompanist-systemuicontroller:${Versions.accompanist}"
 
     const val leakcanary = "com.squareup.leakcanary:leakcanary-android:${Versions.leakcanary}"
 

@@ -5,14 +5,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,7 +25,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import tech.zemn.mobile.MainActivity
 import tech.zemn.mobile.nowplaying.NowPlayingTopBar
 
 @Composable
@@ -42,7 +41,7 @@ fun PlaylistTopBar(
             title = topBarTitle,
         )
     } else {
-        val statusBarHeight = MainActivity.top.dp
+        val statusBarHeight = 0.dp
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -84,7 +83,7 @@ fun PlaylistTopBar(
 
             )
             var dropDownMenuExpanded by remember { mutableStateOf(false) }
-            TopAppBar(
+            LargeTopAppBar(
                 modifier = Modifier.fillMaxSize(),
                 navigationIcon = {
                     Box(
@@ -164,7 +163,7 @@ fun PlaylistTopBar(
                                         onPlayAllPressed()
                                         dropDownMenuExpanded = false
                                     },
-                                    content = {
+                                    text = {
                                         Text(
                                             text = "Play all",
                                             fontSize = 14.sp,
@@ -176,7 +175,7 @@ fun PlaylistTopBar(
                                         onPlaylistAddToQueuePressed()
                                         dropDownMenuExpanded = false
                                     },
-                                    content = {
+                                    text = {
                                         Text(
                                             text = "Add playlist to queue",
                                             fontSize = 14.sp,
@@ -187,7 +186,7 @@ fun PlaylistTopBar(
                         )
                     }
                 },
-                backgroundColor = Color.Transparent,
+//                backgroundColor = Color.Transparent,
             )
 
         }
