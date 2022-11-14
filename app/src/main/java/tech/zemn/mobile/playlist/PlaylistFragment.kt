@@ -4,14 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -63,8 +63,15 @@ class PlaylistFragment: Fragment() {
                             )
                         },
                         content = { paddingValues ->
+                            val insetsPadding =
+                                WindowInsets.systemBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal).asPaddingValues()
                             PlaylistContent(
-                                paddingValues = PaddingValues(bottom = 0.dp),
+                                paddingValues = PaddingValues(
+                                    top = paddingValues.calculateTopPadding(),
+                                    start = insetsPadding.calculateStartPadding(LayoutDirection.Ltr),
+                                    end = insetsPadding.calculateEndPadding(LayoutDirection.Ltr),
+                                    bottom = insetsPadding.calculateBottomPadding()
+                                ),
                                 songs = playlistUi.songs,
                                 songsListState = songsListState,
                                 onSongClicked = { index ->
@@ -80,7 +87,7 @@ class PlaylistFragment: Fragment() {
                                     viewModel.shufflePlay(playlistUi.songs)
                                 }
                             )
-                        }
+                        },
                     )
                 }
             }
