@@ -154,6 +154,7 @@ class NowPlayingFragment : Fragment() {
                                         ),
                                         interactionSource = MutableInteractionSource()
                                     ),
+                                tint = MaterialTheme.colorScheme.onSecondaryContainer
                             )
                             Queue(
                                 queue = queue,
