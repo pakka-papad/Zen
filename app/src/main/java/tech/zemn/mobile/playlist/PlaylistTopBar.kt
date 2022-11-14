@@ -69,7 +69,6 @@ fun PlaylistTopBar(
                     (if (isSystemInDarkTheme()) Color.Black else Color.White).copy(alpha = 0.4f)
                 )
                 .align(Alignment.TopCenter)
-
         )
         var dropDownMenuExpanded by remember { mutableStateOf(false) }
         SmallTopAppBar(
@@ -104,6 +103,7 @@ fun PlaylistTopBar(
                     color = Color.White,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
+                    fontSize = 20.sp
                 )
             },
             actions = {
@@ -125,7 +125,7 @@ fun PlaylistTopBar(
                                 dropDownMenuExpanded = true
                             }
                         ),
-                    colorFilter = ColorFilter.tint(Color.White),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                 )
                 DropdownMenu(
                     expanded = dropDownMenuExpanded,

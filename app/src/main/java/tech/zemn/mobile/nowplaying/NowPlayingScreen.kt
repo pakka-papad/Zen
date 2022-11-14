@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -58,34 +57,20 @@ fun NowPlayingScreen(
         }
         picture = extractor.embeddedPicture
     }
-    val navBarHeight = 0.dp
     ConstraintLayout(
         modifier = Modifier
+            .background(MaterialTheme.colorScheme.surface)
+            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
             .fillMaxSize(),
     ) {
-        val (control, songInfo, displayImage, musicSlider, bottomSpacer) = createRefs()
-
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(navBarHeight)
-                .background(Color.Black.copy(0.2f))
-                .constrainAs(
-                    ref = bottomSpacer,
-                    constrainBlock = {
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                        bottom.linkTo(parent.bottom)
-                    }
-                )
-        )
+        val (control, songInfo, displayImage, musicSlider) = createRefs()
 
         Row(
             modifier = Modifier
                 .constrainAs(
                     ref = control,
                     constrainBlock = {
-                        bottom.linkTo(bottomSpacer.top, 10.dp)
+                        bottom.linkTo(parent.bottom, 10.dp)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     }
@@ -135,7 +120,7 @@ fun NowPlayingScreen(
                         interactionSource = MutableInteractionSource()
                     )
                     .padding(10.dp),
-                colorFilter = ColorFilter.tint(if (song.favourite) Color.Red else Color.Black)
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
             )
             Image(
                 painter = painterResource(R.drawable.ic_baseline_skip_previous_24),
@@ -152,6 +137,7 @@ fun NowPlayingScreen(
                         )
                     )
                     .padding(10.dp),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
             )
             Image(
                 painter = painterResource(
@@ -174,7 +160,7 @@ fun NowPlayingScreen(
                         shape = RoundedCornerShape(35.dp)
                     )
                     .padding(10.dp),
-                colorFilter = ColorFilter.tint(Color.White)
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
             )
             Image(
                 painter = painterResource(R.drawable.ic_baseline_skip_next_24),
@@ -191,6 +177,7 @@ fun NowPlayingScreen(
                         )
                     )
                     .padding(10.dp),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
             )
             Image(
                 painter = painterResource(R.drawable.ic_baseline_queue_music_24),
@@ -205,7 +192,8 @@ fun NowPlayingScreen(
                         ),
                         interactionSource = MutableInteractionSource()
                     )
-                    .padding(10.dp)
+                    .padding(10.dp),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
             )
         }
 
@@ -244,6 +232,7 @@ fun NowPlayingScreen(
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
                 text = song.artist,
@@ -251,6 +240,7 @@ fun NowPlayingScreen(
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
                 text = song.album,
@@ -258,6 +248,7 @@ fun NowPlayingScreen(
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
 

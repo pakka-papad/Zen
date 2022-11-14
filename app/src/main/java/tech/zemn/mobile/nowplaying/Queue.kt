@@ -23,7 +23,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,11 +36,14 @@ fun Queue(
     onFavouriteClicked: (Song) -> Unit,
     currentSong: Song?,
 ) {
-    val navBarHeight = 0.dp
     LazyColumn(
         modifier = Modifier
+            .background(MaterialTheme.colorScheme.secondaryContainer)
             .fillMaxWidth()
             .heightIn(min = 120.dp, max = 700.dp),
+        contentPadding = WindowInsets.systemBars
+            .only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
+            .asPaddingValues()
     ) {
         itemsIndexed(
             items = queue,
@@ -58,13 +60,6 @@ fun Queue(
                     onFavouriteClicked(song)
                 },
                 currentlyPlaying = (song.location == currentSong?.location),
-            )
-        }
-        item {
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(navBarHeight)
             )
         }
     }
@@ -86,8 +81,7 @@ fun QueueSongCard(
             )
             .then(
                 if (currentlyPlaying) {
-                    Modifier
-                        .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.3f))
+                    Modifier.background(MaterialTheme.colorScheme.secondary)
                 } else Modifier
             ),
         contentAlignment = Alignment.BottomCenter
@@ -110,12 +104,14 @@ fun QueueSongCard(
                     fontSize = 20.sp,
                     maxLines = 1,
                     modifier = Modifier.fillMaxWidth(),
+                    color = if (currentlyPlaying) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSecondaryContainer
                 )
                 Text(
                     text = "${song.artist}  •  ${song.durationFormatted}",
                     maxLines = 1,
                     fontSize = 14.sp,
                     modifier = Modifier.fillMaxWidth(),
+                    color = if (currentlyPlaying) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
             Row(
@@ -167,7 +163,7 @@ fun QueueSongCard(
                             interactionSource = MutableInteractionSource()
                         )
                         .padding(8.dp),
-                    tint = if (song.favourite) Color.Red else Color.Black,
+                    tint = if (currentlyPlaying) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSecondaryContainer,
                 )
             }
         }
@@ -176,7 +172,7 @@ fun QueueSongCard(
                 .padding(horizontal = 20.dp)
                 .fillMaxWidth()
                 .height(0.8.dp)
-                .background(color = Color.Black.copy(alpha = 0.1f))
+                .background(color = MaterialTheme.colorScheme.surfaceVariant)
         )
     }
 }

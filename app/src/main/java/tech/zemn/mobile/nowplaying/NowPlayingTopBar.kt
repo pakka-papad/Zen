@@ -9,7 +9,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.SmallTopAppBar
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,24 +27,19 @@ fun NowPlayingTopBar(
     onBackArrowPressed: () -> Unit,
     title: String,
 ) {
-    val statusBarHeight = 0.dp
-    SmallTopAppBar(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp + statusBarHeight)
-            .background(Color(0xFF17C379)),
-        navigationIcon = {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .width(56.dp)
-                    .padding(top = statusBarHeight),
-                contentAlignment = Alignment.Center
-            ) {
+    Box(
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        CenterAlignedTopAppBar(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.surface)
+                .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)),
+            navigationIcon = {
                 Image(
                     imageVector = Icons.Outlined.ArrowBack,
                     contentDescription = null,
                     modifier = Modifier
+                        .padding(16.dp)
                         .size(30.dp)
                         .clickable(
                             interactionSource = MutableInteractionSource(),
@@ -53,37 +49,25 @@ fun NowPlayingTopBar(
                             ),
                             onClick = onBackArrowPressed
                         ),
-                    colorFilter = ColorFilter.tint(Color.White)
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
                 )
-            }
-        },
-        title = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = statusBarHeight),
-                contentAlignment = Alignment.Center
-            ) {
+            },
+            title = {
                 Text(
+                    modifier = Modifier
+                        .padding(16.dp),
                     text = title,
                     fontSize = 20.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-            }
-        },
-        actions = {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .width(56.dp)
-                    .padding(top = statusBarHeight),
-                contentAlignment = Alignment.Center
-            ) {
+            },
+            actions = {
                 Image(
                     imageVector = Icons.Outlined.MoreVert,
                     contentDescription = null,
                     modifier = Modifier
+                        .padding(16.dp)
                         .size(30.dp)
                         .rotate(90f)
                         .clickable(
@@ -97,6 +81,12 @@ fun NowPlayingTopBar(
                     colorFilter = ColorFilter.tint(Color.White),
                 )
             }
-        }
-    )
+        )
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+        )
+    }
 }
