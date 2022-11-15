@@ -1,0 +1,63 @@
+package tech.zemn.mobile.settings
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.navigation.NavController
+import androidx.navigation.fragment.findNavController
+import dagger.hilt.android.AndroidEntryPoint
+import tech.zemn.mobile.SharedViewModel
+import tech.zemn.mobile.components.TopAppBar
+import tech.zemn.mobile.ui.theme.ZemnTheme
+
+@AndroidEntryPoint
+class SettingsFragment : Fragment() {
+
+    private val viewModel by activityViewModels<SharedViewModel>()
+
+    private lateinit var navController: NavController
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        navController = findNavController()
+        return ComposeView(requireContext()).apply {
+            setContent {
+                ZemnTheme {
+                    Scaffold(
+                        topBar = {
+                            TopAppBar(
+                                onBackArrowPressed = navController::popBackStack,
+                                title = "Settings",
+                                actions = { }
+                            )
+                        },
+                        content = { paddingValues ->
+                            val insetsPadding =
+                                WindowInsets.systemBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal).asPaddingValues()
+                            SettingsList(
+                                paddingValues = PaddingValues(
+                                    top = paddingValues.calculateTopPadding(),
+                                    start = insetsPadding.calculateStartPadding(LayoutDirection.Ltr),
+                                    end = insetsPadding.calculateEndPadding(LayoutDirection.Ltr),
+                                    bottom = insetsPadding.calculateBottomPadding()
+                                )
+                            )
+                        }
+                    )
+                }
+            }
+        }
+    }
+}

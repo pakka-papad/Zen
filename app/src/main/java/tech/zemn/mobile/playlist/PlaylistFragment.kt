@@ -51,12 +51,7 @@ class PlaylistFragment: Fragment() {
                             PlaylistTopBar(
                                 topBarTitle = playlistUi.topBarTitle,
                                 topBarBackgroundImageUri = playlistUi.topBarBackgroundImageUri,
-                                onBackArrowPressed = {
-                                    navController.popBackStack()
-                                },
-                                onPlayAllPressed = {
-                                    viewModel.setQueue(playlistUi.songs)
-                                },
+                                onBackArrowPressed = navController::popBackStack,
                                 onPlaylistAddToQueuePressed = {
                                     viewModel.addToQueue(playlistUi.songs)
                                 }

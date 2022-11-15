@@ -104,9 +104,7 @@ class NowPlayingFragment : Fragment() {
                         scaffoldState = scaffoldState,
                         topBar = {
                             NowPlayingTopBar(
-                                onBackArrowPressed = {
-                                    navController.popBackStack()
-                                },
+                                onBackArrowPressed = navController::popBackStack,
                                 title = song!!.title
                             )
                         },
@@ -114,15 +112,9 @@ class NowPlayingFragment : Fragment() {
                             NowPlayingScreen(
                                 paddingValues = paddingValues,
                                 song = song!!,
-                                onPausePlayPressed = {
-                                    pendingPausePlayIntent.send()
-                                },
-                                onPreviousPressed = {
-                                    pendingPreviousIntent.send()
-                                },
-                                onNextPressed = {
-                                    pendingNextIntent.send()
-                                },
+                                onPausePlayPressed = pendingPausePlayIntent::send,
+                                onPreviousPressed = pendingPreviousIntent::send,
+                                onNextPressed = pendingNextIntent::send,
                                 showPlayButton = !songPlaying!!,
                                 exoPlayer = exoPlayer,
                                 onFavouriteClicked = viewModel::changeFavouriteValue,

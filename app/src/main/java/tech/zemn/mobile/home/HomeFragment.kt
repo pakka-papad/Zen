@@ -69,7 +69,11 @@ class HomeFragment : Fragment() {
                     }
                     Scaffold(
                         topBar = {
-                            HomeTopBar()
+                            HomeTopBar(
+                                onSettingsClicked = {
+                                    navController.navigate(R.id.action_homeFragment_to_settingsFragment)
+                                }
+                            )
                         },
                         content = { paddingValues ->
                             Box(
@@ -112,9 +116,7 @@ class HomeFragment : Fragment() {
                                 if (showMiniPlayer) {
                                     MiniPlayer(
                                         showPlayButton = !songPlaying!!,
-                                        onPausePlayPressed = {
-                                            pendingPausePlayIntent.send()
-                                        },
+                                        onPausePlayPressed = pendingPausePlayIntent::send,
                                         song = currentSong!!,
                                         paddingValues = paddingValues,
                                         onMiniPlayerClicked = {

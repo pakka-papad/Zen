@@ -14,6 +14,9 @@
         <action
             android:id="@+id/action_homeFragment_to_playlistFragment"
             app:destination="@id/playlistFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
     <fragment
         android:id="@+id/nowPlaying"
@@ -24,4 +27,8 @@
         android:id="@+id/playlistFragment"
         android:name="tech.zemn.mobile.playlist.PlaylistFragment"
         android:label="PlaylistFragment" />
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="tech.zemn.mobile.settings.SettingsFragment"
+        android:label="SettingsFragment" />
 </navigation>
