@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.fragment.app.Fragment
@@ -34,7 +36,10 @@ class SettingsFragment : Fragment() {
         navController = findNavController()
         return ComposeView(requireContext()).apply {
             setContent {
-                ZemnTheme {
+                val themePreference by viewModel.theme.collectAsState()
+                ZemnTheme(
+                    themePreference = themePreference
+                ) {
                     Scaffold(
                         topBar = {
                             TopAppBar(
@@ -52,7 +57,9 @@ class SettingsFragment : Fragment() {
                                     start = insetsPadding.calculateStartPadding(LayoutDirection.Ltr),
                                     end = insetsPadding.calculateEndPadding(LayoutDirection.Ltr),
                                     bottom = insetsPadding.calculateBottomPadding()
-                                )
+                                ),
+                                themePreference = themePreference,
+                                onThemePreferenceChanged = viewModel::updateTheme
                             )
                         }
                     )

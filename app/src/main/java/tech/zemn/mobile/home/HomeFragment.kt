@@ -53,7 +53,10 @@ class HomeFragment : Fragment() {
         )
         return ComposeView(requireContext()).apply {
             setContent {
-                ZemnTheme {
+                val themePreference by viewModel.theme.collectAsState()
+                ZemnTheme(
+                    themePreference = themePreference
+                ) {
                     var currentScreen by rememberSaveable { mutableStateOf(Screens.AllSongs) }
                     val songs by viewModel.songs.collectAsState()
                     val allSongsListState = rememberLazyListState()

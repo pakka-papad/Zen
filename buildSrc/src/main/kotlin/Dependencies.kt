@@ -16,6 +16,8 @@ object Versions {
     const val navigation = "2.4.2"
 
     const val room = "2.4.3"
+    const val datastore = "1.0.0"
+    const val kotlinLite = "3.18.0"
 
     const val material3 = "1.0.0-alpha14"
     const val accompanist = "0.25.1"
@@ -56,6 +58,8 @@ object Libraries {
 
     const val roomRuntime = "androidx.room:room-runtime:${Versions.room}"
     const val roomKtx = "androidx.room:room-ktx:${Versions.room}"
+    const val datastore = "androidx.datastore:datastore:${Versions.datastore}"
+    const val kotlinLite = "com.google.protobuf:protobuf-kotlin-lite:${Versions.kotlinLite}"
 
     const val androidxComposeMaterial = "androidx.compose.material:material:${Versions.androidxComposeMaterial}"
 

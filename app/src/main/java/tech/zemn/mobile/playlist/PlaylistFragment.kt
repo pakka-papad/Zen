@@ -42,7 +42,10 @@ class PlaylistFragment: Fragment() {
         }
         return ComposeView(requireContext()).apply {
             setContent {
-                ZemnTheme {
+                val themePreference by viewModel.theme.collectAsState()
+                ZemnTheme(
+                    themePreference = themePreference
+                ) {
                     val playlistUi by viewModel.playlist.collectAsState()
                     val songsListState = rememberLazyListState()
                     val currentSong by viewModel.currentSong.collectAsState()

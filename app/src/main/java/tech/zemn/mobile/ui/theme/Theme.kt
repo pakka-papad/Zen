@@ -8,6 +8,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import tech.zemn.mobile.data.UserPreferences
 
 private val LightColors = lightColorScheme(
     primary = md_theme_light_primary,
@@ -71,19 +72,37 @@ private val DarkColors = darkColorScheme(
 )
 
 @Composable
-fun ZemnTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colourScheme = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        if (darkTheme) dynamicDarkColorScheme(LocalContext.current)
-        else dynamicLightColorScheme(LocalContext.current)
+fun ZemnTheme(themePreference: ThemePreference, content: @Composable () -> Unit) {
+    val darkTheme = isSystemInDarkTheme()
+    val context = LocalContext.current
+    val colourScheme = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && themePreference.useMaterialYou) {
+        when(themePreference.theme){
+            UserPreferences.Theme.LIGHT_MODE, UserPreferences.Theme.UNRECOGNIZED -> dynamicLightColorScheme(context)
+            UserPreferences.Theme.DARK_MODE -> dynamicDarkColorScheme(context)
+            UserPreferences.Theme.USE_SYSTEM_MODE -> {
+                if (darkTheme) dynamicDarkColorScheme(context)
+                else dynamicLightColorScheme(context)
+            }
+        }
     } else {
-        if (darkTheme) DarkColors
-        else LightColors
+        when(themePreference.theme){
+            UserPreferences.Theme.LIGHT_MODE, UserPreferences.Theme.UNRECOGNIZED -> LightColors
+            UserPreferences.Theme.DARK_MODE -> DarkColors
+            UserPreferences.Theme.USE_SYSTEM_MODE -> {
+                if (darkTheme) DarkColors
+                else LightColors
+            }
+        }
     }
     val systemUiController = rememberSystemUiController()
-    DisposableEffect(key1 = darkTheme, key2 = systemUiController) {
+    DisposableEffect(key1 = themePreference.theme, key2 = systemUiController) {
         systemUiController.setSystemBarsColor(
             color = Color.Transparent,
-            darkIcons = !darkTheme
+            darkIcons = when(themePreference.theme){
+                UserPreferences.Theme.LIGHT_MODE, UserPreferences.Theme.UNRECOGNIZED -> true
+                UserPreferences.Theme.DARK_MODE -> false
+                UserPreferences.Theme.USE_SYSTEM_MODE -> !darkTheme
+            }
         )
         onDispose { }
     }

@@ -86,7 +86,10 @@ class NowPlayingFragment : Fragment() {
         )
         return ComposeView(requireContext()).apply {
             setContent {
-                ZemnTheme {
+                val themePreference by viewModel.theme.collectAsState()
+                ZemnTheme(
+                    themePreference = themePreference
+                ) {
                     val song by viewModel.currentSong.collectAsState()
                     val songPlaying by viewModel.currentSongPlaying.collectAsState()
                     val queue by viewModel.queue.collectAsState()

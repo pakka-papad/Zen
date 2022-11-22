@@ -23,7 +23,7 @@ import java.util.*
 class DataManager(
     private val context: Context,
     private val notificationManager: ZemnNotificationManager,
-    private val songDao: SongDao
+    private val songDao: SongDao,
 ) {
 
     val allSongs = songDao.getAllSongs()
