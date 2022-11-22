@@ -12,12 +12,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
-import tech.zemn.mobile.R
 import tech.zemn.mobile.SharedViewModel
 import tech.zemn.mobile.ui.theme.ZemnTheme
 
@@ -37,9 +35,6 @@ class PlaylistFragment: Fragment() {
         if (viewModel.playlist.value.songs.isEmpty()){
             navController.popBackStack()
         }
-        requireActivity().window.apply {
-            navigationBarColor = ContextCompat.getColor(requireContext(),R.color.scrim_color)
-        }
         return ComposeView(requireContext()).apply {
             setContent {
                 val themePreference by viewModel.theme.collectAsState()
@@ -57,7 +52,8 @@ class PlaylistFragment: Fragment() {
                                 onBackArrowPressed = navController::popBackStack,
                                 onPlaylistAddToQueuePressed = {
                                     viewModel.addToQueue(playlistUi.songs)
-                                }
+                                },
+                                themePreference = themePreference
                             )
                         },
                         content = { paddingValues ->

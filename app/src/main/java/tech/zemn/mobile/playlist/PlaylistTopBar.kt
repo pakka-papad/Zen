@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import tech.zemn.mobile.components.TopAppBar
+import tech.zemn.mobile.data.UserPreferences
+import tech.zemn.mobile.ui.theme.ThemePreference
 
 @Composable
 fun PlaylistTopBar(
@@ -30,6 +32,7 @@ fun PlaylistTopBar(
     topBarBackgroundImageUri: String,
     onBackArrowPressed: () -> Unit,
     onPlaylistAddToQueuePressed: () -> Unit,
+    themePreference: ThemePreference,
 ) {
     if (topBarBackgroundImageUri.isEmpty()){
         TopAppBar(
@@ -42,6 +45,16 @@ fun PlaylistTopBar(
             }
         )
     } else {
+        val systemInDarkTheme = isSystemInDarkTheme()
+        val darkScrim by remember(themePreference) {
+            derivedStateOf {
+                when(themePreference.theme){
+                    UserPreferences.Theme.DARK_MODE -> true
+                    UserPreferences.Theme.LIGHT_MODE, UserPreferences.Theme.UNRECOGNIZED -> false
+                    UserPreferences.Theme.USE_SYSTEM_MODE -> systemInDarkTheme
+                }
+            }
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -75,7 +88,7 @@ fun PlaylistTopBar(
                     .fillMaxWidth()
                     .height(paddingValues.calculateTopPadding())
                     .background(
-                        (if (isSystemInDarkTheme()) Color.Black else Color.White).copy(alpha = 0.4f)
+                        (if (darkScrim) Color.Black else Color.White).copy(alpha = 0.4f)
                     )
                     .align(Alignment.TopCenter)
             )
@@ -173,5 +186,4 @@ private fun PlaylistTopBarActions(
         },
         offset = DpOffset(x = 0.dp, y = (-20).dp)
     )
-    TODO("don't use isSystemInDarkTheme()")
 }
