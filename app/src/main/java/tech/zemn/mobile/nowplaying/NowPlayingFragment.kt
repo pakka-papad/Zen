@@ -7,20 +7,25 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.BottomSheetScaffold
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.media3.exoplayer.ExoPlayer
@@ -29,7 +34,6 @@ import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import tech.zemn.mobile.Constants
-import tech.zemn.mobile.R
 import tech.zemn.mobile.SharedViewModel
 import tech.zemn.mobile.player.ZemnBroadcastReceiver
 import tech.zemn.mobile.ui.theme.ZemnTheme
@@ -56,44 +60,38 @@ class NowPlayingFragment : Fragment() {
         if (viewModel.currentSong.value == null) {
             navController.popBackStack()
         }
-        requireActivity().window.apply {
-            navigationBarColor = ContextCompat.getColor(requireContext(), R.color.scrim_color)
-        }
+        val pendingPausePlayIntent = PendingIntent.getBroadcast(
+            context, ZemnBroadcastReceiver.PAUSE_PLAY_ACTION_REQUEST_CODE,
+            Intent(Constants.PACKAGE_NAME).putExtra(
+                ZemnBroadcastReceiver.AUDIO_CONTROL,
+                ZemnBroadcastReceiver.ZEMN_PLAYER_PAUSE_PLAY
+            ),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+        val pendingPreviousIntent = PendingIntent.getBroadcast(
+            context, ZemnBroadcastReceiver.PREVIOUS_ACTION_REQUEST_CODE,
+            Intent(Constants.PACKAGE_NAME).putExtra(
+                ZemnBroadcastReceiver.AUDIO_CONTROL,
+                ZemnBroadcastReceiver.ZEMN_PLAYER_PREVIOUS
+            ),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+        val pendingNextIntent = PendingIntent.getBroadcast(
+            context, ZemnBroadcastReceiver.NEXT_ACTION_REQUEST_CODE,
+            Intent(Constants.PACKAGE_NAME).putExtra(
+                ZemnBroadcastReceiver.AUDIO_CONTROL,
+                ZemnBroadcastReceiver.ZEMN_PLAYER_NEXT
+            ),
+            PendingIntent.FLAG_IMMUTABLE
+        )
         return ComposeView(requireContext()).apply {
             setContent {
-                ZemnTheme {
+                val themePreference by viewModel.theme.collectAsState()
+                ZemnTheme(
+                    themePreference = themePreference
+                ) {
                     val song by viewModel.currentSong.collectAsState()
                     val songPlaying by viewModel.currentSongPlaying.collectAsState()
-                    val pendingPausePlayIntent = remember {
-                        PendingIntent.getBroadcast(
-                            context, ZemnBroadcastReceiver.PAUSE_PLAY_ACTION_REQUEST_CODE,
-                            Intent(Constants.PACKAGE_NAME).putExtra(
-                                ZemnBroadcastReceiver.AUDIO_CONTROL,
-                                ZemnBroadcastReceiver.ZEMN_PLAYER_PAUSE_PLAY
-                            ),
-                            PendingIntent.FLAG_IMMUTABLE
-                        )
-                    }
-                    val pendingPreviousIntent = remember {
-                        PendingIntent.getBroadcast(
-                            context, ZemnBroadcastReceiver.PREVIOUS_ACTION_REQUEST_CODE,
-                            Intent(Constants.PACKAGE_NAME).putExtra(
-                                ZemnBroadcastReceiver.AUDIO_CONTROL,
-                                ZemnBroadcastReceiver.ZEMN_PLAYER_PREVIOUS
-                            ),
-                            PendingIntent.FLAG_IMMUTABLE
-                        )
-                    }
-                    val pendingNextIntent = remember {
-                        PendingIntent.getBroadcast(
-                            context, ZemnBroadcastReceiver.NEXT_ACTION_REQUEST_CODE,
-                            Intent(Constants.PACKAGE_NAME).putExtra(
-                                ZemnBroadcastReceiver.AUDIO_CONTROL,
-                                ZemnBroadcastReceiver.ZEMN_PLAYER_NEXT
-                            ),
-                            PendingIntent.FLAG_IMMUTABLE
-                        )
-                    }
                     val queue by viewModel.queue.collectAsState()
                     val scope = rememberCoroutineScope()
                     val scaffoldState = rememberBottomSheetScaffoldState()
@@ -109,9 +107,7 @@ class NowPlayingFragment : Fragment() {
                         scaffoldState = scaffoldState,
                         topBar = {
                             NowPlayingTopBar(
-                                onBackArrowPressed = {
-                                    navController.popBackStack()
-                                },
+                                onBackArrowPressed = navController::popBackStack,
                                 title = song!!.title
                             )
                         },
@@ -119,15 +115,9 @@ class NowPlayingFragment : Fragment() {
                             NowPlayingScreen(
                                 paddingValues = paddingValues,
                                 song = song!!,
-                                onPausePlayPressed = {
-                                    pendingPausePlayIntent.send()
-                                },
-                                onPreviousPressed = {
-                                    pendingPreviousIntent.send()
-                                },
-                                onNextPressed = {
-                                    pendingNextIntent.send()
-                                },
+                                onPausePlayPressed = pendingPausePlayIntent::send,
+                                onPreviousPressed = pendingPreviousIntent::send,
+                                onNextPressed = pendingNextIntent::send,
                                 showPlayButton = !songPlaying!!,
                                 exoPlayer = exoPlayer,
                                 onFavouriteClicked = viewModel::changeFavouriteValue,
@@ -143,6 +133,8 @@ class NowPlayingFragment : Fragment() {
                                 imageVector = Icons.Outlined.KeyboardArrowDown,
                                 contentDescription = "drop down icon",
                                 modifier = Modifier
+                                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                                    .fillMaxWidth()
                                     .size(36.dp)
                                     .align(Alignment.CenterHorizontally)
                                     .clickable(
@@ -157,6 +149,7 @@ class NowPlayingFragment : Fragment() {
                                         ),
                                         interactionSource = MutableInteractionSource()
                                     ),
+                                tint = MaterialTheme.colorScheme.onSecondaryContainer
                             )
                             Queue(
                                 queue = queue,

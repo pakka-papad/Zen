@@ -11,17 +11,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -53,7 +52,12 @@ fun AllSongs(
                 onShuffleClicked = onShuffleClicked,
             )
         }
-        itemsIndexed(songs) { index, song ->
+        itemsIndexed(
+            items = songs,
+            key = { index, song ->
+                song.location
+            }
+        ) { index, song ->
             SongCard(
                 song = song,
                 onSongClicked = {
@@ -88,8 +92,7 @@ fun SongCard(
             )
             .then(
                 if (currentlyPlaying) {
-                    Modifier
-                        .background(MaterialTheme.colors.primaryVariant.copy(alpha = 0.3f))
+                    Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
                 } else Modifier
             ),
         contentAlignment = Alignment.BottomCenter
@@ -169,7 +172,7 @@ fun SongCard(
                             interactionSource = MutableInteractionSource()
                         )
                         .padding(8.dp),
-                    tint = if (song.favourite) Color.Red else Color.Black,
+                    tint = if (currentlyPlaying) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
                 )
                 var dropDownMenuExpanded by remember { mutableStateOf(false) }
                 Icon(
@@ -200,12 +203,12 @@ fun SongCard(
                                 onAddToQueueClicked()
                                 dropDownMenuExpanded = false
                             },
-                            content = {
+                            text = {
                                 Text(
                                     text = "Add to queue",
                                     fontSize = 14.sp
                                 )
-                            }
+                            },
                         )
                     },
                     offset = DpOffset(x = 0.dp, y = (-20).dp)
@@ -217,7 +220,7 @@ fun SongCard(
                 .padding(horizontal = 20.dp)
                 .fillMaxWidth()
                 .height(0.8.dp)
-                .background(color = Color.Black.copy(alpha = 0.1f))
+                .background(color = MaterialTheme.colorScheme.surfaceVariant)
         )
     }
 }

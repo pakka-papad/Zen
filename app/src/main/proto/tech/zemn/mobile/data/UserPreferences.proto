@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option java_package = "tech.zemn.mobile.data";
+option java_multiple_files = true;
+
+message UserPreferences {
+  bool useMaterialYouTheme = 1;
+  enum Theme {
+    LIGHT_MODE = 0;
+    DARK_MODE = 1;
+    USE_SYSTEM_MODE = 2;
+  }
+  Theme chosenTheme = 2;
+}

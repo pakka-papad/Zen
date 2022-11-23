@@ -1,6 +1,9 @@
 package tech.zemn.mobile.di
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.core.DataStoreFactory
+import androidx.datastore.dataStoreFile
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.room.Room
 import dagger.Module
@@ -9,8 +12,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import tech.zemn.mobile.Constants
-import tech.zemn.mobile.data.AppDatabase
-import tech.zemn.mobile.data.DataManager
+import tech.zemn.mobile.data.*
 import tech.zemn.mobile.data.notification.ZemnNotificationManager
 import tech.zemn.mobile.player.ZemnBroadcastReceiver
 import javax.inject.Singleton
@@ -36,12 +38,12 @@ object AppModule {
     fun providesDataManager(
         @ApplicationContext context: Context,
         notificationManager: ZemnNotificationManager,
-        db: AppDatabase
+        db: AppDatabase,
     ): DataManager {
         return DataManager(
             context,
             notificationManager,
-            db.songDao()
+            db.songDao(),
         )
     }
 
@@ -63,5 +65,29 @@ object AppModule {
     @Provides
     fun providesBroadcastReceiver(): ZemnBroadcastReceiver {
         return ZemnBroadcastReceiver()
+    }
+
+    @Singleton
+    @Provides
+    fun providesUserPreferencesDatastore(
+        @ApplicationContext context: Context,
+        userPreferencesSerializer: UserPreferencesSerializer,
+    ): DataStore<UserPreferences> {
+        return DataStoreFactory.create(
+            serializer = userPreferencesSerializer,
+            produceFile = {
+                context.dataStoreFile("user_preferences.pb")
+            }
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun providesZemnPreferencesDatastore(
+        userPreferences: DataStore<UserPreferences>
+    ): ZemnPreferencesDatastore {
+        return ZemnPreferencesDatastore(
+            userPreferences
+        )
     }
 }
