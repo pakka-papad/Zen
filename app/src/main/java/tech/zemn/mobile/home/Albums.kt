@@ -8,12 +8,13 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -36,10 +37,7 @@ fun Albums(
         columns = GridCells.Fixed(2),
         contentPadding = paddingValues,
     ){
-        items(
-            items = albumsWithSongs,
-            key = { it.album.name }
-        ){ album ->
+        items(albumsWithSongs){ album ->
             AlbumCard(
                 albumWithSongs = album,
                 onAlbumClicked = onAlbumClicked
@@ -90,8 +88,9 @@ fun AlbumCard(
             fontSize = 16.sp,
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.secondaryContainer)
+                .background(MaterialTheme.colors.surface)
                 .padding(vertical = 10.dp, horizontal = 8.dp),
+            color = Color.Black,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )

@@ -16,11 +16,8 @@ object Versions {
     const val navigation = "2.4.2"
 
     const val room = "2.4.3"
-    const val datastore = "1.0.0"
-    const val kotlinLite = "3.18.0"
 
-    const val material3 = "1.0.0-alpha14"
-    const val accompanist = "0.25.1"
+    const val material3 = "1.0.0-alpha01"
 
     const val junit = "4.13.2"
 
@@ -58,8 +55,6 @@ object Libraries {
 
     const val roomRuntime = "androidx.room:room-runtime:${Versions.room}"
     const val roomKtx = "androidx.room:room-ktx:${Versions.room}"
-    const val datastore = "androidx.datastore:datastore:${Versions.datastore}"
-    const val kotlinLite = "com.google.protobuf:protobuf-kotlin-lite:${Versions.kotlinLite}"
 
     const val androidxComposeMaterial = "androidx.compose.material:material:${Versions.androidxComposeMaterial}"
 
@@ -72,9 +67,6 @@ object Libraries {
     const val navigationUi = "androidx.navigation:navigation-ui-ktx:${Versions.navigation}"
 
     const val material3 = "androidx.compose.material3:material3:${Versions.material3}"
-    const val material3WindowSizeClass = "androidx.compose.material3:material3-window-size-class:${Versions.material3}"
-
-    const val accompanistSystemUiController = "com.google.accompanist:accompanist-systemuicontroller:${Versions.accompanist}"
 
     const val leakcanary = "com.squareup.leakcanary:leakcanary-android:${Versions.leakcanary}"
 
