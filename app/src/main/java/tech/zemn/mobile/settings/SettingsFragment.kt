@@ -1,11 +1,10 @@
-package tech.zemn.mobile.playlist
+package tech.zemn.mobile.settings
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.collectAsState
@@ -16,10 +15,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import dagger.hilt.android.AndroidEntryPoint
 import tech.zemn.mobile.SharedViewModel
+import tech.zemn.mobile.components.TopAppBar
 import tech.zemn.mobile.ui.theme.ZemnTheme
 
-class PlaylistFragment: Fragment() {
+@AndroidEntryPoint
+class SettingsFragment : Fragment() {
 
     private val viewModel by activityViewModels<SharedViewModel>()
 
@@ -32,60 +34,37 @@ class PlaylistFragment: Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         navController = findNavController()
-        if (viewModel.playlist.value.songs.isEmpty()){
-            navController.popBackStack()
-        }
         return ComposeView(requireContext()).apply {
             setContent {
                 val themePreference by viewModel.theme.collectAsState()
                 ZemnTheme(
                     themePreference = themePreference
                 ) {
-                    val playlistUi by viewModel.playlist.collectAsState()
-                    val songsListState = rememberLazyListState()
-                    val currentSong by viewModel.currentSong.collectAsState()
                     Scaffold(
                         topBar = {
-                            PlaylistTopBar(
-                                topBarTitle = playlistUi.topBarTitle,
-                                topBarBackgroundImageUri = playlistUi.topBarBackgroundImageUri,
+                            TopAppBar(
                                 onBackArrowPressed = navController::popBackStack,
-                                onPlaylistAddToQueuePressed = {
-                                    viewModel.addToQueue(playlistUi.songs)
-                                },
-                                themePreference = themePreference
+                                title = "Settings",
+                                actions = { }
                             )
                         },
                         content = { paddingValues ->
                             val insetsPadding =
                                 WindowInsets.systemBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal).asPaddingValues()
-                            PlaylistContent(
+                            SettingsList(
                                 paddingValues = PaddingValues(
                                     top = paddingValues.calculateTopPadding(),
                                     start = insetsPadding.calculateStartPadding(LayoutDirection.Ltr),
                                     end = insetsPadding.calculateEndPadding(LayoutDirection.Ltr),
                                     bottom = insetsPadding.calculateBottomPadding()
                                 ),
-                                songs = playlistUi.songs,
-                                songsListState = songsListState,
-                                onSongClicked = { index ->
-                                    viewModel.setQueue(playlistUi.songs, index)
-                                },
-                                onSongFavouriteClicked = viewModel::changeFavouriteValue,
-                                currentSong = currentSong,
-                                onAddToQueueClicked = viewModel::addToQueue,
-                                onPlayAllClicked = {
-                                    viewModel.setQueue(playlistUi.songs,0)
-                                },
-                                onShuffleClicked = {
-                                    viewModel.shufflePlay(playlistUi.songs)
-                                }
+                                themePreference = themePreference,
+                                onThemePreferenceChanged = viewModel::updateTheme
                             )
-                        },
+                        }
                     )
                 }
             }
         }
     }
-
 }

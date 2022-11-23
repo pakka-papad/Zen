@@ -1,20 +1,16 @@
 package tech.zemn.mobile.home
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.BottomNavigation
-import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material.Icon
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import tech.zemn.mobile.MainActivity
 import tech.zemn.mobile.R
 import tech.zemn.mobile.Screens
 
@@ -23,13 +19,13 @@ fun HomeBottomBar(
     currentScreen: Screens,
     onScreenChange: (Screens) -> Unit,
 ) {
-    val navBarHeight = MainActivity.bottom.dp
-    BottomNavigation(
+    val paddingValues =
+        WindowInsets.systemBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal).asPaddingValues()
+    NavigationBar(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp + navBarHeight),
+            .height(64.dp + paddingValues.calculateBottomPadding())
     ) {
-        BottomNavigationItem(
+        NavigationBarItem(
             selected = (currentScreen == Screens.AllSongs),
             onClick = {
                 onScreenChange(Screens.AllSongs)
@@ -38,13 +34,12 @@ fun HomeBottomBar(
                 Icon(
                     imageVector = Icons.Outlined.List,
                     contentDescription = null,
-                    modifier = Modifier
-                        .padding(bottom = navBarHeight)
-                        .size(30.dp)
+                    modifier = Modifier.size(30.dp)
                 )
-            }
+            },
+            modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding())
         )
-        BottomNavigationItem(
+        NavigationBarItem(
             selected = (currentScreen == Screens.Albums),
             onClick = {
                 onScreenChange(Screens.Albums)
@@ -53,13 +48,12 @@ fun HomeBottomBar(
                 Icon(
                     painter = painterResource(R.drawable.ic_baseline_album_24),
                     contentDescription = null,
-                    modifier = Modifier
-                        .padding(bottom = navBarHeight)
-                        .size(30.dp)
+                    modifier = Modifier.size(30.dp)
                 )
-            }
+            },
+            modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding())
         )
-        BottomNavigationItem(
+        NavigationBarItem(
             selected = (currentScreen == Screens.Artists),
             onClick = {
                 onScreenChange(Screens.Artists)
@@ -68,11 +62,10 @@ fun HomeBottomBar(
                 Icon(
                     imageVector = Icons.Outlined.Person,
                     contentDescription = null,
-                    modifier = Modifier
-                        .padding(bottom = navBarHeight)
-                        .size(30.dp)
+                    modifier = Modifier.size(30.dp)
                 )
-            }
+            },
+            modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding())
         )
     }
 }
