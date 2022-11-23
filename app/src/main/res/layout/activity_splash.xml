@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="#FFE0F7E3"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".splash.SplashFragment">
+    tools:context=".splash.SplashActivity">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/app_icon"

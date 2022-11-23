@@ -1,8 +1,3 @@
-import com.google.protobuf.gradle.builtins
-import com.google.protobuf.gradle.generateProtoTasks
-import com.google.protobuf.gradle.protobuf
-import com.google.protobuf.gradle.protoc
-
 plugins {
     id ("com.android.application")
     id ("org.jetbrains.kotlin.android")
@@ -10,7 +5,6 @@ plugins {
     id("dagger.hilt.android.plugin")
     id("androidx.navigation.safeargs.kotlin")
     id("kotlin-parcelize")
-    id("com.google.protobuf") version "0.8.19"
 }
 
 android {
@@ -82,10 +76,6 @@ dependencies {
     implementation(Libraries.androidxComposeConstraintLayout)
 
     implementation(Libraries.androidxComposeMaterial)
-    implementation(Libraries.material3)
-    implementation(Libraries.material3WindowSizeClass)
-
-    implementation(Libraries.accompanistSystemUiController)
 
     implementation(Libraries.appCompat)
     implementation(Libraries.navigationUi)
@@ -105,8 +95,6 @@ dependencies {
     implementation(Libraries.roomRuntime)
     implementation(Libraries.roomKtx)
     kapt(AnnotationProcessors.roomCompiler)
-    implementation(Libraries.datastore)
-    implementation(Libraries.kotlinLite)
 
     implementation(Libraries.exoPlayer)
     implementation(Libraries.media3ExoPlayer)
@@ -114,22 +102,4 @@ dependencies {
     implementation(Libraries.exoPlayerUi)
 
     implementation(Libraries.coilCompose)
-}
-
-protobuf {
-    protoc {
-        artifact = "com.google.protobuf:protoc:${Versions.kotlinLite}"
-    }
-    generateProtoTasks {
-        all().forEach { task ->
-            task.builtins {
-                val java by registering {
-                    option("lite")
-                }
-                val kotlin by registering {
-                    option("lite")
-                }
-            }
-        }
-    }
 }

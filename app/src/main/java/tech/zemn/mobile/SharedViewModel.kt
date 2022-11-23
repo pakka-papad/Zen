@@ -7,15 +7,14 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import tech.zemn.mobile.data.DataManager
-import tech.zemn.mobile.data.ZemnPreferencesDatastore
 import tech.zemn.mobile.data.music.AlbumWithSongs
 import tech.zemn.mobile.data.music.ArtistWithSongs
 import tech.zemn.mobile.data.music.Song
 import tech.zemn.mobile.playlist.PlaylistUi
-import tech.zemn.mobile.ui.theme.ThemePreference
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,7 +22,6 @@ class SharedViewModel @Inject constructor(
     private val context: Application,
     private val manager: DataManager,
     private val exoPlayer: ExoPlayer,
-    private val datastore: ZemnPreferencesDatastore
 ) : ViewModel() {
 
     private val _songs = MutableStateFlow(listOf<Song>())
@@ -154,23 +152,6 @@ class SharedViewModel @Inject constructor(
         }
         viewModelScope.launch(Dispatchers.IO) {
             manager.updateSong(updatedSong)
-        }
-    }
-
-    val theme = datastore.preferences.map {
-        ThemePreference(
-            useMaterialYou = it.useMaterialYouTheme,
-            theme = it.chosenTheme
-        )
-    }.stateIn(
-        scope = viewModelScope,
-        initialValue = ThemePreference(),
-        started = SharingStarted.Eagerly
-    )
-
-    fun updateTheme(themePreference: ThemePreference) {
-        viewModelScope.launch(Dispatchers.IO) {
-            datastore.setTheme(themePreference.useMaterialYou,themePreference.theme)
         }
     }
 }
