@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="tech.zemn.mobile.home.HomeFragment"
+        android:name="com.github.pakka_papad.home.HomeFragment"
         android:label="HomeFragment" >
         <action
             android:id="@+id/action_homeFragment_to_nowPlaying"
@@ -21,20 +21,20 @@
     </fragment>
     <fragment
         android:id="@+id/nowPlaying"
-        android:name="tech.zemn.mobile.nowplaying.NowPlayingFragment"
+        android:name="com.github.pakka_papad.nowplaying.NowPlayingFragment"
         android:label="NowPlaying" >
     </fragment>
     <fragment
         android:id="@+id/playlistFragment"
-        android:name="tech.zemn.mobile.playlist.PlaylistFragment"
+        android:name="com.github.pakka_papad.playlist.PlaylistFragment"
         android:label="PlaylistFragment" />
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="tech.zemn.mobile.settings.SettingsFragment"
+        android:name="com.github.pakka_papad.settings.SettingsFragment"
         android:label="SettingsFragment" />
     <fragment
         android:id="@+id/splashFragment"
-        android:name="tech.zemn.mobile.splash.SplashFragment"
+        android:name="com.github.pakka_papad.splash.SplashFragment"
         android:label="fragment_splash"
         tools:layout="@layout/fragment_splash" >
         <action

@@ -14,11 +14,11 @@ plugins {
 }
 
 android {
-    namespace = "tech.zemn.mobile"
+    namespace = "com.github.pakka_papad"
     compileSdk = Api.compileSdk
 
     defaultConfig {
-        applicationId = "tech.zemn.mobile"
+        applicationId = "com.github.pakka_papad"
         minSdk = Api.minSdk
         targetSdk = Api.targetSdk
         versionCode = 1
