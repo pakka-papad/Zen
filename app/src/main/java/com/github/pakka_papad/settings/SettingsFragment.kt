@@ -37,6 +37,7 @@ class SettingsFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 val themePreference by viewModel.theme.collectAsState()
+                val scanStatus by viewModel.scanStatus.collectAsState()
                 ZenTheme(
                     themePreference = themePreference
                 ) {
@@ -59,7 +60,9 @@ class SettingsFragment : Fragment() {
                                     bottom = insetsPadding.calculateBottomPadding()
                                 ),
                                 themePreference = themePreference,
-                                onThemePreferenceChanged = viewModel::updateTheme
+                                onThemePreferenceChanged = viewModel::updateTheme,
+                                scanStatus = scanStatus,
+                                onScanClicked = viewModel::scanForMusic
                             )
                         }
                     )

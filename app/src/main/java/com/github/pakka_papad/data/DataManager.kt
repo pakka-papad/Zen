@@ -29,14 +29,17 @@ class DataManager(
 ) {
 
     val allSongs = songDao.getAllSongs()
-    val allAlbums = songDao.getAllAlbumsWithSongs()
-    val allArtists = songDao.getAllArtistsWithSongs()
+    val allAlbumsWithSongs = songDao.getAllAlbumsWithSongs()
+    val allArtistsWithSongs = songDao.getAllArtistsWithSongs()
 
     private val _scanStatus = Channel<ScanStatus>()
     val scanStatus = _scanStatus.receiveAsFlow()
 
     suspend fun scanForMusic() {
         _scanStatus.send(ScanStatus.ScanStarted)
+        songDao.deleteAllSongs()
+        songDao.deleteAllAlbums()
+        songDao.deleteAllArtists()
         notificationManager.sendScanningNotification()
         val selection = Audio.Media.IS_MUSIC + " != 0"
         val projection = arrayOf(

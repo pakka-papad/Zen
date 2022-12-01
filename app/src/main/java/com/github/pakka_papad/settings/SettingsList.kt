@@ -5,13 +5,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.components.OutlinedBox
 import com.github.pakka_papad.data.UserPreferences
+import com.github.pakka_papad.data.music.ScanStatus
 import com.github.pakka_papad.ui.theme.ThemePreference
 
 @Composable
@@ -19,6 +20,8 @@ fun SettingsList(
     paddingValues: PaddingValues,
     themePreference: ThemePreference,
     onThemePreferenceChanged: (ThemePreference) -> Unit,
+    scanStatus: ScanStatus,
+    onScanClicked: () -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -30,6 +33,12 @@ fun SettingsList(
         item {
             ThemeSettings(
                 themePreference = themePreference, onPreferenceChanged = onThemePreferenceChanged
+            )
+        }
+        item {
+            MusicLibrarySettings(
+                scanStatus = scanStatus,
+                onScanClicked = onScanClicked
             )
         }
     }
@@ -131,5 +140,58 @@ private fun ThemeSettings(
             }
         }
 
+    }
+}
+
+@Composable
+private fun MusicLibrarySettings(
+    scanStatus: ScanStatus,
+    onScanClicked: () -> Unit,
+) {
+    OutlinedBox(
+        label = "Music library",
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 13.dp),
+        modifier = Modifier.padding(10.dp)
+    ) {
+        when(scanStatus) {
+            is ScanStatus.ScanNotRunning -> {
+                Button(
+                    onClick = onScanClicked,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Scan for music",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+            }
+            is ScanStatus.ScanComplete -> {
+                Text(
+                    text = "Scan Complete",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+            is ScanStatus.ScanProgress -> {
+                var totalSongs by remember { mutableStateOf(0) }
+                var scanProgress by remember { mutableStateOf(0f) }
+                scanProgress = (scanStatus.parsed.toFloat()) / (scanStatus.total.toFloat())
+                totalSongs = scanStatus.total
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Text(
+                        text = "Found $totalSongs songs",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                    CircularProgressIndicator(progress = scanProgress)
+                }
+            }
+            else -> {  }
+        }
     }
 }

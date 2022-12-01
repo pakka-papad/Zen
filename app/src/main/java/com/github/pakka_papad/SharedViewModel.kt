@@ -27,41 +27,32 @@ class SharedViewModel @Inject constructor(
     private val datastore: ZenPreferencesDatastore
 ) : ViewModel() {
 
-    private val _songs = MutableStateFlow(listOf<Song>())
-    val songs = _songs.asStateFlow()
+    val songs = manager.allSongs.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = null
+    )
 
-    private val _albumsWithSongs = MutableStateFlow(listOf<AlbumWithSongs>())
-    val albumsWithSongs = _albumsWithSongs.asStateFlow()
+    val albumsWithSongs = manager.allAlbumsWithSongs.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = null
+    )
 
-    private val _artistsWithSongs = MutableStateFlow(listOf<ArtistWithSongs>())
-    val artistsWithSongs = _artistsWithSongs.asStateFlow()
+    val artistsWithSongs = manager.allArtistsWithSongs.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = null
+    )
 
     val currentSong = manager.currentSong
 
     val queue = manager.queue
 
-    init {
-        viewModelScope.launch {
-            manager.allSongs.collect {
-                _songs.value = it
-            }
-        }
-        viewModelScope.launch {
-            manager.allAlbums.collect {
-                _albumsWithSongs.value = it
-            }
-        }
-        viewModelScope.launch {
-            manager.allArtists.collect {
-                _artistsWithSongs.value = it
-            }
-        }
-    }
-
     val scanStatus = manager.scanStatus
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 1500, replayExpirationMillis = 0),
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 300, replayExpirationMillis = 0),
             initialValue = ScanStatus.ScanNotRunning
         )
 

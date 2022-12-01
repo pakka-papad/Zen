@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
@@ -21,13 +22,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
-import dagger.hilt.android.AndroidEntryPoint
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.R
 import com.github.pakka_papad.Screens
 import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.player.ZenBroadcastReceiver
 import com.github.pakka_papad.ui.theme.ZenTheme
+import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
@@ -79,53 +80,68 @@ class HomeFragment : Fragment() {
                             )
                         },
                         content = { paddingValues ->
+                            var dataRetrieved by remember { mutableStateOf(false) }
+                            LaunchedEffect(
+                                key1 = songs,
+                                key2 = albumsWithSongs,
+                                key3 = artistsWithSongs
+                            ) {
+                                dataRetrieved =
+                                    songs != null && albumsWithSongs != null && artistsWithSongs != null
+                            }
                             Box(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.BottomCenter
                             ) {
-                                HomeContent(
-                                    currentScreen = currentScreen,
-                                    onSongClicked = { index ->
-                                        viewModel.setQueue(songs, index)
-                                    },
-                                    songs = songs,
-                                    allSongsListState = allSongsListState,
-                                    paddingValues = PaddingValues(
-                                        bottom = paddingValues.calculateBottomPadding() + if (showMiniPlayer) 80.dp else 0.dp,
-                                        top = paddingValues.calculateTopPadding()
-                                    ),
-                                    albumsWithSongs = albumsWithSongs,
-                                    allAlbumsGridState = allAlbumsGridState,
-                                    onAlbumClicked = { albumWithSongs ->
-                                        viewModel.onAlbumClicked(albumWithSongs)
-                                        navController.navigate(R.id.action_homeFragment_to_playlistFragment)
-                                    },
-                                    artistsWithSongs = artistsWithSongs,
-                                    onArtistClicked = { artistWithSongs ->
-                                        viewModel.onArtistClicked(artistWithSongs)
-                                        navController.navigate(R.id.action_homeFragment_to_playlistFragment)
-                                    },
-                                    allArtistsListState = allArtistsListState,
-                                    onSongFavouriteClicked = viewModel::changeFavouriteValue,
-                                    currentSong = currentSong,
-                                    onAddToQueueClicked = viewModel::addToQueue,
-                                    onPlayAllClicked = {
-                                        viewModel.setQueue(songs, 0)
-                                    },
-                                    onShuffleClicked = {
-                                        viewModel.shufflePlay(songs)
-                                    }
-                                )
-                                if (showMiniPlayer) {
-                                    MiniPlayer(
-                                        showPlayButton = !songPlaying!!,
-                                        onPausePlayPressed = pendingPausePlayIntent::send,
-                                        song = currentSong!!,
-                                        paddingValues = paddingValues,
-                                        onMiniPlayerClicked = {
-                                            navController.navigate(R.id.action_homeFragment_to_nowPlaying)
+                                if (!dataRetrieved) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.align(Alignment.Center)
+                                    )
+                                } else {
+                                    HomeContent(
+                                        currentScreen = currentScreen,
+                                        onSongClicked = { index ->
+                                            viewModel.setQueue(songs!!, index)
+                                        },
+                                        songs = songs!!,
+                                        allSongsListState = allSongsListState,
+                                        paddingValues = PaddingValues(
+                                            bottom = paddingValues.calculateBottomPadding() + if (showMiniPlayer) 80.dp else 0.dp,
+                                            top = paddingValues.calculateTopPadding()
+                                        ),
+                                        albumsWithSongs = albumsWithSongs!!,
+                                        allAlbumsGridState = allAlbumsGridState,
+                                        onAlbumClicked = { albumWithSongs ->
+                                            viewModel.onAlbumClicked(albumWithSongs)
+                                            navController.navigate(R.id.action_homeFragment_to_playlistFragment)
+                                        },
+                                        artistsWithSongs = artistsWithSongs!!,
+                                        onArtistClicked = { artistWithSongs ->
+                                            viewModel.onArtistClicked(artistWithSongs)
+                                            navController.navigate(R.id.action_homeFragment_to_playlistFragment)
+                                        },
+                                        allArtistsListState = allArtistsListState,
+                                        onSongFavouriteClicked = viewModel::changeFavouriteValue,
+                                        currentSong = currentSong,
+                                        onAddToQueueClicked = viewModel::addToQueue,
+                                        onPlayAllClicked = {
+                                            viewModel.setQueue(songs!!, 0)
+                                        },
+                                        onShuffleClicked = {
+                                            viewModel.shufflePlay(songs!!)
                                         }
                                     )
+                                    if (showMiniPlayer) {
+                                        MiniPlayer(
+                                            showPlayButton = !songPlaying!!,
+                                            onPausePlayPressed = pendingPausePlayIntent::send,
+                                            song = currentSong!!,
+                                            paddingValues = paddingValues,
+                                            onMiniPlayerClicked = {
+                                                navController.navigate(R.id.action_homeFragment_to_nowPlaying)
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         },
