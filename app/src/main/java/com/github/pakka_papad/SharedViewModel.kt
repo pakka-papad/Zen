@@ -7,10 +7,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.ZenPreferencesDatastore
-import com.github.pakka_papad.data.music.AlbumWithSongs
-import com.github.pakka_papad.data.music.ArtistWithSongs
-import com.github.pakka_papad.data.music.ScanStatus
-import com.github.pakka_papad.data.music.Song
+import com.github.pakka_papad.data.music.*
 import com.github.pakka_papad.playlist.PlaylistUi
 import com.github.pakka_papad.ui.theme.ThemePreference
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,6 +40,12 @@ class SharedViewModel @Inject constructor(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = null
+    )
+
+    val playlists = manager.allPlaylists.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = emptyList()
     )
 
     val currentSong = manager.currentSong
@@ -106,6 +109,22 @@ class SharedViewModel @Inject constructor(
             songs = artistWithSongs.songs,
             topBarTitle = artistWithSongs.artist.name,
         )
+    }
+
+    fun onPlaylistClicked(playlistId: Long) {
+        viewModelScope.launch {
+            val playlistWithSongs = manager.getPlaylistById(playlistId)
+            _playlist.value = PlaylistUi(
+                songs = playlistWithSongs.songs,
+                topBarTitle = playlistWithSongs.playlist.playlistName,
+            )
+        }
+    }
+
+    fun onPlaylistCreate(playlistName: String) {
+        viewModelScope.launch {
+            manager.createPlaylist(playlistName)
+        }
     }
 
     /**

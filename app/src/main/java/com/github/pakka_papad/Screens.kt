@@ -5,5 +5,5 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 enum class Screens: Parcelable {
-    AllSongs, Albums, Artists
+    AllSongs, Albums, Artists, Playlists
 }

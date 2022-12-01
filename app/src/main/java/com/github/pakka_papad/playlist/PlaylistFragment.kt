@@ -32,9 +32,6 @@ class PlaylistFragment: Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         navController = findNavController()
-        if (viewModel.playlist.value.songs.isEmpty()){
-            navController.popBackStack()
-        }
         return ComposeView(requireContext()).apply {
             setContent {
                 val themePreference by viewModel.theme.collectAsState()

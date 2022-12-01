@@ -67,5 +67,19 @@ fun HomeBottomBar(
             },
             modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding())
         )
+        NavigationBarItem(
+            selected = (currentScreen == Screens.Playlists),
+            onClick = {
+                onScreenChange(Screens.Playlists)
+            },
+            icon = {
+                Icon(
+                    painter = painterResource(R.drawable.ic_baseline_playlist_play_24),
+                    contentDescription = null,
+                    modifier = Modifier.size(30.dp)
+                )
+            },
+            modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding())
+        )
     }
 }

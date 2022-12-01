@@ -67,6 +67,8 @@ class HomeFragment : Fragment() {
                     val allAlbumsGridState = rememberLazyGridState()
                     val artistsWithSongs by viewModel.artistsWithSongs.collectAsState()
                     val allArtistsListState = rememberLazyListState()
+                    val playlists by viewModel.playlists.collectAsState()
+                    val allPlaylistsListState = rememberLazyListState()
                     var showMiniPlayer by remember { mutableStateOf(false) }
                     LaunchedEffect(key1 = currentSong, key2 = songPlaying) {
                         showMiniPlayer = currentSong != null && songPlaying != null
@@ -129,7 +131,14 @@ class HomeFragment : Fragment() {
                                         },
                                         onShuffleClicked = {
                                             viewModel.shufflePlay(songs!!)
-                                        }
+                                        },
+                                        playlists = playlists,
+                                        allPlaylistListState = allPlaylistsListState,
+                                        onPlaylistClicked = { playlistId ->
+                                            viewModel.onPlaylistClicked(playlistId)
+                                            navController.navigate(R.id.action_homeFragment_to_playlistFragment)
+                                        },
+                                        onPlaylistCreate = viewModel::onPlaylistCreate
                                     )
                                     if (showMiniPlayer) {
                                         MiniPlayer(

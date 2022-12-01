@@ -31,6 +31,18 @@ class DataManager(
     val allSongs = songDao.getAllSongs()
     val allAlbumsWithSongs = songDao.getAllAlbumsWithSongs()
     val allArtistsWithSongs = songDao.getAllArtistsWithSongs()
+    val allPlaylists = songDao.getAllPlaylists()
+
+    suspend fun getPlaylistById(id: Long) = songDao.getPlaylistWithSongs(id)
+
+    suspend fun createPlaylist(playlistName: String) {
+        val playlist = PlaylistExceptId(
+            playlistName = playlistName,
+            createdAt = System.currentTimeMillis()
+        )
+        songDao.insertPlaylist(playlist)
+        showToast("Playlist $playlistName created")
+    }
 
     private val _scanStatus = Channel<ScanStatus>()
     val scanStatus = _scanStatus.receiveAsFlow()

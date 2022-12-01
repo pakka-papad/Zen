@@ -38,4 +38,17 @@ interface SongDao {
 
     @Query("DELETE FROM ${Constants.Tables.ARTIST_TABLE}")
     suspend fun deleteAllArtists()
+
+    @Insert(entity = Playlist::class)
+    suspend fun insertPlaylist(playlist: PlaylistExceptId): Long
+
+    @Insert
+    suspend fun insertPlaylistSongCrossRef(playlistSongCrossRefs: List<PlaylistSongCrossRef>)
+
+    @Query("SELECT * FROM ${Constants.Tables.PLAYLIST_TABLE}")
+    fun getAllPlaylists(): Flow<List<Playlist>>
+
+    @Transaction
+    @Query("SELECT * FROM ${Constants.Tables.PLAYLIST_TABLE} WHERE playlistId = :playlistId")
+    suspend fun getPlaylistWithSongs(playlistId: Long): PlaylistWithSongs
 }
