@@ -86,6 +86,8 @@ dependencies {
     implementation(Libraries.material3WindowSizeClass)
 
     implementation(Libraries.accompanistSystemUiController)
+    implementation(Libraries.accompanistPermissions)
+    implementation(Libraries.accompanistPager)
 
     implementation(Libraries.appCompat)
     implementation(Libraries.navigationUi)

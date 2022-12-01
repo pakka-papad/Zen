@@ -5,17 +5,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.ZenPreferencesDatastore
 import com.github.pakka_papad.data.music.AlbumWithSongs
 import com.github.pakka_papad.data.music.ArtistWithSongs
+import com.github.pakka_papad.data.music.ScanStatus
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.playlist.PlaylistUi
 import com.github.pakka_papad.ui.theme.ThemePreference
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -55,6 +56,16 @@ class SharedViewModel @Inject constructor(
                 _artistsWithSongs.value = it
             }
         }
+    }
+
+    val scanStatus = manager.scanStatus
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 1500, replayExpirationMillis = 0),
+            initialValue = ScanStatus.ScanNotRunning
+        )
+
+    fun scanForMusic() {
         viewModelScope.launch(Dispatchers.IO) {
             manager.scanForMusic()
         }
@@ -171,6 +182,20 @@ class SharedViewModel @Inject constructor(
     fun updateTheme(themePreference: ThemePreference) {
         viewModelScope.launch(Dispatchers.IO) {
             datastore.setTheme(themePreference.useMaterialYou,themePreference.theme)
+        }
+    }
+
+    val isOnBoardingComplete = datastore.preferences.map {
+        it.onBoardingComplete
+    }.stateIn(
+        scope = viewModelScope,
+        initialValue = null,
+        started = SharingStarted.WhileSubscribed(5_000)
+    )
+
+    fun setOnBoardingComplete() {
+        viewModelScope.launch(Dispatchers.IO) {
+            datastore.setOnBoardingComplete()
         }
     }
 }

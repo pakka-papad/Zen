@@ -7,14 +7,16 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore.Audio
 import android.widget.Toast
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import com.github.pakka_papad.data.music.*
 import com.github.pakka_papad.data.notification.ZenNotificationManager
 import com.github.pakka_papad.formatToDate
 import com.github.pakka_papad.player.ZenPlayer
 import com.github.pakka_papad.toMBfromB
 import com.github.pakka_papad.toMinutesAndSeconds
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
@@ -30,7 +32,11 @@ class DataManager(
     val allAlbums = songDao.getAllAlbumsWithSongs()
     val allArtists = songDao.getAllArtistsWithSongs()
 
+    private val _scanStatus = Channel<ScanStatus>()
+    val scanStatus = _scanStatus.receiveAsFlow()
+
     suspend fun scanForMusic() {
+        _scanStatus.send(ScanStatus.ScanStarted)
         notificationManager.sendScanningNotification()
         val selection = Audio.Media.IS_MUSIC + " != 0"
         val projection = arrayOf(
@@ -50,6 +56,8 @@ class DataManager(
             Audio.Media.DATE_ADDED,
             null
         ) ?: return
+        val totalSongs = cursor.count
+        var parsedSongs = 0
         cursor.moveToFirst()
         val mExtractor = MetadataExtractor()
         val songs = ArrayList<Song>()
@@ -98,6 +106,8 @@ class DataManager(
             } catch (e: Exception) {
                 Timber.e(e.message ?: e.localizedMessage ?: "FILE_DOES_NOT_EXIST")
             }
+            parsedSongs++
+            _scanStatus.send(ScanStatus.ScanProgress(parsedSongs,totalSongs))
         } while (cursor.moveToNext())
         cursor.close()
         albumArtMap.forEach { (albumName, albumArtUri) ->
@@ -107,6 +117,7 @@ class DataManager(
         songDao.insertAllAlbums(albums)
         songDao.insertAllArtists(artistSet.map { Artist(it) })
         notificationManager.removeScanningNotification()
+        _scanStatus.send(ScanStatus.ScanComplete)
     }
 
     private fun showToast(message: String) {

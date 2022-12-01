@@ -12,14 +12,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
-import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import com.github.pakka_papad.R
 import com.github.pakka_papad.SharedViewModel
-import com.github.pakka_papad.data.UserPreferences
 import com.github.pakka_papad.databinding.FragmentSplashBinding
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class SplashFragment : Fragment() {
@@ -48,16 +45,14 @@ class SplashFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
 
-        val startedAt = System.currentTimeMillis()
         viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED){
-                viewModel.theme.collectLatest {
-//                    if (it.theme != UserPreferences.Theme.UNRECOGNIZED){
-                        if (System.currentTimeMillis() - startedAt < 1500){
-                            delay(1000)
-                        }
-                        navController.navigate(R.id.action_splashFragment_to_homeFragment)
-//                    }
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.isOnBoardingComplete.collect {
+                    if (it == null) return@collect
+                    navController.navigate(
+                        if (it) R.id.action_splashFragment_to_homeFragment
+                        else R.id.action_splashFragment_to_onBoardingFragment
+                    )
                 }
             }
         }

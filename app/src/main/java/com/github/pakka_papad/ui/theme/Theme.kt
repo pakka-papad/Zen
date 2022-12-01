@@ -7,8 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.github.pakka_papad.data.UserPreferences
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 private val LightColors = lightColorScheme(
     primary = md_theme_light_primary,
@@ -70,6 +70,24 @@ private val DarkColors = darkColorScheme(
     inversePrimary = md_theme_dark_inversePrimary,
     surfaceTint = md_theme_dark_surfaceTint,
 )
+
+@Composable
+fun DefaultTheme(content: @Composable () -> Unit) {
+    val isSystemInDarkTheme = isSystemInDarkTheme()
+    val systemUiController = rememberSystemUiController()
+    DisposableEffect(key1 = isSystemInDarkTheme) {
+        systemUiController.setSystemBarsColor(
+            color = Color.Transparent,
+            darkIcons = !isSystemInDarkTheme
+        )
+        onDispose { }
+    }
+    MaterialTheme(
+        colorScheme = if (isSystemInDarkTheme) DarkColors else LightColors,
+        typography = ZenTypography,
+        content = content
+    )
+}
 
 @Composable
 fun ZenTheme(themePreference: ThemePreference, content: @Composable () -> Unit) {

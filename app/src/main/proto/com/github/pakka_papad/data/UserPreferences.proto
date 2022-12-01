@@ -11,4 +11,5 @@ message UserPreferences {
     USE_SYSTEM_MODE = 2;
   }
   Theme chosenTheme = 2;
+  bool onBoardingComplete = 3;
 }

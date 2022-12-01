@@ -75,6 +75,9 @@ object Libraries {
     const val material3WindowSizeClass = "androidx.compose.material3:material3-window-size-class:${Versions.material3}"
 
     const val accompanistSystemUiController = "com.google.accompanist:accompanist-systemuicontroller:${Versions.accompanist}"
+    const val accompanistPermissions = "com.google.accompanist:accompanist-permissions:${Versions.accompanist}"
+    const val accompanistPager = "com.google.accompanist:accompanist-pager:${Versions.accompanist}"
+    const val accompanistPagerIndicator = "com.google.accompanist:accompanist-pager-indicators:${Versions.accompanist}"
 
     const val leakcanary = "com.squareup.leakcanary:leakcanary-android:${Versions.leakcanary}"
 

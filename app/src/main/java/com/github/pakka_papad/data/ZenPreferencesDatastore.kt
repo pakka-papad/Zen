@@ -17,4 +17,12 @@ class ZenPreferencesDatastore @Inject constructor(
             }
         }
     }
+
+    suspend fun setOnBoardingComplete() {
+        userPreferences.updateData {
+            it.copy {
+                onBoardingComplete = true
+            }
+        }
+    }
 }
