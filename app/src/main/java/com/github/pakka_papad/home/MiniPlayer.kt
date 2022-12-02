@@ -1,13 +1,13 @@
 package com.github.pakka_papad.home
 
 import android.media.MediaMetadataRetriever
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -15,10 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.github.pakka_papad.R
 import com.github.pakka_papad.data.music.Song
@@ -32,7 +30,7 @@ fun MiniPlayer(
     onMiniPlayerClicked: () -> Unit
 ) {
     var picture by remember { mutableStateOf<ByteArray?>(null) }
-    LaunchedEffect(key1 = song.location){
+    LaunchedEffect(key1 = song.location) {
         val extractor = MediaMetadataRetriever().apply {
             setDataSource(song.location)
         }
@@ -44,7 +42,7 @@ fun MiniPlayer(
             .fillMaxWidth(0.95f)
             .height(60.dp)
             .background(
-                color = MaterialTheme.colorScheme.secondaryContainer,
+                color = MaterialTheme.colorScheme.primaryContainer,
                 shape = RoundedCornerShape(8.dp)
             )
             .clickable(
@@ -65,9 +63,9 @@ fun MiniPlayer(
                 .fillMaxWidth()
                 .align(Alignment.Center),
             text = song.title,
-            fontSize = 18.sp,
+            style = MaterialTheme.typography.bodyLarge,
         )
-        Image(
+        Icon(
             painter = painterResource(
                 if (showPlayButton) R.drawable.ic_baseline_play_arrow_24 else R.drawable.ic_baseline_pause_24
             ),
@@ -84,7 +82,7 @@ fun MiniPlayer(
                 )
                 .padding(8.dp)
                 .align(BiasAlignment(1f, 0f)),
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSecondaryContainer),
+            tint = MaterialTheme.colorScheme.onPrimaryContainer,
         )
     }
 }
