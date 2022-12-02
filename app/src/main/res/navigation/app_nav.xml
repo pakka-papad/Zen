@@ -18,6 +18,9 @@
         <action
             android:id="@+id/action_homeFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_selectPlaylistFragment"
+            app:destination="@id/selectPlaylistFragment" />
     </fragment>
     <fragment
         android:id="@+id/nowPlaying"
@@ -27,7 +30,11 @@
     <fragment
         android:id="@+id/playlistFragment"
         android:name="com.github.pakka_papad.playlist.PlaylistFragment"
-        android:label="PlaylistFragment" />
+        android:label="PlaylistFragment" >
+        <action
+            android:id="@+id/action_playlistFragment_to_selectPlaylistFragment"
+            app:destination="@id/selectPlaylistFragment" />
+    </fragment>
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.github.pakka_papad.settings.SettingsFragment"
@@ -57,5 +64,14 @@
             app:destination="@id/homeFragment"
             app:popUpTo="@id/onBoardingFragment"
             app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/selectPlaylistFragment"
+        android:name="com.github.pakka_papad.select_playlist.SelectPlaylistFragment"
+        android:label="SelectPlaylistFragment" >
+        <argument
+            android:name="songLocation"
+            app:argType="string"
+            android:defaultValue='""' />
     </fragment>
 </navigation>

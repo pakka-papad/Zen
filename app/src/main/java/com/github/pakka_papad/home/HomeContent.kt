@@ -22,6 +22,7 @@ fun HomeContent(
     onAddToQueueClicked: (Song) -> Unit,
     onPlayAllClicked: () -> Unit,
     onShuffleClicked: () -> Unit,
+    onAddToPlaylistsClicked: (songLocation: String) -> Unit,
 
     // albums list
     albumsWithSongs: List<AlbumWithSongs>,
@@ -51,6 +52,7 @@ fun HomeContent(
                 onAddToQueueClicked = onAddToQueueClicked,
                 onPlayAllClicked = onPlayAllClicked,
                 onShuffleClicked = onShuffleClicked,
+                onAddToPlaylistsClicked = onAddToPlaylistsClicked,
             )
         }
         Screens.Albums -> {

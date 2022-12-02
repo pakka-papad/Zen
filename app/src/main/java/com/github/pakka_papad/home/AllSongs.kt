@@ -39,6 +39,7 @@ fun AllSongs(
     onAddToQueueClicked: (Song) -> Unit,
     onPlayAllClicked: () -> Unit,
     onShuffleClicked: () -> Unit,
+    onAddToPlaylistsClicked: (songLocation: String) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -69,7 +70,8 @@ fun AllSongs(
                 currentlyPlaying = song.location == currentSong?.location,
                 onAddToQueueClicked = {
                     onAddToQueueClicked(song)
-                }
+                },
+                onAddToPlaylistsClicked = onAddToPlaylistsClicked,
             )
         }
     }
@@ -82,6 +84,7 @@ fun SongCard(
     onFavouriteClicked: () -> Unit,
     currentlyPlaying: Boolean = false,
     onAddToQueueClicked: () -> Unit,
+    onAddToPlaylistsClicked: (songLocation: String) -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -206,6 +209,17 @@ fun SongCard(
                             text = {
                                 Text(
                                     text = "Add to queue",
+                                    fontSize = 14.sp
+                                )
+                            },
+                        )
+                        DropdownMenuItem(
+                            onClick = {
+                                onAddToPlaylistsClicked(song.location)
+                            },
+                            text = {
+                                Text(
+                                    text = "Add to playlist",
                                     fontSize = 14.sp
                                 )
                             },

@@ -19,7 +19,7 @@ import androidx.navigation.fragment.findNavController
 import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.ui.theme.ZenTheme
 
-class PlaylistFragment: Fragment() {
+class PlaylistFragment : Fragment() {
 
     private val viewModel by activityViewModels<SharedViewModel>()
 
@@ -55,7 +55,8 @@ class PlaylistFragment: Fragment() {
                         },
                         content = { paddingValues ->
                             val insetsPadding =
-                                WindowInsets.systemBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal).asPaddingValues()
+                                WindowInsets.systemBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
+                                    .asPaddingValues()
                             PlaylistContent(
                                 paddingValues = PaddingValues(
                                     top = paddingValues.calculateTopPadding(),
@@ -72,11 +73,16 @@ class PlaylistFragment: Fragment() {
                                 currentSong = currentSong,
                                 onAddToQueueClicked = viewModel::addToQueue,
                                 onPlayAllClicked = {
-                                    viewModel.setQueue(playlistUi.songs,0)
+                                    viewModel.setQueue(playlistUi.songs, 0)
                                 },
                                 onShuffleClicked = {
                                     viewModel.shufflePlay(playlistUi.songs)
-                                }
+                                },
+                                onAddToPlaylistsClicked = {
+                                    navController.navigate(
+                                        PlaylistFragmentDirections.actionPlaylistFragmentToSelectPlaylistFragment(it)
+                                    )
+                                },
                             )
                         },
                     )

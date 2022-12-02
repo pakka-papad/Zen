@@ -44,14 +44,21 @@ class DataManager(
         showToast("Playlist $playlistName created")
     }
 
+    suspend fun insertPlaylistSongCrossRefs(playlistSongCrossRefs: List<PlaylistSongCrossRef>) {
+        try {
+            songDao.insertPlaylistSongCrossRef(playlistSongCrossRefs)
+            showToast("Done")
+        } catch (e: Exception) {
+            Timber.e(e)
+            showToast("Oops! Some error occurred")
+        }
+    }
+
     private val _scanStatus = Channel<ScanStatus>()
     val scanStatus = _scanStatus.receiveAsFlow()
 
     suspend fun scanForMusic() {
         _scanStatus.send(ScanStatus.ScanStarted)
-        songDao.deleteAllSongs()
-        songDao.deleteAllAlbums()
-        songDao.deleteAllArtists()
         notificationManager.sendScanningNotification()
         val selection = Audio.Media.IS_MUSIC + " != 0"
         val projection = arrayOf(
@@ -85,7 +92,7 @@ class DataManager(
         val dateAddedIndex = cursor.getColumnIndex(Audio.Media.DATE_ADDED)
         val dateModifiedIndex = cursor.getColumnIndex(Audio.Media.DATE_MODIFIED)
         val songCover = Uri.parse("content://media/external/audio/albumart")
-        val albumArtMap = HashMap<String,String?>()
+        val albumArtMap = HashMap<String, String?>()
         val artistSet = TreeSet<String>()
         do {
             try {
@@ -115,14 +122,14 @@ class DataManager(
                 )
                 songs.add(song)
                 artistSet.add(song.artist)
-                if (albumArtMap[song.album] == null){
+                if (albumArtMap[song.album] == null) {
                     albumArtMap[song.album] = ContentUris.withAppendedId(songCover, cursor.getLong(albumIdIndex)).toString()
                 }
             } catch (e: Exception) {
                 Timber.e(e.message ?: e.localizedMessage ?: "FILE_DOES_NOT_EXIST")
             }
             parsedSongs++
-            _scanStatus.send(ScanStatus.ScanProgress(parsedSongs,totalSongs))
+            _scanStatus.send(ScanStatus.ScanProgress(parsedSongs, totalSongs))
         } while (cursor.moveToNext())
         cursor.close()
         albumArtMap.forEach { (albumName, albumArtUri) ->
@@ -136,7 +143,7 @@ class DataManager(
     }
 
     private fun showToast(message: String) {
-        Toast.makeText(context,message,Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
     private var callback: Callback? = null
@@ -148,10 +155,10 @@ class DataManager(
     val currentSong = _currentSong.asStateFlow()
 
     suspend fun updateSong(song: Song) {
-        if (_currentSong.value?.location == song.location){
-           _currentSong.value = song
+        if (_currentSong.value?.location == song.location) {
+            _currentSong.value = song
         }
-        if (_queue.value.any { it.location == song.location }){
+        if (_queue.value.any { it.location == song.location }) {
             _queue.value = _queue.value.map {
                 if (it.location == song.location) song else it
             }
@@ -166,16 +173,16 @@ class DataManager(
         if (newQueue.isEmpty()) return
         _queue.value = newQueue
         _currentSong.value = newQueue[startPlayingFromIndex]
-        if (callback == null){
-            val intent = Intent(context,ZenPlayer::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+        if (callback == null) {
+            val intent = Intent(context, ZenPlayer::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent)
             } else {
                 context.startService(intent)
             }
             remIdx = startPlayingFromIndex
         } else {
-            callback?.setQueue(newQueue,startPlayingFromIndex)
+            callback?.setQueue(newQueue, startPlayingFromIndex)
         }
     }
 
@@ -191,7 +198,7 @@ class DataManager(
 
     fun setPlayerRunning(callback: Callback) {
         this.callback = callback
-        this.callback?.setQueue(_queue.value,remIdx)
+        this.callback?.setQueue(_queue.value, remIdx)
     }
 
     fun updateCurrentSong(currentSongIndex: Int) {

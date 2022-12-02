@@ -22,6 +22,7 @@ fun PlaylistContent(
     onAddToQueueClicked: (Song) -> Unit,
     onPlayAllClicked: () -> Unit,
     onShuffleClicked: () -> Unit,
+    onAddToPlaylistsClicked: (songLocation: String) -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -37,6 +38,7 @@ fun PlaylistContent(
             onAddToQueueClicked = onAddToQueueClicked,
             onPlayAllClicked = onPlayAllClicked,
             onShuffleClicked = onShuffleClicked,
+            onAddToPlaylistsClicked = onAddToPlaylistsClicked,
         )
         Spacer(
             modifier = Modifier

@@ -138,7 +138,12 @@ class HomeFragment : Fragment() {
                                             viewModel.onPlaylistClicked(playlistId)
                                             navController.navigate(R.id.action_homeFragment_to_playlistFragment)
                                         },
-                                        onPlaylistCreate = viewModel::onPlaylistCreate
+                                        onPlaylistCreate = viewModel::onPlaylistCreate,
+                                        onAddToPlaylistsClicked = {
+                                            navController.navigate(
+                                                HomeFragmentDirections.actionHomeFragmentToSelectPlaylistFragment(it)
+                                            )
+                                        },
                                     )
                                     if (showMiniPlayer) {
                                         MiniPlayer(

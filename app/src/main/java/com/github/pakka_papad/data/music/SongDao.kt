@@ -42,7 +42,7 @@ interface SongDao {
     @Insert(entity = Playlist::class)
     suspend fun insertPlaylist(playlist: PlaylistExceptId): Long
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertPlaylistSongCrossRef(playlistSongCrossRefs: List<PlaylistSongCrossRef>)
 
     @Query("SELECT * FROM ${Constants.Tables.PLAYLIST_TABLE}")

@@ -1,6 +1,7 @@
 package com.github.pakka_papad
 
 import android.app.Application
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.Player
@@ -55,7 +56,10 @@ class SharedViewModel @Inject constructor(
     val scanStatus = manager.scanStatus
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 300, replayExpirationMillis = 0),
+            started = SharingStarted.WhileSubscribed(
+                stopTimeoutMillis = 300,
+                replayExpirationMillis = 0
+            ),
             initialValue = ScanStatus.ScanNotRunning
         )
 
@@ -88,7 +92,7 @@ class SharedViewModel @Inject constructor(
     /**
      * Shuffle the queue and start playing from first song
      */
-    fun shufflePlay(songs: List<Song>) = setQueue(songs.shuffled(),0)
+    fun shufflePlay(songs: List<Song>) = setQueue(songs.shuffled(), 0)
 
     /**
      * The playlist to display in playlist fragment
@@ -127,12 +131,44 @@ class SharedViewModel @Inject constructor(
         }
     }
 
+    private val _selectList = mutableStateListOf<Boolean>()
+    val selectList: List<Boolean> = _selectList
+
+    fun updateSelectListSize(size: Int){
+        if (size == _selectList.size) return
+        while (size > _selectList.size) {
+            _selectList.add(false)
+        }
+        while (size < _selectList.size) {
+            _selectList.removeLast()
+        }
+    }
+
+    fun toggleSelectAtIndex(index: Int) {
+        if (index >= _selectList.size) return
+        _selectList[index] = !_selectList[index]
+    }
+
+    fun resetSelectList() = _selectList.clear()
+
+    fun addSongToPlaylists(songLocation: String) {
+        viewModelScope.launch {
+            val playlists = playlists.value
+            val playlistSongCrossRefs = _selectList.indices
+                .filter { _selectList[it] }
+                .map {
+                    PlaylistSongCrossRef(playlists[it].playlistId, songLocation)
+                }
+            manager.insertPlaylistSongCrossRefs(playlistSongCrossRefs)
+        }
+    }
+
     /**
      * Adds a song to the end of queue
      */
     fun addToQueue(song: Song) {
         if (queue.value.isEmpty()) {
-            manager.setQueue(listOf(song),0)
+            manager.setQueue(listOf(song), 0)
         } else {
             manager.addToQueue(song)
         }
@@ -142,8 +178,8 @@ class SharedViewModel @Inject constructor(
      * Adds a list of songs to the end queue
      */
     fun addToQueue(songs: List<Song>) {
-        if (queue.value.isEmpty()){
-            manager.setQueue(songs,0)
+        if (queue.value.isEmpty()) {
+            manager.setQueue(songs, 0)
         } else {
             songs.forEach { manager.addToQueue(it) }
         }
@@ -191,7 +227,7 @@ class SharedViewModel @Inject constructor(
 
     fun updateTheme(themePreference: ThemePreference) {
         viewModelScope.launch(Dispatchers.IO) {
-            datastore.setTheme(themePreference.useMaterialYou,themePreference.theme)
+            datastore.setTheme(themePreference.useMaterialYou, themePreference.theme)
         }
     }
 
