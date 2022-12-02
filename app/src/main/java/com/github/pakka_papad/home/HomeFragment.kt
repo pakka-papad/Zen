@@ -141,7 +141,7 @@ class HomeFragment : Fragment() {
                                         onPlaylistCreate = viewModel::onPlaylistCreate,
                                         onAddToPlaylistsClicked = {
                                             navController.navigate(
-                                                HomeFragmentDirections.actionHomeFragmentToSelectPlaylistFragment(it)
+                                                HomeFragmentDirections.actionHomeFragmentToSelectPlaylistFragment(it.location)
                                             )
                                         },
                                     )

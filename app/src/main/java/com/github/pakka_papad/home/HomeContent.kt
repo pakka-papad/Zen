@@ -5,7 +5,10 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
 import com.github.pakka_papad.Screens
-import com.github.pakka_papad.data.music.*
+import com.github.pakka_papad.data.music.AlbumWithSongs
+import com.github.pakka_papad.data.music.ArtistWithSongs
+import com.github.pakka_papad.data.music.Playlist
+import com.github.pakka_papad.data.music.Song
 
 @Composable
 fun HomeContent(
@@ -22,7 +25,7 @@ fun HomeContent(
     onAddToQueueClicked: (Song) -> Unit,
     onPlayAllClicked: () -> Unit,
     onShuffleClicked: () -> Unit,
-    onAddToPlaylistsClicked: (songLocation: String) -> Unit,
+    onAddToPlaylistsClicked: (Song) -> Unit,
 
     // albums list
     albumsWithSongs: List<AlbumWithSongs>,

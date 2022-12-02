@@ -80,7 +80,7 @@ class PlaylistFragment : Fragment() {
                                 },
                                 onAddToPlaylistsClicked = {
                                     navController.navigate(
-                                        PlaylistFragmentDirections.actionPlaylistFragmentToSelectPlaylistFragment(it)
+                                        PlaylistFragmentDirections.actionPlaylistFragmentToSelectPlaylistFragment(it.location)
                                     )
                                 },
                             )

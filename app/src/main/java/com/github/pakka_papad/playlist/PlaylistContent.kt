@@ -22,7 +22,7 @@ fun PlaylistContent(
     onAddToQueueClicked: (Song) -> Unit,
     onPlayAllClicked: () -> Unit,
     onShuffleClicked: () -> Unit,
-    onAddToPlaylistsClicked: (songLocation: String) -> Unit,
+    onAddToPlaylistsClicked: (Song) -> Unit,
 ) {
     Box(
         modifier = Modifier

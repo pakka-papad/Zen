@@ -153,7 +153,11 @@ class SharedViewModel @Inject constructor(
         _selectList[index] = !_selectList[index]
     }
 
-    fun resetSelectList() = _selectList.clear()
+    fun resetSelectList() {
+        _selectList.indices.forEach {
+            _selectList[it] = false
+        }
+    }
 
     fun addSongToPlaylists(songLocation: String) {
         viewModelScope.launch {
@@ -164,6 +168,7 @@ class SharedViewModel @Inject constructor(
                     PlaylistSongCrossRef(playlists[it].playlistId, songLocation)
                 }
             manager.insertPlaylistSongCrossRefs(playlistSongCrossRefs)
+            resetSelectList()
         }
     }
 
