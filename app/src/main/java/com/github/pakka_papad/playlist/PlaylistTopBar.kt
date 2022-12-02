@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.github.pakka_papad.components.TopAppBar
+import com.github.pakka_papad.components.TopBarWithBackArrow
 import com.github.pakka_papad.data.UserPreferences
 import com.github.pakka_papad.ui.theme.ThemePreference
 
@@ -35,7 +35,7 @@ fun PlaylistTopBar(
     themePreference: ThemePreference,
 ) {
     if (topBarBackgroundImageUri.isEmpty()){
-        TopAppBar(
+        TopBarWithBackArrow(
             onBackArrowPressed = onBackArrowPressed,
             title = topBarTitle,
             actions = {

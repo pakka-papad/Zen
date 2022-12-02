@@ -1,4 +1,4 @@
-package com.github.pakka_papad.home
+package com.github.pakka_papad.components
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutLinearInEasing
@@ -19,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,7 +69,6 @@ private fun SongCardBase(
             ) {
                 Text(
                     text = song.title,
-                    fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
                     maxLines = 1,
                     modifier = Modifier.fillMaxWidth(),

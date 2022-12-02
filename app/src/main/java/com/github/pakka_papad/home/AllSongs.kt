@@ -7,6 +7,8 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.github.pakka_papad.components.SongCardDropdownOptions
+import com.github.pakka_papad.components.SongCardV1
 import com.github.pakka_papad.data.music.Song
 
 @Composable

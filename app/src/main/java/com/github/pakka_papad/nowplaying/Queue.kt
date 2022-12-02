@@ -8,8 +8,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.github.pakka_papad.components.SongCardV2
 import com.github.pakka_papad.data.music.Song
-import com.github.pakka_papad.home.SongCardV2
 
 @Composable
 fun Queue(

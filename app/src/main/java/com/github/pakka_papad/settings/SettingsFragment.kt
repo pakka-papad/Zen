@@ -15,10 +15,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
-import dagger.hilt.android.AndroidEntryPoint
 import com.github.pakka_papad.SharedViewModel
-import com.github.pakka_papad.components.TopAppBar
+import com.github.pakka_papad.components.TopBarWithBackArrow
 import com.github.pakka_papad.ui.theme.ZenTheme
+import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class SettingsFragment : Fragment() {
@@ -43,7 +43,7 @@ class SettingsFragment : Fragment() {
                 ) {
                     Scaffold(
                         topBar = {
-                            TopAppBar(
+                            TopBarWithBackArrow(
                                 onBackArrowPressed = navController::popBackStack,
                                 title = "Settings",
                                 actions = { }

@@ -13,34 +13,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
-import com.github.pakka_papad.components.TopAppBar
+import com.github.pakka_papad.components.TopBarWithBackArrow
 
 @Composable
 fun NowPlayingTopBar(
     onBackArrowPressed: () -> Unit,
     title: String,
-) {
-    TopAppBar(
-        onBackArrowPressed = onBackArrowPressed,
-        title = title,
-        actions = {
-            Icon(
-                imageVector = Icons.Outlined.MoreVert,
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .size(30.dp)
-                    .rotate(90f)
-                    .clickable(
-                        interactionSource = MutableInteractionSource(),
-                        indication = rememberRipple(
-                            bounded = false,
-                            radius = 25.dp,
-                        ),
-                        onClick = { }
+) = TopBarWithBackArrow(
+    onBackArrowPressed = onBackArrowPressed,
+    title = title,
+    actions = {
+        Icon(
+            imageVector = Icons.Outlined.MoreVert,
+            contentDescription = null,
+            modifier = Modifier
+                .padding(16.dp)
+                .size(30.dp)
+                .rotate(90f)
+                .clickable(
+                    interactionSource = MutableInteractionSource(),
+                    indication = rememberRipple(
+                        bounded = false,
+                        radius = 25.dp,
                     ),
-                tint = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-    )
-}
+                    onClick = { }
+                ),
+            tint = MaterialTheme.colorScheme.onSurface,
+        )
+    }
+)
