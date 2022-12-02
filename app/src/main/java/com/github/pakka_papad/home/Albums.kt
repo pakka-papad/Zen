@@ -17,7 +17,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.github.pakka_papad.components.EmptyListMessage
 import com.github.pakka_papad.data.music.AlbumWithSongs
@@ -95,7 +94,7 @@ fun AlbumCard(
         )
         Text(
             text = albumWithSongs.album.name,
-            fontSize = 16.sp,
+            style = MaterialTheme.typography.titleMedium,
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.secondaryContainer)

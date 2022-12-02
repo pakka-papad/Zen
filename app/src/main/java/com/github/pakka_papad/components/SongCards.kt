@@ -21,7 +21,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.github.pakka_papad.data.music.Song
 import kotlinx.coroutines.launch
 
@@ -69,7 +68,7 @@ private fun SongCardBase(
             ) {
                 Text(
                     text = song.title,
-                    fontSize = 20.sp,
+                    style = MaterialTheme.typography.titleLarge,
                     maxLines = 1,
                     modifier = Modifier.fillMaxWidth(),
                     color = if (currentlyPlaying) onCurrentlyPlayingBackgroundColor else onBackgroundColor
@@ -77,7 +76,7 @@ private fun SongCardBase(
                 Text(
                     text = "${song.artist}  •  ${song.durationFormatted}",
                     maxLines = 1,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.fillMaxWidth(),
                     color = if (currentlyPlaying) onCurrentlyPlayingBackgroundColor else onBackgroundColor
                 )

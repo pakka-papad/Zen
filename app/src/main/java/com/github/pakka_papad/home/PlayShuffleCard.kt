@@ -14,7 +14,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.github.pakka_papad.R
 
 @Composable
@@ -48,7 +47,7 @@ fun PlayShuffleCard(
                     )
                     Text(
                         text = "Play All",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                     )
                 }
             )
@@ -68,7 +67,7 @@ fun PlayShuffleCard(
                     )
                     Text(
                         text = "Shuffle",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                     )
                 }
             )

@@ -16,9 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.github.pakka_papad.components.EmptyListMessage
 import com.github.pakka_papad.data.music.ArtistWithSongs
 
@@ -84,15 +82,14 @@ fun ArtistCard(
             ) {
                 Text(
                     text = artistWithSongs.artist.name,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
+                    style = MaterialTheme.typography.titleLarge,
                     maxLines = 1,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Text(
                     text = "${artistWithSongs.songs.size} ${if(artistWithSongs.songs.size == 1) "song" else "songs"}",
                     maxLines = 1,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

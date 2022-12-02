@@ -30,13 +30,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.media3.exoplayer.ExoPlayer
 import coil.compose.AsyncImage
-import kotlinx.coroutines.launch
 import com.github.pakka_papad.R
 import com.github.pakka_papad.data.music.Song
+import kotlinx.coroutines.launch
 
 @Composable
 fun NowPlayingScreen(
@@ -227,7 +226,7 @@ fun NowPlayingScreen(
         ) {
             Text(
                 text = song.title,
-                fontSize = 25.sp,
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
@@ -236,7 +235,7 @@ fun NowPlayingScreen(
             )
             Text(
                 text = song.artist,
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
@@ -244,7 +243,7 @@ fun NowPlayingScreen(
             )
             Text(
                 text = song.album,
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

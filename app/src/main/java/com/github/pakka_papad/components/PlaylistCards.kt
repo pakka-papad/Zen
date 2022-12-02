@@ -41,7 +41,8 @@ private fun PlaylistName(
 ) = Text(
     text = playlist.playlistName,
     color = MaterialTheme.colorScheme.onSecondaryContainer,
-    modifier = Modifier.background(Color.Transparent)
+    modifier = Modifier.background(Color.Transparent),
+    style = MaterialTheme.typography.titleMedium
 )
 
 @Composable
