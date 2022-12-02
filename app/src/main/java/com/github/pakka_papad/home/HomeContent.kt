@@ -42,8 +42,8 @@ fun HomeContent(
     allPlaylistListState: LazyListState,
     onPlaylistClicked: (Long) -> Unit,
     onPlaylistCreate: (String) -> Unit,
-){
-    when(currentScreen){
+) {
+    when (currentScreen) {
         Screens.AllSongs -> {
             AllSongs(
                 songs = songs,
@@ -56,6 +56,7 @@ fun HomeContent(
                 onPlayAllClicked = onPlayAllClicked,
                 onShuffleClicked = onShuffleClicked,
                 onAddToPlaylistsClicked = onAddToPlaylistsClicked,
+                emptyListMessage = "We could not find any songs on your device"
             )
         }
         Screens.Albums -> {

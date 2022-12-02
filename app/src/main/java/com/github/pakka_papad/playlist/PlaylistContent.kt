@@ -1,13 +1,9 @@
 package com.github.pakka_papad.playlist
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.home.AllSongs
 
@@ -28,6 +24,10 @@ fun PlaylistContent(
         modifier = Modifier
             .fillMaxSize()
     ) {
+        /**
+         * The message passed for a playlist which has no songs
+         * Albums and Artists will at least have one song
+         */
         AllSongs(
             songs = songs,
             onSongClicked = onSongClicked,
@@ -39,14 +39,7 @@ fun PlaylistContent(
             onPlayAllClicked = onPlayAllClicked,
             onShuffleClicked = onShuffleClicked,
             onAddToPlaylistsClicked = onAddToPlaylistsClicked,
-        )
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(0.dp)
-                .background(Color.Black.copy(0.2f))
-                .align(Alignment.BottomCenter)
+            emptyListMessage = "No songs here\nTo add a song, go to song => more => add to playlist"
         )
     }
-
 }

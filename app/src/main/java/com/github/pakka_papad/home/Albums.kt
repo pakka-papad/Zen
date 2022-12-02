@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.github.pakka_papad.components.EmptyListMessage
 import com.github.pakka_papad.data.music.AlbumWithSongs
 import timber.log.Timber
 
@@ -29,21 +30,28 @@ fun Albums(
     gridState: LazyGridState,
     onAlbumClicked: (AlbumWithSongs) -> Unit
 ) {
-    LazyVerticalGrid(
-        modifier = Modifier
-            .fillMaxSize(),
-        state = gridState,
-        columns = GridCells.Fixed(2),
-        contentPadding = paddingValues,
-    ){
-        items(
-            items = albumsWithSongs,
-            key = { it.album.name }
-        ){ album ->
-            AlbumCard(
-                albumWithSongs = album,
-                onAlbumClicked = onAlbumClicked
-            )
+    if (albumsWithSongs.isEmpty()) {
+        EmptyListMessage(
+            message = "Oops! No albums found",
+            paddingValues = paddingValues,
+        )
+    } else {
+        LazyVerticalGrid(
+            modifier = Modifier
+                .fillMaxSize(),
+            state = gridState,
+            columns = GridCells.Fixed(2),
+            contentPadding = paddingValues,
+        ) {
+            items(
+                items = albumsWithSongs,
+                key = { it.album.name }
+            ) { album ->
+                AlbumCard(
+                    albumWithSongs = album,
+                    onAlbumClicked = onAlbumClicked
+                )
+            }
         }
     }
 }

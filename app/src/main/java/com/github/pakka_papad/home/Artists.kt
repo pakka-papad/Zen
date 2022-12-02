@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.pakka_papad.components.EmptyListMessage
 import com.github.pakka_papad.data.music.ArtistWithSongs
 
 @Composable
@@ -28,20 +29,27 @@ fun Artists(
     onArtistClicked: (ArtistWithSongs) -> Unit,
     listState: LazyListState
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize(),
-        state = listState,
-        contentPadding = paddingValues
-    ) {
-        items(
-            items = artistsWithSongs,
-            key = { it.artist.name }
-        ) { artist ->
-            ArtistCard(
-                artistWithSongs = artist,
-                onArtistClicked = onArtistClicked,
-            )
+    if (artistsWithSongs.isEmpty()){
+        EmptyListMessage(
+            message = "No artists found",
+            paddingValues = paddingValues,
+        )
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize(),
+            state = listState,
+            contentPadding = paddingValues
+        ) {
+            items(
+                items = artistsWithSongs,
+                key = { it.artist.name }
+            ) { artist ->
+                ArtistCard(
+                    artistWithSongs = artist,
+                    onArtistClicked = onArtistClicked,
+                )
+            }
         }
     }
 }
