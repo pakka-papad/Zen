@@ -7,6 +7,7 @@ object Constants {
         const val ALBUM_TABLE = "album_table"
         const val ARTIST_TABLE = "artist_table"
         const val PLAYLIST_TABLE = "playlist_table"
+        const val PLAYLIST_SONG_CROSS_REF_TABLE = "playlist_song_cross_ref_table"
     }
     const val PACKAGE_NAME = "com.github.pakka_papad"
 }
