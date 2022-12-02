@@ -75,12 +75,12 @@ class SharedViewModel @Inject constructor(
     private val exoPlayerListener = object : Player.Listener {
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             super.onIsPlayingChanged(isPlaying)
-            _currentSongPlaying.value = exoPlayer.isPlaying
+            _currentSongPlaying.update { isPlaying }
         }
     }
 
     init {
-        _currentSongPlaying.value = exoPlayer.isPlaying
+        _currentSongPlaying.update { exoPlayer.isPlaying }
         exoPlayer.addListener(exoPlayerListener)
     }
 
@@ -109,19 +109,23 @@ class SharedViewModel @Inject constructor(
     }
 
     fun onArtistClicked(artistWithSongs: ArtistWithSongs) {
-        _playlist.value = PlaylistUi(
-            songs = artistWithSongs.songs,
-            topBarTitle = artistWithSongs.artist.name,
-        )
+        _playlist.update {
+            PlaylistUi(
+                songs = artistWithSongs.songs,
+                topBarTitle = artistWithSongs.artist.name,
+            )
+        }
     }
 
     fun onPlaylistClicked(playlistId: Long) {
         viewModelScope.launch {
             val playlistWithSongs = manager.getPlaylistById(playlistId)
-            _playlist.value = PlaylistUi(
-                songs = playlistWithSongs.songs,
-                topBarTitle = playlistWithSongs.playlist.playlistName,
-            )
+            _playlist.update {
+                PlaylistUi(
+                    songs = playlistWithSongs.songs,
+                    topBarTitle = playlistWithSongs.playlist.playlistName,
+                )
+            }
         }
     }
 
@@ -203,11 +207,13 @@ class SharedViewModel @Inject constructor(
         if (song == null) return
         val updatedSong = song.copy(favourite = !song.favourite)
         if (_playlist.value.songs.any { it.location == song.location }) {
-            _playlist.value = _playlist.value.copy(
-                songs = _playlist.value.songs.map {
-                    if (it.location == song.location) updatedSong else it
-                }
-            )
+            _playlist.update {
+                _playlist.value.copy(
+                    songs = _playlist.value.songs.map {
+                        if (it.location == song.location) updatedSong else it
+                    }
+                )
+            }
         }
         viewModelScope.launch(Dispatchers.IO) {
             manager.updateSong(updatedSong)

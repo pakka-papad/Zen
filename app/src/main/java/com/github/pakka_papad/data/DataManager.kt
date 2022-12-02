@@ -17,6 +17,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
@@ -123,7 +124,9 @@ class DataManager(
                 songs.add(song)
                 artistSet.add(song.artist)
                 if (albumArtMap[song.album] == null) {
-                    albumArtMap[song.album] = ContentUris.withAppendedId(songCover, cursor.getLong(albumIdIndex)).toString()
+                    albumArtMap[song.album] =
+                        ContentUris.withAppendedId(songCover, cursor.getLong(albumIdIndex))
+                            .toString()
                 }
             } catch (e: Exception) {
                 Timber.e(e.message ?: e.localizedMessage ?: "FILE_DOES_NOT_EXIST")
@@ -156,11 +159,11 @@ class DataManager(
 
     suspend fun updateSong(song: Song) {
         if (_currentSong.value?.location == song.location) {
-            _currentSong.value = song
+            _currentSong.update { song }
         }
         if (_queue.value.any { it.location == song.location }) {
-            _queue.value = _queue.value.map {
-                if (it.location == song.location) song else it
+            _queue.update {
+                _queue.value.map { if (it.location == song.location) song else it }
             }
         }
         songDao.updateSong(song)
@@ -192,7 +195,8 @@ class DataManager(
             showToast("Song already in queue")
             return
         }
-        _queue.value = _queue.value.toMutableList().apply { add(song) }
+        _queue.update { _queue.value.toMutableList().apply { add(song) } }
+        showToast("Added ${song.title} to queue")
         callback?.addToQueue(song)
     }
 
@@ -203,7 +207,7 @@ class DataManager(
 
     fun updateCurrentSong(currentSongIndex: Int) {
         if (currentSongIndex < 0 || currentSongIndex >= _queue.value.size) return
-        _currentSong.value = _queue.value[currentSongIndex]
+        _currentSong.update { _queue.value[currentSongIndex] }
     }
 
     fun getSongAtIndex(index: Int): Song? {
