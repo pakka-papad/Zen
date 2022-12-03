@@ -39,7 +39,7 @@ fun Albums(
             modifier = Modifier
                 .fillMaxSize(),
             state = gridState,
-            columns = GridCells.Fixed(2),
+            columns = GridCells.Adaptive(140.dp),
             contentPadding = paddingValues,
         ) {
             items(

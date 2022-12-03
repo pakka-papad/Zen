@@ -55,7 +55,8 @@ fun MusicSlider(
     }
     val primaryColor = MaterialTheme.colorScheme.primary
     Column(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.Center
     ) {
         AndroidView(
             factory = { context ->

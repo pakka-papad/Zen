@@ -7,23 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.BottomSheetScaffold
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.KeyboardArrowDown
-import androidx.compose.material.rememberBottomSheetScaffoldState
-import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
@@ -31,13 +17,12 @@ import androidx.fragment.app.activityViewModels
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
-import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.player.ZenBroadcastReceiver
 import com.github.pakka_papad.ui.theme.ZenTheme
-import java.util.*
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -129,28 +114,6 @@ class NowPlayingFragment : Fragment() {
                             )
                         },
                         sheetContent = {
-                            Icon(
-                                imageVector = Icons.Outlined.KeyboardArrowDown,
-                                contentDescription = "drop down icon",
-                                modifier = Modifier
-                                    .background(MaterialTheme.colorScheme.secondaryContainer)
-                                    .fillMaxWidth()
-                                    .size(36.dp)
-                                    .align(Alignment.CenterHorizontally)
-                                    .clickable(
-                                        onClick = {
-                                            scope.launch {
-                                                scaffoldState.bottomSheetState.collapse()
-                                            }
-                                        },
-                                        indication = rememberRipple(
-                                            bounded = true,
-                                            radius = 18.dp
-                                        ),
-                                        interactionSource = MutableInteractionSource()
-                                    ),
-                                tint = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
                             Queue(
                                 queue = queue,
                                 onSongClicked = { index ->
@@ -158,6 +121,11 @@ class NowPlayingFragment : Fragment() {
                                 },
                                 onFavouriteClicked = viewModel::changeFavouriteValue,
                                 currentSong = song,
+                                onDownArrowClicked = {
+                                    scope.launch {
+                                        scaffoldState.bottomSheetState.collapse()
+                                    }
+                                }
                             )
                         },
                         sheetShape = RoundedCornerShape(
