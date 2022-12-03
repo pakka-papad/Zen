@@ -44,7 +44,7 @@ fun HomeContent(
     onPlaylistCreate: (String) -> Unit,
 ) {
     when (currentScreen) {
-        Screens.AllSongs -> {
+        Screens.Songs -> {
             AllSongs(
                 songs = songs,
                 onSongClicked = onSongClicked,

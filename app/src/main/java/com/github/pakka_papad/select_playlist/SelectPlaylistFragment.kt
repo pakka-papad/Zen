@@ -4,9 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -14,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
@@ -66,12 +65,14 @@ class SelectPlaylistFragment: Fragment() {
                                 }
                             )
                         },
-                        content = {
+                        content = { paddingValues ->
+                            val insetsPadding =
+                                WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues()
                             if (selectList.size != playlists.size) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .padding(it),
+                                        .padding(paddingValues),
                                     contentAlignment = Alignment.Center
                                 ){
                                     CircularProgressIndicator()
@@ -80,7 +81,12 @@ class SelectPlaylistFragment: Fragment() {
                                 SelectPlaylistContent(
                                     playlists = playlists,
                                     selectList = selectList,
-                                    paddingValues = it,
+                                    paddingValues = PaddingValues(
+                                        top = paddingValues.calculateTopPadding(),
+                                        start = insetsPadding.calculateStartPadding(LayoutDirection.Ltr),
+                                        end = insetsPadding.calculateEndPadding(LayoutDirection.Ltr),
+                                        bottom = insetsPadding.calculateBottomPadding()
+                                    ),
                                     onSelectChanged = viewModel::toggleSelectAtIndex
                                 )
                             }

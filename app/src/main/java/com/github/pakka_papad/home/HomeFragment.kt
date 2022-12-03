@@ -17,6 +17,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -58,7 +59,7 @@ class HomeFragment : Fragment() {
                 ZenTheme(
                     themePreference = themePreference
                 ) {
-                    var currentScreen by rememberSaveable { mutableStateOf(Screens.AllSongs) }
+                    var currentScreen by rememberSaveable { mutableStateOf(Screens.Songs) }
                     val songs by viewModel.songs.collectAsState()
                     val allSongsListState = rememberLazyListState()
                     val currentSong by viewModel.currentSong.collectAsState()
@@ -82,6 +83,8 @@ class HomeFragment : Fragment() {
                             )
                         },
                         content = { paddingValues ->
+                            val insetsPadding =
+                                WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues()
                             var dataRetrieved by remember { mutableStateOf(false) }
                             LaunchedEffect(
                                 key1 = songs,
@@ -109,7 +112,9 @@ class HomeFragment : Fragment() {
                                         allSongsListState = allSongsListState,
                                         paddingValues = PaddingValues(
                                             bottom = paddingValues.calculateBottomPadding() + if (showMiniPlayer) 80.dp else 0.dp,
-                                            top = paddingValues.calculateTopPadding()
+                                            top = paddingValues.calculateTopPadding(),
+                                            start = insetsPadding.calculateStartPadding(LayoutDirection.Ltr),
+                                            end = insetsPadding.calculateEndPadding(LayoutDirection.Ltr)
                                         ),
                                         albumsWithSongs = albumsWithSongs!!,
                                         allAlbumsGridState = allAlbumsGridState,
@@ -150,7 +155,11 @@ class HomeFragment : Fragment() {
                                             showPlayButton = !songPlaying!!,
                                             onPausePlayPressed = pendingPausePlayIntent::send,
                                             song = currentSong!!,
-                                            paddingValues = paddingValues,
+                                            paddingValues = PaddingValues(
+                                                bottom = paddingValues.calculateBottomPadding(),
+                                                start = insetsPadding.calculateStartPadding(LayoutDirection.Ltr),
+                                                end = insetsPadding.calculateEndPadding(LayoutDirection.Ltr)
+                                            ),
                                             onMiniPlayerClicked = {
                                                 navController.navigate(R.id.action_homeFragment_to_nowPlaying)
                                             }

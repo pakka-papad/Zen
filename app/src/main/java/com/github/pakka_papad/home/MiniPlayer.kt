@@ -16,6 +16,7 @@ import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.github.pakka_papad.R
@@ -38,7 +39,11 @@ fun MiniPlayer(
     }
     Box(
         modifier = Modifier
-            .padding(bottom = paddingValues.calculateBottomPadding() + 10.dp)
+            .padding(
+                bottom = paddingValues.calculateBottomPadding() + 10.dp,
+                start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                end = paddingValues.calculateEndPadding(LayoutDirection.Ltr)
+            )
             .fillMaxWidth(0.95f)
             .height(60.dp)
             .background(
