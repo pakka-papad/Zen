@@ -13,6 +13,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.github.pakka_papad.Screens
 import com.github.pakka_papad.data.music.Song
+import com.google.accompanist.systemuicontroller.SystemUiController
 import kotlinx.coroutines.delay
 
 @Composable
@@ -24,16 +25,22 @@ fun HomeBottomBar(
     currentSong: Song?,
     onMiniPlayerClicked: () -> Unit,
     mediaPlayer: ExoPlayer,
+    systemUiController: SystemUiController
 ) {
-    var showMiniPlayer by remember{ mutableStateOf(false) }
-    LaunchedEffect(key1 = songPlaying, key2 = currentSong){
-        showMiniPlayer = songPlaying!= null && currentSong != null
+    var showMiniPlayer by remember { mutableStateOf(false) }
+    LaunchedEffect(key1 = songPlaying, key2 = currentSong) {
+        showMiniPlayer = songPlaying != null && currentSong != null
     }
+    systemUiController.setNavigationBarColor(
+        MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp + LocalAbsoluteTonalElevation.current)
+    )
     BottomAppBar(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .background(
+                MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp + LocalAbsoluteTonalElevation.current)
+            )
             .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
-            .height(if (showMiniPlayer) 142.dp else 84.dp)
+            .height(if (showMiniPlayer) 142.dp else 84.dp),
     ) {
         Column {
             if (showMiniPlayer) {
@@ -50,7 +57,7 @@ fun HomeBottomBar(
                 var isPlaying by remember { mutableStateOf(mediaPlayer.isPlaying) }
 
                 DisposableEffect(Unit) {
-                    progress = mediaPlayer.currentPosition.toFloat()/mediaPlayer.duration.toFloat()
+                    progress = mediaPlayer.currentPosition.toFloat() / mediaPlayer.duration.toFloat()
                     val listener = object : Player.Listener {
                         override fun onIsPlayingChanged(isPlaying_: Boolean) {
                             isPlaying = isPlaying_
@@ -69,7 +76,7 @@ fun HomeBottomBar(
                 if (isPlaying) {
                     LaunchedEffect(Unit) {
                         while (true) {
-                            progress = mediaPlayer.currentPosition.toFloat()/mediaPlayer.duration.toFloat()
+                            progress = mediaPlayer.currentPosition.toFloat() / mediaPlayer.duration.toFloat()
                             delay(40)
                         }
                     }

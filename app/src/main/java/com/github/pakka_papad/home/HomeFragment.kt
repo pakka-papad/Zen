@@ -29,6 +29,7 @@ import com.github.pakka_papad.Screens
 import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.player.ZenBroadcastReceiver
 import com.github.pakka_papad.ui.theme.ZenTheme
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -59,9 +60,11 @@ class HomeFragment : Fragment() {
         )
         return ComposeView(requireContext()).apply {
             setContent {
+                val systemUiController = rememberSystemUiController(requireActivity().window)
                 val themePreference by viewModel.theme.collectAsState()
                 ZenTheme(
-                    themePreference = themePreference
+                    themePreference = themePreference,
+                    systemUiController = systemUiController
                 ) {
                     var currentScreen by rememberSaveable { mutableStateOf(Screens.Songs) }
                     val songs by viewModel.songs.collectAsState()
@@ -154,6 +157,7 @@ class HomeFragment : Fragment() {
                             }
                         },
                         bottomBar = {
+
                             HomeBottomBar(
                                 currentScreen = currentScreen,
                                 onScreenChange = {
@@ -165,7 +169,8 @@ class HomeFragment : Fragment() {
                                 onMiniPlayerClicked = {
                                     navController.navigate(R.id.action_homeFragment_to_nowPlaying)
                                 },
-                                mediaPlayer = exoPlayer
+                                mediaPlayer = exoPlayer,
+                                systemUiController = systemUiController,
                             )
                         },
                     )
