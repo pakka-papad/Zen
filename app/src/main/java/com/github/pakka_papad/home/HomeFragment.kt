@@ -18,9 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.github.pakka_papad.Constants
@@ -30,6 +30,7 @@ import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.player.ZenBroadcastReceiver
 import com.github.pakka_papad.ui.theme.ZenTheme
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
@@ -37,6 +38,9 @@ class HomeFragment : Fragment() {
     private lateinit var navController: NavController
 
     private val viewModel by activityViewModels<SharedViewModel>()
+
+    @Inject
+    lateinit var exoPlayer: ExoPlayer
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreateView(
@@ -70,10 +74,6 @@ class HomeFragment : Fragment() {
                     val allArtistsListState = rememberLazyListState()
                     val playlists by viewModel.playlists.collectAsState()
                     val allPlaylistsListState = rememberLazyListState()
-                    var showMiniPlayer by remember { mutableStateOf(false) }
-                    LaunchedEffect(key1 = currentSong, key2 = songPlaying) {
-                        showMiniPlayer = currentSong != null && songPlaying != null
-                    }
                     Scaffold(
                         topBar = {
                             HomeTopBar(
@@ -111,7 +111,7 @@ class HomeFragment : Fragment() {
                                         songs = songs!!,
                                         allSongsListState = allSongsListState,
                                         paddingValues = PaddingValues(
-                                            bottom = paddingValues.calculateBottomPadding() + if (showMiniPlayer) 80.dp else 0.dp,
+                                            bottom = paddingValues.calculateBottomPadding(),
                                             top = paddingValues.calculateTopPadding(),
                                             start = insetsPadding.calculateStartPadding(LayoutDirection.Ltr),
                                             end = insetsPadding.calculateEndPadding(LayoutDirection.Ltr)
@@ -150,21 +150,6 @@ class HomeFragment : Fragment() {
                                             )
                                         },
                                     )
-                                    if (showMiniPlayer) {
-                                        MiniPlayer(
-                                            showPlayButton = !songPlaying!!,
-                                            onPausePlayPressed = pendingPausePlayIntent::send,
-                                            song = currentSong!!,
-                                            paddingValues = PaddingValues(
-                                                bottom = paddingValues.calculateBottomPadding(),
-                                                start = insetsPadding.calculateStartPadding(LayoutDirection.Ltr),
-                                                end = insetsPadding.calculateEndPadding(LayoutDirection.Ltr)
-                                            ),
-                                            onMiniPlayerClicked = {
-                                                navController.navigate(R.id.action_homeFragment_to_nowPlaying)
-                                            }
-                                        )
-                                    }
                                 }
                             }
                         },
@@ -173,7 +158,14 @@ class HomeFragment : Fragment() {
                                 currentScreen = currentScreen,
                                 onScreenChange = {
                                     currentScreen = it
-                                }
+                                },
+                                songPlaying = songPlaying,
+                                onPlayPausePressed = pendingPausePlayIntent::send,
+                                currentSong = currentSong,
+                                onMiniPlayerClicked = {
+                                    navController.navigate(R.id.action_homeFragment_to_nowPlaying)
+                                },
+                                mediaPlayer = exoPlayer
                             )
                         },
                     )
