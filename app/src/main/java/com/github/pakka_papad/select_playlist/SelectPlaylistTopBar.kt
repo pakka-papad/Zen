@@ -11,6 +11,7 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.components.CenterAlignedTopBar
@@ -28,7 +29,7 @@ fun SelectPlaylistTopBar(
                 .padding(16.dp)
                 .size(30.dp)
                 .clickable(
-                    interactionSource = MutableInteractionSource(),
+                    interactionSource = remember{ MutableInteractionSource() },
                     indication = rememberRipple(
                         bounded = false,
                         radius = 25.dp,
@@ -47,7 +48,7 @@ fun SelectPlaylistTopBar(
                 .padding(16.dp)
                 .size(30.dp)
                 .clickable(
-                    interactionSource = MutableInteractionSource(),
+                    interactionSource = remember{ MutableInteractionSource() },
                     indication = rememberRipple(
                         bounded = false,
                         radius = 25.dp,

@@ -127,7 +127,7 @@ private fun SongCardBase(
                                 bounded = false,
                                 radius = 20.dp
                             ),
-                            interactionSource = MutableInteractionSource()
+                            interactionSource = remember{ MutableInteractionSource() }
                         )
                         .padding(8.dp),
                     tint = if (currentlyPlaying) onCurrentlyPlayingBackgroundColor else onBackgroundColor,
@@ -147,7 +147,7 @@ private fun SongCardBase(
                                     bounded = false,
                                     radius = 20.dp
                                 ),
-                                interactionSource = MutableInteractionSource()
+                                interactionSource = remember{ MutableInteractionSource() }
                             )
                             .padding(8.dp),
                         tint = if (currentlyPlaying) onCurrentlyPlayingBackgroundColor else onBackgroundColor,

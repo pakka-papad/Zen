@@ -79,7 +79,7 @@ fun MiniPlayer(
                 .padding(6.dp)
                 .clickable(
                     onClick = onPausePlayPressed,
-                    interactionSource = MutableInteractionSource(),
+                    interactionSource = remember{ MutableInteractionSource() },
                     indication = rememberRipple(
                         bounded = true,
                         radius = 22.dp

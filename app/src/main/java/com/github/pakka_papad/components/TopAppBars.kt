@@ -9,6 +9,7 @@ import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -120,7 +121,7 @@ fun TopBarWithBackArrow(
                 .padding(16.dp)
                 .size(30.dp)
                 .clickable(
-                    interactionSource = MutableInteractionSource(),
+                    interactionSource = remember{ MutableInteractionSource() },
                     indication = rememberRipple(
                         bounded = false,
                         radius = 25.dp,

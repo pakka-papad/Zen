@@ -104,7 +104,7 @@ fun PlaylistTopBar(
                             .padding(16.dp)
                             .size(30.dp)
                             .clickable(
-                                interactionSource = MutableInteractionSource(),
+                                interactionSource = remember{ MutableInteractionSource() },
                                 indication = rememberRipple(
                                     bounded = false,
                                     radius = 25.dp,
@@ -153,7 +153,7 @@ private fun PlaylistTopBarActions(
             .size(30.dp)
             .rotate(90f)
             .clickable(
-                interactionSource = MutableInteractionSource(),
+                interactionSource = remember{ MutableInteractionSource() },
                 indication = rememberRipple(
                     bounded = false,
                     radius = 25.dp,

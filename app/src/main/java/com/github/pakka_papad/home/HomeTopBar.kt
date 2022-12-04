@@ -10,6 +10,7 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
@@ -30,7 +31,7 @@ fun HomeTopBar(
                 .size(30.dp)
                 .rotate(90f)
                 .clickable(
-                    interactionSource = MutableInteractionSource(),
+                    interactionSource = remember{ MutableInteractionSource() },
                     indication = rememberRipple(
                         bounded = false,
                         radius = 25.dp,

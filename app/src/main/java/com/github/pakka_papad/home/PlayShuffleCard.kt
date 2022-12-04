@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,19 +24,24 @@ fun PlayShuffleCard(
 ) {
     Box(
         modifier = Modifier
+            .padding(horizontal = 20.dp)
             .fillMaxWidth()
             .height(85.dp),
     ) {
+        val cf = LocalConfiguration.current
         Row(
             modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.SpaceAround,
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
             verticalAlignment = Alignment.CenterVertically,
+
         ) {
             Button(
                 onClick = onPlayAllClicked,
                 modifier = Modifier
-                    .width(IntrinsicSize.Max)
-                    .height(IntrinsicSize.Max)
+//                    .width(IntrinsicSize.Max)
+//                    .fillMaxWidth(0.7f)
+//
+                    .weight(1f)
                     .clip(RoundedCornerShape(30.dp)),
                 content = {
                     Icon(
@@ -45,17 +51,20 @@ fun PlayShuffleCard(
                             .padding(4.dp),
                         contentDescription = "play-all-button"
                     )
-                    Text(
-                        text = "Play All",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
+                    if (cf.screenWidthDp > 340){
+                        Text(
+                            text = "Play All",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
                 }
             )
             Button(
                 onClick = onShuffleClicked,
                 modifier = Modifier
-                    .width(IntrinsicSize.Max)
-                    .height(IntrinsicSize.Max)
+//                    .width(IntrinsicSize.Max)
+//                    .fillMaxWidth(0.7f)
+                    .weight(1f)
                     .clip(RoundedCornerShape(30.dp)),
                 content = {
                     Icon(
@@ -65,16 +74,17 @@ fun PlayShuffleCard(
                             .padding(4.dp),
                         contentDescription = "shuffle-button"
                     )
-                    Text(
-                        text = "Shuffle",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
+                    if (cf.screenWidthDp > 340){
+                        Text(
+                            text = "Shuffle",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
                 }
             )
         }
         Spacer(
             modifier = Modifier
-                .padding(horizontal = 20.dp)
                 .fillMaxWidth()
                 .height(0.8.dp)
                 .background(color = MaterialTheme.colorScheme.surfaceVariant)

@@ -37,8 +37,9 @@ class DataManager(
     suspend fun getPlaylistById(id: Long) = songDao.getPlaylistWithSongs(id)
 
     suspend fun createPlaylist(playlistName: String) {
+        if (playlistName.trim().isEmpty()) return
         val playlist = PlaylistExceptId(
-            playlistName = playlistName,
+            playlistName = playlistName.trim(),
             createdAt = System.currentTimeMillis()
         )
         songDao.insertPlaylist(playlist)
