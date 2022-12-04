@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="source_to_destination_anim_duration" type="integer">500</item>
+    <item name="destination_to_source_anim_duration" type="integer">500</item>
+</resources>

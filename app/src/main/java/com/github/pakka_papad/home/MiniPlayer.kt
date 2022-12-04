@@ -37,7 +37,6 @@ fun MiniPlayer(
         }
         picture = extractor.embeddedPicture
     }
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -46,7 +45,7 @@ fun MiniPlayer(
             .clickable(
                 onClick = onMiniPlayerClicked,
                 indication = null,
-                interactionSource = MutableInteractionSource()
+                interactionSource = remember { MutableInteractionSource() }
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -79,7 +78,7 @@ fun MiniPlayer(
                 .padding(6.dp)
                 .clickable(
                     onClick = onPausePlayPressed,
-                    interactionSource = remember{ MutableInteractionSource() },
+                    interactionSource = remember { MutableInteractionSource() },
                     indication = rememberRipple(
                         bounded = true,
                         radius = 22.dp

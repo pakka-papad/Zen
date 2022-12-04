@@ -7,17 +7,21 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.components.SongCardV2
 import com.github.pakka_papad.data.music.Song
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -28,6 +32,15 @@ fun ColumnScope.Queue(
     currentSong: Song?,
     onDownArrowClicked: () -> Unit,
 ) {
+    val listState = rememberLazyListState()
+    LaunchedEffect(currentSong) {
+        delay(800) // for smooth transition animation
+        queue.forEachIndexed { index, song ->
+            if (currentSong?.location == song.location && !listState.isScrollInProgress) {
+                listState.animateScrollToItem(index)
+            }
+        }
+    }
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
@@ -36,7 +49,8 @@ fun ColumnScope.Queue(
             .background(MaterialTheme.colorScheme.secondaryContainer),
         contentPadding = WindowInsets.systemBars
             .only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
-            .asPaddingValues()
+            .asPaddingValues(),
+        state = listState
     ) {
         stickyHeader {
             Icon(
@@ -52,7 +66,7 @@ fun ColumnScope.Queue(
                             bounded = true,
                             radius = 18.dp
                         ),
-                        interactionSource = MutableInteractionSource()
+                        interactionSource = remember { MutableInteractionSource() }
                     ),
                 tint = MaterialTheme.colorScheme.onSecondaryContainer
             )
