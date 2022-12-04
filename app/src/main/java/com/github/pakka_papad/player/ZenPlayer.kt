@@ -118,9 +118,7 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
             ZenNotificationManager.PLAYER_NOTIFICATION_ID,
             notificationManager.getPlayerNotification(
                 session = mediaSession,
-                showPreviousButton = true,
                 showPlayButton = false,
-                showNextButton = true,
             )
         )
 
@@ -190,9 +188,7 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
                     ZenNotificationManager.PLAYER_NOTIFICATION_ID,
                     notificationManager.getPlayerNotification(
                         session = mediaSession,
-                        showPreviousButton = true,
                         showPlayButton = !exoPlayer.isPlaying,
-                        showNextButton = true,
                     )
                 )
             }
@@ -245,8 +241,9 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
     override fun onBroadcastPausePlay() {
         Timber.d("broadcast received")
         if (exoPlayer.isPlaying) exoPlayer.pause() else exoPlayer.play()
-        updateMediaSessionState()
-        updateMediaSessionMetadata()
+        // not needed as below functions will be triggered in onIsPlayingChanged
+//        updateMediaSessionState()
+//        updateMediaSessionMetadata()
     }
 
     override fun onBroadcastNext() {

@@ -122,11 +122,10 @@ class ZenNotificationManager(
 
     fun getPlayerNotification(
         session: MediaSessionCompat,
-        showPreviousButton: Boolean = true,
         showPlayButton: Boolean,
-        showNextButton: Boolean = true
     ): Notification {
         val mediaStyle = androidx.media.app.NotificationCompat.MediaStyle()
+            .setShowActionsInCompactView(0,1,2)
             .setMediaSession(session.sessionToken)
         return NotificationCompat.Builder(context, PLAYER_SERVICE).apply {
             setSmallIcon(R.mipmap.ic_notification)
@@ -136,9 +135,9 @@ class ZenNotificationManager(
             priority = NotificationCompat.PRIORITY_MAX
             setSilent(true)
             setStyle(mediaStyle)
-            if(showPreviousButton) addAction(previousAction)
+            addAction(previousAction)
             addAction(if (showPlayButton) playAction else pauseAction)
-            if (showNextButton) addAction(nextAction)
+            addAction(nextAction)
         }.build()
     }
 }
