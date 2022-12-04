@@ -28,7 +28,7 @@ fun PlayShuffleCard(
             .fillMaxWidth()
             .height(85.dp),
     ) {
-        val cf = LocalConfiguration.current
+        val configuration = LocalConfiguration.current
         Row(
             modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.spacedBy(20.dp),
@@ -38,9 +38,6 @@ fun PlayShuffleCard(
             Button(
                 onClick = onPlayAllClicked,
                 modifier = Modifier
-//                    .width(IntrinsicSize.Max)
-//                    .fillMaxWidth(0.7f)
-//
                     .weight(1f)
                     .clip(RoundedCornerShape(30.dp)),
                 content = {
@@ -51,7 +48,7 @@ fun PlayShuffleCard(
                             .padding(4.dp),
                         contentDescription = "play-all-button"
                     )
-                    if (cf.screenWidthDp > 340){
+                    if (configuration.screenWidthDp > 340){
                         Text(
                             text = "Play All",
                             style = MaterialTheme.typography.titleMedium,
@@ -62,8 +59,6 @@ fun PlayShuffleCard(
             Button(
                 onClick = onShuffleClicked,
                 modifier = Modifier
-//                    .width(IntrinsicSize.Max)
-//                    .fillMaxWidth(0.7f)
                     .weight(1f)
                     .clip(RoundedCornerShape(30.dp)),
                 content = {
@@ -74,7 +69,7 @@ fun PlayShuffleCard(
                             .padding(4.dp),
                         contentDescription = "shuffle-button"
                     )
-                    if (cf.screenWidthDp > 340){
+                    if (configuration.screenWidthDp > 340){
                         Text(
                             text = "Shuffle",
                             style = MaterialTheme.typography.titleMedium,
