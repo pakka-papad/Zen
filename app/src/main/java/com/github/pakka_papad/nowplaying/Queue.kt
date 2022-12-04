@@ -34,10 +34,11 @@ fun ColumnScope.Queue(
 ) {
     val listState = rememberLazyListState()
     LaunchedEffect(currentSong) {
-        delay(800) // for smooth transition animation
-        queue.forEachIndexed { index, song ->
-            if (currentSong?.location == song.location && !listState.isScrollInProgress) {
-                listState.animateScrollToItem(index)
+        delay(700) // for smooth transition animation
+        for (index in queue.indices) {
+            if (currentSong?.location == queue[index].location){
+                if (!listState.isScrollInProgress) listState.animateScrollToItem(index)
+                break
             }
         }
     }
