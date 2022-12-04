@@ -12,6 +12,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.github.pakka_papad.Constants
+import com.github.pakka_papad.MainActivity
 import com.github.pakka_papad.R
 import com.github.pakka_papad.player.ZenBroadcastReceiver
 
@@ -119,6 +120,12 @@ class ZenNotificationManager(
             PendingIntent.FLAG_IMMUTABLE
         )
     ).build()
+    private val activityIntent = PendingIntent.getActivity(
+        context,
+        0,
+        Intent(context,MainActivity::class.java),
+        PendingIntent.FLAG_IMMUTABLE
+    )
 
     fun getPlayerNotification(
         session: MediaSessionCompat,
@@ -138,6 +145,7 @@ class ZenNotificationManager(
             addAction(previousAction)
             addAction(if (showPlayButton) playAction else pauseAction)
             addAction(nextAction)
+            setContentIntent(activityIntent)  // use with android:launchMode="singleTask" in manifest
         }.build()
     }
 }
