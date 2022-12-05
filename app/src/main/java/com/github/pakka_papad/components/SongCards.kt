@@ -13,24 +13,19 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import com.github.pakka_papad.components.more_options.OptionsAlertDialog
+import com.github.pakka_papad.components.more_options.SongOptions
 import com.github.pakka_papad.data.music.Song
 import kotlinx.coroutines.launch
-
-sealed class SongCardDropdownOptions(open val onClick: (Song) -> Unit, open val text: String) {
-    data class AddToQueue(override val onClick: (Song) -> Unit) :
-        SongCardDropdownOptions(onClick, "Add to queue")
-
-    data class AddToPlaylists(override val onClick: (Song) -> Unit) :
-        SongCardDropdownOptions(onClick, "Add to playlist")
-}
 
 @Composable
 private fun SongCardBase(
@@ -42,7 +37,7 @@ private fun SongCardBase(
     currentlyPlayingBackgroundColor: Color,
     onBackgroundColor: Color,
     onCurrentlyPlayingBackgroundColor: Color,
-    dropdownOptions: List<SongCardDropdownOptions>,
+    songOptions: List<SongOptions>,
 ) {
     Box(
         modifier = Modifier
@@ -127,13 +122,13 @@ private fun SongCardBase(
                                 bounded = false,
                                 radius = 20.dp
                             ),
-                            interactionSource = remember{ MutableInteractionSource() }
+                            interactionSource = remember { MutableInteractionSource() }
                         )
                         .padding(8.dp),
                     tint = if (currentlyPlaying) onCurrentlyPlayingBackgroundColor else onBackgroundColor,
                 )
-                if (dropdownOptions.isNotEmpty()) {
-                    var dropDownMenuExpanded by remember { mutableStateOf(false) }
+                if (songOptions.isNotEmpty()) {
+                    var optionsVisible by remember { mutableStateOf(false) }
                     Icon(
                         imageVector = Icons.Outlined.MoreVert,
                         contentDescription = null,
@@ -141,40 +136,26 @@ private fun SongCardBase(
                             .size(40.dp)
                             .clickable(
                                 onClick = {
-                                    dropDownMenuExpanded = true
+                                    optionsVisible = true
                                 },
                                 indication = rememberRipple(
                                     bounded = false,
                                     radius = 20.dp
                                 ),
-                                interactionSource = remember{ MutableInteractionSource() }
+                                interactionSource = remember { MutableInteractionSource() }
                             )
                             .padding(8.dp),
                         tint = if (currentlyPlaying) onCurrentlyPlayingBackgroundColor else onBackgroundColor,
                     )
-                    DropdownMenu(
-                        expanded = dropDownMenuExpanded,
-                        onDismissRequest = {
-                            dropDownMenuExpanded = false
-                        },
-                        content = {
-                            dropdownOptions.forEach { option ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            text = option.text,
-                                            style = MaterialTheme.typography.bodyMedium
-                                        )
-                                    },
-                                    onClick = {
-                                        option.onClick(song)
-                                        dropDownMenuExpanded = false
-                                    }
-                                )
+                    if (optionsVisible){
+                        OptionsAlertDialog(
+                            options = songOptions,
+                            title = song.title,
+                            onDismissRequest = {
+                                optionsVisible = false
                             }
-                        },
-                        offset = DpOffset(x = 0.dp, y = (-20).dp),
-                    )
+                        )
+                    }
                 }
             }
         }
@@ -194,7 +175,7 @@ fun SongCardV1(
     onSongClicked: () -> Unit,
     onFavouriteClicked: (Song) -> Unit,
     currentlyPlaying: Boolean = false,
-    dropdownOptions: List<SongCardDropdownOptions>,
+    songOptions: List<SongOptions>,
 ) = SongCardBase(
     song = song,
     onSongClicked = onSongClicked,
@@ -204,7 +185,7 @@ fun SongCardV1(
     currentlyPlayingBackgroundColor = MaterialTheme.colorScheme.surfaceVariant,
     onBackgroundColor = MaterialTheme.colorScheme.onSurface,
     onCurrentlyPlayingBackgroundColor = MaterialTheme.colorScheme.onSurfaceVariant,
-    dropdownOptions = dropdownOptions,
+    songOptions = songOptions,
 )
 
 @Composable
@@ -213,7 +194,7 @@ fun SongCardV2(
     onSongClicked: () -> Unit,
     onFavouriteClicked: (Song) -> Unit,
     currentlyPlaying: Boolean = false,
-    dropdownOptions: List<SongCardDropdownOptions> = listOf(),
+    songOptions: List<SongOptions> = listOf(),
 ) = SongCardBase(
     song = song,
     onSongClicked = onSongClicked,
@@ -223,5 +204,5 @@ fun SongCardV2(
     currentlyPlayingBackgroundColor = MaterialTheme.colorScheme.secondary,
     onBackgroundColor = MaterialTheme.colorScheme.onSecondaryContainer,
     onCurrentlyPlayingBackgroundColor = MaterialTheme.colorScheme.onSecondary,
-    dropdownOptions = dropdownOptions
+    songOptions = songOptions
 )

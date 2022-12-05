@@ -36,6 +36,7 @@ fun MiniPlayer(
             setDataSource(song.location)
         }
         picture = extractor.embeddedPicture
+        extractor.release()
     }
     Row(
         modifier = Modifier

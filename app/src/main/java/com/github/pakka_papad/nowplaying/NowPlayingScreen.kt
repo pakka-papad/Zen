@@ -138,6 +138,7 @@ private fun AlbumArt(
             setDataSource(song.location)
         }
         picture = extractor.embeddedPicture
+        extractor.release()
     }
     AsyncImage(
         model = picture,

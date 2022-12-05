@@ -12,7 +12,7 @@ import com.github.pakka_papad.data.notification.ZenNotificationManager
 import com.github.pakka_papad.formatToDate
 import com.github.pakka_papad.player.ZenPlayer
 import com.github.pakka_papad.toMBfromB
-import com.github.pakka_papad.toMinutesAndSeconds
+import com.github.pakka_papad.toMS
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -116,7 +116,7 @@ class DataManager(
                     year = songMetadata.year,
                     comment = songMetadata.comment,
                     durationMillis = songMetadata.duration,
-                    durationFormatted = songMetadata.duration.toMinutesAndSeconds(),
+                    durationFormatted = songMetadata.duration.toMS(),
                     bitrate = songMetadata.bitrate,
                     sampleRate = songMetadata.sampleRate,
                     bitsPerSample = songMetadata.bitsPerSample,

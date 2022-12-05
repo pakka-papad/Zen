@@ -16,12 +16,12 @@ import android.widget.Toast
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
-import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.data.notification.ZenNotificationManager
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.*
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -180,7 +180,7 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
                 )
             }.build()
         )
-
+        extractor.release()
         scope.launch {
             delay(100)
             withContext(Dispatchers.Main) {
