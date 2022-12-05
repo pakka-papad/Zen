@@ -101,11 +101,13 @@ class SharedViewModel @Inject constructor(
     val playlist = _playlist.asStateFlow()
 
     fun onAlbumClicked(albumWithSongs: AlbumWithSongs) {
-        _playlist.value = PlaylistUi(
-            songs = albumWithSongs.songs,
-            topBarTitle = albumWithSongs.album.name,
-            topBarBackgroundImageUri = albumWithSongs.album.albumArtUri ?: ""
-        )
+        _playlist.update {
+            PlaylistUi(
+                songs = albumWithSongs.songs,
+                topBarTitle = albumWithSongs.album.name,
+                topBarBackgroundImageUri = albumWithSongs.album.albumArtUri ?: ""
+            )
+        }
     }
 
     fun onArtistClicked(artistWithSongs: ArtistWithSongs) {

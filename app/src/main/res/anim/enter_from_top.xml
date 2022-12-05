@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <set xmlns:android="http://schemas.android.com/apk/res/android">
-    <translate android:fromYDelta="-100%" android:toYDelta="0%" android:duration="@integer/destination_to_source_anim_duration" />
+    <translate android:fromYDelta="-100%" android:toYDelta="0%" android:duration="@android:integer/config_mediumAnimTime" />
 </set>

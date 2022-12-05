@@ -5,5 +5,5 @@
         android:fromYScale="1.0"
         android:toXScale="1.0"
         android:toYScale="0.8"
-        android:duration="@integer/source_to_destination_anim_duration" />
+        android:duration="@android:integer/config_mediumAnimTime" />
 </set>

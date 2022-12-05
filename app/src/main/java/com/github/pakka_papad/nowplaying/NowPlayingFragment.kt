@@ -125,7 +125,9 @@ class NowPlayingFragment : Fragment() {
                                     scope.launch {
                                         scaffoldState.bottomSheetState.collapse()
                                     }
-                                }
+                                },
+                                expanded = scaffoldState.bottomSheetState.isExpanded,
+                                exoPlayer = exoPlayer
                             )
                         },
                         sheetShape = RoundedCornerShape(

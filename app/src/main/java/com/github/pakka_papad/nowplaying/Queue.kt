@@ -13,12 +13,11 @@ import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.media3.exoplayer.ExoPlayer
 import com.github.pakka_papad.components.SongCardV2
 import com.github.pakka_papad.data.music.Song
 import kotlinx.coroutines.delay
@@ -31,15 +30,18 @@ fun ColumnScope.Queue(
     onFavouriteClicked: (Song) -> Unit,
     currentSong: Song?,
     onDownArrowClicked: () -> Unit,
+    expanded: Boolean,
+    exoPlayer: ExoPlayer,
 ) {
     val listState = rememberLazyListState()
-    LaunchedEffect(currentSong) {
-        delay(700) // for smooth transition animation
-        for (index in queue.indices) {
-            if (currentSong?.location == queue[index].location){
-                if (!listState.isScrollInProgress) listState.animateScrollToItem(index)
-                break
-            }
+    LaunchedEffect(key1 = currentSong, key2 = expanded){
+        delay(600)
+        if (!expanded){
+            listState.scrollToItem(exoPlayer.currentMediaItemIndex)
+            return@LaunchedEffect
+        }
+        if (!listState.isScrollInProgress){
+            listState.animateScrollToItem(exoPlayer.currentMediaItemIndex)
         }
     }
     LazyColumn(
