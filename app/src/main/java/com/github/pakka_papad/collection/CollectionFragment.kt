@@ -58,10 +58,12 @@ class CollectionFragment : Fragment() {
                                 topBarTitle = collectionUi?.topBarTitle ?: "",
                                 topBarBackgroundImageUri = collectionUi?.topBarBackgroundImageUri ?: "",
                                 onBackArrowPressed = navController::popBackStack,
-                                onPlaylistAddToQueuePressed = {
-                                    collectionUi?.songs?.let { viewModel.addToQueue(it) }
-                                },
-                                themePreference = themePreference
+                                themePreference = themePreference,
+                                actions = listOf(
+                                    CollectionActions.AddToQueue {
+                                        collectionUi?.songs?.let { viewModel.addToQueue(it) }
+                                    },
+                                )
                             )
                         },
                         content = { paddingValues ->
@@ -103,7 +105,9 @@ class CollectionFragment : Fragment() {
                                             viewModel.shufflePlay(collectionUi?.songs)
                                         },
                                         onAddToPlaylistsClicked = {
-                                            navController.navigate(CollectionFragmentDirections.actionCollectionFragmentToSelectPlaylistFragment(it.location))
+                                            navController.navigate(
+                                                CollectionFragmentDirections.actionCollectionFragmentToSelectPlaylistFragment(it.location)
+                                            )
                                         },
                                     )
                                 }

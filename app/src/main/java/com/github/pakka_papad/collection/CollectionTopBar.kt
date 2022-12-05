@@ -17,12 +17,14 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.github.pakka_papad.components.TopBarWithBackArrow
+import com.github.pakka_papad.components.more_options.OptionsDropDown
 import com.github.pakka_papad.data.UserPreferences
 import com.github.pakka_papad.ui.theme.ThemePreference
 
@@ -31,24 +33,23 @@ fun CollectionTopBar(
     topBarTitle: String,
     topBarBackgroundImageUri: String,
     onBackArrowPressed: () -> Unit,
-    onPlaylistAddToQueuePressed: () -> Unit,
     themePreference: ThemePreference,
+    actions: List<CollectionActions> = listOf(),
 ) {
-    if (topBarBackgroundImageUri.isEmpty()){
+    val configuration = LocalConfiguration.current
+    if (topBarBackgroundImageUri.isEmpty() || configuration.screenHeightDp < 360) {
         TopBarWithBackArrow(
             onBackArrowPressed = onBackArrowPressed,
             title = topBarTitle,
             actions = {
-                PlaylistTopBarActions(
-                    onPlaylistAddToQueuePressed = onPlaylistAddToQueuePressed
-                )
+                CollectionTopBarActions(actions)
             }
         )
     } else {
         val systemInDarkTheme = isSystemInDarkTheme()
         val darkScrim by remember(themePreference) {
             derivedStateOf {
-                when(themePreference.theme){
+                when (themePreference.theme) {
                     UserPreferences.Theme.DARK_MODE -> true
                     UserPreferences.Theme.LIGHT_MODE, UserPreferences.Theme.UNRECOGNIZED -> false
                     UserPreferences.Theme.USE_SYSTEM_MODE -> systemInDarkTheme
@@ -58,7 +59,7 @@ fun CollectionTopBar(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(256.dp)
+                .height(if (configuration.screenHeightDp >= 720) 240.dp else 120.dp)
         ) {
             AsyncImage(
                 model = topBarBackgroundImageUri,
@@ -95,6 +96,10 @@ fun CollectionTopBar(
             SmallTopAppBar(
                 modifier = Modifier
                     .background(Color.Transparent)
+                    .padding(
+                        start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                        end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),
+                    )
                     .align(Alignment.BottomCenter),
                 navigationIcon = {
                     Icon(
@@ -104,7 +109,7 @@ fun CollectionTopBar(
                             .padding(16.dp)
                             .size(30.dp)
                             .clickable(
-                                interactionSource = remember{ MutableInteractionSource() },
+                                interactionSource = remember { MutableInteractionSource() },
                                 indication = rememberRipple(
                                     bounded = false,
                                     radius = 25.dp,
@@ -128,9 +133,7 @@ fun CollectionTopBar(
                     )
                 },
                 actions = {
-                    PlaylistTopBarActions(
-                        onPlaylistAddToQueuePressed = onPlaylistAddToQueuePressed
-                    )
+                    CollectionTopBarActions(actions)
                 },
                 colors = TopAppBarDefaults.smallTopAppBarColors(
                     containerColor = Color.Transparent
@@ -141,9 +144,9 @@ fun CollectionTopBar(
 }
 
 @Composable
-private fun PlaylistTopBarActions(
-    onPlaylistAddToQueuePressed: () -> Unit,
-){
+private fun CollectionTopBarActions(
+    actions: List<CollectionActions>
+) {
     var dropDownMenuExpanded by remember { mutableStateOf(false) }
     Icon(
         imageVector = Icons.Outlined.MoreVert,
@@ -153,7 +156,7 @@ private fun PlaylistTopBarActions(
             .size(30.dp)
             .rotate(90f)
             .clickable(
-                interactionSource = remember{ MutableInteractionSource() },
+                interactionSource = remember { MutableInteractionSource() },
                 indication = rememberRipple(
                     bounded = false,
                     radius = 25.dp,
@@ -165,25 +168,11 @@ private fun PlaylistTopBarActions(
             ),
         tint = MaterialTheme.colorScheme.onSurface,
     )
-    DropdownMenu(
+    OptionsDropDown(
+        options = actions,
         expanded = dropDownMenuExpanded,
         onDismissRequest = {
             dropDownMenuExpanded = false
-        },
-        content = {
-            DropdownMenuItem(
-                onClick = {
-                    onPlaylistAddToQueuePressed()
-                    dropDownMenuExpanded = false
-                },
-                text = {
-                    Text(
-                        text = "Add playlist to queue",
-                        fontSize = 14.sp,
-                    )
-                },
-            )
-        },
-        offset = DpOffset(x = 0.dp, y = (-20).dp)
+        }
     )
 }
