@@ -1,4 +1,4 @@
-package com.github.pakka_papad.playlist
+package com.github.pakka_papad.collection
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,7 +27,7 @@ import com.github.pakka_papad.data.UserPreferences
 import com.github.pakka_papad.ui.theme.ThemePreference
 
 @Composable
-fun PlaylistTopBar(
+fun CollectionTopBar(
     topBarTitle: String,
     topBarBackgroundImageUri: String,
     onBackArrowPressed: () -> Unit,

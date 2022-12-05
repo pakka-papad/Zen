@@ -27,6 +27,7 @@ import com.github.pakka_papad.Constants
 import com.github.pakka_papad.R
 import com.github.pakka_papad.Screens
 import com.github.pakka_papad.SharedViewModel
+import com.github.pakka_papad.collection.CollectionType
 import com.github.pakka_papad.player.ZenBroadcastReceiver
 import com.github.pakka_papad.ui.theme.ZenTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -122,13 +123,19 @@ class HomeFragment : Fragment() {
                                         albumsWithSongs = albumsWithSongs!!,
                                         allAlbumsGridState = allAlbumsGridState,
                                         onAlbumClicked = { albumWithSongs ->
-                                            viewModel.onAlbumClicked(albumWithSongs)
-                                            navController.navigate(R.id.action_homeFragment_to_playlistFragment)
+                                            navController.navigate(
+                                                HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
+                                                    CollectionType.AlbumType(albumWithSongs.album.name)
+                                                )
+                                            )
                                         },
                                         artistsWithSongs = artistsWithSongs!!,
                                         onArtistClicked = { artistWithSongs ->
-                                            viewModel.onArtistClicked(artistWithSongs)
-                                            navController.navigate(R.id.action_homeFragment_to_playlistFragment)
+                                            navController.navigate(
+                                                HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
+                                                    CollectionType.ArtistType(artistWithSongs.artist.name)
+                                                )
+                                            )
                                         },
                                         allArtistsListState = allArtistsListState,
                                         onSongFavouriteClicked = viewModel::changeFavouriteValue,
@@ -143,8 +150,11 @@ class HomeFragment : Fragment() {
                                         playlists = playlists,
                                         allPlaylistListState = allPlaylistsListState,
                                         onPlaylistClicked = { playlistId ->
-                                            viewModel.onPlaylistClicked(playlistId)
-                                            navController.navigate(R.id.action_homeFragment_to_playlistFragment)
+                                            navController.navigate(
+                                                HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
+                                                    CollectionType.PlaylistType(playlistId)
+                                                )
+                                            )
                                         },
                                         onPlaylistCreate = viewModel::onPlaylistCreate,
                                         onAddToPlaylistsClicked = {

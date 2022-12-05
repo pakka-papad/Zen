@@ -34,7 +34,9 @@ class DataManager(
     val allArtistsWithSongs = songDao.getAllArtistsWithSongs()
     val allPlaylists = songDao.getAllPlaylists()
 
-    suspend fun getPlaylistById(id: Long) = songDao.getPlaylistWithSongs(id)
+    suspend fun getPlaylistWithSongsById(id: Long) = songDao.getPlaylistWithSongs(id)
+    suspend fun getAlbumWithSongsByName(albumName: String) = songDao.getAlbumWithSongsByName(albumName)
+    suspend fun getArtistWithSongsByName(artistName: String) = songDao.getArtistWithSongsByName(artistName)
 
     suspend fun createPlaylist(playlistName: String) {
         if (playlistName.trim().isEmpty()) return

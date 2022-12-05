@@ -6,15 +6,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import com.github.pakka_papad.collection.CollectionType
+import com.github.pakka_papad.collection.CollectionUi
 import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.ZenPreferencesDatastore
-import com.github.pakka_papad.data.music.*
-import com.github.pakka_papad.playlist.PlaylistUi
+import com.github.pakka_papad.data.music.PlaylistSongCrossRef
+import com.github.pakka_papad.data.music.ScanStatus
+import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.ui.theme.ThemePreference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -92,41 +96,66 @@ class SharedViewModel @Inject constructor(
     /**
      * Shuffle the queue and start playing from first song
      */
-    fun shufflePlay(songs: List<Song>) = setQueue(songs.shuffled(), 0)
+    fun shufflePlay(songs: List<Song>?) = setQueue(songs?.shuffled(), 0)
 
     /**
-     * The playlist to display in playlist fragment
+     * The collection to display in collection fragment
      */
-    private val _playlist = MutableStateFlow(PlaylistUi())
-    val playlist = _playlist.asStateFlow()
+    private val _collectionUi = MutableStateFlow<CollectionUi?>(null)
+    val collectionUi = _collectionUi.asStateFlow()
 
-    fun onAlbumClicked(albumWithSongs: AlbumWithSongs) {
-        _playlist.update {
-            PlaylistUi(
-                songs = albumWithSongs.songs,
-                topBarTitle = albumWithSongs.album.name,
-                topBarBackgroundImageUri = albumWithSongs.album.albumArtUri ?: ""
-            )
-        }
-    }
-
-    fun onArtistClicked(artistWithSongs: ArtistWithSongs) {
-        _playlist.update {
-            PlaylistUi(
-                songs = artistWithSongs.songs,
-                topBarTitle = artistWithSongs.artist.name,
-            )
-        }
-    }
-
-    fun onPlaylistClicked(playlistId: Long) {
+    fun loadCollection(type: CollectionType?) {
         viewModelScope.launch {
-            val playlistWithSongs = manager.getPlaylistById(playlistId)
-            _playlist.update {
-                PlaylistUi(
-                    songs = playlistWithSongs.songs,
-                    topBarTitle = playlistWithSongs.playlist.playlistName,
-                )
+            _collectionUi.update { null }
+            try {
+                when (type) {
+                    is CollectionType.AlbumType -> {
+                        val result = manager.getAlbumWithSongsByName(type.albumName)
+                        if (result == null) {
+                            _collectionUi.update { CollectionUi(error = "Could not find the album") }
+                        } else {
+                            _collectionUi.update {
+                                CollectionUi(
+                                    songs = result.songs,
+                                    topBarTitle = result.album.name,
+                                    topBarBackgroundImageUri = result.album.albumArtUri ?: ""
+                                )
+                            }
+                        }
+                    }
+                    is CollectionType.ArtistType -> {
+                        val result = manager.getArtistWithSongsByName(type.artistName)
+                        if (result == null) {
+                            _collectionUi.update { CollectionUi(error = "Could not find the artist") }
+                        } else {
+                            _collectionUi.update {
+                                CollectionUi(
+                                    songs = result.songs,
+                                    topBarTitle = result.artist.name,
+                                )
+                            }
+                        }
+                    }
+                    is CollectionType.PlaylistType -> {
+                        val result = manager.getPlaylistWithSongsById(type.id)
+                        if (result == null) {
+                            _collectionUi.update { CollectionUi(error = "Could not find playlist") }
+                        } else {
+                            _collectionUi.update {
+                                CollectionUi(
+                                    songs = result.songs,
+                                    topBarTitle = result.playlist.playlistName
+                                )
+                            }
+                        }
+                    }
+                    else -> {
+                        _collectionUi.update { CollectionUi(error = "Don't know what just happened") }
+                    }
+                }
+            } catch (e: Exception) {
+                _collectionUi.update { CollectionUi(error = "Just ran into some errors") }
+                Timber.d(e.message)
             }
         }
     }
@@ -140,7 +169,7 @@ class SharedViewModel @Inject constructor(
     private val _selectList = mutableStateListOf<Boolean>()
     val selectList: List<Boolean> = _selectList
 
-    fun updateSelectListSize(size: Int){
+    fun updateSelectListSize(size: Int) {
         if (size == _selectList.size) return
         while (size > _selectList.size) {
             _selectList.add(false)
@@ -203,7 +232,8 @@ class SharedViewModel @Inject constructor(
      * @param songs queue items
      * @param startPlayingFromIndex index of song from which playing should start
      */
-    fun setQueue(songs: List<Song>, startPlayingFromIndex: Int = 0) {
+    fun setQueue(songs: List<Song>?, startPlayingFromIndex: Int = 0) {
+        if (songs == null) return
         manager.setQueue(songs, startPlayingFromIndex)
     }
 
@@ -213,10 +243,10 @@ class SharedViewModel @Inject constructor(
     fun changeFavouriteValue(song: Song? = currentSong.value) {
         if (song == null) return
         val updatedSong = song.copy(favourite = !song.favourite)
-        if (_playlist.value.songs.any { it.location == song.location }) {
-            _playlist.update {
-                _playlist.value.copy(
-                    songs = _playlist.value.songs.map {
+        if (_collectionUi.value?.songs?.any { it.location == song.location } == true) {
+            _collectionUi.update {
+                _collectionUi.value!!.copy(
+                    songs = _collectionUi.value!!.songs.map {
                         if (it.location == song.location) updatedSong else it
                     }
                 )

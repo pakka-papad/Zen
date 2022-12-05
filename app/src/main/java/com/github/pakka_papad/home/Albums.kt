@@ -18,7 +18,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.github.pakka_papad.components.EmptyListMessage
+import com.github.pakka_papad.components.FullScreenSadMessage
 import com.github.pakka_papad.data.music.AlbumWithSongs
 import timber.log.Timber
 
@@ -30,7 +30,7 @@ fun Albums(
     onAlbumClicked: (AlbumWithSongs) -> Unit
 ) {
     if (albumsWithSongs.isEmpty()) {
-        EmptyListMessage(
+        FullScreenSadMessage(
             message = "Oops! No albums found",
             paddingValues = paddingValues,
         )

@@ -21,7 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.window.DialogProperties
-import com.github.pakka_papad.components.EmptyListMessage
+import com.github.pakka_papad.components.FullScreenSadMessage
 import com.github.pakka_papad.components.SongCardV1
 import com.github.pakka_papad.components.more_options.SongOptions
 import com.github.pakka_papad.data.music.Song
@@ -41,7 +41,7 @@ fun AllSongs(
     emptyListMessage: String = "No Songs"
 ) {
     if (songs.isEmpty()) {
-        EmptyListMessage(
+        FullScreenSadMessage(
             message = emptyListMessage,
             paddingValues = paddingValues
         )

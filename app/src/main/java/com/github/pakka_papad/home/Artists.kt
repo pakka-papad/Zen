@@ -18,7 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.github.pakka_papad.components.EmptyListMessage
+import com.github.pakka_papad.components.FullScreenSadMessage
 import com.github.pakka_papad.data.music.ArtistWithSongs
 
 @Composable
@@ -29,7 +29,7 @@ fun Artists(
     listState: LazyListState
 ) {
     if (artistsWithSongs.isEmpty()){
-        EmptyListMessage(
+        FullScreenSadMessage(
             message = "No artists found",
             paddingValues = paddingValues,
         )

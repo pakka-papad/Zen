@@ -17,8 +17,8 @@
             app:popEnterAnim="@anim/grow_from_top"
             app:popExitAnim="@anim/exit_to_bottom" />
         <action
-            android:id="@+id/action_homeFragment_to_playlistFragment"
-            app:destination="@id/playlistFragment" />
+            android:id="@+id/action_homeFragment_to_collectionFragment"
+            app:destination="@id/collectionFragment" />
         <action
             android:id="@+id/action_homeFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
@@ -32,12 +32,17 @@
         android:label="NowPlaying" >
     </fragment>
     <fragment
-        android:id="@+id/playlistFragment"
-        android:name="com.github.pakka_papad.playlist.PlaylistFragment"
-        android:label="PlaylistFragment" >
+        android:id="@+id/collectionFragment"
+        android:name="com.github.pakka_papad.collection.CollectionFragment"
+        android:label="CollectionFragment" >
         <action
-            android:id="@+id/action_playlistFragment_to_selectPlaylistFragment"
+            android:id="@+id/action_collectionFragment_to_selectPlaylistFragment"
             app:destination="@id/selectPlaylistFragment" />
+        <argument
+            android:name="collectionType"
+            app:argType="com.github.pakka_papad.collection.CollectionType"
+            app:nullable="true"
+            android:defaultValue="@null" />
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"

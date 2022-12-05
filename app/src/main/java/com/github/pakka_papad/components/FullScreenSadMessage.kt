@@ -14,8 +14,8 @@ import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.R
 
 @Composable
-fun EmptyListMessage(
-    message: String,
+fun FullScreenSadMessage(
+    message: String? = null,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
 ) = Column(
@@ -35,13 +35,15 @@ fun EmptyListMessage(
             painter = painterResource(R.drawable.ic_baseline_sentiment_very_dissatisfied_24),
             contentDescription = "sad-face",
         )
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
-            text = message,
-            style = MaterialTheme.typography.headlineSmall,
-            textAlign = TextAlign.Center
-        )
+        message?.let {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                text = it,
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 )
