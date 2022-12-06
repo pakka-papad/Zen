@@ -201,15 +201,15 @@ class DataManager(
         }
     }
 
+    /**
+     * Returns true if added to queue else returns false if already in queue
+     */
     @Synchronized
-    fun addToQueue(song: Song) {
-        if (_queue.value.any { it.location == song.location }) {
-            showToast("Song already in queue")
-            return
-        }
+    fun addToQueue(song: Song): Boolean {
+        if (_queue.value.any { it.location == song.location }) return false
         _queue.update { _queue.value.toMutableList().apply { add(song) } }
-        showToast("Added ${song.title} to queue")
         callback?.addToQueue(song)
+        return true
     }
 
     fun setPlayerRunning(callback: Callback) {

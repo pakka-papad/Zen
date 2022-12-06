@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -173,6 +174,7 @@ private fun CollectionTopBarActions(
         expanded = dropDownMenuExpanded,
         onDismissRequest = {
             dropDownMenuExpanded = false
-        }
+        },
+        offset = DpOffset(x = 0.dp, y = (-62).dp)
     )
 }

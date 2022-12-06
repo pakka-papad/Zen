@@ -1,6 +1,7 @@
 package com.github.pakka_papad
 
 import android.app.Application
+import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -86,6 +87,10 @@ class SharedViewModel @Inject constructor(
     init {
         _currentSongPlaying.update { exoPlayer.isPlaying }
         exoPlayer.addListener(exoPlayerListener)
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
     override fun onCleared() {
@@ -210,7 +215,12 @@ class SharedViewModel @Inject constructor(
         if (queue.value.isEmpty()) {
             manager.setQueue(listOf(song), 0)
         } else {
-            manager.addToQueue(song)
+            val result = manager.addToQueue(song)
+            if (result) {
+                showToast("Added ${song.title} to queue")
+            } else {
+                showToast("Song already in queue")
+            }
         }
     }
 
@@ -221,7 +231,13 @@ class SharedViewModel @Inject constructor(
         if (queue.value.isEmpty()) {
             manager.setQueue(songs, 0)
         } else {
-            songs.forEach { manager.addToQueue(it) }
+            var result = false
+            songs.forEach { result = result or manager.addToQueue(it) }
+            if (result) {
+                showToast("Done")
+            } else {
+                showToast("Songs already in queue")
+            }
         }
     }
 

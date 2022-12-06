@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -16,15 +17,20 @@ fun OptionsDropDown(
     options: List<MoreOptions>,
     expanded: Boolean,
     onDismissRequest: () -> Unit,
+    offset: DpOffset = DpOffset(0.dp, 0.dp),
 ) {
     if (options.isEmpty()) return
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
+        offset = offset,
     ) {
         options.forEach { option ->
             DropdownMenuItem(
-                onClick = option.onClick,
+                onClick = {
+                    onDismissRequest()
+                    option.onClick()
+                },
                 text = {
                     Text(
                         text = option.text,
