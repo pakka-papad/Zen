@@ -109,48 +109,54 @@ class SharedViewModel @Inject constructor(
     private val _collectionUi = MutableStateFlow<CollectionUi?>(null)
     val collectionUi = _collectionUi.asStateFlow()
 
-    fun loadCollection(type: CollectionType?) {
+    fun loadCollection(type: CollectionType?) =
         viewModelScope.launch {
             _collectionUi.update { null }
             try {
                 when (type) {
                     is CollectionType.AlbumType -> {
-                        val result = manager.getAlbumWithSongsByName(type.albumName)
-                        if (result == null) {
-                            _collectionUi.update { CollectionUi(error = "Could not find the album") }
-                        } else {
-                            _collectionUi.update {
-                                CollectionUi(
-                                    songs = result.songs,
-                                    topBarTitle = result.album.name,
-                                    topBarBackgroundImageUri = result.album.albumArtUri ?: ""
-                                )
+                        manager.getAlbumWithSongsByName(type.albumName).collect {
+                            val result = it
+                            if (result == null) {
+                                _collectionUi.update { CollectionUi(error = "Could not find the album") }
+                            } else {
+                                _collectionUi.update {
+                                    CollectionUi(
+                                        songs = result.songs,
+                                        topBarTitle = result.album.name,
+                                        topBarBackgroundImageUri = result.album.albumArtUri ?: ""
+                                    )
+                                }
                             }
                         }
                     }
                     is CollectionType.ArtistType -> {
-                        val result = manager.getArtistWithSongsByName(type.artistName)
-                        if (result == null) {
-                            _collectionUi.update { CollectionUi(error = "Could not find the artist") }
-                        } else {
-                            _collectionUi.update {
-                                CollectionUi(
-                                    songs = result.songs,
-                                    topBarTitle = result.artist.name,
-                                )
+                        manager.getArtistWithSongsByName(type.artistName).collect {
+                            val result = it
+                            if (result == null) {
+                                _collectionUi.update { CollectionUi(error = "Could not find the artist") }
+                            } else {
+                                _collectionUi.update {
+                                    CollectionUi(
+                                        songs = result.songs,
+                                        topBarTitle = result.artist.name,
+                                    )
+                                }
                             }
                         }
                     }
                     is CollectionType.PlaylistType -> {
-                        val result = manager.getPlaylistWithSongsById(type.id)
-                        if (result == null) {
-                            _collectionUi.update { CollectionUi(error = "Could not find playlist") }
-                        } else {
-                            _collectionUi.update {
-                                CollectionUi(
-                                    songs = result.songs,
-                                    topBarTitle = result.playlist.playlistName
-                                )
+                        manager.getPlaylistWithSongsById(type.id).collect {
+                            val result = it
+                            if (result == null) {
+                                _collectionUi.update { CollectionUi(error = "Could not find playlist") }
+                            } else {
+                                _collectionUi.update {
+                                    CollectionUi(
+                                        songs = result.songs,
+                                        topBarTitle = result.playlist.playlistName
+                                    )
+                                }
                             }
                         }
                     }
@@ -163,7 +169,6 @@ class SharedViewModel @Inject constructor(
                 Timber.d(e.message)
             }
         }
-    }
 
     fun onPlaylistCreate(playlistName: String) {
         viewModelScope.launch {
@@ -259,15 +264,15 @@ class SharedViewModel @Inject constructor(
     fun changeFavouriteValue(song: Song? = currentSong.value) {
         if (song == null) return
         val updatedSong = song.copy(favourite = !song.favourite)
-        if (_collectionUi.value?.songs?.any { it.location == song.location } == true) {
-            _collectionUi.update {
-                _collectionUi.value!!.copy(
-                    songs = _collectionUi.value!!.songs.map {
-                        if (it.location == song.location) updatedSong else it
-                    }
-                )
-            }
-        }
+//        if (_collectionUi.value?.songs?.any { it.location == song.location } == true) {
+//            _collectionUi.update {
+//                _collectionUi.value!!.copy(
+//                    songs = _collectionUi.value!!.songs.map {
+//                        if (it.location == song.location) updatedSong else it
+//                    }
+//                )
+//            }
+//        }
         viewModelScope.launch(Dispatchers.IO) {
             manager.updateSong(updatedSong)
         }

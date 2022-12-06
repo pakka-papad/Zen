@@ -28,7 +28,7 @@ interface SongDao {
 
     @Transaction
     @Query("SELECT * FROM ${Constants.Tables.ALBUM_TABLE} WHERE name = :albumName")
-    suspend fun getAlbumWithSongsByName(albumName: String): AlbumWithSongs?
+    fun getAlbumWithSongsByName(albumName: String): Flow<AlbumWithSongs?>
 
     @Query("DELETE FROM ${Constants.Tables.ALBUM_TABLE}")
     suspend fun deleteAllAlbums()
@@ -42,7 +42,7 @@ interface SongDao {
 
     @Transaction
     @Query("SELECT * FROM ${Constants.Tables.ARTIST_TABLE} WHERE name = :artistName")
-    suspend fun getArtistWithSongsByName(artistName: String): ArtistWithSongs?
+    fun getArtistWithSongsByName(artistName: String): Flow<ArtistWithSongs?>
 
     @Query("DELETE FROM ${Constants.Tables.ARTIST_TABLE}")
     suspend fun deleteAllArtists()
@@ -58,7 +58,7 @@ interface SongDao {
 
     @Transaction
     @Query("SELECT * FROM ${Constants.Tables.PLAYLIST_TABLE} WHERE playlistId = :playlistId")
-    suspend fun getPlaylistWithSongs(playlistId: Long): PlaylistWithSongs?
+    fun getPlaylistWithSongs(playlistId: Long): Flow<PlaylistWithSongs?>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAllAlbumArtists(data: List<AlbumArtist>)

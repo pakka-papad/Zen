@@ -23,6 +23,7 @@ import androidx.navigation.fragment.navArgs
 import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.components.FullScreenSadMessage
 import com.github.pakka_papad.ui.theme.ZenTheme
+import kotlinx.coroutines.Job
 
 class CollectionFragment : Fragment() {
 
@@ -31,6 +32,7 @@ class CollectionFragment : Fragment() {
     private lateinit var navController: NavController
 
     private val args: CollectionFragmentArgs by navArgs()
+    private var job: Job? = null
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreateView(
@@ -42,7 +44,7 @@ class CollectionFragment : Fragment() {
         if (args.collectionType == null) {
             navController.popBackStack()
         }
-        viewModel.loadCollection(args.collectionType)
+        job = viewModel.loadCollection(args.collectionType)
         return ComposeView(requireContext()).apply {
             setContent {
                 val themePreference by viewModel.theme.collectAsState()
@@ -117,5 +119,11 @@ class CollectionFragment : Fragment() {
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        job?.cancel()
+        job = null
     }
 }
