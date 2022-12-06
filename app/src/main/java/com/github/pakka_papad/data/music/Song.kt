@@ -1,10 +1,51 @@
 package com.github.pakka_papad.data.music
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import com.github.pakka_papad.Constants
 
-@Entity(tableName = Constants.Tables.SONG_TABLE)
+@Entity(
+    tableName = Constants.Tables.SONG_TABLE,
+    foreignKeys = [
+        ForeignKey(
+            entity = Album::class,
+            parentColumns = ["name"],
+            childColumns = ["album"],
+            onDelete = ForeignKey.SET_NULL,
+        ),
+        ForeignKey(
+            entity = Artist::class,
+            parentColumns = ["name"],
+            childColumns = ["artist"],
+            onDelete = ForeignKey.SET_NULL
+        ),
+        ForeignKey(
+            entity = Genre::class,
+            parentColumns = ["genre"],
+            childColumns = ["genre"],
+            onDelete = ForeignKey.SET_NULL,
+        ),
+        ForeignKey(
+            entity = AlbumArtist::class,
+            parentColumns = ["name"],
+            childColumns = ["albumArtist"],
+            onDelete = ForeignKey.SET_NULL
+        ),
+        ForeignKey(
+            entity = Lyricist::class,
+            parentColumns = ["name"],
+            childColumns = ["lyricist"],
+            onDelete = ForeignKey.SET_NULL
+        ),
+        ForeignKey(
+            entity = Composer::class,
+            parentColumns = ["name"],
+            childColumns = ["composer"],
+            onDelete = ForeignKey.SET_NULL
+        ),
+    ]
+)
 data class Song(
     @PrimaryKey val location: String = "",
     val title: String,

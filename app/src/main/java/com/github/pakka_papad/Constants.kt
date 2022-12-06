@@ -8,6 +8,10 @@ object Constants {
         const val ARTIST_TABLE = "artist_table"
         const val PLAYLIST_TABLE = "playlist_table"
         const val PLAYLIST_SONG_CROSS_REF_TABLE = "playlist_song_cross_ref_table"
+        const val GENRE_TABLE = "genre_table"
+        const val ALBUM_ARTIST_TABLE = "album_artist_table"
+        const val COMPOSER_TABLE = "composer_table"
+        const val LYRICIST_TABLE = "lyricist_table"
     }
     const val PACKAGE_NAME = "com.github.pakka_papad"
 }

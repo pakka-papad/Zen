@@ -86,8 +86,6 @@ class DataManager(
         var parsedSongs = 0
         cursor.moveToFirst()
         val mExtractor = MetadataExtractor()
-        val songs = ArrayList<Song>()
-        val albums = ArrayList<Album>()
         val dataIndex = cursor.getColumnIndex(Audio.Media.DATA)
         val titleIndex = cursor.getColumnIndex(Audio.Media.TITLE)
         val albumIdIndex = cursor.getColumnIndex(Audio.Media.ALBUM_ID)
@@ -96,8 +94,14 @@ class DataManager(
         val dateAddedIndex = cursor.getColumnIndex(Audio.Media.DATE_ADDED)
         val dateModifiedIndex = cursor.getColumnIndex(Audio.Media.DATE_MODIFIED)
         val songCover = Uri.parse("content://media/external/audio/albumart")
+
+        val songs = ArrayList<Song>()
         val albumArtMap = HashMap<String, String?>()
         val artistSet = TreeSet<String>()
+        val albumArtistSet = TreeSet<String>()
+        val composerSet = TreeSet<String>()
+        val genreSet = TreeSet<String>()
+        val lyricistSet = TreeSet<String>()
         do {
             try {
                 val file = File(cursor.getString(dataIndex))
@@ -111,10 +115,10 @@ class DataManager(
                     addedDate = cursor.getString(dateAddedIndex).toLong().formatToDate(),
                     modifiedDate = cursor.getString(dateModifiedIndex).toLong().formatToDate(),
                     artist = songMetadata.artist.trim(),
-                    albumArtist = songMetadata.albumArtist,
-                    composer = songMetadata.composer,
-                    genre = songMetadata.genre,
-                    lyricist = songMetadata.lyricist,
+                    albumArtist = songMetadata.albumArtist.trim(),
+                    composer = songMetadata.composer.trim(),
+                    genre = songMetadata.genre.trim(),
+                    lyricist = songMetadata.lyricist.trim(),
                     year = songMetadata.year,
                     comment = songMetadata.comment,
                     durationMillis = songMetadata.duration,
@@ -126,6 +130,10 @@ class DataManager(
                 )
                 songs.add(song)
                 artistSet.add(song.artist)
+                albumArtistSet.add(song.albumArtist)
+                composerSet.add(song.composer)
+                lyricistSet.add(song.lyricist)
+                genreSet.add(song.genre)
                 if (albumArtMap[song.album] == null) {
                     albumArtMap[song.album] =
                         ContentUris.withAppendedId(songCover, cursor.getLong(albumIdIndex))
@@ -138,12 +146,13 @@ class DataManager(
             _scanStatus.send(ScanStatus.ScanProgress(parsedSongs, totalSongs))
         } while (cursor.moveToNext())
         cursor.close()
-        albumArtMap.forEach { (albumName, albumArtUri) ->
-            albums.add(Album(name = albumName, albumArtUri = albumArtUri))
-        }
-        songDao.insertAllSongs(songs)
-        songDao.insertAllAlbums(albums)
+        songDao.insertAllAlbums(albumArtMap.entries.map { (t,u) -> Album(t,u) })
         songDao.insertAllArtists(artistSet.map { Artist(it) })
+        songDao.insertAllAlbumArtists(albumArtistSet.map { AlbumArtist(it) })
+        songDao.insertAllComposers(composerSet.map { Composer(it) })
+        songDao.insertAllLyricists(lyricistSet.map { Lyricist(it) })
+        songDao.insertAllGenres(genreSet.map { Genre(it) })
+        songDao.insertAllSongs(songs)
         notificationManager.removeScanningNotification()
         _scanStatus.send(ScanStatus.ScanComplete)
     }

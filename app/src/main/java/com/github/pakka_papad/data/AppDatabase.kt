@@ -10,6 +10,10 @@ import com.github.pakka_papad.data.music.*
         Artist::class,
         Playlist::class,
         PlaylistSongCrossRef::class,
+        Genre::class,
+        AlbumArtist::class,
+        Composer::class,
+        Lyricist::class
     ],
     version = 1, exportSchema = false)
 abstract class AppDatabase: RoomDatabase() {

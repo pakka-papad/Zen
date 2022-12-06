@@ -59,4 +59,16 @@ interface SongDao {
     @Transaction
     @Query("SELECT * FROM ${Constants.Tables.PLAYLIST_TABLE} WHERE playlistId = :playlistId")
     suspend fun getPlaylistWithSongs(playlistId: Long): PlaylistWithSongs?
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAllAlbumArtists(data: List<AlbumArtist>)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAllComposers(data: List<Composer>)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAllLyricists(data: List<Lyricist>)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAllGenres(data: List<Genre>)
 }
