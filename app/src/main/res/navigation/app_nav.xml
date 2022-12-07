@@ -25,6 +25,9 @@
         <action
             android:id="@+id/action_homeFragment_to_selectPlaylistFragment"
             app:destination="@id/selectPlaylistFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_searchFragment"
+            app:destination="@id/searchFragment" />
     </fragment>
     <fragment
         android:id="@+id/nowPlaying"
@@ -83,4 +86,8 @@
             app:argType="string"
             android:defaultValue='""' />
     </fragment>
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.github.pakka_papad.search.SearchFragment"
+        android:label="SearchFragment" />
 </navigation>

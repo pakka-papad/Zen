@@ -83,7 +83,10 @@ class HomeFragment : Fragment() {
                             HomeTopBar(
                                 onSettingsClicked = {
                                     navController.navigate(R.id.action_homeFragment_to_settingsFragment)
-                                }
+                                },
+                                onSearchClicked = {
+                                    navController.navigate(R.id.action_homeFragment_to_searchFragment)
+                                },
                             )
                         },
                         content = { paddingValues ->

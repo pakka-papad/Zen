@@ -1,5 +1,6 @@
 package com.github.pakka_papad.data.music
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
@@ -49,15 +50,15 @@ import com.github.pakka_papad.Constants
 data class Song(
     @PrimaryKey val location: String = "",
     val title: String,
-    val album: String = "",
+    @ColumnInfo(index = true) val album: String = "",
     val size: String,
     val addedDate: String,
     val modifiedDate: String,
-    val artist: String,
-    val albumArtist: String,
-    val composer: String,
-    val genre: String,
-    val lyricist: String,
+    @ColumnInfo(index = true) val artist: String,
+    @ColumnInfo(index = true) val albumArtist: String,
+    @ColumnInfo(index = true) val composer: String,
+    @ColumnInfo(index = true) val genre: String,
+    @ColumnInfo(index = true) val lyricist: String,
     val year: Int,
     val comment: String? = null,
     val durationMillis: Long,
