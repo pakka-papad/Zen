@@ -97,7 +97,7 @@ fun HomeBottomBar(
                         },
                         icon = {
                             Icon(
-                                painter = painterResource(id = screen.icon),
+                                painter = painterResource(screen.filledIcon),
                                 contentDescription = null,
                                 modifier = Modifier.size(26.dp)
                             )
