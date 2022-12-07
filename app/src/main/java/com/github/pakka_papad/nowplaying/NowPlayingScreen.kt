@@ -44,15 +44,16 @@ import kotlin.math.min
 @Composable
 fun NowPlayingScreen(
     paddingValues: PaddingValues,
-    song: Song,
+    song: Song?,
     onPausePlayPressed: () -> Unit,
     onPreviousPressed: () -> Unit,
     onNextPressed: () -> Unit,
-    showPlayButton: Boolean,
+    songPlaying: Boolean?,
     exoPlayer: ExoPlayer,
     onFavouriteClicked: () -> Unit,
     onQueueClicked: () -> Unit,
 ) {
+    if (song == null || songPlaying == null) return
     val configuration = LocalConfiguration.current
     val screenHeight = max(configuration.screenHeightDp - 60, 0) // subtracting 60 for TopBarHeight
     val screenWidth = configuration.screenWidthDp
@@ -80,7 +81,7 @@ fun NowPlayingScreen(
                 onPausePlayPressed = onPausePlayPressed,
                 onPreviousPressed = onPreviousPressed,
                 onNextPressed = onNextPressed,
-                showPlayButton = showPlayButton,
+                showPlayButton = !songPlaying,
                 exoPlayer = exoPlayer,
                 onFavouriteClicked = onFavouriteClicked,
                 onQueueClicked = onQueueClicked,
@@ -115,7 +116,7 @@ fun NowPlayingScreen(
                 onPausePlayPressed = onPausePlayPressed,
                 onPreviousPressed = onPreviousPressed,
                 onNextPressed = onNextPressed,
-                showPlayButton = showPlayButton,
+                showPlayButton = !songPlaying,
                 exoPlayer = exoPlayer,
                 onFavouriteClicked = onFavouriteClicked,
                 onQueueClicked = onQueueClicked,

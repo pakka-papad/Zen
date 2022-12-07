@@ -98,7 +98,7 @@ class ZenNotificationManager(
     ).build()
     private val pauseAction = NotificationCompat.Action.Builder(
         IconCompat.createWithResource(context,R.drawable.ic_baseline_pause_24),
-        "Next",
+        "Pause",
         PendingIntent.getBroadcast(
             context, ZenBroadcastReceiver.PAUSE_PLAY_ACTION_REQUEST_CODE,
             Intent(Constants.PACKAGE_NAME).putExtra(
@@ -110,12 +110,48 @@ class ZenNotificationManager(
     ).build()
     private val playAction = NotificationCompat.Action.Builder(
         IconCompat.createWithResource(context,R.drawable.ic_baseline_play_arrow_24),
-        "Next",
+        "Play",
         PendingIntent.getBroadcast(
             context, ZenBroadcastReceiver.PAUSE_PLAY_ACTION_REQUEST_CODE,
             Intent(Constants.PACKAGE_NAME).putExtra(
                 ZenBroadcastReceiver.AUDIO_CONTROL,
                 ZenBroadcastReceiver.ZEN_PLAYER_PAUSE_PLAY
+            ),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+    ).build()
+    private val outlinedLikeAction = NotificationCompat.Action.Builder(
+        IconCompat.createWithResource(context,R.drawable.ic_baseline_favorite_border_24),
+        "Like",
+        PendingIntent.getBroadcast(
+            context, ZenBroadcastReceiver.LIKE_ACTION_REQUEST_CODE,
+            Intent(Constants.PACKAGE_NAME).putExtra(
+                ZenBroadcastReceiver.AUDIO_CONTROL,
+                ZenBroadcastReceiver.ZEN_PLAYER_LIKE
+            ),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+    ).build()
+    private val filledLikeAction = NotificationCompat.Action.Builder(
+        IconCompat.createWithResource(context,R.drawable.ic_baseline_favorite_24),
+        "Unlike",
+        PendingIntent.getBroadcast(
+            context, ZenBroadcastReceiver.LIKE_ACTION_REQUEST_CODE,
+            Intent(Constants.PACKAGE_NAME).putExtra(
+                ZenBroadcastReceiver.AUDIO_CONTROL,
+                ZenBroadcastReceiver.ZEN_PLAYER_LIKE
+            ),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+    ).build()
+    private val cancelAction = NotificationCompat.Action.Builder(
+        IconCompat.createWithResource(context,R.drawable.ic_baseline_close_24),
+        "Close",
+        PendingIntent.getBroadcast(
+            context, ZenBroadcastReceiver.CANCEL_ACTION_REQUEST_CODE,
+            Intent(Constants.PACKAGE_NAME).putExtra(
+                ZenBroadcastReceiver.AUDIO_CONTROL,
+                ZenBroadcastReceiver.ZEN_PLAYER_CANCEL
             ),
             PendingIntent.FLAG_IMMUTABLE
         )
@@ -130,9 +166,10 @@ class ZenNotificationManager(
     fun getPlayerNotification(
         session: MediaSessionCompat,
         showPlayButton: Boolean,
+        isLiked: Boolean,
     ): Notification {
         val mediaStyle = androidx.media.app.NotificationCompat.MediaStyle()
-            .setShowActionsInCompactView(0,1,2)
+            .setShowActionsInCompactView(1,2,3)
             .setMediaSession(session.sessionToken)
         return NotificationCompat.Builder(context, PLAYER_SERVICE).apply {
             setSmallIcon(R.mipmap.ic_notification)
@@ -142,9 +179,11 @@ class ZenNotificationManager(
             priority = NotificationCompat.PRIORITY_MAX
             setSilent(true)
             setStyle(mediaStyle)
+            addAction(if (isLiked) filledLikeAction else outlinedLikeAction)
             addAction(previousAction)
             addAction(if (showPlayButton) playAction else pauseAction)
             addAction(nextAction)
+            addAction(cancelAction)
             setContentIntent(activityIntent)  // use with android:launchMode="singleTask" in manifest
         }.build()
     }

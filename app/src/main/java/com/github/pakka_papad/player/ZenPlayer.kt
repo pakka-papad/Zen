@@ -37,10 +37,9 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
     @Inject
     lateinit var exoPlayer: ExoPlayer
 
-    @Inject
-    lateinit var broadcastReceiver: ZenBroadcastReceiver
+    private var broadcastReceiver: ZenBroadcastReceiver? = null
 
-    private lateinit var systemNotificationManager: NotificationManager
+    private var systemNotificationManager: NotificationManager? = null
 
     private val job = SupervisorJob()
     private val scope = CoroutineScope(job + Dispatchers.Default)
@@ -103,14 +102,14 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        broadcastReceiver = ZenBroadcastReceiver()
         mediaSession = MediaSessionCompat(this, MEDIA_SESSION)
         systemNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         dataManager.setPlayerRunning(this)
         IntentFilter(Constants.PACKAGE_NAME).also {
             registerReceiver(broadcastReceiver, it)
         }
-        broadcastReceiver.startListening(this)
-
+        broadcastReceiver?.startListening(this)
         mediaSession.setCallback(mediaSessionCallback)
         exoPlayer.addListener(exoPlayerListener)
 
@@ -119,6 +118,7 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
             notificationManager.getPlayerNotification(
                 session = mediaSession,
                 showPlayButton = false,
+                isLiked = dataManager.getSongAtIndex(exoPlayer.currentMediaItemIndex)?.favourite ?: false
             )
         )
 
@@ -142,53 +142,59 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
         exoPlayer.removeListener(exoPlayerListener)
+        mediaSession.release()
         dataManager.stopPlayerRunning()
-        broadcastReceiver.stopListening()
-        systemNotificationManager.cancel(ZenNotificationManager.PLAYER_NOTIFICATION_ID)
-        stopForeground(true)
-        stopSelf()
+        broadcastReceiver?.stopListening()
+        systemNotificationManager?.cancel(ZenNotificationManager.PLAYER_NOTIFICATION_ID)
+        scope.cancel()
+        job.cancel()
+        systemNotificationManager = null
+        broadcastReceiver = null
     }
 
     private fun updateMediaSessionMetadata() {
-        val currentSong = dataManager.getSongAtIndex(exoPlayer.currentMediaItemIndex) ?: return
-
-        val extractor = MediaMetadataRetriever()
-        extractor.setDataSource(currentSong.location)
-
-        mediaSession.setMetadata(
-            MediaMetadataCompat.Builder().apply {
-                putString(
-                    MediaMetadataCompat.METADATA_KEY_TITLE,
-                    currentSong.title
-                )
-                putString(
-                    MediaMetadataCompat.METADATA_KEY_ARTIST,
-                    currentSong.artist
-                )
-                if (extractor.embeddedPicture != null) {
-                    putBitmap(
-                        MediaMetadataCompat.METADATA_KEY_ALBUM_ART,
-                        BitmapFactory.decodeByteArray(
-                            extractor.embeddedPicture, 0,
-                            extractor.embeddedPicture!!.size
-                        )
-                    )
-                }
-                putLong(
-                    MediaMetadataCompat.METADATA_KEY_DURATION,
-                    currentSong.durationMillis
-                )
-            }.build()
-        )
-        extractor.release()
         scope.launch {
+            var currentSong: Song? = null
+            withContext(Dispatchers.Main) {
+                currentSong = dataManager.getSongAtIndex(exoPlayer.currentMediaItemIndex)
+            }
+            if (currentSong == null) return@launch
+            val extractor = MediaMetadataRetriever()
+            extractor.setDataSource(currentSong!!.location)
+            mediaSession.setMetadata(
+                MediaMetadataCompat.Builder().apply {
+                    putString(
+                        MediaMetadataCompat.METADATA_KEY_TITLE,
+                        currentSong!!.title
+                    )
+                    putString(
+                        MediaMetadataCompat.METADATA_KEY_ARTIST,
+                        currentSong!!.artist
+                    )
+                    if (extractor.embeddedPicture != null) {
+                        putBitmap(
+                            MediaMetadataCompat.METADATA_KEY_ALBUM_ART,
+                            BitmapFactory.decodeByteArray(
+                                extractor.embeddedPicture, 0,
+                                extractor.embeddedPicture!!.size
+                            )
+                        )
+                    }
+                    putLong(
+                        MediaMetadataCompat.METADATA_KEY_DURATION,
+                        currentSong!!.durationMillis
+                    )
+                }.build()
+            )
+            extractor.release()
             delay(100)
             withContext(Dispatchers.Main) {
-                systemNotificationManager.notify(
+                systemNotificationManager?.notify(
                     ZenNotificationManager.PLAYER_NOTIFICATION_ID,
                     notificationManager.getPlayerNotification(
                         session = mediaSession,
                         showPlayButton = !exoPlayer.isPlaying,
+                        isLiked = dataManager.getSongAtIndex(exoPlayer.currentMediaItemIndex)?.favourite ?: false
                     )
                 )
             }
@@ -238,34 +244,65 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
         exoPlayer.addMediaItem(MediaItem.fromUri(song.location))
     }
 
-    override fun onBroadcastPausePlay() {
-        Timber.d("broadcast received")
-        if (exoPlayer.isPlaying) exoPlayer.pause() else exoPlayer.play()
-        // not needed as below functions will be triggered in onIsPlayingChanged
-//        updateMediaSessionState()
-//        updateMediaSessionMetadata()
+    @Synchronized
+    override fun updateNotification() {
+        updateMediaSessionState()
+        updateMediaSessionMetadata()
     }
 
+    /**
+     * Called when user clicks play/pause button in notification.
+     * Player.Listener onIsPlayingChanged gets called.
+     */
+    override fun onBroadcastPausePlay() {
+        if (exoPlayer.isPlaying) exoPlayer.pause() else exoPlayer.play()
+    }
+
+    /**
+     * Called when user clicks next button in notification.
+     * If we have next song in queue we skip to it.
+     * Player.Listener onMediaItemTransition gets called.
+     */
     override fun onBroadcastNext() {
         if (!exoPlayer.hasNextMediaItem()) {
             showToast("No next song in queue")
             return
         }
         exoPlayer.seekToNextMediaItem()
-        // not needed as below functions will be triggered in onMediaItemTransition
-//        updateMediaSessionState()
-//        updateMediaSessionMetadata()
     }
 
+    /**
+     * Called when user clicks previous button in notification.
+     * If we have previous song in queue we skip to it.
+     * Player.Listener onMediaItemTransition gets called.
+     */
     override fun onBroadcastPrevious() {
         if (!exoPlayer.hasPreviousMediaItem()) {
             showToast("No previous song in queue")
             return
         }
         exoPlayer.seekToPreviousMediaItem()
-        // not needed as below functions will be triggered in onMediaItemTransition
-//        updateMediaSessionState()
-//        updateMediaSessionMetadata()
     }
 
+    /**
+     * Called when user clicks on like icon (filled and outlined both)
+     * This fetches the current song, toggles the favourite and passes the updated song to DataManager
+     * DataManager then calls updateNotification of DataManager.Callback
+     */
+    override fun onBroadcastLike() {
+        val currentSong = dataManager.getSongAtIndex(exoPlayer.currentMediaItemIndex) ?: return
+        val updatedSong = currentSong.copy(favourite = !currentSong.favourite)
+        scope.launch {
+            dataManager.updateSong(updatedSong)
+        }
+    }
+
+    /**
+     * Called when user clicks close button in notification
+     * This stops the service and onDestroy is called
+     */
+    override fun onBroadcastCancel() {
+        stopForeground(true)
+        stopSelf()
+    }
 }

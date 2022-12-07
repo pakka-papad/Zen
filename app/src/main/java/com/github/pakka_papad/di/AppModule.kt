@@ -14,7 +14,6 @@ import dagger.hilt.components.SingletonComponent
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.data.*
 import com.github.pakka_papad.data.notification.ZenNotificationManager
-import com.github.pakka_papad.player.ZenBroadcastReceiver
 import javax.inject.Singleton
 
 @Module
@@ -59,12 +58,6 @@ object AppModule {
         @ApplicationContext context: Context
     ): ExoPlayer {
         return ExoPlayer.Builder(context).build()
-    }
-
-    @Singleton
-    @Provides
-    fun providesBroadcastReceiver(): ZenBroadcastReceiver {
-        return ZenBroadcastReceiver()
     }
 
     @Singleton

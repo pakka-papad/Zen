@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore.Audio
 import android.widget.Toast
+import androidx.compose.runtime.mutableStateListOf
 import com.github.pakka_papad.data.music.*
 import com.github.pakka_papad.data.notification.ZenNotificationManager
 import com.github.pakka_papad.formatToDate
@@ -163,8 +164,8 @@ class DataManager(
 
     private var callback: Callback? = null
 
-    private val _queue = MutableStateFlow(listOf<Song>())
-    val queue = _queue.asStateFlow()
+    private val _queue = mutableStateListOf<Song>()
+    val queue: List<Song> = _queue
 
     private val _currentSong = MutableStateFlow<Song?>(null)
     val currentSong = _currentSong.asStateFlow()
@@ -172,10 +173,12 @@ class DataManager(
     suspend fun updateSong(song: Song) {
         if (_currentSong.value?.location == song.location) {
             _currentSong.update { song }
+            callback?.updateNotification()
         }
-        if (_queue.value.any { it.location == song.location }) {
-            _queue.update {
-                _queue.value.map { if (it.location == song.location) song else it }
+        for (idx in _queue.indices){
+            if (_queue[idx].location == song.location){
+                _queue[idx] = song
+                break
             }
         }
         songDao.updateSong(song)
@@ -186,7 +189,10 @@ class DataManager(
     @Synchronized
     fun setQueue(newQueue: List<Song>, startPlayingFromIndex: Int) {
         if (newQueue.isEmpty()) return
-        _queue.value = newQueue
+        _queue.apply {
+            clear()
+            addAll(newQueue)
+        }
         _currentSong.value = newQueue[startPlayingFromIndex]
         if (callback == null) {
             val intent = Intent(context, ZenPlayer::class.java)
@@ -206,33 +212,36 @@ class DataManager(
      */
     @Synchronized
     fun addToQueue(song: Song): Boolean {
-        if (_queue.value.any { it.location == song.location }) return false
-        _queue.update { _queue.value.toMutableList().apply { add(song) } }
+        if (_queue.any { it.location == song.location }) return false
+        _queue.add(song)
         callback?.addToQueue(song)
         return true
     }
 
     fun setPlayerRunning(callback: Callback) {
         this.callback = callback
-        this.callback?.setQueue(_queue.value, remIdx)
+        this.callback?.setQueue(_queue, remIdx)
     }
 
     fun updateCurrentSong(currentSongIndex: Int) {
-        if (currentSongIndex < 0 || currentSongIndex >= _queue.value.size) return
-        _currentSong.update { _queue.value[currentSongIndex] }
+        if (currentSongIndex < 0 || currentSongIndex >= _queue.size) return
+        _currentSong.update { _queue[currentSongIndex] }
     }
 
     fun getSongAtIndex(index: Int): Song? {
-        if (index < 0 || index >= _queue.value.size) return null
-        return _queue.value[index]
+        if (index < 0 || index >= _queue.size) return null
+        return _queue[index]
     }
 
     fun stopPlayerRunning() {
         this.callback = null
+        _currentSong.update { null }
+        _queue.clear()
     }
 
     interface Callback {
         fun setQueue(newQueue: List<Song>, startPlayingFromIndex: Int)
         fun addToQueue(song: Song)
+        fun updateNotification()
     }
 }

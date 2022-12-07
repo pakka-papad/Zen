@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -77,11 +78,15 @@ class NowPlayingFragment : Fragment() {
                 ) {
                     val song by viewModel.currentSong.collectAsState()
                     val songPlaying by viewModel.currentSongPlaying.collectAsState()
-                    val queue by viewModel.queue.collectAsState()
+                    val queue = viewModel.queue
                     val scope = rememberCoroutineScope()
                     val scaffoldState = rememberBottomSheetScaffoldState()
+                    LaunchedEffect(key1 = song) {
+                        if (song != null) return@LaunchedEffect
+                        navController.popBackStack()
+                    }
                     BackHandler(
-                        enabled = scaffoldState.bottomSheetState.isExpanded,
+                        enabled = if (song != null) scaffoldState.bottomSheetState.isExpanded else false,
                         onBack = {
                             scope.launch {
                                 scaffoldState.bottomSheetState.collapse()
@@ -93,25 +98,27 @@ class NowPlayingFragment : Fragment() {
                         topBar = {
                             NowPlayingTopBar(
                                 onBackArrowPressed = navController::popBackStack,
-                                title = song!!.title
+                                title = song?.title ?: ""
                             )
                         },
                         content = { paddingValues ->
-                            NowPlayingScreen(
-                                paddingValues = paddingValues,
-                                song = song!!,
-                                onPausePlayPressed = pendingPausePlayIntent::send,
-                                onPreviousPressed = pendingPreviousIntent::send,
-                                onNextPressed = pendingNextIntent::send,
-                                showPlayButton = !songPlaying!!,
-                                exoPlayer = exoPlayer,
-                                onFavouriteClicked = viewModel::changeFavouriteValue,
-                                onQueueClicked = {
-                                    scope.launch {
-                                        scaffoldState.bottomSheetState.expand()
+                            Box {
+                                NowPlayingScreen(
+                                    paddingValues = paddingValues,
+                                    song = song,
+                                    onPausePlayPressed = pendingPausePlayIntent::send,
+                                    onPreviousPressed = pendingPreviousIntent::send,
+                                    onNextPressed = pendingNextIntent::send,
+                                    songPlaying = songPlaying,
+                                    exoPlayer = exoPlayer,
+                                    onFavouriteClicked = viewModel::changeFavouriteValue,
+                                    onQueueClicked = {
+                                        scope.launch {
+                                            scaffoldState.bottomSheetState.expand()
+                                        }
                                     }
-                                }
-                            )
+                                )
+                            }
                         },
                         sheetContent = {
                             Queue(

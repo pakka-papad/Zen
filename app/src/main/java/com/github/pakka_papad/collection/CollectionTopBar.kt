@@ -175,6 +175,6 @@ private fun CollectionTopBarActions(
         onDismissRequest = {
             dropDownMenuExpanded = false
         },
-        offset = DpOffset(x = 0.dp, y = (-62).dp)
+        offset = DpOffset(x = 0.dp, y = (-46).dp)
     )
 }

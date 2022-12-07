@@ -217,7 +217,7 @@ class SharedViewModel @Inject constructor(
      * Adds a song to the end of queue
      */
     fun addToQueue(song: Song) {
-        if (queue.value.isEmpty()) {
+        if (queue.isEmpty()) {
             manager.setQueue(listOf(song), 0)
         } else {
             val result = manager.addToQueue(song)
@@ -233,7 +233,7 @@ class SharedViewModel @Inject constructor(
      * Adds a list of songs to the end queue
      */
     fun addToQueue(songs: List<Song>) {
-        if (queue.value.isEmpty()) {
+        if (queue.isEmpty()) {
             manager.setQueue(songs, 0)
         } else {
             var result = false
