@@ -17,13 +17,13 @@ sealed class CollectionActions(
         CollectionActions(
             onClick = onClick,
             text = "Add all to queue",
-            icon = R.drawable.ic_baseline_queue_music_24
+            icon = R.drawable.ic_baseline_queue_music_40
         )
 
     data class AddToPlaylist(override val onClick: () -> Unit) :
         CollectionActions(
             onClick = onClick,
             text = "Add all to playlist",
-            icon = R.drawable.ic_baseline_playlist_add_24
+            icon = R.drawable.ic_baseline_playlist_add_40
         )
 }

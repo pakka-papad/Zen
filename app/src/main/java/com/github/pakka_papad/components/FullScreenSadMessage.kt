@@ -32,7 +32,7 @@ fun FullScreenSadMessage(
                 .aspectRatio(1f,false)
                 .fillMaxSize()
                 .padding(24.dp),
-            painter = painterResource(R.drawable.ic_baseline_sentiment_very_dissatisfied_24),
+            painter = painterResource(R.drawable.ic_baseline_sentiment_very_dissatisfied_40),
             contentDescription = "sad-face",
         )
         message?.let {

@@ -73,7 +73,7 @@ class ZenNotificationManager(
     }
 
     private val previousAction = NotificationCompat.Action.Builder(
-        IconCompat.createWithResource(context,R.drawable.ic_baseline_skip_previous_24),
+        IconCompat.createWithResource(context,R.drawable.ic_baseline_skip_previous_40),
         "Previous",
         PendingIntent.getBroadcast(
             context, ZenBroadcastReceiver.PREVIOUS_ACTION_REQUEST_CODE,
@@ -85,7 +85,7 @@ class ZenNotificationManager(
         )
     ).build()
     private val nextAction = NotificationCompat.Action.Builder(
-        IconCompat.createWithResource(context,R.drawable.ic_baseline_skip_next_24),
+        IconCompat.createWithResource(context,R.drawable.ic_baseline_skip_next_40),
         "Next",
         PendingIntent.getBroadcast(
             context, ZenBroadcastReceiver.NEXT_ACTION_REQUEST_CODE,
@@ -97,7 +97,7 @@ class ZenNotificationManager(
         )
     ).build()
     private val pauseAction = NotificationCompat.Action.Builder(
-        IconCompat.createWithResource(context,R.drawable.ic_baseline_pause_24),
+        IconCompat.createWithResource(context,R.drawable.ic_baseline_pause_40),
         "Pause",
         PendingIntent.getBroadcast(
             context, ZenBroadcastReceiver.PAUSE_PLAY_ACTION_REQUEST_CODE,
@@ -109,7 +109,7 @@ class ZenNotificationManager(
         )
     ).build()
     private val playAction = NotificationCompat.Action.Builder(
-        IconCompat.createWithResource(context,R.drawable.ic_baseline_play_arrow_24),
+        IconCompat.createWithResource(context,R.drawable.ic_baseline_play_arrow_40),
         "Play",
         PendingIntent.getBroadcast(
             context, ZenBroadcastReceiver.PAUSE_PLAY_ACTION_REQUEST_CODE,
@@ -145,7 +145,7 @@ class ZenNotificationManager(
         )
     ).build()
     private val cancelAction = NotificationCompat.Action.Builder(
-        IconCompat.createWithResource(context,R.drawable.ic_baseline_close_24),
+        IconCompat.createWithResource(context,R.drawable.ic_baseline_close_30),
         "Close",
         PendingIntent.getBroadcast(
             context, ZenBroadcastReceiver.CANCEL_ACTION_REQUEST_CODE,

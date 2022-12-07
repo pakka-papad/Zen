@@ -42,7 +42,7 @@ fun PlayShuffleCard(
                     .clip(RoundedCornerShape(30.dp)),
                 content = {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_play_arrow_24),
+                        painter = painterResource(R.drawable.ic_baseline_play_arrow_40),
                         modifier = Modifier
                             .size(30.dp)
                             .padding(4.dp),
@@ -63,7 +63,7 @@ fun PlayShuffleCard(
                     .clip(RoundedCornerShape(30.dp)),
                 content = {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_shuffle_24),
+                        painter = painterResource(R.drawable.ic_baseline_shuffle_40),
                         modifier = Modifier
                             .size(30.dp)
                             .padding(4.dp),

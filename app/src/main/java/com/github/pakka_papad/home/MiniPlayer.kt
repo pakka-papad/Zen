@@ -71,7 +71,7 @@ fun MiniPlayer(
         )
         Icon(
             painter = painterResource(
-                if (showPlayButton) R.drawable.ic_baseline_play_arrow_24 else R.drawable.ic_baseline_pause_24
+                if (showPlayButton) R.drawable.ic_baseline_play_arrow_40 else R.drawable.ic_baseline_pause_40
             ),
             contentDescription = null,
             modifier = Modifier

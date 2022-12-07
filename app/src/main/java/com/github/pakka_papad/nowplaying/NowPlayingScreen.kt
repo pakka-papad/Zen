@@ -268,7 +268,7 @@ private fun PreviousButton(
     onPreviousPressed: () -> Unit,
     modifier: Modifier = Modifier,
 ) = Image(
-    painter = painterResource(R.drawable.ic_baseline_skip_previous_24),
+    painter = painterResource(R.drawable.ic_baseline_skip_previous_40),
     contentDescription = "previous button",
     modifier = modifier
         .size(70.dp)
@@ -291,7 +291,7 @@ private fun PausePlayButton(
     modifier: Modifier = Modifier,
 ) = Image(
     painter = painterResource(
-        if (showPlayButton) R.drawable.ic_baseline_play_arrow_24 else R.drawable.ic_baseline_pause_24
+        if (showPlayButton) R.drawable.ic_baseline_play_arrow_40 else R.drawable.ic_baseline_pause_40
     ),
     contentDescription = "play/pause button",
     modifier = modifier
@@ -316,7 +316,7 @@ private fun NextButton(
     onNextPressed: () -> Unit,
     modifier: Modifier = Modifier,
 ) = Image(
-    painter = painterResource(R.drawable.ic_baseline_skip_next_24),
+    painter = painterResource(R.drawable.ic_baseline_skip_next_40),
     contentDescription = "next button",
     modifier = modifier
         .size(70.dp)
@@ -337,7 +337,7 @@ private fun QueueButton(
     onQueueClicked: () -> Unit,
     modifier: Modifier = Modifier,
 ) = Image(
-    painter = painterResource(R.drawable.ic_baseline_queue_music_24),
+    painter = painterResource(R.drawable.ic_baseline_queue_music_40),
     contentDescription = "queue button",
     modifier = modifier
         .size(50.dp)
