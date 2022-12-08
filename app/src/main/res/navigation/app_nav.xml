@@ -18,16 +18,32 @@
             app:popExitAnim="@anim/exit_to_bottom" />
         <action
             android:id="@+id/action_homeFragment_to_collectionFragment"
-            app:destination="@id/collectionFragment" />
+            app:destination="@id/collectionFragment"
+            app:enterAnim="@anim/enter_from_right"
+            app:exitAnim="@anim/exit_to_left"
+            app:popEnterAnim="@anim/enter_from_left"
+            app:popExitAnim="@anim/exit_to_right" />
         <action
             android:id="@+id/action_homeFragment_to_settingsFragment"
-            app:destination="@id/settingsFragment" />
+            app:destination="@id/settingsFragment"
+            app:enterAnim="@anim/enter_from_right"
+            app:exitAnim="@anim/no_change"
+            app:popEnterAnim="@anim/no_change"
+            app:popExitAnim="@anim/exit_to_bottom" />
         <action
             android:id="@+id/action_homeFragment_to_selectPlaylistFragment"
-            app:destination="@id/selectPlaylistFragment" />
+            app:destination="@id/selectPlaylistFragment"
+            app:enterAnim="@anim/enter_from_bottom"
+            app:exitAnim="@anim/no_change"
+            app:popEnterAnim="@anim/no_change"
+            app:popExitAnim="@anim/exit_to_bottom" />
         <action
             android:id="@+id/action_homeFragment_to_searchFragment"
-            app:destination="@id/searchFragment" />
+            app:destination="@id/searchFragment"
+            app:enterAnim="@anim/fade_in_enter"
+            app:exitAnim="@anim/fade_out_exit"
+            app:popEnterAnim="@anim/no_change"
+            app:popExitAnim="@anim/exit_to_bottom" />
     </fragment>
     <fragment
         android:id="@+id/nowPlaying"

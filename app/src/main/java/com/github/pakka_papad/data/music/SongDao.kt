@@ -30,7 +30,6 @@ interface SongDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAllAlbums(data: List<Album>)
 
-    @Transaction
     @Query("SELECT * FROM ${Constants.Tables.ALBUM_TABLE} ORDER BY name ASC")
     fun getAllAlbums(): Flow<List<Album>>
 
