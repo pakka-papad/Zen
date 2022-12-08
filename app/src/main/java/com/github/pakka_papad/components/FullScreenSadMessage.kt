@@ -17,7 +17,7 @@ import com.github.pakka_papad.R
 fun FullScreenSadMessage(
     message: String? = null,
     modifier: Modifier = Modifier,
-    paddingValues: PaddingValues,
+    paddingValues: PaddingValues = PaddingValues(),
 ) = Column(
     modifier = modifier
         .fillMaxSize()

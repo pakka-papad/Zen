@@ -83,6 +83,7 @@ class DataManager(
             Audio.Media.SIZE,
             Audio.Media.DATE_ADDED,
             Audio.Media.DATE_MODIFIED,
+            Audio.Media._ID
         )
         val cursor = context.contentResolver.query(
             Audio.Media.EXTERNAL_CONTENT_URI,
@@ -103,6 +104,7 @@ class DataManager(
         val sizeIndex = cursor.getColumnIndex(Audio.Media.SIZE)
         val dateAddedIndex = cursor.getColumnIndex(Audio.Media.DATE_ADDED)
         val dateModifiedIndex = cursor.getColumnIndex(Audio.Media.DATE_MODIFIED)
+        val songIdIndex = cursor.getColumnIndex(Audio.Media._ID)
         val songCover = Uri.parse("content://media/external/audio/albumart")
 
         val songs = ArrayList<Song>()
@@ -137,6 +139,7 @@ class DataManager(
                     sampleRate = songMetadata.sampleRate,
                     bitsPerSample = songMetadata.bitsPerSample,
                     mimeType = songMetadata.mimeType,
+                    artUri = "content://media/external/audio/media/${cursor.getLong(songIdIndex)}/albumart"
                 )
                 songs.add(song)
                 artistSet.add(song.artist)

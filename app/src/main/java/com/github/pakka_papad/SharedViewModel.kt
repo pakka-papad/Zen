@@ -282,8 +282,10 @@ class SharedViewModel @Inject constructor(
     private val _query = MutableStateFlow("")
     val query = _query.asStateFlow()
 
+    private var lastJob: Job? = null
     fun search(query: String){
-        viewModelScope.launch {
+        lastJob?.cancel()
+        lastJob = viewModelScope.launch {
             _query.update { query }
             val trimmedQuery = query.trim()
             if (trimmedQuery.isEmpty()) {
@@ -316,9 +318,6 @@ class SharedViewModel @Inject constructor(
                 }
             } catch (e: Exception){
                 Timber.d(e.message)
-                _searchResult.update {
-                    SearchResult(errorMsg = "Err!!! Some error occurred")
-                }
             }
         }
     }
