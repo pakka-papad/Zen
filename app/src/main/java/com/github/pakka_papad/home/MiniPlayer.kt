@@ -1,6 +1,5 @@
 package com.github.pakka_papad.home
 
-import android.media.MediaMetadataRetriever
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -30,14 +29,6 @@ fun MiniPlayer(
     onMiniPlayerClicked: () -> Unit,
 ) {
     if (song == null) return
-    var picture by remember { mutableStateOf<ByteArray?>(null) }
-    LaunchedEffect(key1 = song.location) {
-        val extractor = MediaMetadataRetriever().apply {
-            setDataSource(song.location)
-        }
-        picture = extractor.embeddedPicture
-        extractor.release()
-    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -51,7 +42,7 @@ fun MiniPlayer(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AsyncImage(
-            model = picture,
+            model = song.artUri,
             contentDescription = null,
             modifier = Modifier
                 .size(56.dp)

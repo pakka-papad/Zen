@@ -1,7 +1,6 @@
 package com.github.pakka_papad.nowplaying
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
-import android.media.MediaMetadataRetriever
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearEasing
@@ -133,16 +132,8 @@ private fun AlbumArt(
     song: Song,
     modifier: Modifier = Modifier,
 ) {
-    var picture by remember { mutableStateOf<ByteArray?>(null) }
-    LaunchedEffect(key1 = song.location) {
-        val extractor = MediaMetadataRetriever().apply {
-            setDataSource(song.location)
-        }
-        picture = extractor.embeddedPicture
-        extractor.release()
-    }
     AsyncImage(
-        model = picture,
+        model = song.artUri,
         contentDescription = null,
         modifier = modifier
             .aspectRatio(1f)

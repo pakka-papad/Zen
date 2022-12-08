@@ -5,9 +5,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.BitmapFactory
 import android.media.AudioManager
-import android.media.MediaMetadataRetriever
 import android.os.IBinder
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -159,8 +157,6 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
                 currentSong = dataManager.getSongAtIndex(exoPlayer.currentMediaItemIndex)
             }
             if (currentSong == null) return@launch
-            val extractor = MediaMetadataRetriever()
-            extractor.setDataSource(currentSong!!.location)
             mediaSession.setMetadata(
                 MediaMetadataCompat.Builder().apply {
                     putString(
@@ -171,22 +167,16 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
                         MediaMetadataCompat.METADATA_KEY_ARTIST,
                         currentSong!!.artist
                     )
-                    if (extractor.embeddedPicture != null) {
-                        putBitmap(
-                            MediaMetadataCompat.METADATA_KEY_ALBUM_ART,
-                            BitmapFactory.decodeByteArray(
-                                extractor.embeddedPicture, 0,
-                                extractor.embeddedPicture!!.size
-                            )
-                        )
-                    }
+                    putString(
+                        MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI,
+                        currentSong!!.artUri
+                    )
                     putLong(
                         MediaMetadataCompat.METADATA_KEY_DURATION,
                         currentSong!!.durationMillis
                     )
                 }.build()
             )
-            extractor.release()
             delay(100)
             withContext(Dispatchers.Main) {
                 systemNotificationManager?.notify(

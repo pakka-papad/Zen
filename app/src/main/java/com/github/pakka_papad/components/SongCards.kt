@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
@@ -19,9 +20,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.github.pakka_papad.components.more_options.OptionsAlertDialog
 import com.github.pakka_papad.components.more_options.SongOptions
 import com.github.pakka_papad.data.music.Song
@@ -52,33 +57,41 @@ private fun SongCardBase(
         Row(
             modifier = Modifier
                 .fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
+            AsyncImage(
+                model = song.artUri,
+                contentDescription = "song-${song.title}-art",
+                modifier = Modifier
+                    .size(80.dp)
+                    .padding(10.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
             Column(
                 modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .fillMaxHeight()
-                    .padding(start = 20.dp),
+                    .weight(1f)
+                    .fillMaxHeight(),
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
                     text = song.title,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     modifier = Modifier.fillMaxWidth(),
-                    color = if (currentlyPlaying) onCurrentlyPlayingBackgroundColor else onBackgroundColor
+                    color = if (currentlyPlaying) onCurrentlyPlayingBackgroundColor else onBackgroundColor,
+                    fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "${song.artist}  •  ${song.durationFormatted}",
+                    text = song.artist,
                     maxLines = 1,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier.fillMaxWidth(),
                     color = if (currentlyPlaying) onCurrentlyPlayingBackgroundColor else onBackgroundColor
                 )
             }
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .fillMaxHeight(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically,
@@ -90,6 +103,7 @@ private fun SongCardBase(
                     contentDescription = null,
                     modifier = Modifier
                         .size(40.dp)
+                        .padding(8.dp)
                         .scale(favouriteButtonScale.value)
                         .clickable(
                             onClick = {
@@ -123,8 +137,7 @@ private fun SongCardBase(
                                 radius = 20.dp
                             ),
                             interactionSource = remember { MutableInteractionSource() }
-                        )
-                        .padding(8.dp),
+                        ),
                     tint = if (currentlyPlaying) onCurrentlyPlayingBackgroundColor else onBackgroundColor,
                 )
                 if (songOptions.isNotEmpty()) {
@@ -134,6 +147,7 @@ private fun SongCardBase(
                         contentDescription = null,
                         modifier = Modifier
                             .size(40.dp)
+                            .padding(8.dp)
                             .clickable(
                                 onClick = {
                                     optionsVisible = true
@@ -143,8 +157,7 @@ private fun SongCardBase(
                                     radius = 20.dp
                                 ),
                                 interactionSource = remember { MutableInteractionSource() }
-                            )
-                            .padding(8.dp),
+                            ),
                         tint = if (currentlyPlaying) onCurrentlyPlayingBackgroundColor else onBackgroundColor,
                     )
                     if (optionsVisible){
