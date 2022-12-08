@@ -18,17 +18,17 @@ import com.github.pakka_papad.data.music.Playlist
 
 @Composable
 fun Playlists(
-    paddingValues: PaddingValues,
-    playlists: List<Playlist>,
+    playlists: List<Playlist>?,
     onPlaylistClicked: (Long) -> Unit,
     listState: LazyListState,
     onPlaylistCreate: (String) -> Unit,
 ) {
+    if (playlists == null) return
     LazyColumn(
         modifier = Modifier
             .fillMaxSize(),
         state = listState,
-        contentPadding = paddingValues,
+        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues(),
     ) {
         item {
             CreatePlaylistCard(

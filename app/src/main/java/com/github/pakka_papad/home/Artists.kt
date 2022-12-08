@@ -23,22 +23,22 @@ import com.github.pakka_papad.data.music.ArtistWithSongs
 
 @Composable
 fun Artists(
-    paddingValues: PaddingValues,
-    artistsWithSongs: List<ArtistWithSongs>,
+    artistsWithSongs: List<ArtistWithSongs>?,
     onArtistClicked: (ArtistWithSongs) -> Unit,
     listState: LazyListState
 ) {
+    if (artistsWithSongs == null) return
     if (artistsWithSongs.isEmpty()){
         FullScreenSadMessage(
             message = "No artists found",
-            paddingValues = paddingValues,
+            paddingValues = WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues(),
         )
     } else {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize(),
             state = listState,
-            contentPadding = paddingValues
+            contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues(),
         ) {
             items(
                 items = artistsWithSongs,

@@ -1,8 +1,6 @@
 package com.github.pakka_papad.home
 
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -28,9 +26,8 @@ import com.github.pakka_papad.data.music.Song
 
 @Composable
 fun AllSongs(
-    songs: List<Song>,
+    songs: List<Song>?,
     onSongClicked: (index: Int) -> Unit,
-    paddingValues: PaddingValues,
     listState: LazyListState,
     onFavouriteClicked: (Song) -> Unit,
     currentSong: Song?,
@@ -38,19 +35,19 @@ fun AllSongs(
     onPlayAllClicked: () -> Unit,
     onShuffleClicked: () -> Unit,
     onAddToPlaylistsClicked: (Song) -> Unit,
-    emptyListMessage: String = "No Songs"
 ) {
+    if (songs == null) return
     if (songs.isEmpty()) {
         FullScreenSadMessage(
-            message = emptyListMessage,
-            paddingValues = paddingValues
+            message = "No songs found on this device",
+            paddingValues = WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues()
         )
     } else {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize(),
             state = listState,
-            contentPadding = paddingValues
+            contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues()
         ) {
             item {
                 PlayShuffleCard(

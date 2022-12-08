@@ -24,23 +24,23 @@ import timber.log.Timber
 
 @Composable
 fun Albums(
-    paddingValues: PaddingValues,
-    albumsWithSongs: List<AlbumWithSongs>,
+    albumsWithSongs: List<AlbumWithSongs>?,
     gridState: LazyGridState,
     onAlbumClicked: (AlbumWithSongs) -> Unit
 ) {
+    if (albumsWithSongs == null) return
     if (albumsWithSongs.isEmpty()) {
         FullScreenSadMessage(
             message = "Oops! No albums found",
-            paddingValues = paddingValues,
+            paddingValues = WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues(),
         )
     } else {
         LazyVerticalGrid(
             modifier = Modifier
                 .fillMaxSize(),
             state = gridState,
-            columns = GridCells.Adaptive(140.dp),
-            contentPadding = paddingValues,
+            columns = GridCells.Adaptive(150.dp),
+            contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues(),
         ) {
             items(
                 items = albumsWithSongs,

@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -17,7 +19,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.media3.exoplayer.ExoPlayer
@@ -44,7 +45,7 @@ class HomeFragment : Fragment() {
     @Inject
     lateinit var exoPlayer: ExoPlayer
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -63,21 +64,24 @@ class HomeFragment : Fragment() {
             setContent {
                 val systemUiController = rememberSystemUiController(requireActivity().window)
                 val themePreference by viewModel.theme.collectAsState()
-                ZenTheme(
-                    themePreference = themePreference,
-                    systemUiController = systemUiController
-                ) {
+                ZenTheme(themePreference, systemUiController) {
                     var currentScreen by rememberSaveable { mutableStateOf(Screens.Songs) }
+
                     val songs by viewModel.songs.collectAsState()
                     val allSongsListState = rememberLazyListState()
+
                     val currentSong by viewModel.currentSong.collectAsState()
                     val songPlaying by viewModel.currentSongPlaying.collectAsState()
+
                     val albumsWithSongs by viewModel.albumsWithSongs.collectAsState()
                     val allAlbumsGridState = rememberLazyGridState()
+
                     val artistsWithSongs by viewModel.artistsWithSongs.collectAsState()
                     val allArtistsListState = rememberLazyListState()
+
                     val playlists by viewModel.playlists.collectAsState()
                     val allPlaylistsListState = rememberLazyListState()
+
                     Scaffold(
                         topBar = {
                             HomeTopBar(
@@ -91,8 +95,6 @@ class HomeFragment : Fragment() {
                             )
                         },
                         content = { paddingValues ->
-                            val insetsPadding =
-                                WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues()
                             var dataRetrieved by remember { mutableStateOf(false) }
                             LaunchedEffect(
                                 key1 = songs,
@@ -103,7 +105,10 @@ class HomeFragment : Fragment() {
                                     songs != null && albumsWithSongs != null && artistsWithSongs != null
                             }
                             Box(
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier
+                                    .padding(paddingValues)
+                                    .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
+                                    .fillMaxSize(),
                                 contentAlignment = Alignment.BottomCenter
                             ) {
                                 if (!dataRetrieved) {
@@ -111,67 +116,79 @@ class HomeFragment : Fragment() {
                                         modifier = Modifier.align(Alignment.Center)
                                     )
                                 } else {
-                                    HomeContent(
-                                        currentScreen = currentScreen,
-                                        onSongClicked = { index ->
-                                            viewModel.setQueue(songs!!, index)
-                                        },
-                                        songs = songs!!,
-                                        allSongsListState = allSongsListState,
-                                        paddingValues = PaddingValues(
-                                            bottom = paddingValues.calculateBottomPadding(),
-                                            top = paddingValues.calculateTopPadding(),
-                                            start = insetsPadding.calculateStartPadding(LayoutDirection.Ltr),
-                                            end = insetsPadding.calculateEndPadding(LayoutDirection.Ltr)
-                                        ),
-                                        albumsWithSongs = albumsWithSongs!!,
-                                        allAlbumsGridState = allAlbumsGridState,
-                                        onAlbumClicked = { albumWithSongs ->
-                                            navController.navigate(
-                                                HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                                                    CollectionType.AlbumType(albumWithSongs.album.name)
+                                    AnimatedContent(targetState = currentScreen) { targetScreen ->
+                                        when (targetScreen) {
+                                            Screens.Songs -> {
+                                                AllSongs(
+                                                    songs = songs,
+                                                    onSongClicked = {
+                                                        viewModel.setQueue(songs, it)
+                                                    },
+                                                    listState = allSongsListState,
+                                                    onFavouriteClicked = viewModel::changeFavouriteValue,
+                                                    currentSong = currentSong,
+                                                    onAddToQueueClicked = viewModel::addToQueue,
+                                                    onPlayAllClicked = {
+                                                        viewModel.setQueue(songs)
+                                                    },
+                                                    onShuffleClicked = {
+                                                        viewModel.shufflePlay(songs)
+                                                    },
+                                                    onAddToPlaylistsClicked = {
+                                                        navController.navigate(
+                                                            HomeFragmentDirections.actionHomeFragmentToSelectPlaylistFragment(
+                                                                it.location
+                                                            )
+                                                        )
+                                                    },
                                                 )
-                                            )
-                                        },
-                                        artistsWithSongs = artistsWithSongs!!,
-                                        onArtistClicked = { artistWithSongs ->
-                                            navController.navigate(
-                                                HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                                                    CollectionType.ArtistType(artistWithSongs.artist.name)
+                                            }
+                                            Screens.Albums -> {
+                                                Albums(
+                                                    albumsWithSongs = albumsWithSongs,
+                                                    gridState = allAlbumsGridState,
+                                                    onAlbumClicked = {
+                                                        navController.navigate(
+                                                            HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
+                                                                CollectionType.AlbumType(it.album.name)
+                                                            )
+                                                        )
+                                                    }
                                                 )
-                                            )
-                                        },
-                                        allArtistsListState = allArtistsListState,
-                                        onSongFavouriteClicked = viewModel::changeFavouriteValue,
-                                        currentSong = currentSong,
-                                        onAddToQueueClicked = viewModel::addToQueue,
-                                        onPlayAllClicked = {
-                                            viewModel.setQueue(songs!!, 0)
-                                        },
-                                        onShuffleClicked = {
-                                            viewModel.shufflePlay(songs!!)
-                                        },
-                                        playlists = playlists,
-                                        allPlaylistListState = allPlaylistsListState,
-                                        onPlaylistClicked = { playlistId ->
-                                            navController.navigate(
-                                                HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                                                    CollectionType.PlaylistType(playlistId)
+                                            }
+                                            Screens.Artists -> {
+                                                Artists(
+                                                    artistsWithSongs = artistsWithSongs,
+                                                    onArtistClicked = {
+                                                        navController.navigate(
+                                                            HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
+                                                                CollectionType.ArtistType(it.artist.name)
+                                                            )
+                                                        )
+                                                    },
+                                                    listState = allArtistsListState
                                                 )
-                                            )
-                                        },
-                                        onPlaylistCreate = viewModel::onPlaylistCreate,
-                                        onAddToPlaylistsClicked = {
-                                            navController.navigate(
-                                                HomeFragmentDirections.actionHomeFragmentToSelectPlaylistFragment(it.location)
-                                            )
-                                        },
-                                    )
+                                            }
+                                            Screens.Playlists -> {
+                                                Playlists(
+                                                    playlists = playlists,
+                                                    onPlaylistClicked = {
+                                                        navController.navigate(
+                                                            HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
+                                                                CollectionType.PlaylistType(it)
+                                                            )
+                                                        )
+                                                    },
+                                                    listState = allPlaylistsListState,
+                                                    onPlaylistCreate = viewModel::onPlaylistCreate
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         },
                         bottomBar = {
-
                             HomeBottomBar(
                                 currentScreen = currentScreen,
                                 onScreenChange = {
