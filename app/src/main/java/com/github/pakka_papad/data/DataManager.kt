@@ -39,6 +39,15 @@ class DataManager(
     fun getAlbumWithSongsByName(albumName: String) = songDao.getAlbumWithSongsByName(albumName)
     fun getArtistWithSongsByName(artistName: String) = songDao.getArtistWithSongsByName(artistName)
 
+    suspend fun searchSongs(query: String) = songDao.searchSongs(query)
+    suspend fun searchAlbums(query: String) = songDao.searchAlbums(query)
+    suspend fun searchArtists(query: String) = songDao.searchArtists(query)
+    suspend fun searchAlbumArtists(query: String) = songDao.searchAlbumArtists(query)
+    suspend fun searchComposers(query: String) = songDao.searchComposers(query)
+    suspend fun searchLyricists(query: String) = songDao.searchLyricists(query)
+    suspend fun searchPlaylists(query: String) = songDao.searchPlaylists(query)
+    suspend fun searchGenres(query: String) = songDao.searchGenres(query)
+
     suspend fun createPlaylist(playlistName: String) {
         if (playlistName.trim().isEmpty()) return
         val playlist = PlaylistExceptId(

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
@@ -54,7 +55,7 @@ fun SearchBar(
             },
             trailingIcon = {
                 Icon(
-                    imageVector = Icons.Outlined.Search,
+                    imageVector = if (query.isEmpty()) Icons.Outlined.Search else Icons.Outlined.Close,
                     contentDescription = null,
                     modifier = Modifier
                         .size(48.dp)
@@ -65,7 +66,11 @@ fun SearchBar(
                                 bounded = false,
                                 radius = 25.dp,
                             ),
-                            onClick = {}
+                            onClick = {
+                                if (query.isNotEmpty()) {
+                                    onQueryChange("")
+                                }
+                            }
                         ),
                 )
             },

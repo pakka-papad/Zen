@@ -11,14 +11,12 @@ import com.github.pakka_papad.collection.CollectionType
 import com.github.pakka_papad.collection.CollectionUi
 import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.ZenPreferencesDatastore
-import com.github.pakka_papad.data.music.PlaylistSongCrossRef
-import com.github.pakka_papad.data.music.ScanStatus
-import com.github.pakka_papad.data.music.Song
+import com.github.pakka_papad.data.music.*
 import com.github.pakka_papad.ui.theme.ThemePreference
+import com.github.pakka_papad.search.SearchResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -275,6 +273,53 @@ class SharedViewModel @Inject constructor(
 //        }
         viewModelScope.launch(Dispatchers.IO) {
             manager.updateSong(updatedSong)
+        }
+    }
+
+    private val _searchResult = MutableStateFlow(SearchResult())
+    val searchResult = _searchResult.asStateFlow()
+
+    private val _query = MutableStateFlow("")
+    val query = _query.asStateFlow()
+
+    fun search(query: String){
+        viewModelScope.launch {
+            _query.update { query }
+            val trimmedQuery = query.trim()
+            if (trimmedQuery.isEmpty()) {
+                _searchResult.update { SearchResult() }
+                return@launch
+            }
+            try {
+                lateinit var l1: List<Song>
+                lateinit var l2: List<Album>
+                lateinit var l3: List<Artist>
+                lateinit var l4: List<AlbumArtist>
+                lateinit var l5: List<Composer>
+                lateinit var l6: List<Lyricist>
+                lateinit var l7: List<Genre>
+                lateinit var l8: List<Playlist>
+
+                val searchJobs = listOf(
+                    launch { l1 = manager.searchSongs(trimmedQuery) },
+                    launch { l2 = manager.searchAlbums(trimmedQuery) },
+                    launch { l3 = manager.searchArtists(trimmedQuery) },
+                    launch { l4 = manager.searchAlbumArtists(trimmedQuery) },
+                    launch { l5 = manager.searchComposers(trimmedQuery) },
+                    launch { l6 = manager.searchLyricists(trimmedQuery) },
+                    launch { l7 = manager.searchGenres(trimmedQuery) },
+                    launch { l8 = manager.searchPlaylists(trimmedQuery) },
+                )
+                searchJobs.joinAll()
+                _searchResult.update {
+                    SearchResult(l1,l2,l3,l4,l5,l6,l7,l8)
+                }
+            } catch (e: Exception){
+                Timber.d(e.message)
+                _searchResult.update {
+                    SearchResult(errorMsg = "Err!!! Some error occurred")
+                }
+            }
         }
     }
 
