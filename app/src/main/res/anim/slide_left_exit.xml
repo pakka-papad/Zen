@@ -3,5 +3,8 @@
     <translate
         android:fromXDelta="0%"
         android:toXDelta="-100%"
-        android:duration="@integer/anim_duration"/>
+        android:fillAfter="true"
+        android:fillBefore="true"
+        android:fillEnabled="true"
+        android:duration="@android:integer/config_shortAnimTime"/>
 </set>
