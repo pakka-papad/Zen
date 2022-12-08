@@ -56,7 +56,8 @@ private fun SongCardBase(
     ) {
         Row(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .padding(horizontal = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AsyncImage(
@@ -90,47 +91,61 @@ private fun SongCardBase(
                     color = if (currentlyPlaying) onCurrentlyPlayingBackgroundColor else onBackgroundColor
                 )
             }
-            Row(
+            val scope = rememberCoroutineScope()
+            val favouriteButtonScale = remember { Animatable(1f) }
+            Icon(
+                imageVector = if (song.favourite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                contentDescription = null,
                 modifier = Modifier
-                    .fillMaxHeight(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                val scope = rememberCoroutineScope()
-                val favouriteButtonScale = remember { Animatable(1f) }
+                    .size(40.dp)
+                    .padding(8.dp)
+                    .scale(favouriteButtonScale.value)
+                    .clickable(
+                        onClick = {
+                            onFavouriteClicked(song)
+                            scope.launch {
+                                favouriteButtonScale.animateTo(
+                                    targetValue = 1.2f,
+                                    animationSpec = tween(
+                                        durationMillis = 300,
+                                        easing = FastOutLinearInEasing,
+                                    )
+                                )
+                                favouriteButtonScale.animateTo(
+                                    targetValue = 0.8f,
+                                    animationSpec = tween(
+                                        durationMillis = 200,
+                                        easing = LinearEasing,
+                                    )
+                                )
+                                favouriteButtonScale.animateTo(
+                                    targetValue = 1f,
+                                    animationSpec = tween(
+                                        durationMillis = 100,
+                                        easing = FastOutLinearInEasing,
+                                    )
+                                )
+                            }
+                        },
+                        indication = rememberRipple(
+                            bounded = false,
+                            radius = 20.dp
+                        ),
+                        interactionSource = remember { MutableInteractionSource() }
+                    ),
+                tint = if (currentlyPlaying) onCurrentlyPlayingBackgroundColor else onBackgroundColor,
+            )
+            if (songOptions.isNotEmpty()) {
+                var optionsVisible by remember { mutableStateOf(false) }
                 Icon(
-                    imageVector = if (song.favourite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    imageVector = Icons.Outlined.MoreVert,
                     contentDescription = null,
                     modifier = Modifier
                         .size(40.dp)
                         .padding(8.dp)
-                        .scale(favouriteButtonScale.value)
                         .clickable(
                             onClick = {
-                                onFavouriteClicked(song)
-                                scope.launch {
-                                    favouriteButtonScale.animateTo(
-                                        targetValue = 1.2f,
-                                        animationSpec = tween(
-                                            durationMillis = 300,
-                                            easing = FastOutLinearInEasing,
-                                        )
-                                    )
-                                    favouriteButtonScale.animateTo(
-                                        targetValue = 0.8f,
-                                        animationSpec = tween(
-                                            durationMillis = 200,
-                                            easing = LinearEasing,
-                                        )
-                                    )
-                                    favouriteButtonScale.animateTo(
-                                        targetValue = 1f,
-                                        animationSpec = tween(
-                                            durationMillis = 100,
-                                            easing = FastOutLinearInEasing,
-                                        )
-                                    )
-                                }
+                                optionsVisible = true
                             },
                             indication = rememberRipple(
                                 bounded = false,
@@ -140,35 +155,14 @@ private fun SongCardBase(
                         ),
                     tint = if (currentlyPlaying) onCurrentlyPlayingBackgroundColor else onBackgroundColor,
                 )
-                if (songOptions.isNotEmpty()) {
-                    var optionsVisible by remember { mutableStateOf(false) }
-                    Icon(
-                        imageVector = Icons.Outlined.MoreVert,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .padding(8.dp)
-                            .clickable(
-                                onClick = {
-                                    optionsVisible = true
-                                },
-                                indication = rememberRipple(
-                                    bounded = false,
-                                    radius = 20.dp
-                                ),
-                                interactionSource = remember { MutableInteractionSource() }
-                            ),
-                        tint = if (currentlyPlaying) onCurrentlyPlayingBackgroundColor else onBackgroundColor,
+                if (optionsVisible) {
+                    OptionsAlertDialog(
+                        options = songOptions,
+                        title = song.title,
+                        onDismissRequest = {
+                            optionsVisible = false
+                        }
                     )
-                    if (optionsVisible){
-                        OptionsAlertDialog(
-                            options = songOptions,
-                            title = song.title,
-                            onDismissRequest = {
-                                optionsVisible = false
-                            }
-                        )
-                    }
                 }
             }
         }

@@ -31,7 +31,7 @@ class DataManager(
 ) {
 
     val allSongs = songDao.getAllSongs()
-    val allAlbumsWithSongs = songDao.getAllAlbumsWithSongs()
+    val allAlbums = songDao.getAllAlbums()
     val allArtistsWithSongs = songDao.getAllArtistsWithSongs()
     val allPlaylists = songDao.getAllPlaylists()
 

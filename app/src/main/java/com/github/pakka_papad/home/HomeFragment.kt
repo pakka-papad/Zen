@@ -73,7 +73,7 @@ class HomeFragment : Fragment() {
                     val currentSong by viewModel.currentSong.collectAsState()
                     val songPlaying by viewModel.currentSongPlaying.collectAsState()
 
-                    val albumsWithSongs by viewModel.albumsWithSongs.collectAsState()
+                    val albums by viewModel.albums.collectAsState()
                     val allAlbumsGridState = rememberLazyGridState()
 
                     val artistsWithSongs by viewModel.artistsWithSongs.collectAsState()
@@ -98,11 +98,11 @@ class HomeFragment : Fragment() {
                             var dataRetrieved by remember { mutableStateOf(false) }
                             LaunchedEffect(
                                 key1 = songs,
-                                key2 = albumsWithSongs,
+                                key2 = albums,
                                 key3 = artistsWithSongs
                             ) {
                                 dataRetrieved =
-                                    songs != null && albumsWithSongs != null && artistsWithSongs != null
+                                    songs != null && albums != null && artistsWithSongs != null
                             }
                             Box(
                                 modifier = Modifier
@@ -145,12 +145,12 @@ class HomeFragment : Fragment() {
                                             }
                                             Screens.Albums -> {
                                                 Albums(
-                                                    albumsWithSongs = albumsWithSongs,
+                                                    albums = albums,
                                                     gridState = allAlbumsGridState,
                                                     onAlbumClicked = {
                                                         navController.navigate(
                                                             HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                                                                CollectionType.AlbumType(it.album.name)
+                                                                CollectionType.AlbumType(it.name)
                                                             )
                                                         )
                                                     }

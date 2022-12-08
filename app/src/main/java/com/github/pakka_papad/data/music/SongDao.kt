@@ -32,7 +32,7 @@ interface SongDao {
 
     @Transaction
     @Query("SELECT * FROM ${Constants.Tables.ALBUM_TABLE} ORDER BY name ASC")
-    fun getAllAlbumsWithSongs(): Flow<List<AlbumWithSongs>>
+    fun getAllAlbums(): Flow<List<Album>>
 
     @Transaction
     @Query("SELECT * FROM ${Constants.Tables.ALBUM_TABLE} WHERE name = :albumName")
