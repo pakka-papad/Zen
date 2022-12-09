@@ -4,15 +4,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
@@ -97,5 +101,42 @@ fun SearchBar(
             currentType = currentType,
             onSearchTypeSelect = onSearchTypeSelect
         )
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchTypeSelector(
+    currentType: SearchType,
+    onSearchTypeSelect: (SearchType) -> Unit,
+){
+    LazyRow(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ){
+        items(
+            items = SearchType.values(),
+            key = { it.name }
+        ){ type ->
+            FilterChip(
+                selected = (type == currentType),
+                onClick = { onSearchTypeSelect(type) },
+                label = {
+                    Text(
+                        text = type.text,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                },
+                selectedIcon = {
+                    Icon(
+                        imageVector = Icons.Outlined.Check,
+                        contentDescription = "check-mark",
+                    )
+                }
+            )
+        }
     }
 }

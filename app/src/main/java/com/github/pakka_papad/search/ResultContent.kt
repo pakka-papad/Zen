@@ -3,61 +3,20 @@ package com.github.pakka_papad.search
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import com.github.pakka_papad.components.SongCardV3
 import com.github.pakka_papad.data.music.*
-
-@Composable
-fun SongCardV3(
-    song: Song,
-    onClick: () -> Unit,
-) = Column(
-    modifier = Modifier
-        .widthIn(max = 200.dp)
-        .fillMaxWidth()
-        .padding(10.dp)
-        .clickable(onClick = onClick),
-    horizontalAlignment = Alignment.Start,
-) {
-    AsyncImage(
-        model = song.artUri,
-        contentDescription = "song-album-art",
-        modifier = Modifier
-            .aspectRatio(1f)
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp)),
-        contentScale = ContentScale.Crop,
-    )
-    Spacer(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(8.dp)
-    )
-    Text(
-        text = song.title,
-        maxLines = 1,
-        style = MaterialTheme.typography.titleMedium,
-        overflow = TextOverflow.Ellipsis
-    )
-    Text(
-        text = song.artist,
-        maxLines = 1,
-        style = MaterialTheme.typography.titleSmall,
-        overflow = TextOverflow.Ellipsis
-    )
-}
+import com.github.pakka_papad.data.music.Composer
+import com.github.pakka_papad.home.AlbumCard
 
 @Composable
 fun TextCard(
@@ -79,38 +38,116 @@ fun TextCard(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchTypeSelector(
-    currentType: SearchType,
-    onSearchTypeSelect: (SearchType) -> Unit,
+fun ResultContent(
+    searchResult: SearchResult,
+    showGrid: Boolean,
+    searchType: SearchType,
+    onSongClicked: (Song) -> Unit,
+    onAlbumClicked: (Album) -> Unit,
+    onArtistClicked: (Artist) -> Unit,
+    onAlbumArtistClicked: (AlbumArtist) -> Unit,
+    onComposerClicked: (Composer) -> Unit,
+    onLyricistClicked: (Lyricist) -> Unit,
+    onGenreClicked: (Genre) -> Unit,
+    onPlaylistClicked: (Playlist) -> Unit,
 ){
-    LazyRow(
-        modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(10.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ){
-        items(
-            items = SearchType.values(),
-            key = { it.name }
-        ){ type ->
-            FilterChip(
-                selected = (type == currentType),
-                onClick = { onSearchTypeSelect(type) },
-                label = {
-                    Text(
-                        text = type.text,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                },
-                selectedIcon = {
-                    Icon(
-                        imageVector = Icons.Outlined.Check,
-                        contentDescription = "check-mark",
+    LazyVerticalGrid(
+        columns = if (showGrid) GridCells.Adaptive(150.dp) else GridCells.Fixed(1),
+        modifier = Modifier
+            .fillMaxSize(),
+        contentPadding = WindowInsets.systemBars.only(
+            WindowInsetsSides.Bottom).asPaddingValues(),
+    ) {
+        when(searchType){
+            SearchType.Songs -> {
+                items(
+                    items = searchResult.songs,
+                    key = { it.location }
+                ){ song ->
+                    SongCardV3(
+                        song = song,
+                        onSongClicked = onSongClicked,
                     )
                 }
-            )
+            }
+            SearchType.Albums -> {
+                items(
+                    items = searchResult.albums,
+                    key = { it.name }
+                ){ album ->
+                    AlbumCard(
+                        album = album,
+                        onAlbumClicked = onAlbumClicked,
+                    )
+                }
+            }
+            SearchType.Artists -> {
+                items(
+                    items = searchResult.artists,
+                    key = { it.name }
+                ){ artist ->
+                    TextCard(
+                        text = artist.name,
+                        onClick = { onArtistClicked(artist) },
+                    )
+                }
+            }
+            SearchType.AlbumArtists -> {
+                items(
+                    items = searchResult.albumArtists,
+                    key = { it.name }
+                ){ albumArtist ->
+                    TextCard(
+                        text = albumArtist.name,
+                        onClick = {},
+                    )
+                }
+            }
+            SearchType.Lyricists -> {
+                items(
+                    items = searchResult.lyricists,
+                    key = { it.name }
+                ){ lyricist ->
+                    TextCard(
+                        text = lyricist.name,
+                        onClick = {},
+                    )
+                }
+            }
+            SearchType.Composers -> {
+                items(
+                    items = searchResult.composers,
+                    key = { it.name }
+                ){ composer ->
+                    TextCard(
+                        text = composer.name,
+                        onClick = {},
+                    )
+                }
+            }
+            SearchType.Genres -> {
+                items(
+                    items = searchResult.genres,
+                    key = { it.genre }
+                ){ genre ->
+                    TextCard(
+                        text = genre.genre,
+                        onClick = {},
+                    )
+                }
+            }
+            SearchType.Playlists -> {
+                items(
+                    items = searchResult.playlists,
+                    key = { it.playlistId }
+                ){ playlist ->
+                    TextCard(
+                        text = playlist.playlistName,
+                        onClick = { onPlaylistClicked(playlist) },
+                    )
+                }
+            }
         }
     }
 }

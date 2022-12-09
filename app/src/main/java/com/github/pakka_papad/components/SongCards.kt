@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.github.pakka_papad.components.more_options.OptionsAlertDialog
@@ -213,3 +214,43 @@ fun SongCardV2(
     onCurrentlyPlayingBackgroundColor = MaterialTheme.colorScheme.onSecondary,
     songOptions = songOptions
 )
+
+@Composable
+fun SongCardV3(
+    song: Song,
+    onSongClicked: (Song) -> Unit,
+) = Column(
+    modifier = Modifier
+        .widthIn(max = 200.dp)
+        .fillMaxWidth()
+        .padding(10.dp)
+        .clickable(onClick = { onSongClicked(song) }),
+    horizontalAlignment = Alignment.Start,
+) {
+    AsyncImage(
+        model = song.artUri,
+        contentDescription = "song-album-art",
+        modifier = Modifier
+            .aspectRatio(1f)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp)),
+        contentScale = ContentScale.Crop,
+    )
+    Spacer(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(8.dp)
+    )
+    Text(
+        text = song.title,
+        maxLines = 1,
+        style = MaterialTheme.typography.titleMedium,
+        overflow = TextOverflow.Ellipsis
+    )
+    Text(
+        text = song.artist,
+        maxLines = 1,
+        style = MaterialTheme.typography.titleSmall,
+        overflow = TextOverflow.Ellipsis
+    )
+}
