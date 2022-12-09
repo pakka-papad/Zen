@@ -99,6 +99,9 @@ fun SmallTopBar(
                 )
             },
             actions = actions,
+            colors = TopAppBarDefaults.smallTopAppBarColors(
+                containerColor = backgroundColor
+            )
         )
     },
     backgroundColor = backgroundColor
@@ -121,7 +124,7 @@ fun TopBarWithBackArrow(
                 .padding(16.dp)
                 .size(30.dp)
                 .clickable(
-                    interactionSource = remember{ MutableInteractionSource() },
+                    interactionSource = remember { MutableInteractionSource() },
                     indication = rememberRipple(
                         bounded = false,
                         radius = 25.dp,

@@ -167,7 +167,7 @@ private fun CollectionTopBarActions(
                     dropDownMenuExpanded = true
                 }
             ),
-        tint = MaterialTheme.colorScheme.onSurface,
+        tint = Color.White,
     )
     OptionsDropDown(
         options = actions,

@@ -10,6 +10,7 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -59,5 +60,8 @@ fun HomeTopBar(
             tint = MaterialTheme.colorScheme.onSurface,
         )
     },
-    titleMaxLines = 1
+    titleMaxLines = 1,
+    backgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
+    onBackgroundColor = MaterialTheme.colorScheme.onSurface,
+
 )

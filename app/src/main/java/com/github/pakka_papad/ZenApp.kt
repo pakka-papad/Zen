@@ -22,7 +22,7 @@ class ZenApp: Application(), ImageLoaderFactory {
         return ImageLoader.Builder(this).apply {
             allowRgb565(true)
             bitmapConfig(Bitmap.Config.RGB_565)
-            error(R.mipmap.ic_launcher_background)
+            error(R.drawable.error)
         }.build()
     }
 }
