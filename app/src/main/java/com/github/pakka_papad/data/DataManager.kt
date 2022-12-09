@@ -38,6 +38,10 @@ class DataManager(
     fun getPlaylistWithSongsById(id: Long) = songDao.getPlaylistWithSongs(id)
     fun getAlbumWithSongsByName(albumName: String) = songDao.getAlbumWithSongsByName(albumName)
     fun getArtistWithSongsByName(artistName: String) = songDao.getArtistWithSongsByName(artistName)
+    fun getAlbumArtistWithSings(albumArtistName: String) = songDao.getAlbumArtistWithSongs(albumArtistName)
+    fun getComposerWithSongs(composerName: String) = songDao.getComposerWithSongs(composerName)
+    fun getLyricistWithSongs(lyricistName: String) = songDao.getLyricistWithSongs(lyricistName)
+    fun getGenreWithSongs(genreName: String) = songDao.getGenreWithSongs(genreName)
 
     suspend fun searchSongs(query: String) = songDao.searchSongs(query)
     suspend fun searchAlbums(query: String) = songDao.searchAlbums(query)

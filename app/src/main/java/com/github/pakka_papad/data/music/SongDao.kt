@@ -82,11 +82,19 @@ interface SongDao {
     @Query("SELECT * FROM ${Constants.Tables.ALBUM_ARTIST_TABLE} WHERE name LIKE '%' || :query || '%'")
     suspend fun searchAlbumArtists(query: String): List<AlbumArtist>
 
+    @Transaction
+    @Query("SELECT * FROM ${Constants.Tables.ALBUM_ARTIST_TABLE} WHERE name = :name")
+    fun getAlbumArtistWithSongs(name: String): Flow<AlbumArtistWithSongs?>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAllComposers(data: List<Composer>)
 
     @Query("SELECT * FROM ${Constants.Tables.COMPOSER_TABLE} WHERE name LIKE '%' || :query || '%'")
     suspend fun searchComposers(query: String): List<Composer>
+
+    @Transaction
+    @Query("SELECT * FROM ${Constants.Tables.COMPOSER_TABLE} WHERE name = :name")
+    fun getComposerWithSongs(name: String): Flow<ComposerWithSongs?>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAllLyricists(data: List<Lyricist>)
@@ -94,9 +102,17 @@ interface SongDao {
     @Query("SELECT * FROM ${Constants.Tables.LYRICIST_TABLE} WHERE name LIKE '%' || :query || '%'")
     suspend fun searchLyricists(query: String): List<Lyricist>
 
+    @Transaction
+    @Query("SELECT * FROM ${Constants.Tables.LYRICIST_TABLE} WHERE name = :name")
+    fun getLyricistWithSongs(name: String): Flow<LyricistWithSongs?>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAllGenres(data: List<Genre>)
 
     @Query("SELECT * FROM ${Constants.Tables.GENRE_TABLE} WHERE genre LIKE '%' || :query || '%'")
     suspend fun searchGenres(query: String): List<Genre>
+
+    @Transaction
+    @Query("SELECT * FROM ${Constants.Tables.GENRE_TABLE} WHERE genre = :genreName")
+    fun getGenreWithSongs(genreName: String): Flow<GenreWithSongs?>
 }

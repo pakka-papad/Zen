@@ -92,10 +92,34 @@ class SearchFragment : Fragment() {
                                                     )
                                             )
                                         },
-                                        onAlbumArtistClicked = {},
-                                        onComposerClicked = {},
-                                        onLyricistClicked = {},
-                                        onGenreClicked = {},
+                                        onAlbumArtistClicked = {
+                                           navController.navigate(
+                                               SearchFragmentDirections.actionSearchFragmentToCollectionFragment(
+                                                   CollectionType.AlbumArtistType(it.name)
+                                               )
+                                           )
+                                        },
+                                        onComposerClicked = {
+                                            navController.navigate(
+                                                SearchFragmentDirections.actionSearchFragmentToCollectionFragment(
+                                                    CollectionType.ComposerType(it.name)
+                                                )
+                                            )
+                                        },
+                                        onLyricistClicked = {
+                                            navController.navigate(
+                                                SearchFragmentDirections.actionSearchFragmentToCollectionFragment(
+                                                    CollectionType.LyricistType(it.name)
+                                                )
+                                            )
+                                        },
+                                        onGenreClicked = {
+                                             navController.navigate(
+                                                 SearchFragmentDirections.actionSearchFragmentToCollectionFragment(
+                                                     CollectionType.GenreType(it.genre)
+                                                 )
+                                             )
+                                        },
                                         onPlaylistClicked = {
                                             navController.navigate(
                                                 SearchFragmentDirections
