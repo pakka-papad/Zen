@@ -89,7 +89,7 @@ class HomeFragment : Fragment() {
                                     navController.navigate(R.id.action_homeFragment_to_settingsFragment)
                                 },
                                 onSearchClicked = {
-                                    viewModel.search("")
+                                    viewModel.updateQuery("")
                                     navController.navigate(R.id.action_homeFragment_to_searchFragment)
                                 },
                             )

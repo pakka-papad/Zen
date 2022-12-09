@@ -5,18 +5,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.components.FullScreenSadMessage
+import com.github.pakka_papad.home.AlbumCard
 import com.github.pakka_papad.ui.theme.ZenTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -27,7 +31,7 @@ class SearchFragment : Fragment() {
 
     private val viewModel by activityViewModels<SharedViewModel>()
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class,)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -40,19 +44,28 @@ class SearchFragment : Fragment() {
                 ZenTheme(themePreference) {
                     val query by viewModel.query.collectAsState()
                     val searchResult by viewModel.searchResult.collectAsState()
+                    val searchType by viewModel.searchType.collectAsState()
+
+                    val showGrid by remember {
+                        derivedStateOf {
+                            ((searchType == SearchType.Songs) || (searchType == SearchType.Albums))
+                        }
+                    }
                     Scaffold(
                         topBar = {
                             SearchBar(
                                 query = query,
-                                onQueryChange = viewModel::search,
-                                onBackArrowPressed = navController::popBackStack
+                                onQueryChange = viewModel::updateQuery,
+                                onBackArrowPressed = navController::popBackStack,
+                                currentType = searchType,
+                                onSearchTypeSelect = viewModel::updateType
                             )
                         },
-                        content = {
+                        content = { paddingValues ->
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(it)
+                                    .padding(paddingValues)
                                     .windowInsetsPadding(
                                         WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
                                     )
@@ -60,68 +73,95 @@ class SearchFragment : Fragment() {
                                 if (searchResult.errorMsg != null) {
                                     FullScreenSadMessage(searchResult.errorMsg)
                                 } else {
-                                    LazyColumn(
+                                    LazyVerticalGrid(
+                                        columns = if (showGrid) GridCells.Adaptive(150.dp) else GridCells.Fixed(1),
                                         modifier = Modifier
                                             .fillMaxSize(),
                                         contentPadding = WindowInsets.systemBars.only(
-                                            WindowInsetsSides.Bottom).asPaddingValues()
+                                            WindowInsetsSides.Bottom).asPaddingValues(),
                                     ) {
-                                        item("Songs") {
-                                            SongResult(
-                                                onSeeAllPressed = {  },
-                                                onSongClicked = {  },
-                                                songs = searchResult.songs.take(5)
-                                            )
+                                        when(searchType){
+                                            SearchType.Songs -> {
+                                                items(
+                                                    items = searchResult.songs,
+                                                    key = { it.location }
+                                                ){
+                                                    SongCardV3(song = it) {
+
+                                                    }
+                                                }
+                                            }
+                                            SearchType.Albums -> {
+                                                items(
+                                                    items = searchResult.albums,
+                                                    key = { it.name }
+                                                ){
+                                                    AlbumCard(album = it){
+
+                                                    }
+                                                }
+                                            }
+                                            SearchType.Artists -> {
+                                                items(
+                                                    items = searchResult.artists,
+                                                    key = { it.name }
+                                                ){
+                                                    TextCard(text = it.name){
+
+                                                    }
+                                                }
+                                            }
+                                            SearchType.AlbumArtists -> {
+                                                items(
+                                                    items = searchResult.albumArtists,
+                                                    key = { it.name }
+                                                ){
+                                                    TextCard(text = it.name){
+
+                                                    }
+                                                }
+                                            }
+                                            SearchType.Lyricists -> {
+                                                items(
+                                                    items = searchResult.lyricists,
+                                                    key = { it.name }
+                                                ){
+                                                    TextCard(text = it.name){
+
+                                                    }
+                                                }
+                                            }
+                                            SearchType.Composers -> {
+                                                items(
+                                                    items = searchResult.composers,
+                                                    key = { it.name }
+                                                ){
+                                                    TextCard(text = it.name){
+
+                                                    }
+                                                }
+                                            }
+                                            SearchType.Genres -> {
+                                                items(
+                                                    items = searchResult.genres,
+                                                    key = { it.genre }
+                                                ){
+                                                    TextCard(text = it.genre){
+
+                                                    }
+                                                }
+                                            }
+                                            SearchType.Playlists -> {
+                                                items(
+                                                    items = searchResult.playlists,
+                                                    key = { it.playlistId }
+                                                ){
+                                                    TextCard(text = it.playlistName){
+
+                                                    }
+                                                }
+                                            }
                                         }
-                                        item("Albums") {
-                                            AlbumResult(
-                                                onSeeAllPressed = {  },
-                                                onAlbumClicked = {  },
-                                                albums = searchResult.albums.take(5)
-                                            )
-                                        }
-//                                        item("Artists") {
-//                                            ArtistResult(
-//                                                onSeeAllPressed = {  },
-//                                                onArtistClicked = {  },
-//                                                artists = searchResult.artists.take(5)
-//                                            )
-//                                        }
-//                                        item("Album Artists") {
-//                                            AlbumArtistResult(
-//                                                onSeeAllPressed = {  },
-//                                                onAlbumArtistClicked = {  },
-//                                                albumArtists = searchResult.albumArtists.take(5)
-//                                            )
-//                                        }
-//                                        item("Composers") {
-//                                            ComposerResult(
-//                                                onSeeAllPressed = {  },
-//                                                onComposerClicked = {  },
-//                                                composers = searchResult.composers.take(5)
-//                                            )
-//                                        }
-//                                        item("Lyricists") {
-//                                            LyricistResult(
-//                                                onSeeAllPressed = { },
-//                                                onLyricistClicked = { },
-//                                                lyricists = searchResult.lyricists.take(5)
-//                                            )
-//                                        }
-//                                        item("Genres") {
-//                                            GenreResult(
-//                                                onSeeAllPressed = {  },
-//                                                onGenreClicked = {  },
-//                                                genres = searchResult.genres.take(5)
-//                                            )
-//                                        }
-//                                        item("Playlists") {
-//                                            PlaylistResult(
-//                                                onSeeAllPressed = { },
-//                                                onPlaylistClicked = { },
-//                                                playlists = searchResult.playlists.take(5)
-//                                            )
-//                                        }
                                     }
                                 }
                             }

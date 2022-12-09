@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -23,16 +24,22 @@ fun SearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
     onBackArrowPressed: () -> Unit,
+    currentType: SearchType,
+    onSearchTypeSelect: (SearchType) -> Unit,
 ) {
-    Box(
+    Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
             .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
     ) {
         TextField(
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.textFieldColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
+                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent,
+                errorIndicatorColor = Color.Transparent
             ),
             value = query,
             onValueChange = onQueryChange,
@@ -85,6 +92,10 @@ fun SearchBar(
             singleLine = true,
             textStyle = MaterialTheme.typography.titleLarge,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        )
+        SearchTypeSelector(
+            currentType = currentType,
+            onSearchTypeSelect = onSearchTypeSelect
         )
     }
 }
