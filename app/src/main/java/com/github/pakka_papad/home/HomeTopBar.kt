@@ -63,5 +63,4 @@ fun HomeTopBar(
     titleMaxLines = 1,
     backgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
     onBackgroundColor = MaterialTheme.colorScheme.onSurface,
-
 )
