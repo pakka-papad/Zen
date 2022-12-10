@@ -29,6 +29,8 @@ import com.github.pakka_papad.R
 import com.github.pakka_papad.Screens
 import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.collection.CollectionType
+import com.github.pakka_papad.data.music.Album
+import com.github.pakka_papad.data.music.ArtistWithSongCount
 import com.github.pakka_papad.player.ZenBroadcastReceiver
 import com.github.pakka_papad.ui.theme.ZenTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -76,7 +78,7 @@ class HomeFragment : Fragment() {
                     val albums by viewModel.albums.collectAsState()
                     val allAlbumsGridState = rememberLazyGridState()
 
-                    val artistsWithSongs by viewModel.artistsWithSongs.collectAsState()
+                    val artistsWithSongCount by viewModel.artistsWithSongCount.collectAsState()
                     val allArtistsListState = rememberLazyListState()
 
                     val playlists by viewModel.playlists.collectAsState()
@@ -99,10 +101,10 @@ class HomeFragment : Fragment() {
                             LaunchedEffect(
                                 key1 = songs,
                                 key2 = albums,
-                                key3 = artistsWithSongs
+                                key3 = artistsWithSongCount
                             ) {
                                 dataRetrieved =
-                                    songs != null && albums != null && artistsWithSongs != null
+                                    songs != null && albums != null && artistsWithSongCount != null
                             }
                             Box(
                                 modifier = Modifier
@@ -147,38 +149,20 @@ class HomeFragment : Fragment() {
                                                 Albums(
                                                     albums = albums,
                                                     gridState = allAlbumsGridState,
-                                                    onAlbumClicked = {
-                                                        navController.navigate(
-                                                            HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                                                                CollectionType.AlbumType(it.name)
-                                                            )
-                                                        )
-                                                    }
+                                                    onAlbumClicked = this@HomeFragment::navigateToCollection
                                                 )
                                             }
                                             Screens.Artists -> {
                                                 Artists(
-                                                    artistsWithSongs = artistsWithSongs,
-                                                    onArtistClicked = {
-                                                        navController.navigate(
-                                                            HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                                                                CollectionType.ArtistType(it.artist.name)
-                                                            )
-                                                        )
-                                                    },
+                                                    artistsWithSongCount = artistsWithSongCount,
+                                                    onArtistClicked = this@HomeFragment::navigateToCollection,
                                                     listState = allArtistsListState
                                                 )
                                             }
                                             Screens.Playlists -> {
                                                 Playlists(
                                                     playlists = playlists,
-                                                    onPlaylistClicked = {
-                                                        navController.navigate(
-                                                            HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                                                                CollectionType.PlaylistType(it)
-                                                            )
-                                                        )
-                                                    },
+                                                    onPlaylistClicked = this@HomeFragment::navigateToCollection,
                                                     listState = allPlaylistsListState,
                                                     onPlaylistCreate = viewModel::onPlaylistCreate
                                                 )
@@ -211,5 +195,29 @@ class HomeFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun navigateToCollection(album: Album){
+        navController.navigate(
+            HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
+                CollectionType.AlbumType(album.name)
+            )
+        )
+    }
+
+    private fun navigateToCollection(artistWithSongCount: ArtistWithSongCount) {
+        navController.navigate(
+            HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
+                CollectionType.ArtistType(artistWithSongCount.artistName)
+            )
+        )
+    }
+
+    private fun navigateToCollection(playlistId: Long){
+        navController.navigate(
+            HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
+                CollectionType.PlaylistType(playlistId)
+            )
+        )
     }
 }

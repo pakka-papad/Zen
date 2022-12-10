@@ -41,7 +41,7 @@ class SharedViewModel @Inject constructor(
         initialValue = null
     )
 
-    val artistsWithSongs = manager.allArtistsWithSongs.stateIn(
+    val artistsWithSongCount = manager.allArtistWithSongCount.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = null

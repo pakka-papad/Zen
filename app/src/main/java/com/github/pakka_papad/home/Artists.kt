@@ -19,16 +19,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.components.FullScreenSadMessage
-import com.github.pakka_papad.data.music.ArtistWithSongs
+import com.github.pakka_papad.data.music.ArtistWithSongCount
 
 @Composable
 fun Artists(
-    artistsWithSongs: List<ArtistWithSongs>?,
-    onArtistClicked: (ArtistWithSongs) -> Unit,
+    artistsWithSongCount: List<ArtistWithSongCount>?,
+    onArtistClicked: (ArtistWithSongCount) -> Unit,
     listState: LazyListState
 ) {
-    if (artistsWithSongs == null) return
-    if (artistsWithSongs.isEmpty()){
+    if (artistsWithSongCount == null) return
+    if (artistsWithSongCount.isEmpty()){
         FullScreenSadMessage(
             message = "No artists found",
             paddingValues = WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues(),
@@ -41,11 +41,11 @@ fun Artists(
             contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues(),
         ) {
             items(
-                items = artistsWithSongs,
-                key = { it.artist.name }
+                items = artistsWithSongCount,
+                key = { it.artistName }
             ) { artist ->
                 ArtistCard(
-                    artistWithSongs = artist,
+                    artistWithSongCount = artist,
                     onArtistClicked = onArtistClicked,
                 )
             }
@@ -55,8 +55,8 @@ fun Artists(
 
 @Composable
 fun ArtistCard(
-    artistWithSongs: ArtistWithSongs,
-    onArtistClicked: (ArtistWithSongs) -> Unit,
+    artistWithSongCount: ArtistWithSongCount,
+    onArtistClicked: (ArtistWithSongCount) -> Unit,
 ){
     Box(
         modifier = Modifier
@@ -64,7 +64,7 @@ fun ArtistCard(
             .height(85.dp)
             .clickable(
                 onClick = {
-                    onArtistClicked(artistWithSongs)
+                    onArtistClicked(artistWithSongCount)
                 }
             ),
         contentAlignment = Alignment.BottomCenter,
@@ -82,13 +82,13 @@ fun ArtistCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = artistWithSongs.artist.name,
+                    text = artistWithSongCount.artistName,
                     style = MaterialTheme.typography.titleLarge,
                     maxLines = 1,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Text(
-                    text = "${artistWithSongs.songs.size} ${if(artistWithSongs.songs.size == 1) "song" else "songs"}",
+                    text = "${artistWithSongCount.count} ${if(artistWithSongCount.count == 1) "song" else "songs"}",
                     maxLines = 1,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.fillMaxWidth(),
