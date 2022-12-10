@@ -8,6 +8,7 @@ import android.os.Build
 import android.provider.MediaStore.Audio
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
+import com.github.pakka_papad.data.daos.*
 import com.github.pakka_papad.data.music.*
 import com.github.pakka_papad.data.notification.ZenNotificationManager
 import com.github.pakka_papad.formatToDate
@@ -28,29 +29,36 @@ class DataManager(
     private val context: Context,
     private val notificationManager: ZenNotificationManager,
     private val songDao: SongDao,
+    private val albumDao: AlbumDao,
+    private val artistDao: ArtistDao,
+    private val albumArtistDao: AlbumArtistDao,
+    private val composerDao: ComposerDao,
+    private val lyricistDao: LyricistDao,
+    private val playlistDao: PlaylistDao,
+    private val genreDao: GenreDao,
 ) {
 
     val allSongs = songDao.getAllSongs()
-    val allAlbums = songDao.getAllAlbums()
-    val allArtistsWithSongs = songDao.getAllArtistsWithSongs()
-    val allPlaylists = songDao.getAllPlaylists()
+    val allAlbums = albumDao.getAllAlbums()
+    val allArtistsWithSongs = artistDao.getAllArtistsWithSongs()
+    val allPlaylists = playlistDao.getAllPlaylists()
 
-    fun getPlaylistWithSongsById(id: Long) = songDao.getPlaylistWithSongs(id)
-    fun getAlbumWithSongsByName(albumName: String) = songDao.getAlbumWithSongsByName(albumName)
-    fun getArtistWithSongsByName(artistName: String) = songDao.getArtistWithSongsByName(artistName)
-    fun getAlbumArtistWithSings(albumArtistName: String) = songDao.getAlbumArtistWithSongs(albumArtistName)
-    fun getComposerWithSongs(composerName: String) = songDao.getComposerWithSongs(composerName)
-    fun getLyricistWithSongs(lyricistName: String) = songDao.getLyricistWithSongs(lyricistName)
-    fun getGenreWithSongs(genreName: String) = songDao.getGenreWithSongs(genreName)
+    fun getPlaylistWithSongsById(id: Long) = playlistDao.getPlaylistWithSongs(id)
+    fun getAlbumWithSongsByName(albumName: String) = albumDao.getAlbumWithSongsByName(albumName)
+    fun getArtistWithSongsByName(artistName: String) = artistDao.getArtistWithSongsByName(artistName)
+    fun getAlbumArtistWithSings(albumArtistName: String) = albumArtistDao.getAlbumArtistWithSongs(albumArtistName)
+    fun getComposerWithSongs(composerName: String) = composerDao.getComposerWithSongs(composerName)
+    fun getLyricistWithSongs(lyricistName: String) = lyricistDao.getLyricistWithSongs(lyricistName)
+    fun getGenreWithSongs(genreName: String) = genreDao.getGenreWithSongs(genreName)
 
     suspend fun searchSongs(query: String) = songDao.searchSongs(query)
-    suspend fun searchAlbums(query: String) = songDao.searchAlbums(query)
-    suspend fun searchArtists(query: String) = songDao.searchArtists(query)
-    suspend fun searchAlbumArtists(query: String) = songDao.searchAlbumArtists(query)
-    suspend fun searchComposers(query: String) = songDao.searchComposers(query)
-    suspend fun searchLyricists(query: String) = songDao.searchLyricists(query)
-    suspend fun searchPlaylists(query: String) = songDao.searchPlaylists(query)
-    suspend fun searchGenres(query: String) = songDao.searchGenres(query)
+    suspend fun searchAlbums(query: String) = albumDao.searchAlbums(query)
+    suspend fun searchArtists(query: String) = artistDao.searchArtists(query)
+    suspend fun searchAlbumArtists(query: String) = albumArtistDao.searchAlbumArtists(query)
+    suspend fun searchComposers(query: String) = composerDao.searchComposers(query)
+    suspend fun searchLyricists(query: String) = lyricistDao.searchLyricists(query)
+    suspend fun searchPlaylists(query: String) = playlistDao.searchPlaylists(query)
+    suspend fun searchGenres(query: String) = genreDao.searchGenres(query)
 
     suspend fun createPlaylist(playlistName: String) {
         if (playlistName.trim().isEmpty()) return
@@ -58,13 +66,13 @@ class DataManager(
             playlistName = playlistName.trim(),
             createdAt = System.currentTimeMillis()
         )
-        songDao.insertPlaylist(playlist)
+        playlistDao.insertPlaylist(playlist)
         showToast("Playlist $playlistName created")
     }
 
     suspend fun insertPlaylistSongCrossRefs(playlistSongCrossRefs: List<PlaylistSongCrossRef>) {
         try {
-            songDao.insertPlaylistSongCrossRef(playlistSongCrossRefs)
+            playlistDao.insertPlaylistSongCrossRef(playlistSongCrossRefs)
             showToast("Done")
         } catch (e: Exception) {
             Timber.e(e)
@@ -163,12 +171,12 @@ class DataManager(
             _scanStatus.send(ScanStatus.ScanProgress(parsedSongs, totalSongs))
         } while (cursor.moveToNext())
         cursor.close()
-        songDao.insertAllAlbums(albumArtMap.entries.map { (t,u) -> Album(t,u) })
-        songDao.insertAllArtists(artistSet.map { Artist(it) })
-        songDao.insertAllAlbumArtists(albumArtistSet.map { AlbumArtist(it) })
-        songDao.insertAllComposers(composerSet.map { Composer(it) })
-        songDao.insertAllLyricists(lyricistSet.map { Lyricist(it) })
-        songDao.insertAllGenres(genreSet.map { Genre(it) })
+        albumDao.insertAllAlbums(albumArtMap.entries.map { (t,u) -> Album(t,u) })
+        artistDao.insertAllArtists(artistSet.map { Artist(it) })
+        albumArtistDao.insertAllAlbumArtists(albumArtistSet.map { AlbumArtist(it) })
+        composerDao.insertAllComposers(composerSet.map { Composer(it) })
+        lyricistDao.insertAllLyricists(lyricistSet.map { Lyricist(it) })
+        genreDao.insertAllGenres(genreSet.map { Genre(it) })
         songDao.insertAllSongs(songs)
         notificationManager.removeScanningNotification()
         _scanStatus.send(ScanStatus.ScanComplete)

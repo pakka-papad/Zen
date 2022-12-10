@@ -40,9 +40,16 @@ object AppModule {
         db: AppDatabase,
     ): DataManager {
         return DataManager(
-            context,
-            notificationManager,
-            db.songDao(),
+            context = context,
+            notificationManager = notificationManager,
+            songDao = db.songDao(),
+            albumDao = db.albumDao(),
+            artistDao = db.artistDao(),
+            albumArtistDao = db.albumArtistDao(),
+            composerDao = db.composerDao(),
+            lyricistDao = db.lyricistDao(),
+            genreDao = db.genreDao(),
+            playlistDao = db.playlistDao()
         )
     }
 
