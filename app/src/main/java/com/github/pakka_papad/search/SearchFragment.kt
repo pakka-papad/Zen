@@ -12,11 +12,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.collection.CollectionType
 import com.github.pakka_papad.components.FullScreenSadMessage
+import com.github.pakka_papad.data.music.*
+import com.github.pakka_papad.data.music.Composer
 import com.github.pakka_papad.ui.theme.ZenTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -27,20 +31,20 @@ class SearchFragment : Fragment() {
 
     private val viewModel by activityViewModels<SharedViewModel>()
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalLifecycleComposeApi::class)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
+    ): View? {
         navController = findNavController()
         return ComposeView(requireContext()).apply {
             setContent {
-                val themePreference by viewModel.theme.collectAsState()
+                val themePreference by viewModel.theme.collectAsStateWithLifecycle()
                 ZenTheme(themePreference) {
-                    val query by viewModel.query.collectAsState()
-                    val searchResult by viewModel.searchResult.collectAsState()
-                    val searchType by viewModel.searchType.collectAsState()
+                    val query by viewModel.query.collectAsStateWithLifecycle()
+                    val searchResult by viewModel.searchResult.collectAsStateWithLifecycle()
+                    val searchType by viewModel.searchType.collectAsStateWithLifecycle()
 
                     val showGrid by remember {
                         derivedStateOf {
@@ -54,7 +58,8 @@ class SearchFragment : Fragment() {
                                 onQueryChange = viewModel::updateQuery,
                                 onBackArrowPressed = navController::popBackStack,
                                 currentType = searchType,
-                                onSearchTypeSelect = viewModel::updateType
+                                onSearchTypeSelect = viewModel::updateType,
+                                onClearRequest = viewModel::clearQueryText
                             )
                         },
                         content = { paddingValues ->
@@ -73,61 +78,14 @@ class SearchFragment : Fragment() {
                                         searchResult = searchResult,
                                         showGrid = showGrid,
                                         searchType = searchType,
-                                        onSongClicked = {
-                                            viewModel.setQueue(listOf(it))
-                                        },
-                                        onAlbumClicked = {
-                                            navController.navigate(
-                                                SearchFragmentDirections
-                                                    .actionSearchFragmentToCollectionFragment(
-                                                        CollectionType.AlbumType(it.name)
-                                                    )
-                                            )
-                                        },
-                                        onArtistClicked = {
-                                            navController.navigate(
-                                                SearchFragmentDirections
-                                                    .actionSearchFragmentToCollectionFragment(
-                                                        CollectionType.ArtistType(it.name)
-                                                    )
-                                            )
-                                        },
-                                        onAlbumArtistClicked = {
-                                           navController.navigate(
-                                               SearchFragmentDirections.actionSearchFragmentToCollectionFragment(
-                                                   CollectionType.AlbumArtistType(it.name)
-                                               )
-                                           )
-                                        },
-                                        onComposerClicked = {
-                                            navController.navigate(
-                                                SearchFragmentDirections.actionSearchFragmentToCollectionFragment(
-                                                    CollectionType.ComposerType(it.name)
-                                                )
-                                            )
-                                        },
-                                        onLyricistClicked = {
-                                            navController.navigate(
-                                                SearchFragmentDirections.actionSearchFragmentToCollectionFragment(
-                                                    CollectionType.LyricistType(it.name)
-                                                )
-                                            )
-                                        },
-                                        onGenreClicked = {
-                                             navController.navigate(
-                                                 SearchFragmentDirections.actionSearchFragmentToCollectionFragment(
-                                                     CollectionType.GenreType(it.genre)
-                                                 )
-                                             )
-                                        },
-                                        onPlaylistClicked = {
-                                            navController.navigate(
-                                                SearchFragmentDirections
-                                                    .actionSearchFragmentToCollectionFragment(
-                                                        CollectionType.PlaylistType(it.playlistId)
-                                                    )
-                                            )
-                                        }
+                                        onSongClicked = this@SearchFragment::handleClick,
+                                        onAlbumClicked = this@SearchFragment::handleClick,
+                                        onArtistClicked = this@SearchFragment::handleClick,
+                                        onAlbumArtistClicked = this@SearchFragment::handleClick,
+                                        onComposerClicked = this@SearchFragment::handleClick,
+                                        onLyricistClicked = this@SearchFragment::handleClick,
+                                        onGenreClicked = this@SearchFragment::handleClick,
+                                        onPlaylistClicked = this@SearchFragment::handleClick,
                                     )
                                 }
                             }
@@ -136,5 +94,58 @@ class SearchFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun handleClick(song: Song){
+        viewModel.setQueue(listOf(song))
+    }
+
+    private fun handleClick(album: Album){
+        navController.navigate(
+            SearchFragmentDirections
+                .actionSearchFragmentToCollectionFragment(CollectionType.AlbumType(album.name))
+        )
+    }
+
+    private fun handleClick(artist: Artist){
+        navController.navigate(
+            SearchFragmentDirections
+                .actionSearchFragmentToCollectionFragment(CollectionType.ArtistType(artist.name))
+        )
+    }
+
+    private fun handleClick(albumArtist: AlbumArtist){
+        navController.navigate(
+            SearchFragmentDirections
+                .actionSearchFragmentToCollectionFragment(CollectionType.AlbumArtistType(albumArtist.name))
+        )
+    }
+
+    private fun handleClick(composer: Composer){
+        navController.navigate(
+            SearchFragmentDirections
+                .actionSearchFragmentToCollectionFragment(CollectionType.ComposerType(composer.name))
+        )
+    }
+
+    private fun handleClick(lyricist: Lyricist){
+        navController.navigate(
+            SearchFragmentDirections.actionSearchFragmentToCollectionFragment(
+                CollectionType.LyricistType(lyricist.name)
+            )
+        )
+    }
+
+    private fun handleClick(genre: Genre){
+        navController.navigate(
+            SearchFragmentDirections.actionSearchFragmentToCollectionFragment(CollectionType.GenreType(genre.genre))
+        )
+    }
+
+    private fun handleClick(playlist: Playlist){
+        navController.navigate(
+            SearchFragmentDirections
+                .actionSearchFragmentToCollectionFragment(CollectionType.PlaylistType(playlist.playlistId))
+        )
     }
 }

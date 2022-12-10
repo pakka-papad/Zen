@@ -332,6 +332,10 @@ class SharedViewModel @Inject constructor(
         initialValue = SearchResult()
     )
 
+    fun clearQueryText() {
+        _query.update { "" }
+    }
+
     fun updateQuery(query: String) {
         _query.update { query }
     }

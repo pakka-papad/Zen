@@ -9,7 +9,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.ripple.rememberRipple
@@ -30,6 +29,7 @@ fun SearchBar(
     onBackArrowPressed: () -> Unit,
     currentType: SearchType,
     onSearchTypeSelect: (SearchType) -> Unit,
+    onClearRequest: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -77,24 +77,20 @@ fun SearchBar(
                                 bounded = false,
                                 radius = 25.dp,
                             ),
-                            onClick = {
-                                if (query.isNotEmpty()) {
-                                    onQueryChange("")
-                                }
-                            }
+                            onClick = onClearRequest
                         ),
                 )
             },
             placeholder = {
                 Text(
                     text = "Search for songs, albums, artists, playlists...",
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             },
             singleLine = true,
-            textStyle = MaterialTheme.typography.titleLarge,
+            textStyle = MaterialTheme.typography.titleMedium,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         )
         SearchTypeSelector(
@@ -128,12 +124,6 @@ fun SearchTypeSelector(
                     Text(
                         text = type.text,
                         style = MaterialTheme.typography.titleMedium
-                    )
-                },
-                selectedIcon = {
-                    Icon(
-                        imageVector = Icons.Outlined.Check,
-                        contentDescription = "check-mark",
                     )
                 }
             )

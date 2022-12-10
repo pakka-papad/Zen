@@ -7,6 +7,7 @@ object Versions {
     const val androidxComposeMaterial = "1.2.1"
     const val androidxCore = "1.7.0"
     const val androidxLifecycle = "2.5.1"
+    const val androidxLifecycleRuntimeCompose = "2.6.0-alpha01"
     const val androidxActivity = "1.5.1"
     const val androidxJunit = "1.1.3"
     const val androidxEspresso = "3.4.0"
@@ -46,6 +47,7 @@ object Libraries {
     const val androidxCore = "androidx.core:core-ktx:${Versions.androidxCore}"
 
     const val androidxLifecycle = "androidx.lifecycle:lifecycle-runtime-ktx:${Versions.androidxLifecycle}"
+    const val androidxLifecycleRuntimeCompose = "androidx.lifecycle:lifecycle-runtime-compose:${Versions.androidxLifecycleRuntimeCompose}"
 
     const val androidxActivityCompose = "androidx.activity:activity-compose:${Versions.androidxActivity}"
 

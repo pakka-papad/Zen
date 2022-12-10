@@ -71,6 +71,7 @@ dependencies {
     implementation(Libraries.androidxCore)
 
     implementation(Libraries.androidxLifecycle)
+    implementation(Libraries.androidxLifecycleRuntimeCompose)
 
     implementation(Libraries.androidxActivityCompose)
 
