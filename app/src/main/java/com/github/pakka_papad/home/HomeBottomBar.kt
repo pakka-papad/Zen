@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -106,7 +107,9 @@ fun HomeBottomBar(
                             Text(
                                 text = screen.name,
                                 style = MaterialTheme.typography.bodySmall,
-                                fontWeight = if (currentScreen == screen) FontWeight.ExtraBold else FontWeight.Bold
+                                fontWeight = if (currentScreen == screen) FontWeight.ExtraBold else FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         },
                         alwaysShowLabel = true

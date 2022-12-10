@@ -183,6 +183,9 @@ class HomeFragment : Fragment() {
                                                     onPlaylistCreate = viewModel::onPlaylistCreate
                                                 )
                                             }
+                                            Screens.Genres -> {
+
+                                            }
                                         }
                                     }
                                 }
