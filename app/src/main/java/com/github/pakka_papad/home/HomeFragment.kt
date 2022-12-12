@@ -85,7 +85,7 @@ class HomeFragment : Fragment() {
                     val selectedPerson by viewModel.selectedPerson.collectAsStateWithLifecycle()
                     val allPersonsListState = rememberLazyListState()
 
-                    val playlists by viewModel.playlists.collectAsState()
+                    val playlistsWithSongCount by viewModel.playlistsWithSongCount.collectAsState()
                     val allPlaylistsListState = rememberLazyListState()
 
                     Scaffold(
@@ -171,7 +171,7 @@ class HomeFragment : Fragment() {
                                             }
                                             Screens.Playlists -> {
                                                 Playlists(
-                                                    playlists = playlists,
+                                                    playlistsWithSongCount = playlistsWithSongCount,
                                                     onPlaylistClicked = this@HomeFragment::navigateToCollection,
                                                     listState = allPlaylistsListState,
                                                     onPlaylistCreate = viewModel::onPlaylistCreate

@@ -2,10 +2,7 @@ package com.github.pakka_papad.data.daos
 
 import androidx.room.*
 import com.github.pakka_papad.Constants
-import com.github.pakka_papad.data.music.Playlist
-import com.github.pakka_papad.data.music.PlaylistExceptId
-import com.github.pakka_papad.data.music.PlaylistSongCrossRef
-import com.github.pakka_papad.data.music.PlaylistWithSongs
+import com.github.pakka_papad.data.music.*
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -26,5 +23,11 @@ interface PlaylistDao {
 
     @Query("SELECT * FROM ${Constants.Tables.PLAYLIST_TABLE} WHERE playlistName LIKE '%' || :query || '%'")
     suspend fun searchPlaylists(query: String): List<Playlist>
+
+    @Transaction
+    @Query("SELECT playlistId AS playlistId, count AS count, createdAt AS createdAt, playlistName AS playlistName FROM " +
+            "${Constants.Tables.PLAYLIST_TABLE} NATURAL JOIN (SELECT playlistId, COUNT(*) AS count FROM " +
+            "${Constants.Tables.PLAYLIST_SONG_CROSS_REF_TABLE} GROUP BY playlistId)")
+    fun getAllPlaylistWithSongCount(): Flow<List<PlaylistWithSongCount>>
 
 }

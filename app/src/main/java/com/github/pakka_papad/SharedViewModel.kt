@@ -65,7 +65,7 @@ class SharedViewModel @Inject constructor(
         initialValue = null
     )
 
-    val playlists = manager.allPlaylists.stateIn(
+    val playlistsWithSongCount = manager.allPlaylistsWithSongCount.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = emptyList()
@@ -252,7 +252,7 @@ class SharedViewModel @Inject constructor(
 
     fun addSongToPlaylists(songLocation: String) {
         viewModelScope.launch {
-            val playlists = playlists.value
+            val playlists = playlistsWithSongCount.value
             val playlistSongCrossRefs = _selectList.indices
                 .filter { _selectList[it] }
                 .map {

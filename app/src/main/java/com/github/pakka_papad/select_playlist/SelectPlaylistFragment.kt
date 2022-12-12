@@ -47,7 +47,7 @@ class SelectPlaylistFragment: Fragment() {
                 ZenTheme(
                     themePreference = themePreference
                 ) {
-                    val playlists = viewModel.playlists.value
+                    val playlists = viewModel.playlistsWithSongCount.value
                     val selectList = viewModel.selectList
                     LaunchedEffect(key1 = Unit){
                         viewModel.updateSelectListSize(playlists.size)

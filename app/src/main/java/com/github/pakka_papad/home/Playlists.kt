@@ -1,29 +1,29 @@
 package com.github.pakka_papad.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.github.pakka_papad.R
 import com.github.pakka_papad.components.PlaylistCard
-import com.github.pakka_papad.data.music.Playlist
+import com.github.pakka_papad.data.music.PlaylistWithSongCount
 
 @Composable
 fun Playlists(
-    playlists: List<Playlist>?,
+    playlistsWithSongCount: List<PlaylistWithSongCount>?,
     onPlaylistClicked: (Long) -> Unit,
     listState: LazyListState,
     onPlaylistCreate: (String) -> Unit,
 ) {
-    if (playlists == null) return
+    if (playlistsWithSongCount == null) return
     LazyColumn(
         modifier = Modifier
             .fillMaxSize(),
@@ -36,11 +36,11 @@ fun Playlists(
             )
         }
         items(
-            items = playlists,
+            items = playlistsWithSongCount,
             key = { it.playlistId }
         ) { playlist ->
             PlaylistCard(
-                playlist = playlist,
+                playlistWithSongCount = playlist,
                 onPlaylistClicked = onPlaylistClicked
             )
         }
@@ -54,20 +54,33 @@ fun CreatePlaylistCard(
     var isDialogVisible by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
+            .padding(horizontal = 20.dp)
             .fillMaxWidth()
-            .height(80.dp)
-            .padding(12.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.primary)
-            .clickable { isDialogVisible = true },
-        contentAlignment = Alignment.Center
+            .height(85.dp),
     ) {
         var playlistName by remember { mutableStateOf("") }
-        Text(
-            text = "Create new playlist",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onPrimary
-        )
+        Button(
+            onClick = { isDialogVisible = true },
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.Center)
+        ){
+            Icon(
+                painter = painterResource(R.drawable.ic_baseline_playlist_add_40),
+                modifier = Modifier
+                    .size(30.dp)
+                    .padding(4.dp),
+                contentDescription = "create-new-playlist"
+            )
+            Text(
+                text = "Create new playlist",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
         if (isDialogVisible) {
             AlertDialog(
                 onDismissRequest = { isDialogVisible = false },
@@ -117,5 +130,13 @@ fun CreatePlaylistCard(
                 }
             )
         }
+
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(0.8.dp)
+                .background(color = MaterialTheme.colorScheme.surfaceVariant)
+                .align(Alignment.BottomCenter)
+        )
     }
 }

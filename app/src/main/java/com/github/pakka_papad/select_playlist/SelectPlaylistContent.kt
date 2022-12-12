@@ -7,11 +7,11 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.github.pakka_papad.components.SelectablePlaylistCard
-import com.github.pakka_papad.data.music.Playlist
+import com.github.pakka_papad.data.music.PlaylistWithSongCount
 
 @Composable
 fun SelectPlaylistContent(
-    playlists: List<Playlist>,
+    playlists: List<PlaylistWithSongCount>,
     selectList: List<Boolean>,
     paddingValues: PaddingValues,
     onSelectChanged: (index: Int) -> Unit
