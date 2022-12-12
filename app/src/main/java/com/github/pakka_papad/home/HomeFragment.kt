@@ -90,6 +90,9 @@ class HomeFragment : Fragment() {
                     val playlistsWithSongCount by viewModel.playlistsWithSongCount.collectAsState()
                     val allPlaylistsListState = rememberLazyListState()
 
+                    val genresWithSongCount by viewModel.genresWithSongCount.collectAsStateWithLifecycle()
+                    val allGenresListState = rememberLazyListState()
+
                     Scaffold(
                         topBar = {
                             HomeTopBar(
@@ -180,7 +183,11 @@ class HomeFragment : Fragment() {
                                                 )
                                             }
                                             Screens.Genres -> {
-
+                                                Genres(
+                                                    genresWithSongCount = genresWithSongCount,
+                                                    listState = allGenresListState,
+                                                    onGenreClicked = this@HomeFragment::navigateToCollection
+                                                )
                                             }
                                         }
                                     }
@@ -198,7 +205,7 @@ class HomeFragment : Fragment() {
                                                 Screens.Albums -> allAlbumsGridState.scrollToItem(0)
                                                 Screens.Artists -> allPersonsListState.scrollToItem(0)
                                                 Screens.Playlists -> allPlaylistsListState.scrollToItem(0)
-                                                Screens.Genres -> {  }
+                                                Screens.Genres -> allGenresListState.scrollToItem(0)
                                             }
                                         }
                                     } else {
@@ -266,6 +273,14 @@ class HomeFragment : Fragment() {
         navController.navigate(
             HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
                 CollectionType.PlaylistType(playlistId)
+            )
+        )
+    }
+
+    private fun navigateToCollection(genreWithSongCount: GenreWithSongCount){
+        navController.navigate(
+            HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
+                CollectionType.GenreType(genreWithSongCount.genreName)
             )
         )
     }

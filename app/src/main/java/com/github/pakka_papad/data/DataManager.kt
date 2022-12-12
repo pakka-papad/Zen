@@ -45,6 +45,7 @@ class DataManager(
     val allComposerWithSongCount = songDao.getAllComposersWithSongCount()
     val allLyricistWithSongCount = songDao.getAllLyricistsWithSongCount()
     val allPlaylistsWithSongCount = playlistDao.getAllPlaylistWithSongCount()
+    val allGenresWithSongCount = songDao.getAllGenresWithSongCount()
 
     fun getPlaylistWithSongsById(id: Long) = playlistDao.getPlaylistWithSongs(id)
     fun getAlbumWithSongsByName(albumName: String) = albumDao.getAlbumWithSongsByName(albumName)
