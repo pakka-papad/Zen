@@ -54,6 +54,7 @@ class DataManager(
     fun getComposerWithSongs(composerName: String) = composerDao.getComposerWithSongs(composerName)
     fun getLyricistWithSongs(lyricistName: String) = lyricistDao.getLyricistWithSongs(lyricistName)
     fun getGenreWithSongs(genreName: String) = genreDao.getGenreWithSongs(genreName)
+    fun getFavourites() = songDao.getAllFavourites()
 
     suspend fun searchSongs(query: String) = songDao.searchSongs(query)
     suspend fun searchAlbums(query: String) = albumDao.searchAlbums(query)

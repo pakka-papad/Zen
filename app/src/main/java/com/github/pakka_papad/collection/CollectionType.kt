@@ -12,4 +12,5 @@ open class CollectionType : Parcelable {
     data class ComposerType(val name: String): CollectionType()
     data class LyricistType(val name: String): CollectionType()
     data class GenreType(val genre: String): CollectionType()
+    object Favourites: CollectionType()
 }

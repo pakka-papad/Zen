@@ -179,7 +179,8 @@ class HomeFragment : Fragment() {
                                                     playlistsWithSongCount = playlistsWithSongCount,
                                                     onPlaylistClicked = this@HomeFragment::navigateToCollection,
                                                     listState = allPlaylistsListState,
-                                                    onPlaylistCreate = viewModel::onPlaylistCreate
+                                                    onPlaylistCreate = viewModel::onPlaylistCreate,
+                                                    onFavouritesClicked = this@HomeFragment::navigateToCollection
                                                 )
                                             }
                                             Screens.Genres -> {
@@ -281,6 +282,14 @@ class HomeFragment : Fragment() {
         navController.navigate(
             HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
                 CollectionType.GenreType(genreWithSongCount.genreName)
+            )
+        )
+    }
+
+    private fun navigateToCollection(){
+        navController.navigate(
+            HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
+                CollectionType.Favourites
             )
         )
     }

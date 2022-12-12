@@ -48,4 +48,7 @@ interface SongDao {
     @Query("SELECT genre AS genreName, COUNT(*) AS count FROM ${Constants.Tables.SONG_TABLE} GROUP BY " +
             "${Constants.Tables.SONG_TABLE}.genre")
     fun getAllGenresWithSongCount(): Flow<List<GenreWithSongCount>>
+
+    @Query("SELECT * FROM ${Constants.Tables.SONG_TABLE} WHERE favourite = 1")
+    fun getAllFavourites(): Flow<List<Song>>
 }

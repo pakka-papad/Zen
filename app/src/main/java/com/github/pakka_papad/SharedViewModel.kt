@@ -212,6 +212,15 @@ class SharedViewModel @Inject constructor(
                     }
                 }
             }
+            is CollectionType.Favourites -> {
+                manager.getFavourites().map {
+                    CollectionUi(
+                        songs = it,
+                        topBarTitle = "Favourites",
+                        topBarBackgroundImageUri = if (it.isEmpty()) "" else (it[0].artUri ?: "")
+                    )
+                }
+            }
             else -> flow {  }
         }
     }.catch { exception ->

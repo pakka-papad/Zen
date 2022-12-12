@@ -5,10 +5,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -22,6 +24,7 @@ fun Playlists(
     onPlaylistClicked: (Long) -> Unit,
     listState: LazyListState,
     onPlaylistCreate: (String) -> Unit,
+    onFavouritesClicked: () -> Unit,
 ) {
     if (playlistsWithSongCount == null) return
     LazyColumn(
@@ -33,6 +36,7 @@ fun Playlists(
         item {
             CreatePlaylistCard(
                 onPlaylistCreate = onPlaylistCreate,
+                onFavouritesClicked = onFavouritesClicked
             )
         }
         items(
@@ -49,37 +53,66 @@ fun Playlists(
 
 @Composable
 fun CreatePlaylistCard(
-    onPlaylistCreate: (String) -> Unit
+    onPlaylistCreate: (String) -> Unit,
+    onFavouritesClicked: () -> Unit,
 ) {
     var isDialogVisible by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = 10.dp)
             .fillMaxWidth()
             .height(85.dp),
     ) {
         var playlistName by remember { mutableStateOf("") }
-        Button(
-            onClick = { isDialogVisible = true },
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.Center)
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically
         ){
-            Icon(
-                painter = painterResource(R.drawable.ic_baseline_playlist_add_40),
+            Button(
+                onClick = onFavouritesClicked,
                 modifier = Modifier
-                    .size(30.dp)
-                    .padding(4.dp),
-                contentDescription = "create-new-playlist"
-            )
-            Text(
-                text = "Create new playlist",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onPrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+                    .weight(1f)
+                    .clip(RoundedCornerShape(30.dp))
+            ){
+                Icon(
+                    painter = painterResource(R.drawable.ic_baseline_favorite_24),
+                    modifier = Modifier
+                        .size(30.dp)
+                        .padding(4.dp),
+                    contentDescription = "create-new-playlist"
+                )
+                Text(
+                    text = "Favourites",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Button(
+                onClick = { isDialogVisible = true },
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(30.dp))
+            ){
+                Icon(
+                    painter = painterResource(R.drawable.ic_baseline_playlist_add_40),
+                    modifier = Modifier
+                        .size(30.dp)
+                        .padding(4.dp),
+                    contentDescription = "create-new-playlist"
+                )
+                Text(
+                    text = "New Playlist",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
+
 
         if (isDialogVisible) {
             AlertDialog(
@@ -133,6 +166,7 @@ fun CreatePlaylistCard(
 
         Spacer(
             modifier = Modifier
+                .padding(horizontal = 10.dp)
                 .fillMaxWidth()
                 .height(0.8.dp)
                 .background(color = MaterialTheme.colorScheme.surfaceVariant)
