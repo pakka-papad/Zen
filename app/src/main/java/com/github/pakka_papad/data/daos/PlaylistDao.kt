@@ -25,8 +25,8 @@ interface PlaylistDao {
     suspend fun searchPlaylists(query: String): List<Playlist>
 
     @Transaction
-    @Query("SELECT playlistId AS playlistId, count AS count, createdAt AS createdAt, playlistName AS playlistName FROM " +
-            "${Constants.Tables.PLAYLIST_TABLE} NATURAL JOIN (SELECT playlistId, COUNT(*) AS count FROM " +
+    @Query("SELECT * FROM ${Constants.Tables.PLAYLIST_TABLE} NATURAL LEFT JOIN " +
+            "(SELECT playlistId, COUNT(*) AS count FROM " +
             "${Constants.Tables.PLAYLIST_SONG_CROSS_REF_TABLE} GROUP BY playlistId)")
     fun getAllPlaylistWithSongCount(): Flow<List<PlaylistWithSongCount>>
 

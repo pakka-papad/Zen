@@ -4,5 +4,5 @@ data class PlaylistWithSongCount(
     val playlistId: Long,
     val playlistName: String,
     val createdAt: Long,
-    val count: Int,
+    val count: Int = 0,
 )

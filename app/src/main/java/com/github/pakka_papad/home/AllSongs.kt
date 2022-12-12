@@ -124,6 +124,8 @@ fun SongInfo(
                     withStyle(spanStyle) { append(song.location) }
                     append("\n\nSize\n")
                     withStyle(spanStyle) { append(song.size) }
+                    append("\n\nAlbum\n")
+                    withStyle(spanStyle) { append(song.album) }
                     append("\n\nArtist\n")
                     withStyle(spanStyle) { append(song.artist) }
                     append("\n\nAlbum artist\n")
