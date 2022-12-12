@@ -36,6 +36,7 @@ import com.github.pakka_papad.player.ZenBroadcastReceiver
 import com.github.pakka_papad.ui.theme.ZenTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -71,6 +72,7 @@ class HomeFragment : Fragment() {
                 val themePreference by viewModel.theme.collectAsState()
                 ZenTheme(themePreference, systemUiController) {
                     var currentScreen by rememberSaveable { mutableStateOf(Screens.Songs) }
+                    val scope = rememberCoroutineScope()
 
                     val songs by viewModel.songs.collectAsState()
                     val allSongsListState = rememberLazyListState()
@@ -189,7 +191,19 @@ class HomeFragment : Fragment() {
                             HomeBottomBar(
                                 currentScreen = currentScreen,
                                 onScreenChange = {
-                                    currentScreen = it
+                                    if (currentScreen == it){
+                                        scope.launch {
+                                            when(it){
+                                                Screens.Songs -> allSongsListState.scrollToItem(0)
+                                                Screens.Albums -> allAlbumsGridState.scrollToItem(0)
+                                                Screens.Artists -> allPersonsListState.scrollToItem(0)
+                                                Screens.Playlists -> allPlaylistsListState.scrollToItem(0)
+                                                Screens.Genres -> {  }
+                                            }
+                                        }
+                                    } else {
+                                        currentScreen = it
+                                    }
                                 },
                                 songPlaying = songPlaying,
                                 onPlayPausePressed = pendingPausePlayIntent::send,
