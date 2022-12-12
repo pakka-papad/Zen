@@ -45,13 +45,13 @@ class SharedViewModel @Inject constructor(
     private val _selectedPerson = MutableStateFlow(Person.Artist)
     val selectedPerson = _selectedPerson.asStateFlow()
 
-    fun onPersonSelect(person: Person){
+    fun onPersonSelect(person: Person) {
         _selectedPerson.update { person }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val personsWithSongCount = _selectedPerson.flatMapLatest {
-        when(it){
+        when (it) {
             Person.Artist -> manager.allArtistWithSongCount
             Person.AlbumArtist -> manager.allAlbumArtistWithSongCount
             Person.Composer -> manager.allComposerWithSongCount
@@ -133,7 +133,7 @@ class SharedViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val collectionUi = _type.flatMapLatest { type ->
-        when(type) {
+        when (type) {
             is CollectionType.AlbumType -> {
                 manager.getAlbumWithSongsByName(type.albumName).map {
                     if (it == null) CollectionUi()
@@ -152,7 +152,9 @@ class SharedViewModel @Inject constructor(
                     else {
                         CollectionUi(
                             songs = it.songs,
-                            topBarTitle = it.artist.name
+                            topBarTitle = it.artist.name,
+                            topBarBackgroundImageUri = if (it.songs.isEmpty()) "" else (it.songs[0].artUri
+                                ?: "")
                         )
                     }
                 }
@@ -163,7 +165,9 @@ class SharedViewModel @Inject constructor(
                     else {
                         CollectionUi(
                             songs = it.songs,
-                            topBarTitle = it.playlist.playlistName
+                            topBarTitle = it.playlist.playlistName,
+                            topBarBackgroundImageUri = if (it.songs.isEmpty()) "" else (it.songs[0].artUri
+                                ?: "")
                         )
                     }
                 }
@@ -174,7 +178,9 @@ class SharedViewModel @Inject constructor(
                     else {
                         CollectionUi(
                             songs = it.songs,
-                            topBarTitle = it.albumArtist.name
+                            topBarTitle = it.albumArtist.name,
+                            topBarBackgroundImageUri = if (it.songs.isEmpty()) "" else (it.songs[0].artUri
+                                ?: "")
                         )
                     }
                 }
@@ -185,7 +191,9 @@ class SharedViewModel @Inject constructor(
                     else {
                         CollectionUi(
                             songs = it.songs,
-                            topBarTitle = it.composer.name
+                            topBarTitle = it.composer.name,
+                            topBarBackgroundImageUri = if (it.songs.isEmpty()) "" else (it.songs[0].artUri
+                                ?: "")
                         )
                     }
                 }
@@ -196,7 +204,9 @@ class SharedViewModel @Inject constructor(
                     else {
                         CollectionUi(
                             songs = it.songs,
-                            topBarTitle = it.lyricist.name
+                            topBarTitle = it.lyricist.name,
+                            topBarBackgroundImageUri = if (it.songs.isEmpty()) "" else (it.songs[0].artUri
+                                ?: "")
                         )
                     }
                 }
@@ -207,7 +217,9 @@ class SharedViewModel @Inject constructor(
                     else {
                         CollectionUi(
                             songs = it.songs,
-                            topBarTitle = it.genre.genre
+                            topBarTitle = it.genre.genre,
+                            topBarBackgroundImageUri = if (it.songs.isEmpty()) "" else (it.songs[0].artUri
+                                ?: "")
                         )
                     }
                 }
@@ -221,7 +233,7 @@ class SharedViewModel @Inject constructor(
                     )
                 }
             }
-            else -> flow {  }
+            else -> flow { }
         }
     }.catch { exception ->
         Timber.e(exception)
@@ -341,12 +353,12 @@ class SharedViewModel @Inject constructor(
     private val _searchType = MutableStateFlow(SearchType.Songs)
     val searchType = _searchType.asStateFlow()
 
-    val searchResult = _query.combine(searchType){ query,type ->
+    val searchResult = _query.combine(searchType) { query, type ->
         val trimmedQuery = query.trim()
-        if (trimmedQuery.isEmpty()){
+        if (trimmedQuery.isEmpty()) {
             SearchResult()
         } else {
-            when(type){
+            when (type) {
                 SearchType.Songs -> SearchResult(songs = manager.searchSongs(trimmedQuery))
                 SearchType.Albums -> SearchResult(albums = manager.searchAlbums(trimmedQuery))
                 SearchType.Artists -> SearchResult(artists = manager.searchArtists(trimmedQuery))
@@ -373,7 +385,7 @@ class SharedViewModel @Inject constructor(
         _query.update { query }
     }
 
-    fun updateType(type: SearchType){
+    fun updateType(type: SearchType) {
         _searchType.update { type }
     }
 

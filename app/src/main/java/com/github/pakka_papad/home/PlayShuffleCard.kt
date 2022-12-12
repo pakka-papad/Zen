@@ -24,14 +24,14 @@ fun PlayShuffleCard(
 ) {
     Box(
         modifier = Modifier
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = 10.dp)
             .fillMaxWidth()
             .height(85.dp),
     ) {
         val configuration = LocalConfiguration.current
         Row(
             modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.spacedBy(20.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically,
 
         ) {
@@ -81,6 +81,7 @@ fun PlayShuffleCard(
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 10.dp)
                 .height(0.8.dp)
                 .background(color = MaterialTheme.colorScheme.surfaceVariant)
                 .align(Alignment.BottomCenter)
