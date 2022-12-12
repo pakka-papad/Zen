@@ -2,7 +2,7 @@ package com.github.pakka_papad.data.daos
 
 import androidx.room.*
 import com.github.pakka_papad.Constants
-import com.github.pakka_papad.data.music.Song
+import com.github.pakka_papad.data.music.*
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -28,4 +28,20 @@ interface SongDao {
             "lyricist LIKE '%' || :query || '%'")
     suspend fun searchSongs(query: String): List<Song>
 
+    @Query("SELECT artist as name, COUNT(*) as count FROM ${Constants.Tables.SONG_TABLE} GROUP BY " +
+            "${Constants.Tables.SONG_TABLE}.artist")
+    fun getAllArtistsWithSongCount(): Flow<List<ArtistWithSongCount>>
+
+    @Query("SELECT albumArtist as name, COUNT(*) as count FROM ${Constants.Tables.SONG_TABLE} GROUP BY " +
+            "${Constants.Tables.SONG_TABLE}.albumArtist")
+    fun getAllAlbumArtistsWithSongCount(): Flow<List<AlbumArtistWithSongCount>>
+
+
+    @Query("SELECT composer as name, COUNT(*) as count FROM ${Constants.Tables.SONG_TABLE} GROUP BY " +
+            "${Constants.Tables.SONG_TABLE}.composer")
+    fun getAllComposersWithSongCount(): Flow<List<ComposerWithSongCount>>
+
+    @Query("SELECT lyricist as name, COUNT(*) as count FROM ${Constants.Tables.SONG_TABLE} GROUP BY " +
+            "${Constants.Tables.SONG_TABLE}.lyricist")
+    fun getAllLyricistsWithSongCount(): Flow<List<LyricistWithSongCount>>
 }

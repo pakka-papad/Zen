@@ -12,6 +12,7 @@ import com.github.pakka_papad.collection.CollectionUi
 import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.ZenPreferencesDatastore
 import com.github.pakka_papad.data.music.*
+import com.github.pakka_papad.home.Person
 import com.github.pakka_papad.search.SearchResult
 import com.github.pakka_papad.search.SearchType
 import com.github.pakka_papad.ui.theme.ThemePreference
@@ -41,7 +42,24 @@ class SharedViewModel @Inject constructor(
         initialValue = null
     )
 
-    val artistsWithSongCount = manager.allArtistWithSongCount.stateIn(
+    private val _selectedPerson = MutableStateFlow(Person.Artist)
+    val selectedPerson = _selectedPerson.asStateFlow()
+
+    fun onPersonSelect(person: Person){
+        _selectedPerson.update { person }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val personsWithSongCount = _selectedPerson.flatMapLatest {
+        when(it){
+            Person.Artist -> manager.allArtistWithSongCount
+            Person.AlbumArtist -> manager.allAlbumArtistWithSongCount
+            Person.Composer -> manager.allComposerWithSongCount
+            Person.Lyricist -> manager.allLyricistWithSongCount
+        }
+    }.catch { exception ->
+        Timber.e(exception)
+    }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = null

@@ -21,6 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
@@ -29,8 +31,7 @@ import com.github.pakka_papad.R
 import com.github.pakka_papad.Screens
 import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.collection.CollectionType
-import com.github.pakka_papad.data.music.Album
-import com.github.pakka_papad.data.music.ArtistWithSongCount
+import com.github.pakka_papad.data.music.*
 import com.github.pakka_papad.player.ZenBroadcastReceiver
 import com.github.pakka_papad.ui.theme.ZenTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -47,7 +48,9 @@ class HomeFragment : Fragment() {
     @Inject
     lateinit var exoPlayer: ExoPlayer
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
+        ExperimentalLifecycleComposeApi::class
+    )
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -78,8 +81,9 @@ class HomeFragment : Fragment() {
                     val albums by viewModel.albums.collectAsState()
                     val allAlbumsGridState = rememberLazyGridState()
 
-                    val artistsWithSongCount by viewModel.artistsWithSongCount.collectAsState()
-                    val allArtistsListState = rememberLazyListState()
+                    val personsWithSongCount by viewModel.personsWithSongCount.collectAsStateWithLifecycle()
+                    val selectedPerson by viewModel.selectedPerson.collectAsStateWithLifecycle()
+                    val allPersonsListState = rememberLazyListState()
 
                     val playlists by viewModel.playlists.collectAsState()
                     val allPlaylistsListState = rememberLazyListState()
@@ -101,15 +105,19 @@ class HomeFragment : Fragment() {
                             LaunchedEffect(
                                 key1 = songs,
                                 key2 = albums,
-                                key3 = artistsWithSongCount
+                                key3 = personsWithSongCount
                             ) {
                                 dataRetrieved =
-                                    songs != null && albums != null && artistsWithSongCount != null
+                                    songs != null && albums != null && personsWithSongCount != null
                             }
                             Box(
                                 modifier = Modifier
                                     .padding(paddingValues)
-                                    .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
+                                    .windowInsetsPadding(
+                                        WindowInsets.systemBars.only(
+                                            WindowInsetsSides.Horizontal
+                                        )
+                                    )
                                     .fillMaxSize(),
                                 contentAlignment = Alignment.BottomCenter
                             ) {
@@ -153,10 +161,12 @@ class HomeFragment : Fragment() {
                                                 )
                                             }
                                             Screens.Artists -> {
-                                                Artists(
-                                                    artistsWithSongCount = artistsWithSongCount,
-                                                    onArtistClicked = this@HomeFragment::navigateToCollection,
-                                                    listState = allArtistsListState
+                                                Persons(
+                                                    personsWithSongCount = personsWithSongCount,
+                                                    onPersonClicked = this@HomeFragment::navigateToCollection,
+                                                    listState = allPersonsListState,
+                                                    selectedPerson = selectedPerson,
+                                                    onPersonSelect = viewModel::onPersonSelect
                                                 )
                                             }
                                             Screens.Playlists -> {
@@ -205,12 +215,37 @@ class HomeFragment : Fragment() {
         )
     }
 
-    private fun navigateToCollection(artistWithSongCount: ArtistWithSongCount) {
-        navController.navigate(
-            HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                CollectionType.ArtistType(artistWithSongCount.artistName)
-            )
-        )
+    private fun navigateToCollection(personWithSongCount: PersonWithSongCount) {
+        when(personWithSongCount){
+            is ArtistWithSongCount -> {
+                navController.navigate(
+                    HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
+                        CollectionType.ArtistType(personWithSongCount.name)
+                    )
+                )
+            }
+            is AlbumArtistWithSongCount -> {
+                navController.navigate(
+                    HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
+                        CollectionType.AlbumArtistType(personWithSongCount.name)
+                    )
+                )
+            }
+            is ComposerWithSongCount -> {
+                navController.navigate(
+                    HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
+                        CollectionType.ComposerType(personWithSongCount.name)
+                    )
+                )
+            }
+            is LyricistWithSongCount -> {
+                navController.navigate(
+                    HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
+                        CollectionType.LyricistType(personWithSongCount.name)
+                    )
+                )
+            }
+        }
     }
 
     private fun navigateToCollection(playlistId: Long){

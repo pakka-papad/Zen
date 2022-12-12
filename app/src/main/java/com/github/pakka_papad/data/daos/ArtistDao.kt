@@ -7,7 +7,6 @@ import androidx.room.Query
 import androidx.room.Transaction
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.data.music.Artist
-import com.github.pakka_papad.data.music.ArtistWithSongCount
 import com.github.pakka_papad.data.music.ArtistWithSongs
 import kotlinx.coroutines.flow.Flow
 
@@ -31,10 +30,11 @@ interface ArtistDao {
     @Query("SELECT * FROM ${Constants.Tables.ARTIST_TABLE} WHERE name LIKE '%' || :query || '%'")
     suspend fun searchArtists(query: String): List<Artist>
 
-    @Query("SELECT ${Constants.Tables.ARTIST_TABLE}.name as artistName, COUNT(*) as count " +
-            "FROM ${Constants.Tables.ARTIST_TABLE} JOIN ${Constants.Tables.SONG_TABLE} ON " +
-            "${Constants.Tables.ARTIST_TABLE}.name = ${Constants.Tables.SONG_TABLE}.artist " +
-            "GROUP BY ${Constants.Tables.ARTIST_TABLE}.name")
-    fun getAllArtistsWithSongCount(): Flow<List<ArtistWithSongCount>>
+//    @Transaction
+//    @Query("SELECT ${Constants.Tables.ARTIST_TABLE}.name as artistName, COUNT(*) as count " +
+//            "FROM ${Constants.Tables.ARTIST_TABLE} JOIN ${Constants.Tables.SONG_TABLE} ON " +
+//            "${Constants.Tables.ARTIST_TABLE}.name = ${Constants.Tables.SONG_TABLE}.artist " +
+//            "GROUP BY ${Constants.Tables.ARTIST_TABLE}.name")
+//    fun getAllArtistsWithSongCount(): Flow<List<ArtistWithSongCount>>
 
 }
