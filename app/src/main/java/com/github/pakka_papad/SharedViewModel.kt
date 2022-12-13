@@ -153,8 +153,6 @@ class SharedViewModel @Inject constructor(
                         CollectionUi(
                             songs = it.songs,
                             topBarTitle = it.artist.name,
-                            topBarBackgroundImageUri = if (it.songs.isEmpty()) "" else (it.songs[0].artUri
-                                ?: "")
                         )
                     }
                 }
@@ -166,8 +164,6 @@ class SharedViewModel @Inject constructor(
                         CollectionUi(
                             songs = it.songs,
                             topBarTitle = it.playlist.playlistName,
-                            topBarBackgroundImageUri = if (it.songs.isEmpty()) "" else (it.songs[0].artUri
-                                ?: "")
                         )
                     }
                 }
@@ -179,8 +175,6 @@ class SharedViewModel @Inject constructor(
                         CollectionUi(
                             songs = it.songs,
                             topBarTitle = it.albumArtist.name,
-                            topBarBackgroundImageUri = if (it.songs.isEmpty()) "" else (it.songs[0].artUri
-                                ?: "")
                         )
                     }
                 }
@@ -192,8 +186,6 @@ class SharedViewModel @Inject constructor(
                         CollectionUi(
                             songs = it.songs,
                             topBarTitle = it.composer.name,
-                            topBarBackgroundImageUri = if (it.songs.isEmpty()) "" else (it.songs[0].artUri
-                                ?: "")
                         )
                     }
                 }
@@ -205,8 +197,6 @@ class SharedViewModel @Inject constructor(
                         CollectionUi(
                             songs = it.songs,
                             topBarTitle = it.lyricist.name,
-                            topBarBackgroundImageUri = if (it.songs.isEmpty()) "" else (it.songs[0].artUri
-                                ?: "")
                         )
                     }
                 }
@@ -218,8 +208,6 @@ class SharedViewModel @Inject constructor(
                         CollectionUi(
                             songs = it.songs,
                             topBarTitle = it.genre.genre,
-                            topBarBackgroundImageUri = if (it.songs.isEmpty()) "" else (it.songs[0].artUri
-                                ?: "")
                         )
                     }
                 }
@@ -229,7 +217,6 @@ class SharedViewModel @Inject constructor(
                     CollectionUi(
                         songs = it,
                         topBarTitle = "Favourites",
-                        topBarBackgroundImageUri = if (it.isEmpty()) "" else (it[0].artUri ?: "")
                     )
                 }
             }
