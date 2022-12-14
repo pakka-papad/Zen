@@ -17,12 +17,15 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.components.FullScreenSadMessage
+import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.ui.theme.ZenTheme
+import kotlinx.coroutines.launch
 
 class CollectionFragment : Fragment() {
 
@@ -63,6 +66,9 @@ class CollectionFragment : Fragment() {
                                     CollectionActions.AddToQueue {
                                         collectionUi?.songs?.let { viewModel.addToQueue(it) }
                                     },
+                                    CollectionActions.AddToPlaylist {
+                                        addAllSongsToPlaylistClicked(collectionUi?.songs)
+                                    }
                                 )
                             )
                         },
@@ -106,7 +112,10 @@ class CollectionFragment : Fragment() {
                                         },
                                         onAddToPlaylistsClicked = {
                                             navController.navigate(
-                                                CollectionFragmentDirections.actionCollectionFragmentToSelectPlaylistFragment(it.location)
+                                                CollectionFragmentDirections
+                                                    .actionCollectionFragmentToSelectPlaylistFragment(
+                                                        arrayOf(it.location)
+                                                    )
                                             )
                                         },
                                     )
@@ -116,6 +125,17 @@ class CollectionFragment : Fragment() {
                     )
                 }
             }
+        }
+    }
+
+    private fun addAllSongsToPlaylistClicked(songs: List<Song>?){
+        lifecycleScope.launch {
+            if (songs == null) return@launch
+            val songLocations = songs.map { it.location }
+            navController.navigate(
+                CollectionFragmentDirections
+                    .actionCollectionFragmentToSelectPlaylistFragment(songLocations.toTypedArray())
+            )
         }
     }
 }

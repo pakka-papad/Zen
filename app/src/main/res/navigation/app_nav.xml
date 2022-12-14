@@ -104,9 +104,8 @@
         android:name="com.github.pakka_papad.select_playlist.SelectPlaylistFragment"
         android:label="SelectPlaylistFragment" >
         <argument
-            android:name="songLocation"
-            app:argType="string"
-            android:defaultValue='""' />
+            android:name="songLocations"
+            app:argType="string[]" />
     </fragment>
     <fragment
         android:id="@+id/searchFragment"

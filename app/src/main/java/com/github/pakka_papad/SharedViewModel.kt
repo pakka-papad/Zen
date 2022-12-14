@@ -266,15 +266,19 @@ class SharedViewModel @Inject constructor(
         }
     }
 
-    fun addSongToPlaylists(songLocation: String) {
+    fun addSongsToPlaylists(songLocations: Array<String>) {
         viewModelScope.launch {
             val playlists = playlistsWithSongCount.value
             val playlistSongCrossRefs = _selectList.indices
                 .filter { _selectList[it] }
                 .map {
-                    PlaylistSongCrossRef(playlists[it].playlistId, songLocation)
+                    val list = ArrayList<PlaylistSongCrossRef>()
+                    for (songLocation in songLocations) {
+                        list += PlaylistSongCrossRef(playlists[it].playlistId, songLocation)
+                    }
+                    list.toList()
                 }
-            manager.insertPlaylistSongCrossRefs(playlistSongCrossRefs)
+            manager.insertPlaylistSongCrossRefs(playlistSongCrossRefs.flatten())
             resetSelectList()
         }
     }

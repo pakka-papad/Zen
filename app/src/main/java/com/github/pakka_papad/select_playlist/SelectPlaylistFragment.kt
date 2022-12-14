@@ -38,7 +38,7 @@ class SelectPlaylistFragment: Fragment() {
         savedInstanceState: Bundle?
     ): View {
         navController = findNavController()
-        if (args.songLocation.isEmpty()){
+        if (args.songLocations.isEmpty()){
             navController.popBackStack()
         }
         return ComposeView(requireContext()).apply {
@@ -60,7 +60,7 @@ class SelectPlaylistFragment: Fragment() {
                                     navController.popBackStack()
                                 },
                                 onConfirmClicked = {
-                                    viewModel.addSongToPlaylists(args.songLocation)
+                                    viewModel.addSongsToPlaylists(args.songLocations)
                                     navController.popBackStack()
                                 }
                             )

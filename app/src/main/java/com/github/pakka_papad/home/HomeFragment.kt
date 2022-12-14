@@ -152,7 +152,7 @@ class HomeFragment : Fragment() {
                                                     onAddToPlaylistsClicked = {
                                                         navController.navigate(
                                                             HomeFragmentDirections.actionHomeFragmentToSelectPlaylistFragment(
-                                                                it.location
+                                                                arrayOf(it.location)
                                                             )
                                                         )
                                                     },
