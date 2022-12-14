@@ -49,6 +49,9 @@
         android:id="@+id/nowPlaying"
         android:name="com.github.pakka_papad.nowplaying.NowPlayingFragment"
         android:label="NowPlaying" >
+        <action
+            android:id="@+id/action_nowPlaying_to_selectPlaylistFragment"
+            app:destination="@id/selectPlaylistFragment" />
     </fragment>
     <fragment
         android:id="@+id/collectionFragment"

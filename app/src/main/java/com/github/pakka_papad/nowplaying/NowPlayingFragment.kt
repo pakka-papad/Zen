@@ -15,11 +15,13 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.SharedViewModel
+import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.player.ZenBroadcastReceiver
 import com.github.pakka_papad.ui.theme.ZenTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -98,7 +100,12 @@ class NowPlayingFragment : Fragment() {
                         topBar = {
                             NowPlayingTopBar(
                                 onBackArrowPressed = navController::popBackStack,
-                                title = song?.title ?: ""
+                                title = song?.title ?: "",
+                                options = listOf(
+                                    NowPlayingOptions.SaveToPlaylist {
+                                        saveToPlaylistClicked(queue)
+                                    }
+                                )
                             )
                         },
                         content = { paddingValues ->
@@ -150,6 +157,16 @@ class NowPlayingFragment : Fragment() {
                     )
                 }
             }
+        }
+    }
+
+    private fun saveToPlaylistClicked(queue: List<Song>){
+        lifecycleScope.launch {
+            val songLocations = queue.map { it.location }
+            navController.navigate(
+                NowPlayingFragmentDirections
+                    .actionNowPlayingToSelectPlaylistFragment(songLocations.toTypedArray())
+            )
         }
     }
 }
