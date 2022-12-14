@@ -234,6 +234,8 @@ class SharedViewModel @Inject constructor(
         _type.update { type }
     }
 
+    fun onSongDrag(fromIndex: Int, toIndex: Int) = manager.moveItem(fromIndex,toIndex)
+
     fun onPlaylistCreate(playlistName: String) {
         viewModelScope.launch {
             manager.createPlaylist(playlistName)

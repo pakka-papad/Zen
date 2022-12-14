@@ -199,6 +199,10 @@ class DataManager(
     private val _currentSong = MutableStateFlow<Song?>(null)
     val currentSong = _currentSong.asStateFlow()
 
+    fun moveItem(fromIndex: Int, toIndex: Int){
+        _queue.apply { add(toIndex,removeAt(fromIndex)) }
+    }
+
     suspend fun updateSong(song: Song) {
         if (_currentSong.value?.location == song.location) {
             _currentSong.update { song }

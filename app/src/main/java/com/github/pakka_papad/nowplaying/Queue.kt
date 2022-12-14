@@ -11,9 +11,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -21,6 +22,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.github.pakka_papad.components.SongCardV2
 import com.github.pakka_papad.data.music.Song
 import kotlinx.coroutines.delay
+import timber.log.Timber
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -32,62 +34,65 @@ fun ColumnScope.Queue(
     onDownArrowClicked: () -> Unit,
     expanded: Boolean,
     exoPlayer: ExoPlayer,
+    onDrag: (fromIndex: Int, toIndex: Int) -> Unit,
 ) {
+    Icon(
+        imageVector = Icons.Outlined.KeyboardArrowDown,
+        contentDescription = "down arrow icon",
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .fillMaxWidth()
+            .size(36.dp)
+            .clickable(
+                onClick = onDownArrowClicked,
+                indication = rememberRipple(
+                    bounded = true,
+                    radius = 18.dp
+                ),
+                interactionSource = remember { MutableInteractionSource() }
+            ),
+        tint = MaterialTheme.colorScheme.onSecondaryContainer
+    )
     val listState = rememberLazyListState()
-    LaunchedEffect(key1 = currentSong, key2 = expanded){
+    LaunchedEffect(key1 = currentSong, key2 = expanded) {
         delay(600)
-        if (!expanded){
+        if (!expanded) {
             listState.scrollToItem(exoPlayer.currentMediaItemIndex)
             return@LaunchedEffect
         }
-        if (!listState.isScrollInProgress){
+        if (!listState.isScrollInProgress) {
             listState.animateScrollToItem(exoPlayer.currentMediaItemIndex)
         }
+    }
+    val dragDropState = rememberDragDropState(listState) { fromIndex, toIndex ->
+        Timber.d("dd from:$fromIndex to:$toIndex")
+        onDrag(fromIndex,toIndex)
+        exoPlayer.moveMediaItem(fromIndex,toIndex)
     }
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight(0.6f)
             .align(Alignment.CenterHorizontally)
-            .background(MaterialTheme.colorScheme.secondaryContainer),
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .dragContainer(dragDropState),
+        state = listState,
         contentPadding = WindowInsets.systemBars
             .only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
             .asPaddingValues(),
-        state = listState
     ) {
-        stickyHeader {
-            Icon(
-                imageVector = Icons.Outlined.KeyboardArrowDown,
-                contentDescription = "down arrow icon",
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.secondaryContainer)
-                    .fillMaxWidth()
-                    .size(36.dp)
-                    .clickable(
-                        onClick = onDownArrowClicked,
-                        indication = rememberRipple(
-                            bounded = true,
-                            radius = 18.dp
-                        ),
-                        interactionSource = remember { MutableInteractionSource() }
-                    ),
-                tint = MaterialTheme.colorScheme.onSecondaryContainer
-            )
-        }
         itemsIndexed(
             items = queue,
-            key = { index, song ->
-                song.location
-            }
+            key = { _, song -> song.location }
         ) { index, song ->
-            SongCardV2(
-                song = song,
-                onSongClicked = {
-                    onSongClicked(index)
-                },
-                onFavouriteClicked = onFavouriteClicked,
-                currentlyPlaying = (song.location == currentSong?.location)
-            )
+            DraggableItem(dragDropState, index) {
+                SongCardV2(
+                    song = song,
+                    onSongClicked = { onSongClicked(index) },
+                    onFavouriteClicked = onFavouriteClicked,
+                    currentlyPlaying = (currentSong?.location == song.location),
+                )
+            }
         }
     }
 }

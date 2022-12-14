@@ -134,7 +134,8 @@ class NowPlayingFragment : Fragment() {
                                     }
                                 },
                                 expanded = scaffoldState.bottomSheetState.isExpanded,
-                                exoPlayer = exoPlayer
+                                exoPlayer = exoPlayer,
+                                onDrag = viewModel::onSongDrag
                             )
                         },
                         sheetShape = RoundedCornerShape(
