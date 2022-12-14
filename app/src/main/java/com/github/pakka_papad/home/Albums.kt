@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -61,8 +60,8 @@ fun AlbumCard(
         modifier = Modifier
             .widthIn(max = 200.dp)
             .fillMaxWidth()
-            .padding(10.dp)
-            .clickable { onAlbumClicked(album) },
+            .clickable { onAlbumClicked(album) }
+            .padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         AsyncImage(
@@ -71,7 +70,7 @@ fun AlbumCard(
             modifier = Modifier
                 .aspectRatio(ratio = 1f, matchHeightConstraintsFirst = false)
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp)),
+                .clip(MaterialTheme.shapes.medium),
             contentScale = ContentScale.Crop,
         )
         Text(

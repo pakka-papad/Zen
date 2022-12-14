@@ -1,6 +1,5 @@
 package com.github.pakka_papad.home
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -16,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.components.FullScreenSadMessage
 import com.github.pakka_papad.data.music.PersonWithSongCount
@@ -29,17 +30,19 @@ fun Persons(
     onPersonSelect: (Person) -> Unit,
 ) {
     if (personsWithSongCount == null) return
-    if (personsWithSongCount.isEmpty()){
+    if (personsWithSongCount.isEmpty()) {
         FullScreenSadMessage(
             message = "No artists found",
-            paddingValues = WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues(),
+            paddingValues = WindowInsets.systemBars.only(WindowInsetsSides.Bottom)
+                .asPaddingValues(),
         )
     } else {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize(),
             state = listState,
-            contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues(),
+            contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Bottom)
+                .asPaddingValues(),
         ) {
             item {
                 PersonFilter(
@@ -64,75 +67,52 @@ fun Persons(
 fun PersonCard(
     personWithSongCount: PersonWithSongCount,
     onPersonClicked: (PersonWithSongCount) -> Unit,
-){
-    Box(
+) {
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(85.dp)
-            .clickable(
-                onClick = {
-                    onPersonClicked(personWithSongCount)
-                }
-            ),
-        contentAlignment = Alignment.BottomCenter,
+            .height(70.dp)
+            .clickable(onClick = { onPersonClicked(personWithSongCount) })
+            .padding(horizontal = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
+                .weight(1f)
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.Center
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .fillMaxHeight()
-                    .padding(start = 20.dp),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = personWithSongCount.name,
-                    style = MaterialTheme.typography.titleLarge,
-                    maxLines = 1,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Text(
-                    text = "${personWithSongCount.count} ${if(personWithSongCount.count == 1) "song" else "songs"}",
-                    maxLines = 1,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically,
-                ) {
-                Icon(
-                    imageVector = Icons.Outlined.MoreVert,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clickable(
-                            onClick = {
-
-                            },
-                            indication = rememberRipple(
-                                bounded = false,
-                                radius = 20.dp
-                            ),
-                            interactionSource = remember { MutableInteractionSource() }
-                        )
-                        .padding(8.dp)
-                )
-            }
+            Text(
+                text = personWithSongCount.name,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                modifier = Modifier.fillMaxWidth(),
+                overflow = TextOverflow.Ellipsis,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                text = "${personWithSongCount.count} ${if (personWithSongCount.count == 1) "song" else "songs"}",
+                maxLines = 1,
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.fillMaxWidth(),
+                overflow = TextOverflow.Ellipsis,
+            )
         }
-        Spacer(
+        Icon(
+            imageVector = Icons.Outlined.MoreVert,
+            contentDescription = null,
             modifier = Modifier
-                .padding(horizontal = 20.dp)
-                .fillMaxWidth()
-                .height(0.8.dp)
-                .background(color = MaterialTheme.colorScheme.surfaceVariant)
+                .size(26.dp)
+                .clickable(
+                    onClick = {
+
+                    },
+                    indication = rememberRipple(
+                        bounded = false,
+                        radius = 20.dp
+                    ),
+                    interactionSource = remember { MutableInteractionSource() }
+                )
         )
     }
 }
@@ -142,15 +122,15 @@ fun PersonCard(
 fun PersonFilter(
     selectedPerson: Person,
     onPersonSelect: (Person) -> Unit,
-){
+) {
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         contentPadding = PaddingValues(horizontal = 10.dp)
-    ){
+    ) {
         items(
             items = Person.values(),
-        ){ person ->
+        ) { person ->
             FilterChip(
                 selected = (person == selectedPerson),
                 onClick = { onPersonSelect(person) },
