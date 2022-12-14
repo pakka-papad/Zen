@@ -12,14 +12,15 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.components.FullScreenSadMessage
+import com.github.pakka_papad.components.more_options.GenreOptions
+import com.github.pakka_papad.components.more_options.OptionsAlertDialog
 import com.github.pakka_papad.data.music.GenreWithSongCount
 
 @Composable
@@ -56,6 +57,7 @@ fun Genres(
 fun GenreCard(
     genreWithSongCount: GenreWithSongCount,
     onGenreClicked: (GenreWithSongCount) -> Unit,
+    options: List<GenreOptions> = listOf(),
 ) {
     Row(
         modifier = Modifier
@@ -87,21 +89,31 @@ fun GenreCard(
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        Icon(
-            imageVector = Icons.Outlined.MoreVert,
-            contentDescription = null,
-            modifier = Modifier
-                .size(26.dp)
-                .clickable(
-                    onClick = {
-
-                    },
-                    indication = rememberRipple(
-                        bounded = false,
-                        radius = 20.dp
-                    ),
-                    interactionSource = remember { MutableInteractionSource() }
+        if (options.isNotEmpty()) {
+            var optionsVisible by remember { mutableStateOf(false) }
+            Icon(
+                imageVector = Icons.Outlined.MoreVert,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(26.dp)
+                    .clickable(
+                        onClick = {
+                            optionsVisible = true
+                        },
+                        indication = rememberRipple(
+                            bounded = false,
+                            radius = 20.dp
+                        ),
+                        interactionSource = remember { MutableInteractionSource() }
+                    )
+            )
+            if (optionsVisible) {
+                OptionsAlertDialog(
+                    options = options,
+                    title = genreWithSongCount.genreName,
+                    onDismissRequest = { optionsVisible = false }
                 )
-        )
+            }
+        }
     }
 }
