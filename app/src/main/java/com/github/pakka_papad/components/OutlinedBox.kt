@@ -52,7 +52,8 @@ fun OutlinedBox(
                 .onGloballyPositioned {
                     labelRect = it.boundsInParent()
                 }
-                .padding(horizontal = 4.dp)
+                .padding(horizontal = 4.dp),
+            style = MaterialTheme.typography.titleMedium
         )
     }
 }
