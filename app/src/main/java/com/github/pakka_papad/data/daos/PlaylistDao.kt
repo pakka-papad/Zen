@@ -11,6 +11,9 @@ interface PlaylistDao {
     @Insert(entity = Playlist::class)
     suspend fun insertPlaylist(playlist: PlaylistExceptId): Long
 
+    @Delete(entity = Playlist::class)
+    suspend fun deletePlaylist(playlist: Playlist)
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertPlaylistSongCrossRef(playlistSongCrossRefs: List<PlaylistSongCrossRef>)
 

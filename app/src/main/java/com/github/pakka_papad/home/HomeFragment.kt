@@ -180,7 +180,8 @@ class HomeFragment : Fragment() {
                                                     onPlaylistClicked = this@HomeFragment::navigateToCollection,
                                                     listState = allPlaylistsListState,
                                                     onPlaylistCreate = viewModel::onPlaylistCreate,
-                                                    onFavouritesClicked = this@HomeFragment::navigateToCollection
+                                                    onFavouritesClicked = this@HomeFragment::navigateToCollection,
+                                                    onDeletePlaylistClicked = viewModel::deletePlaylist,
                                                 )
                                             }
                                             Screens.Genres -> {

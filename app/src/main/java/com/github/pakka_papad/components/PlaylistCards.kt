@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.MoreVert
@@ -12,8 +11,7 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,6 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.github.pakka_papad.components.more_options.OptionsAlertDialog
+import com.github.pakka_papad.components.more_options.PlaylistOptions
 import com.github.pakka_papad.data.music.PlaylistWithSongCount
 
 @Composable
@@ -32,7 +32,7 @@ private fun BasePlaylistCard(
         .fillMaxWidth()
         .height(80.dp)
         .padding(12.dp)
-        .clip(RoundedCornerShape(12.dp))
+        .clip(MaterialTheme.shapes.medium)
         .background(MaterialTheme.colorScheme.secondaryContainer)
         .clickable(onClick = onCardClicked)
         .padding(horizontal = 12.dp),
@@ -77,6 +77,7 @@ fun SelectablePlaylistCard(
 fun PlaylistCard(
     playlistWithSongCount: PlaylistWithSongCount,
     onPlaylistClicked: (Long) -> Unit,
+    options: List<PlaylistOptions> = listOf(),
 ) {
     Row(
         modifier = Modifier
@@ -108,6 +109,7 @@ fun PlaylistCard(
                 overflow = TextOverflow.Ellipsis
             )
         }
+        var optionsVisible by remember { mutableStateOf(false) }
         Icon(
             imageVector = Icons.Outlined.MoreVert,
             contentDescription = null,
@@ -115,7 +117,7 @@ fun PlaylistCard(
                 .size(26.dp)
                 .clickable(
                     onClick = {
-
+                        optionsVisible = true
                     },
                     indication = rememberRipple(
                         bounded = false,
@@ -124,6 +126,13 @@ fun PlaylistCard(
                     interactionSource = remember { MutableInteractionSource() }
                 )
         )
+        if (optionsVisible) {
+            OptionsAlertDialog(
+                options = options,
+                title = playlistWithSongCount.playlistName,
+                onDismissRequest = { optionsVisible = false }
+            )
+        }
     }
 }
 

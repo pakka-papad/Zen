@@ -75,6 +75,8 @@ class DataManager(
         showToast("Playlist $playlistName created")
     }
 
+    suspend fun deletePlaylist(playlist: Playlist) = playlistDao.deletePlaylist(playlist)
+
     suspend fun insertPlaylistSongCrossRefs(playlistSongCrossRefs: List<PlaylistSongCrossRef>) {
         try {
             playlistDao.insertPlaylistSongCrossRef(playlistSongCrossRefs)

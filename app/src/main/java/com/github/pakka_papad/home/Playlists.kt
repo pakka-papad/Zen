@@ -15,6 +15,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.R
 import com.github.pakka_papad.components.PlaylistCard
+import com.github.pakka_papad.components.more_options.PlaylistOptions
 import com.github.pakka_papad.data.music.PlaylistWithSongCount
 
 @Composable
@@ -24,6 +25,7 @@ fun Playlists(
     listState: LazyListState,
     onPlaylistCreate: (String) -> Unit,
     onFavouritesClicked: () -> Unit,
+    onDeletePlaylistClicked: (PlaylistWithSongCount) -> Unit,
 ) {
     if (playlistsWithSongCount == null) return
     LazyColumn(
@@ -44,7 +46,12 @@ fun Playlists(
         ) { playlist ->
             PlaylistCard(
                 playlistWithSongCount = playlist,
-                onPlaylistClicked = onPlaylistClicked
+                onPlaylistClicked = onPlaylistClicked,
+                options = listOf(
+                    PlaylistOptions.DeletePlaylist {
+                        onDeletePlaylistClicked(playlist)
+                    }
+                )
             )
         }
     }

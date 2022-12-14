@@ -242,6 +242,23 @@ class SharedViewModel @Inject constructor(
         }
     }
 
+    fun deletePlaylist(playlistWithSongCount: PlaylistWithSongCount) {
+        viewModelScope.launch {
+            try {
+                val playlist = Playlist(
+                    playlistId = playlistWithSongCount.playlistId,
+                    playlistName = playlistWithSongCount.playlistName,
+                    createdAt = playlistWithSongCount.createdAt
+                )
+                manager.deletePlaylist(playlist)
+                showToast("Done")
+            } catch (e: Exception){
+                Timber.e(e)
+                showToast("Some error occurred")
+            }
+        }
+    }
+
     private val _selectList = mutableStateListOf<Boolean>()
     val selectList: List<Boolean> = _selectList
 
