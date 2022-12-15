@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFE0F7E3"
+    android:id="@+id/constraint_layout"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".splash.SplashFragment">
 
@@ -28,6 +28,7 @@
     </androidx.cardview.widget.CardView>
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/linear_indicator"
         android:layout_width="120dp"
         android:layout_height="3dp"
         app:layout_constraintStart_toStartOf="parent"
@@ -36,5 +37,14 @@
         app:layout_constraintTop_toBottomOf="@+id/app_icon"
         app:indicatorColor="#FF17C379"
         android:indeterminate="true"/>
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progress_circular"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

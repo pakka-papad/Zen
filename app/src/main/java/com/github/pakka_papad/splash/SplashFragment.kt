@@ -1,10 +1,10 @@
 package com.github.pakka_papad.splash
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -16,6 +16,7 @@ import com.github.pakka_papad.R
 import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.databinding.FragmentSplashBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -34,10 +35,12 @@ class SplashFragment : Fragment() {
     ): View? {
         navController = findNavController()
         binding = FragmentSplashBinding.inflate(inflater, container, false)
-        activity?.window?.decorView?.windowInsetsController?.setSystemBarsAppearance(
-            APPEARANCE_LIGHT_STATUS_BARS,
-            APPEARANCE_LIGHT_STATUS_BARS
-        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+            binding?.appIcon?.visibility = View.GONE
+            binding?.linearIndicator?.visibility = View.GONE
+        } else {
+            binding?.progressCircular?.visibility = View.GONE
+        }
         return binding!!.root
     }
 
@@ -49,6 +52,9 @@ class SplashFragment : Fragment() {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.isOnBoardingComplete.collect {
                     if (it == null) return@collect
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S){
+                        delay(400)
+                    }
                     navController.navigate(
                         if (it) R.id.action_splashFragment_to_homeFragment
                         else R.id.action_splashFragment_to_onBoardingFragment

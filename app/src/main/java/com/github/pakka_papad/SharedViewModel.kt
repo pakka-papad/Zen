@@ -421,7 +421,7 @@ class SharedViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         initialValue = null,
-        started = SharingStarted.WhileSubscribed(5_000)
+        started = SharingStarted.Eagerly
     )
 
     fun setOnBoardingComplete() {
