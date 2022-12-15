@@ -156,6 +156,7 @@ class HomeFragment : Fragment() {
                                                             )
                                                         )
                                                     },
+                                                    onBlacklistClicked = viewModel::onSongBlacklist
                                                 )
                                             }
                                             Screens.Albums -> {

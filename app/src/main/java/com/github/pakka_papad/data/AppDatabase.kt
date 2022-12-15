@@ -14,7 +14,8 @@ import com.github.pakka_papad.data.music.*
         Genre::class,
         AlbumArtist::class,
         Composer::class,
-        Lyricist::class
+        Lyricist::class,
+        BlacklistedSong::class
     ],
     version = 1, exportSchema = false)
 abstract class AppDatabase: RoomDatabase() {
@@ -34,5 +35,7 @@ abstract class AppDatabase: RoomDatabase() {
     abstract fun genreDao(): GenreDao
 
     abstract fun playlistDao(): PlaylistDao
+
+    abstract fun blacklistDao(): BlacklistDao
 
 }

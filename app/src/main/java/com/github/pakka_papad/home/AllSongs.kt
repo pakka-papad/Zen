@@ -35,6 +35,7 @@ fun AllSongs(
     onPlayAllClicked: () -> Unit,
     onShuffleClicked: () -> Unit,
     onAddToPlaylistsClicked: (Song) -> Unit,
+    onBlacklistClicked: (Song) -> Unit,
 ) {
     if (songs == null) return
     if (songs.isEmpty()) {
@@ -72,6 +73,7 @@ fun AllSongs(
                         SongOptions.Info { infoVisible = true },
                         SongOptions.AddToQueue { onAddToQueueClicked(song) },
                         SongOptions.AddToPlaylist { onAddToPlaylistsClicked(song) },
+                        SongOptions.Blacklist { onBlacklistClicked(song) }
                     ),
                     currentlyPlaying = (song.location == currentSong?.location)
                 )

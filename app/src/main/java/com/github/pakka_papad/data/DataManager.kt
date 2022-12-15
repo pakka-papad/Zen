@@ -36,6 +36,7 @@ class DataManager(
     private val lyricistDao: LyricistDao,
     private val playlistDao: PlaylistDao,
     private val genreDao: GenreDao,
+    private val blacklistDao: BlacklistDao,
 ) {
 
     val allSongs = songDao.getAllSongs()
@@ -49,8 +50,12 @@ class DataManager(
 
     fun getPlaylistWithSongsById(id: Long) = playlistDao.getPlaylistWithSongs(id)
     fun getAlbumWithSongsByName(albumName: String) = albumDao.getAlbumWithSongsByName(albumName)
-    fun getArtistWithSongsByName(artistName: String) = artistDao.getArtistWithSongsByName(artistName)
-    fun getAlbumArtistWithSings(albumArtistName: String) = albumArtistDao.getAlbumArtistWithSongs(albumArtistName)
+    fun getArtistWithSongsByName(artistName: String) =
+        artistDao.getArtistWithSongsByName(artistName)
+
+    fun getAlbumArtistWithSings(albumArtistName: String) =
+        albumArtistDao.getAlbumArtistWithSongs(albumArtistName)
+
     fun getComposerWithSongs(composerName: String) = composerDao.getComposerWithSongs(composerName)
     fun getLyricistWithSongs(lyricistName: String) = lyricistDao.getLyricistWithSongs(lyricistName)
     fun getGenreWithSongs(genreName: String) = genreDao.getGenreWithSongs(genreName)
@@ -76,6 +81,16 @@ class DataManager(
     }
 
     suspend fun deletePlaylist(playlist: Playlist) = playlistDao.deletePlaylist(playlist)
+    suspend fun deleteSong(song: Song) {
+        songDao.deleteSong(song)
+        blacklistDao.addSong(
+            BlacklistedSong(
+                location = song.location,
+                title = song.title,
+                artist = song.artist,
+            )
+        )
+    }
 
     suspend fun insertPlaylistSongCrossRefs(playlistSongCrossRefs: List<PlaylistSongCrossRef>) {
         try {
@@ -178,7 +193,7 @@ class DataManager(
             _scanStatus.send(ScanStatus.ScanProgress(parsedSongs, totalSongs))
         } while (cursor.moveToNext())
         cursor.close()
-        albumDao.insertAllAlbums(albumArtMap.entries.map { (t,u) -> Album(t,u) })
+        albumDao.insertAllAlbums(albumArtMap.entries.map { (t, u) -> Album(t, u) })
         artistDao.insertAllArtists(artistSet.map { Artist(it) })
         albumArtistDao.insertAllAlbumArtists(albumArtistSet.map { AlbumArtist(it) })
         composerDao.insertAllComposers(composerSet.map { Composer(it) })
@@ -201,8 +216,8 @@ class DataManager(
     private val _currentSong = MutableStateFlow<Song?>(null)
     val currentSong = _currentSong.asStateFlow()
 
-    fun moveItem(fromIndex: Int, toIndex: Int){
-        _queue.apply { add(toIndex,removeAt(fromIndex)) }
+    fun moveItem(fromIndex: Int, toIndex: Int) {
+        _queue.apply { add(toIndex, removeAt(fromIndex)) }
     }
 
     suspend fun updateSong(song: Song) {
@@ -210,8 +225,8 @@ class DataManager(
             _currentSong.update { song }
             callback?.updateNotification()
         }
-        for (idx in _queue.indices){
-            if (_queue[idx].location == song.location){
+        for (idx in _queue.indices) {
+            if (_queue[idx].location == song.location) {
                 _queue[idx] = song
                 break
             }

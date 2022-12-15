@@ -235,6 +235,17 @@ class SharedViewModel @Inject constructor(
     }
 
     fun onSongDrag(fromIndex: Int, toIndex: Int) = manager.moveItem(fromIndex,toIndex)
+    fun onSongBlacklist(song: Song) {
+        viewModelScope.launch {
+            try {
+                manager.deleteSong(song)
+                showToast("Done")
+            } catch (e: Exception){
+                Timber.e(e)
+                showToast("Some error occurred")
+            }
+        }
+    }
 
     fun onPlaylistCreate(playlistName: String) {
         viewModelScope.launch {

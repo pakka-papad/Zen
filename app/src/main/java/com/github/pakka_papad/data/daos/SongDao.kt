@@ -17,6 +17,9 @@ interface SongDao {
     @Update
     suspend fun updateSong(song: Song)
 
+    @Delete
+    suspend fun deleteSong(song: Song)
+
     @Query("DELETE FROM ${Constants.Tables.SONG_TABLE}")
     suspend fun deleteAllSongs()
 

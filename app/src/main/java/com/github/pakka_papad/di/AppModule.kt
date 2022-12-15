@@ -49,7 +49,8 @@ object AppModule {
             composerDao = db.composerDao(),
             lyricistDao = db.lyricistDao(),
             genreDao = db.genreDao(),
-            playlistDao = db.playlistDao()
+            playlistDao = db.playlistDao(),
+            blacklistDao = db.blacklistDao()
         )
     }
 

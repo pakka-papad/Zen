@@ -46,4 +46,11 @@ sealed class SongOptions(
             text = "Remove from playlist",
             icon = R.drawable.ic_baseline_playlist_remove_40,
         )
+
+    data class Blacklist(override val onClick: () -> Unit) :
+        SongOptions(
+            onClick = onClick,
+            text = "Add to blacklist",
+            icon = R.drawable.ic_baseline_remove_circle_40,
+        )
 }
