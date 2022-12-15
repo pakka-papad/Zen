@@ -3,9 +3,7 @@ package com.github.pakka_papad.settings
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectableGroup
@@ -28,8 +26,10 @@ import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.R
 import com.github.pakka_papad.components.OutlinedBox
 import com.github.pakka_papad.data.UserPreferences
+import com.github.pakka_papad.data.UserPreferences.Accent
 import com.github.pakka_papad.data.music.ScanStatus
 import com.github.pakka_papad.ui.theme.ThemePreference
+import com.github.pakka_papad.ui.theme.getSeedColor
 
 @Composable
 fun SettingsList(
@@ -64,7 +64,6 @@ fun SettingsList(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LookAndFeelSettings(
     themePreference: ThemePreference,
@@ -93,6 +92,42 @@ private fun LookAndFeelSettings(
                 }
                 Spacer(spacerModifier)
             }
+            val seedColor by remember(themePreference.accent){
+                derivedStateOf {
+                    themePreference.accent.getSeedColor()
+                }
+            }
+            var showAccentSelector by remember { mutableStateOf(false) }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .alpha(if (themePreference.useMaterialYou) 0.5f else 1f),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "Accent color",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Canvas(
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clickable(
+                            enabled = (!themePreference.useMaterialYou),
+                            onClick = { showAccentSelector = true }
+                        )
+                ){
+                    drawCircle(color = seedColor)
+                }
+            }
+            if (showAccentSelector){
+                AccentSelectorDialog(
+                    themePreference = themePreference,
+                    onPreferenceChanged = onPreferenceChanged,
+                    onDismissRequest = { showAccentSelector = false }
+                )
+            }
+            Spacer(spacerModifier)
             var showSelectorDialog by remember { mutableStateOf(false) }
             val buttonText = when (themePreference.theme) {
                 UserPreferences.Theme.LIGHT_MODE, UserPreferences.Theme.UNRECOGNIZED -> "Light"
@@ -119,78 +154,176 @@ private fun LookAndFeelSettings(
                 )
             }
             if (showSelectorDialog) {
-                AlertDialog(
-                    onDismissRequest = { showSelectorDialog = false },
-                    confirmButton = {
-                        Button(
-                            onClick = { showSelectorDialog = false }
-                        ) {
-                            Text(
-                                text = "OK",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
-                    },
-                    text = {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .selectableGroup()
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                RadioButton(
-                                    selected = (themePreference.theme == UserPreferences.Theme.LIGHT_MODE || themePreference.theme == UserPreferences.Theme.UNRECOGNIZED),
-                                    onClick = {
-                                        onPreferenceChanged(themePreference.copy(theme = UserPreferences.Theme.LIGHT_MODE))
-                                    }
-                                )
-                                Text(
-                                    text = "Light mode",
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                RadioButton(
-                                    selected = (themePreference.theme == UserPreferences.Theme.DARK_MODE),
-                                    onClick = {
-                                        onPreferenceChanged(themePreference.copy(theme = UserPreferences.Theme.DARK_MODE))
-                                    }
-                                )
-                                Text(
-                                    text = "Dark mode",
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                RadioButton(
-                                    selected = (themePreference.theme == UserPreferences.Theme.USE_SYSTEM_MODE),
-                                    onClick = {
-                                        onPreferenceChanged(themePreference.copy(theme = UserPreferences.Theme.USE_SYSTEM_MODE))
-                                    }
-                                )
-                                Text(
-                                    text = "System mode",
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                            }
-                        }
-                    }
-                )
+               ThemeSelectorDialog(
+                   themePreference = themePreference,
+                   onPreferenceChanged = onPreferenceChanged,
+                   onDismissRequest = { showSelectorDialog = false }
+               )
             }
         }
     }
+}
+
+@Composable
+private fun AccentSelectorDialog(
+    themePreference: ThemePreference,
+    onPreferenceChanged: (ThemePreference) -> Unit,
+    onDismissRequest: () -> Unit,
+){
+    AlertDialog(
+        title = {
+            Text(
+                text = "Accent color",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+            )
+        },
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            Button(
+                onClick = onDismissRequest
+            ) {
+                Text(
+                    text = "OK",
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ){
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Canvas(Modifier.size(50.dp).clickable {
+                        onPreferenceChanged(themePreference.copy(accent = Accent.Default))
+                    }) {
+                        drawCircle(Accent.Default.getSeedColor())
+                    }
+                    Canvas(Modifier.size(50.dp).clickable {
+                        onPreferenceChanged(themePreference.copy(accent = Accent.Malibu))
+                    }) {
+                        drawCircle(Accent.Malibu.getSeedColor())
+                    }
+                    Canvas(Modifier.size(50.dp).clickable {
+                        onPreferenceChanged(themePreference.copy(accent = Accent.Melrose))
+                    }) {
+                        drawCircle(Accent.Melrose.getSeedColor())
+                    }
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Canvas(Modifier.size(50.dp).clickable {
+                        onPreferenceChanged(themePreference.copy(accent = Accent.Elm))
+                    }) {
+                        drawCircle(Accent.Elm.getSeedColor())
+                    }
+                    Canvas(Modifier.size(50.dp).clickable {
+                        onPreferenceChanged(themePreference.copy(accent = Accent.Magenta))
+                    }) {
+                        drawCircle(Accent.Magenta.getSeedColor())
+                    }
+                    Canvas(Modifier.size(50.dp).clickable {
+                        onPreferenceChanged(themePreference.copy(accent = Accent.JacksonsPurple))
+                    }) {
+                        drawCircle(Accent.JacksonsPurple.getSeedColor())
+                    }
+                }
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ThemeSelectorDialog(
+    themePreference: ThemePreference,
+    onPreferenceChanged: (ThemePreference) -> Unit,
+    onDismissRequest: () -> Unit,
+){
+    AlertDialog(
+        title = {
+            Text(
+                text = "App theme",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+            )
+        },
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            Button(
+                onClick = onDismissRequest
+            ) {
+                Text(
+                    text = "OK",
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .selectableGroup()
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    RadioButton(
+                        selected = (themePreference.theme == UserPreferences.Theme.LIGHT_MODE || themePreference.theme == UserPreferences.Theme.UNRECOGNIZED),
+                        onClick = {
+                            onPreferenceChanged(themePreference.copy(theme = UserPreferences.Theme.LIGHT_MODE))
+                        }
+                    )
+                    Text(
+                        text = "Light mode",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    RadioButton(
+                        selected = (themePreference.theme == UserPreferences.Theme.DARK_MODE),
+                        onClick = {
+                            onPreferenceChanged(themePreference.copy(theme = UserPreferences.Theme.DARK_MODE))
+                        }
+                    )
+                    Text(
+                        text = "Dark mode",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    RadioButton(
+                        selected = (themePreference.theme == UserPreferences.Theme.USE_SYSTEM_MODE),
+                        onClick = {
+                            onPreferenceChanged(themePreference.copy(theme = UserPreferences.Theme.USE_SYSTEM_MODE))
+                        }
+                    )
+                    Text(
+                        text = "System mode",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+            }
+        }
+    )
 }
 
 @Composable

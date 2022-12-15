@@ -12,4 +12,13 @@ message UserPreferences {
   }
   Theme chosenTheme = 2;
   bool onBoardingComplete = 3;
+  enum Accent {
+    Default = 0;
+    Malibu = 1;
+    Melrose = 2;
+    Elm = 3;
+    Magenta = 4;
+    JacksonsPurple = 5;
+  }
+  Accent chosenAccent = 4;
 }

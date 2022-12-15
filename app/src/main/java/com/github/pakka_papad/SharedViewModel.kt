@@ -402,7 +402,8 @@ class SharedViewModel @Inject constructor(
     val theme = datastore.preferences.map {
         ThemePreference(
             useMaterialYou = it.useMaterialYouTheme,
-            theme = it.chosenTheme
+            theme = it.chosenTheme,
+            accent = it.chosenAccent,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -412,7 +413,7 @@ class SharedViewModel @Inject constructor(
 
     fun updateTheme(themePreference: ThemePreference) {
         viewModelScope.launch(Dispatchers.IO) {
-            datastore.setTheme(themePreference.useMaterialYou, themePreference.theme)
+            datastore.setTheme(themePreference.useMaterialYou, themePreference.theme,themePreference.accent)
         }
     }
 
