@@ -59,7 +59,8 @@ fun PageIndicator(
             ){
                 Text(
                     text = "Back",
-                    style = MaterialTheme.typography.labelLarge
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onPrimary,
                 )
             }
         }
@@ -94,7 +95,8 @@ fun PageIndicator(
         ){
             Text(
                 text = if(pageCount-1 == currentPage) "Finish" else "Next",
-                style = MaterialTheme.typography.labelLarge
+                style = MaterialTheme.typography.titleMedium,
+                color = if (nextEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
             )
         }
     }

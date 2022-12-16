@@ -118,6 +118,7 @@ dependencies {
     implementation(Libraries.exoPlayerUi)
 
     implementation(Libraries.coilCompose)
+    implementation(Libraries.lottie)
 }
 
 protobuf {
