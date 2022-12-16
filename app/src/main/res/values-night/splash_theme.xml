@@ -3,10 +3,11 @@
     <style name="Theme.AppSplash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">#FF00522F</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_round</item>
-        <item name="windowSplashScreenAnimationDuration">200</item>
+        <item name="windowSplashScreenAnimationDuration">20</item>
 
         <item name="android:statusBarColor">#FF00522F</item>
         <item name="android:navigationBarColor">#FF00522F</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="postSplashScreenTheme">@style/Theme.Zen</item>
     </style>
 </resources>

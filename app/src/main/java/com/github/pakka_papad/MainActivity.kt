@@ -1,6 +1,7 @@
 package com.github.pakka_papad
 
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -17,7 +18,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        installSplashScreen()
+        installSplashScreen().apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+                setKeepOnScreenCondition {
+                    viewModel.isOnBoardingComplete.value == null
+                }
+            }
+        }
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
