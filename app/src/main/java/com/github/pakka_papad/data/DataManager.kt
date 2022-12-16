@@ -108,6 +108,8 @@ class DataManager(
     suspend fun scanForMusic() {
         _scanStatus.send(ScanStatus.ScanStarted)
         notificationManager.sendScanningNotification()
+        val blacklistedSongs = blacklistDao.getBlacklistedSongs()
+        val blacklistedSongLocations = blacklistedSongs.map { it.location }.toSet()
         val selection = Audio.Media.IS_MUSIC + " != 0"
         val projection = arrayOf(
             Audio.Media.DATA,
@@ -151,6 +153,7 @@ class DataManager(
         do {
             try {
                 val file = File(cursor.getString(dataIndex))
+                if (blacklistedSongLocations.contains(file.path)) continue
                 if (!file.exists()) throw FileNotFoundException()
                 val songMetadata = mExtractor.getSongMetadata(file.path)
                 val song = Song(
