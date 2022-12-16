@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
@@ -79,7 +80,7 @@ fun CenterAlignedTopBar(
 @Composable
 fun SmallTopBar(
     leadingIcon: @Composable () -> Unit,
-    title: String,
+    title: AnnotatedString,
     actions: @Composable RowScope.() -> Unit,
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
     onBackgroundColor: Color = MaterialTheme.colorScheme.onSurface,
@@ -92,10 +93,12 @@ fun SmallTopBar(
                 .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)),
             navigationIcon = leadingIcon,
             title = {
-                TopBarTitle(
-                    title = title,
-                    titleMaxLines = titleMaxLines,
-                    textColor = onBackgroundColor
+                Text(
+                    text = title,
+                    maxLines = titleMaxLines,
+                    color = onBackgroundColor,
+                    style = MaterialTheme.typography.titleLarge,
+                    overflow = TextOverflow.Ellipsis
                 )
             },
             actions = actions,

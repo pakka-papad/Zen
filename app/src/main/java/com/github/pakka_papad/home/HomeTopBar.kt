@@ -15,7 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.github.pakka_papad.components.SmallTopBar
 
 @Composable
@@ -24,7 +29,27 @@ fun HomeTopBar(
     onSearchClicked: () -> Unit,
 ) = SmallTopBar(
     leadingIcon = { },
-    title = "Zen Music Player",
+    title = buildAnnotatedString {
+        withStyle(
+            SpanStyle(
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 1.sp,
+                fontSize = 26.sp,
+            )
+        ) {
+            append("Zen ")
+        }
+        withStyle(
+            SpanStyle(
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 1.sp,
+                fontSize = 26.sp
+            )
+        ) {
+            append("Music")
+        }
+    },
     actions = {
         Icon(
             imageVector = Icons.Outlined.Search,
