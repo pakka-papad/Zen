@@ -50,12 +50,8 @@ class DataManager(
 
     fun getPlaylistWithSongsById(id: Long) = playlistDao.getPlaylistWithSongs(id)
     fun getAlbumWithSongsByName(albumName: String) = albumDao.getAlbumWithSongsByName(albumName)
-    fun getArtistWithSongsByName(artistName: String) =
-        artistDao.getArtistWithSongsByName(artistName)
-
-    fun getAlbumArtistWithSings(albumArtistName: String) =
-        albumArtistDao.getAlbumArtistWithSongs(albumArtistName)
-
+    fun getArtistWithSongsByName(artistName: String) = artistDao.getArtistWithSongsByName(artistName)
+    fun getAlbumArtistWithSings(albumArtistName: String) = albumArtistDao.getAlbumArtistWithSongs(albumArtistName)
     fun getComposerWithSongs(composerName: String) = composerDao.getComposerWithSongs(composerName)
     fun getLyricistWithSongs(lyricistName: String) = lyricistDao.getLyricistWithSongs(lyricistName)
     fun getGenreWithSongs(genreName: String) = genreDao.getGenreWithSongs(genreName)
@@ -69,6 +65,14 @@ class DataManager(
     suspend fun searchLyricists(query: String) = lyricistDao.searchLyricists(query)
     suspend fun searchPlaylists(query: String) = playlistDao.searchPlaylists(query)
     suspend fun searchGenres(query: String) = genreDao.searchGenres(query)
+
+    val blacklistedSongsFlow = blacklistDao.getBlacklistedSongsFlow()
+    suspend fun removeFromBlacklist(data: List<BlacklistedSong>){
+        data.forEach {
+            Timber.d("bs: $it")
+            blacklistDao.deleteBlacklistedSong(it)
+        }
+    }
 
     suspend fun createPlaylist(playlistName: String) {
         if (playlistName.trim().isEmpty()) return

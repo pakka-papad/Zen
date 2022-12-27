@@ -270,6 +270,9 @@ class SharedViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Selecting playlists for a list of songs
+     */
     private val _selectList = mutableStateListOf<Boolean>()
     val selectList: List<Boolean> = _selectList
 
@@ -408,6 +411,50 @@ class SharedViewModel @Inject constructor(
 
     fun updateType(type: SearchType) {
         _searchType.update { type }
+    }
+
+    val blackListedSongs = manager.blacklistedSongsFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList()
+        )
+
+    private val _restoreList = mutableStateListOf<Boolean>()
+    val restoreList : List<Boolean> = _restoreList
+
+    fun updateRestoreListSize(size: Int){
+        while (_restoreList.size < size) _restoreList.add(false)
+        while (_restoreList.size > size) _restoreList.removeLast()
+    }
+
+    fun updateRestoreList(index: Int, isSelected: Boolean){
+        if (index >= _restoreList.size) return
+        _restoreList[index] = isSelected
+    }
+
+    fun resetRestoreList(){
+        viewModelScope.launch {
+            for (idx in _restoreList.indices){
+                _restoreList[idx] = false
+            }
+        }
+    }
+
+    fun restoreSongs(){
+        viewModelScope.launch {
+            val blacklist = blackListedSongs.value
+            val toRestore = _restoreList.indices
+                .filter { _restoreList[it] }
+                .map { blacklist[it] }
+            try {
+                manager.removeFromBlacklist(toRestore)
+                Timber.d("list\n$toRestore")
+                showToast("Rescan to see all the restored songs")
+            } catch (e: Exception){
+                showToast("Some error occurred")
+            }
+        }
     }
 
     val theme = datastore.preferences.map {

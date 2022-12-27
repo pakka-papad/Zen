@@ -10,6 +10,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
@@ -39,6 +40,7 @@ class SearchFragment : Fragment() {
     ): View? {
         navController = findNavController()
         return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 val themePreference by viewModel.theme.collectAsStateWithLifecycle()
                 ZenTheme(themePreference) {

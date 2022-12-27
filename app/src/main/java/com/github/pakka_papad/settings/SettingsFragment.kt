@@ -19,6 +19,7 @@ import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.components.TopBarWithBackArrow
 import com.github.pakka_papad.ui.theme.ZenTheme
 import dagger.hilt.android.AndroidEntryPoint
+import com.github.pakka_papad.R
 
 @AndroidEntryPoint
 class SettingsFragment : Fragment() {
@@ -62,7 +63,13 @@ class SettingsFragment : Fragment() {
                                 themePreference = themePreference,
                                 onThemePreferenceChanged = viewModel::updateTheme,
                                 scanStatus = scanStatus,
-                                onScanClicked = viewModel::scanForMusic
+                                onScanClicked = viewModel::scanForMusic,
+                                onRestoreClicked = {
+                                    viewModel.resetRestoreList()
+                                    navController.navigate(
+                                        R.id.action_settingsFragment_to_restoreFragment
+                                    )
+                                }
                             )
                         }
                     )

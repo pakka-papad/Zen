@@ -7,13 +7,11 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -38,6 +36,7 @@ fun SettingsList(
     onThemePreferenceChanged: (ThemePreference) -> Unit,
     scanStatus: ScanStatus,
     onScanClicked: () -> Unit,
+    onRestoreClicked: () -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -55,7 +54,8 @@ fun SettingsList(
         item {
             MusicLibrarySettings(
                 scanStatus = scanStatus,
-                onScanClicked = onScanClicked
+                onScanClicked = onScanClicked,
+                onRestoreClicked = onRestoreClicked
             )
         }
         item {
@@ -330,52 +330,80 @@ private fun ThemeSelectorDialog(
 private fun MusicLibrarySettings(
     scanStatus: ScanStatus,
     onScanClicked: () -> Unit,
+    onRestoreClicked: () -> Unit,
 ) {
     OutlinedBox(
         label = "Music library",
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 13.dp),
         modifier = Modifier.padding(10.dp)
     ) {
-        when (scanStatus) {
-            is ScanStatus.ScanNotRunning -> {
-                Button(
-                    onClick = onScanClicked,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Scan for music",
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                }
-            }
-            is ScanStatus.ScanComplete -> {
+        Column(Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    text = "Scan Complete",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyLarge
+                    text = "Rescan for music",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Button(
+                    onClick = {
+                        if (scanStatus is ScanStatus.ScanNotRunning){
+                            onScanClicked()
+                        }
+                    },
+                    content = {
+                        when (scanStatus) {
+                            is ScanStatus.ScanNotRunning -> {
+                                Text(
+                                    text = "Scan",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                )
+                            }
+                            is ScanStatus.ScanComplete -> {
+                                Text(
+                                    text = "Done",
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
+                            is ScanStatus.ScanProgress -> {
+                                var totalSongs by remember { mutableStateOf(0) }
+                                var scanProgress by remember { mutableStateOf(0f) }
+                                scanProgress = (scanStatus.parsed.toFloat()) / (scanStatus.total.toFloat())
+                                totalSongs = scanStatus.total
+                                CircularProgressIndicator(
+                                    progress = scanProgress,
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                )
+                            }
+                            else -> {}
+                        }
+                    }
                 )
             }
-            is ScanStatus.ScanProgress -> {
-                var totalSongs by remember { mutableStateOf(0) }
-                var scanProgress by remember { mutableStateOf(0f) }
-                scanProgress = (scanStatus.parsed.toFloat()) / (scanStatus.total.toFloat())
-                totalSongs = scanStatus.total
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Found $totalSongs songs",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
-                    CircularProgressIndicator(progress = scanProgress)
-                }
+            Spacer(Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Restore blacklisted songs",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Button(
+                    onClick = onRestoreClicked,
+                    content = {
+                        Text(
+                            text = "Restore",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                )
             }
-            else -> {}
         }
+
     }
 }
 
@@ -401,8 +429,8 @@ private fun MadeBy() {
         val iconModifier = Modifier
             .size(30.dp)
             .alpha(0.5f)
-            .clip(CircleShape)
-            .border(1.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
+//            .clip(CircleShape)
+//            .border(1.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
         Row(
             horizontalArrangement = Arrangement.spacedBy(24.dp)
         ) {

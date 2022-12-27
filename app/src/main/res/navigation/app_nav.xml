@@ -73,7 +73,15 @@
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.github.pakka_papad.settings.SettingsFragment"
-        android:label="SettingsFragment" />
+        android:label="SettingsFragment" >
+        <action
+            android:id="@+id/action_settingsFragment_to_restoreFragment"
+            app:destination="@id/restoreFragment"
+            app:enterAnim="@anim/enter_from_bottom"
+            app:exitAnim="@anim/no_change"
+            app:popEnterAnim="@anim/no_change"
+            app:popExitAnim="@anim/exit_to_bottom"/>
+    </fragment>
     <fragment
         android:id="@+id/splashFragment"
         android:name="com.github.pakka_papad.splash.SplashFragment"
@@ -122,4 +130,8 @@
             app:popEnterAnim="@anim/zen_close_enter"
             app:popExitAnim="@anim/zen_close_exit"/>
     </fragment>
+    <fragment
+        android:id="@+id/restoreFragment"
+        android:name="com.github.pakka_papad.restore.RestoreFragment"
+        android:label="RestoreFragment" />
 </navigation>
