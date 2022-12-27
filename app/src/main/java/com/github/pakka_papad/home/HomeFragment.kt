@@ -31,6 +31,7 @@ import com.github.pakka_papad.R
 import com.github.pakka_papad.Screens
 import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.collection.CollectionType
+import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.*
 import com.github.pakka_papad.player.ZenBroadcastReceiver
 import com.github.pakka_papad.ui.theme.ZenTheme
@@ -48,6 +49,9 @@ class HomeFragment : Fragment() {
 
     @Inject
     lateinit var exoPlayer: ExoPlayer
+
+    @Inject
+    lateinit var preferenceProvider: ZenPreferenceProvider
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
         ExperimentalLifecycleComposeApi::class
@@ -69,7 +73,7 @@ class HomeFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 val systemUiController = rememberSystemUiController(requireActivity().window)
-                val themePreference by viewModel.theme.collectAsState()
+                val themePreference by preferenceProvider.theme.collectAsState()
                 ZenTheme(themePreference, systemUiController) {
                     var currentScreen by rememberSaveable { mutableStateOf(Screens.Songs) }
                     val scope = rememberCoroutineScope()

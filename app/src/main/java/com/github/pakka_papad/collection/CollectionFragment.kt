@@ -23,15 +23,20 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.components.FullScreenSadMessage
+import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.ui.theme.ZenTheme
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 class CollectionFragment : Fragment() {
 
     private val viewModel by activityViewModels<SharedViewModel>()
 
     private lateinit var navController: NavController
+
+    @Inject
+    lateinit var preferenceProvider: ZenPreferenceProvider
 
     private val args: CollectionFragmentArgs by navArgs()
 
@@ -48,7 +53,7 @@ class CollectionFragment : Fragment() {
         viewModel.loadCollection(args.collectionType)
         return ComposeView(requireContext()).apply {
             setContent {
-                val themePreference by viewModel.theme.collectAsState()
+                val themePreference by preferenceProvider.theme.collectAsState()
                 ZenTheme(
                     themePreference = themePreference
                 ) {

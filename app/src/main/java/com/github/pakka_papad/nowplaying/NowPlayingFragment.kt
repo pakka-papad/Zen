@@ -21,6 +21,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.SharedViewModel
+import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.player.ZenBroadcastReceiver
 import com.github.pakka_papad.ui.theme.ZenTheme
@@ -37,6 +38,9 @@ class NowPlayingFragment : Fragment() {
 
     @Inject
     lateinit var exoPlayer: ExoPlayer
+
+    @Inject
+    lateinit var preferenceProvider: ZenPreferenceProvider
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreateView(
@@ -74,7 +78,7 @@ class NowPlayingFragment : Fragment() {
         )
         return ComposeView(requireContext()).apply {
             setContent {
-                val themePreference by viewModel.theme.collectAsState()
+                val themePreference by preferenceProvider.theme.collectAsState()
                 ZenTheme(
                     themePreference = themePreference
                 ) {

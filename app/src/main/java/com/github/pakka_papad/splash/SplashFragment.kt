@@ -6,27 +6,28 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.github.pakka_papad.R
-import com.github.pakka_papad.SharedViewModel
+import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.databinding.FragmentSplashBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SplashFragment : Fragment() {
 
     private lateinit var navController: NavController
 
-    private val viewModel by activityViewModels<SharedViewModel>()
-
     private var binding: FragmentSplashBinding? = null
+
+    @Inject
+    lateinit var preferenceProvider: ZenPreferenceProvider
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -50,7 +51,7 @@ class SplashFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                viewModel.isOnBoardingComplete.collect {
+                preferenceProvider.isOnBoardingComplete.collect {
                     if (it == null) return@collect
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S){
                         delay(400)

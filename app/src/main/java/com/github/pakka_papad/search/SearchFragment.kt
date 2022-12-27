@@ -20,10 +20,12 @@ import androidx.navigation.fragment.findNavController
 import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.collection.CollectionType
 import com.github.pakka_papad.components.FullScreenSadMessage
+import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.*
 import com.github.pakka_papad.data.music.Composer
 import com.github.pakka_papad.ui.theme.ZenTheme
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SearchFragment : Fragment() {
@@ -31,6 +33,9 @@ class SearchFragment : Fragment() {
     private lateinit var navController: NavController
 
     private val viewModel by activityViewModels<SharedViewModel>()
+
+    @Inject
+    lateinit var preferenceProvider: ZenPreferenceProvider
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalLifecycleComposeApi::class)
     override fun onCreateView(
@@ -42,7 +47,7 @@ class SearchFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                val themePreference by viewModel.theme.collectAsStateWithLifecycle()
+                val themePreference by preferenceProvider.theme.collectAsStateWithLifecycle()
                 ZenTheme(themePreference) {
                     val query by viewModel.query.collectAsStateWithLifecycle()
                     val searchResult by viewModel.searchResult.collectAsStateWithLifecycle()

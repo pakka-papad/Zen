@@ -10,12 +10,10 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.github.pakka_papad.collection.CollectionType
 import com.github.pakka_papad.collection.CollectionUi
 import com.github.pakka_papad.data.DataManager
-import com.github.pakka_papad.data.ZenPreferencesDatastore
 import com.github.pakka_papad.data.music.*
 import com.github.pakka_papad.home.Person
 import com.github.pakka_papad.search.SearchResult
 import com.github.pakka_papad.search.SearchType
-import com.github.pakka_papad.ui.theme.ThemePreference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -27,7 +25,6 @@ class SharedViewModel @Inject constructor(
     private val context: Application,
     private val manager: DataManager,
     private val exoPlayer: ExoPlayer,
-    private val datastore: ZenPreferencesDatastore
 ) : ViewModel() {
 
     val songs = manager.allSongs.stateIn(
@@ -454,38 +451,6 @@ class SharedViewModel @Inject constructor(
             } catch (e: Exception){
                 showToast("Some error occurred")
             }
-        }
-    }
-
-    val theme = datastore.preferences.map {
-        ThemePreference(
-            useMaterialYou = it.useMaterialYouTheme,
-            theme = it.chosenTheme,
-            accent = it.chosenAccent,
-        )
-    }.stateIn(
-        scope = viewModelScope,
-        initialValue = ThemePreference(),
-        started = SharingStarted.Eagerly
-    )
-
-    fun updateTheme(themePreference: ThemePreference) {
-        viewModelScope.launch(Dispatchers.IO) {
-            datastore.setTheme(themePreference.useMaterialYou, themePreference.theme,themePreference.accent)
-        }
-    }
-
-    val isOnBoardingComplete = datastore.preferences.map {
-        it.onBoardingComplete
-    }.stateIn(
-        scope = viewModelScope,
-        initialValue = null,
-        started = SharingStarted.Eagerly
-    )
-
-    fun setOnBoardingComplete() {
-        viewModelScope.launch(Dispatchers.IO) {
-            datastore.setOnBoardingComplete()
         }
     }
 }

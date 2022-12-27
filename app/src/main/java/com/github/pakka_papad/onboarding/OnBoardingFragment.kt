@@ -18,6 +18,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.github.pakka_papad.R
 import com.github.pakka_papad.SharedViewModel
+import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.ScanStatus
 import com.github.pakka_papad.ui.theme.DefaultTheme
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -28,6 +29,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 import kotlin.math.max
 
 @AndroidEntryPoint
@@ -36,6 +38,9 @@ class OnBoardingFragment : Fragment() {
     private val viewModel by activityViewModels<SharedViewModel>()
 
     private lateinit var navController: NavController
+
+    @Inject
+    lateinit var preferenceProvider: ZenPreferenceProvider
 
     @OptIn(ExperimentalPagerApi::class, ExperimentalPermissionsApi::class)
     override fun onCreateView(
@@ -85,7 +90,7 @@ class OnBoardingFragment : Fragment() {
                             },
                             onNextClicked = {
                                 if (pagerState.currentPage == pageCount-1){
-                                    viewModel.setOnBoardingComplete()
+                                    preferenceProvider.setOnBoardingComplete()
                                     navController.navigate(R.id.action_onBoardingFragment_to_homeFragment)
                                 } else {
                                     scope.launch {

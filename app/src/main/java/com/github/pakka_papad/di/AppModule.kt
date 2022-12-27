@@ -14,6 +14,9 @@ import dagger.hilt.components.SingletonComponent
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.data.*
 import com.github.pakka_papad.data.notification.ZenNotificationManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import javax.inject.Singleton
 
 @Module
@@ -84,11 +87,19 @@ object AppModule {
 
     @Singleton
     @Provides
+    fun providesCoroutineScope(): CoroutineScope {
+        return CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    }
+
+    @Singleton
+    @Provides
     fun providesZenPreferencesDatastore(
-        userPreferences: DataStore<UserPreferences>
-    ): ZenPreferencesDatastore {
-        return ZenPreferencesDatastore(
-            userPreferences
+        userPreferences: DataStore<UserPreferences>,
+        coroutineScope: CoroutineScope,
+    ): ZenPreferenceProvider {
+        return ZenPreferenceProvider(
+            userPreferences = userPreferences,
+            coroutineScope = coroutineScope,
         )
     }
 }

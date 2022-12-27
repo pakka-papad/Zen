@@ -21,8 +21,10 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.github.pakka_papad.SharedViewModel
+import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.ui.theme.ZenTheme
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class RestoreFragment: Fragment() {
@@ -30,6 +32,9 @@ class RestoreFragment: Fragment() {
     private val viewModel by activityViewModels<SharedViewModel>()
 
     private lateinit var navController: NavController
+
+    @Inject
+    lateinit var preferenceProvider: ZenPreferenceProvider
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreateView(
@@ -41,7 +46,7 @@ class RestoreFragment: Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                val theme by viewModel.theme.collectAsState()
+                val theme by preferenceProvider.theme.collectAsState()
                 ZenTheme(theme) {
                     val songs by viewModel.blackListedSongs.collectAsState()
                     val selectList = viewModel.restoreList

@@ -19,8 +19,10 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.github.pakka_papad.SharedViewModel
+import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.ui.theme.ZenTheme
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SelectPlaylistFragment: Fragment() {
@@ -30,6 +32,9 @@ class SelectPlaylistFragment: Fragment() {
     private val viewModel by activityViewModels<SharedViewModel>()
 
     private val args: SelectPlaylistFragmentArgs by navArgs()
+
+    @Inject
+    lateinit var preferenceProvider: ZenPreferenceProvider
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreateView(
@@ -43,7 +48,7 @@ class SelectPlaylistFragment: Fragment() {
         }
         return ComposeView(requireContext()).apply {
             setContent {
-                val themePreference by viewModel.theme.collectAsState()
+                val themePreference by preferenceProvider.theme.collectAsState()
                 ZenTheme(
                     themePreference = themePreference
                 ) {

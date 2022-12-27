@@ -20,6 +20,8 @@ import com.github.pakka_papad.components.TopBarWithBackArrow
 import com.github.pakka_papad.ui.theme.ZenTheme
 import dagger.hilt.android.AndroidEntryPoint
 import com.github.pakka_papad.R
+import com.github.pakka_papad.data.ZenPreferenceProvider
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class SettingsFragment : Fragment() {
@@ -27,6 +29,9 @@ class SettingsFragment : Fragment() {
     private val viewModel by activityViewModels<SharedViewModel>()
 
     private lateinit var navController: NavController
+
+    @Inject
+    lateinit var preferenceProvider: ZenPreferenceProvider
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreateView(
@@ -37,7 +42,7 @@ class SettingsFragment : Fragment() {
         navController = findNavController()
         return ComposeView(requireContext()).apply {
             setContent {
-                val themePreference by viewModel.theme.collectAsState()
+                val themePreference by preferenceProvider.theme.collectAsState()
                 val scanStatus by viewModel.scanStatus.collectAsState()
                 ZenTheme(
                     themePreference = themePreference
@@ -61,7 +66,7 @@ class SettingsFragment : Fragment() {
                                     bottom = insetsPadding.calculateBottomPadding()
                                 ),
                                 themePreference = themePreference,
-                                onThemePreferenceChanged = viewModel::updateTheme,
+                                onThemePreferenceChanged = preferenceProvider::updateTheme,
                                 scanStatus = scanStatus,
                                 onScanClicked = viewModel::scanForMusic,
                                 onRestoreClicked = {
