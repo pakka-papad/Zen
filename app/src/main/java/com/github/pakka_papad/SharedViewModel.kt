@@ -133,9 +133,9 @@ class SharedViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val collectionUi = _type.flatMapLatest { type ->
-        when (type) {
-            is CollectionType.AlbumType -> {
-                manager.getAlbumWithSongsByName(type.albumName).map {
+        when (type?.type) {
+            CollectionType.AlbumType -> {
+                manager.getAlbumWithSongsByName(type.id).map {
                     if (it == null) CollectionUi()
                     else {
                         CollectionUi(
@@ -146,8 +146,8 @@ class SharedViewModel @Inject constructor(
                     }
                 }
             }
-            is CollectionType.ArtistType -> {
-                manager.getArtistWithSongsByName(type.artistName).map {
+            CollectionType.ArtistType -> {
+                manager.getArtistWithSongsByName(type.id).map {
                     if (it == null) CollectionUi()
                     else {
                         CollectionUi(
@@ -157,8 +157,8 @@ class SharedViewModel @Inject constructor(
                     }
                 }
             }
-            is CollectionType.PlaylistType -> {
-                manager.getPlaylistWithSongsById(type.id).map {
+            CollectionType.PlaylistType -> {
+                manager.getPlaylistWithSongsById(type.id.toLong()).map {
                     if (it == null) CollectionUi()
                     else {
                         CollectionUi(
@@ -168,8 +168,8 @@ class SharedViewModel @Inject constructor(
                     }
                 }
             }
-            is CollectionType.AlbumArtistType -> {
-                manager.getAlbumArtistWithSings(type.name).map {
+            CollectionType.AlbumArtistType -> {
+                manager.getAlbumArtistWithSings(type.id).map {
                     if (it == null) CollectionUi()
                     else {
                         CollectionUi(
@@ -179,8 +179,8 @@ class SharedViewModel @Inject constructor(
                     }
                 }
             }
-            is CollectionType.ComposerType -> {
-                manager.getComposerWithSongs(type.name).map {
+            CollectionType.ComposerType -> {
+                manager.getComposerWithSongs(type.id).map {
                     if (it == null) CollectionUi()
                     else {
                         CollectionUi(
@@ -190,8 +190,8 @@ class SharedViewModel @Inject constructor(
                     }
                 }
             }
-            is CollectionType.LyricistType -> {
-                manager.getLyricistWithSongs(type.name).map {
+            CollectionType.LyricistType -> {
+                manager.getLyricistWithSongs(type.id).map {
                     if (it == null) CollectionUi()
                     else {
                         CollectionUi(
@@ -201,8 +201,8 @@ class SharedViewModel @Inject constructor(
                     }
                 }
             }
-            is CollectionType.GenreType -> {
-                manager.getGenreWithSongs(type.genre).map {
+            CollectionType.GenreType -> {
+                manager.getGenreWithSongs(type.id).map {
                     if (it == null) CollectionUi()
                     else {
                         CollectionUi(
@@ -212,7 +212,7 @@ class SharedViewModel @Inject constructor(
                     }
                 }
             }
-            is CollectionType.Favourites -> {
+            CollectionType.FavouritesType -> {
                 manager.getFavourites().map {
                     CollectionUi(
                         songs = it,

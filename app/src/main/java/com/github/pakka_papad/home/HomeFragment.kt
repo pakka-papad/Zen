@@ -234,7 +234,7 @@ class HomeFragment : Fragment() {
     private fun navigateToCollection(album: Album){
         navController.navigate(
             HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                CollectionType.AlbumType(album.name)
+                CollectionType(CollectionType.AlbumType,album.name)
             )
         )
     }
@@ -244,28 +244,28 @@ class HomeFragment : Fragment() {
             is ArtistWithSongCount -> {
                 navController.navigate(
                     HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                        CollectionType.ArtistType(personWithSongCount.name)
+                        CollectionType(CollectionType.ArtistType,personWithSongCount.name)
                     )
                 )
             }
             is AlbumArtistWithSongCount -> {
                 navController.navigate(
                     HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                        CollectionType.AlbumArtistType(personWithSongCount.name)
+                        CollectionType(CollectionType.AlbumArtistType,personWithSongCount.name)
                     )
                 )
             }
             is ComposerWithSongCount -> {
                 navController.navigate(
                     HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                        CollectionType.ComposerType(personWithSongCount.name)
+                        CollectionType(CollectionType.ComposerType,personWithSongCount.name)
                     )
                 )
             }
             is LyricistWithSongCount -> {
                 navController.navigate(
                     HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                        CollectionType.LyricistType(personWithSongCount.name)
+                        CollectionType(CollectionType.LyricistType,personWithSongCount.name)
                     )
                 )
             }
@@ -275,7 +275,7 @@ class HomeFragment : Fragment() {
     private fun navigateToCollection(playlistId: Long){
         navController.navigate(
             HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                CollectionType.PlaylistType(playlistId)
+                CollectionType(CollectionType.PlaylistType,playlistId.toString())
             )
         )
     }
@@ -283,7 +283,7 @@ class HomeFragment : Fragment() {
     private fun navigateToCollection(genreWithSongCount: GenreWithSongCount){
         navController.navigate(
             HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                CollectionType.GenreType(genreWithSongCount.genreName)
+                CollectionType(CollectionType.GenreType,genreWithSongCount.genreName)
             )
         )
     }
@@ -291,7 +291,7 @@ class HomeFragment : Fragment() {
     private fun navigateToCollection(){
         navController.navigate(
             HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                CollectionType.Favourites
+                CollectionType(CollectionType.FavouritesType)
             )
         )
     }

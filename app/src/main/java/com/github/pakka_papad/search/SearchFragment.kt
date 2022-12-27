@@ -105,49 +105,49 @@ class SearchFragment : Fragment() {
     private fun handleClick(album: Album){
         navController.navigate(
             SearchFragmentDirections
-                .actionSearchFragmentToCollectionFragment(CollectionType.AlbumType(album.name))
+                .actionSearchFragmentToCollectionFragment(CollectionType(CollectionType.AlbumType,album.name))
         )
     }
 
     private fun handleClick(artist: Artist){
         navController.navigate(
             SearchFragmentDirections
-                .actionSearchFragmentToCollectionFragment(CollectionType.ArtistType(artist.name))
+                .actionSearchFragmentToCollectionFragment(CollectionType(CollectionType.ArtistType,artist.name))
         )
     }
 
     private fun handleClick(albumArtist: AlbumArtist){
         navController.navigate(
             SearchFragmentDirections
-                .actionSearchFragmentToCollectionFragment(CollectionType.AlbumArtistType(albumArtist.name))
+                .actionSearchFragmentToCollectionFragment(CollectionType(CollectionType.AlbumArtistType,albumArtist.name))
         )
     }
 
     private fun handleClick(composer: Composer){
         navController.navigate(
             SearchFragmentDirections
-                .actionSearchFragmentToCollectionFragment(CollectionType.ComposerType(composer.name))
+                .actionSearchFragmentToCollectionFragment(CollectionType(CollectionType.ComposerType,composer.name))
         )
     }
 
     private fun handleClick(lyricist: Lyricist){
         navController.navigate(
             SearchFragmentDirections.actionSearchFragmentToCollectionFragment(
-                CollectionType.LyricistType(lyricist.name)
+                CollectionType(CollectionType.LyricistType,lyricist.name)
             )
         )
     }
 
     private fun handleClick(genre: Genre){
         navController.navigate(
-            SearchFragmentDirections.actionSearchFragmentToCollectionFragment(CollectionType.GenreType(genre.genre))
+            SearchFragmentDirections.actionSearchFragmentToCollectionFragment(CollectionType(CollectionType.GenreType,genre.genre))
         )
     }
 
     private fun handleClick(playlist: Playlist){
         navController.navigate(
             SearchFragmentDirections
-                .actionSearchFragmentToCollectionFragment(CollectionType.PlaylistType(playlist.playlistId))
+                .actionSearchFragmentToCollectionFragment(CollectionType(CollectionType.PlaylistType,playlist.playlistId.toString()))
         )
     }
 }
