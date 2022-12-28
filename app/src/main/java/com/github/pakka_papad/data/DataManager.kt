@@ -96,15 +96,8 @@ class DataManager(
         )
     }
 
-    suspend fun insertPlaylistSongCrossRefs(playlistSongCrossRefs: List<PlaylistSongCrossRef>) {
-        try {
-            playlistDao.insertPlaylistSongCrossRef(playlistSongCrossRefs)
-            showToast("Done")
-        } catch (e: Exception) {
-            Timber.e(e)
-            showToast("Oops! Some error occurred")
-        }
-    }
+    suspend fun insertPlaylistSongCrossRefs(playlistSongCrossRefs: List<PlaylistSongCrossRef>) =
+        playlistDao.insertPlaylistSongCrossRef(playlistSongCrossRefs)
 
     private val _scanStatus = Channel<ScanStatus>()
     val scanStatus = _scanStatus.receiveAsFlow()

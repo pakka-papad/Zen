@@ -20,7 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.exoplayer.ExoPlayer
@@ -29,7 +29,6 @@ import androidx.navigation.fragment.findNavController
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.R
 import com.github.pakka_papad.Screens
-import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.collection.CollectionType
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.*
@@ -45,7 +44,7 @@ class HomeFragment : Fragment() {
 
     private lateinit var navController: NavController
 
-    private val viewModel by activityViewModels<SharedViewModel>()
+    private val viewModel: HomeViewModel by viewModels()
 
     @Inject
     lateinit var exoPlayer: ExoPlayer
@@ -104,7 +103,6 @@ class HomeFragment : Fragment() {
                                     navController.navigate(R.id.action_homeFragment_to_settingsFragment)
                                 },
                                 onSearchClicked = {
-                                    viewModel.updateQuery("")
                                     navController.navigate(R.id.action_homeFragment_to_searchFragment)
                                 },
                             )

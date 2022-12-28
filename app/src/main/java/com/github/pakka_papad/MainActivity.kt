@@ -3,7 +3,6 @@ package com.github.pakka_papad
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
@@ -16,7 +15,6 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val viewModel by viewModels<SharedViewModel>()
 
     @Inject lateinit var preferencesProvider: ZenPreferenceProvider
 

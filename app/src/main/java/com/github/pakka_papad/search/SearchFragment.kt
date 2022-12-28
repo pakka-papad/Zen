@@ -7,22 +7,22 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.*
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
-import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.collection.CollectionType
 import com.github.pakka_papad.components.FullScreenSadMessage
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.*
-import com.github.pakka_papad.data.music.Composer
 import com.github.pakka_papad.ui.theme.ZenTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -32,7 +32,7 @@ class SearchFragment : Fragment() {
 
     private lateinit var navController: NavController
 
-    private val viewModel by activityViewModels<SharedViewModel>()
+    private val viewModel: SearchViewModel by viewModels()
 
     @Inject
     lateinit var preferenceProvider: ZenPreferenceProvider
@@ -42,7 +42,7 @@ class SearchFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         navController = findNavController()
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)

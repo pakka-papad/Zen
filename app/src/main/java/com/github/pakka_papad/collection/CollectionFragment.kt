@@ -16,22 +16,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.components.FullScreenSadMessage
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.ui.theme.ZenTheme
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class CollectionFragment : Fragment() {
 
-    private val viewModel by activityViewModels<SharedViewModel>()
+    private val viewModel: CollectionViewModel by viewModels()
 
     private lateinit var navController: NavController
 
@@ -45,7 +46,7 @@ class CollectionFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         navController = findNavController()
         if (args.collectionType == null) {
             navController.popBackStack()

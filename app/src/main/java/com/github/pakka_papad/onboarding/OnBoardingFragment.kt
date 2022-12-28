@@ -13,11 +13,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.github.pakka_papad.R
-import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.ScanStatus
 import com.github.pakka_papad.ui.theme.DefaultTheme
@@ -35,7 +34,7 @@ import kotlin.math.max
 @AndroidEntryPoint
 class OnBoardingFragment : Fragment() {
 
-    private val viewModel by activityViewModels<SharedViewModel>()
+    private val viewModel : OnBoardingViewModel by viewModels()
 
     private lateinit var navController: NavController
 
@@ -47,7 +46,7 @@ class OnBoardingFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         navController = findNavController()
         return ComposeView(requireContext()).apply {
             setContent {

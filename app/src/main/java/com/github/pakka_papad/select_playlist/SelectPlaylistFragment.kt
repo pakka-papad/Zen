@@ -8,17 +8,19 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.github.pakka_papad.SharedViewModel
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.ui.theme.ZenTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,14 +31,14 @@ class SelectPlaylistFragment: Fragment() {
 
     private lateinit var navController: NavController
 
-    private val viewModel by activityViewModels<SharedViewModel>()
+    private val viewModel: SelectPlaylistViewModel by viewModels()
 
     private val args: SelectPlaylistFragmentArgs by navArgs()
 
     @Inject
     lateinit var preferenceProvider: ZenPreferenceProvider
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalLifecycleComposeApi::class)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -48,22 +50,14 @@ class SelectPlaylistFragment: Fragment() {
         }
         return ComposeView(requireContext()).apply {
             setContent {
-                val themePreference by preferenceProvider.theme.collectAsState()
-                ZenTheme(
-                    themePreference = themePreference
-                ) {
-                    val playlists = viewModel.playlistsWithSongCount.value
+                val theme by preferenceProvider.theme.collectAsState()
+                ZenTheme(theme) {
+                    val playlists by viewModel.playlistsWithSongCount.collectAsStateWithLifecycle()
                     val selectList = viewModel.selectList
-                    LaunchedEffect(key1 = Unit){
-                        viewModel.updateSelectListSize(playlists.size)
-                    }
                     Scaffold(
                         topBar = {
                             SelectPlaylistTopBar(
-                                onCancelClicked = {
-                                    viewModel.resetSelectList()
-                                    navController.popBackStack()
-                                },
+                                onCancelClicked = navController::popBackStack,
                                 onConfirmClicked = {
                                     viewModel.addSongsToPlaylists(args.songLocations)
                                     navController.popBackStack()
