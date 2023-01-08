@@ -33,7 +33,6 @@ fun HomeTopBar(
         withStyle(
             SpanStyle(
                 fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 1.sp,
                 fontSize = 26.sp,
             )
         ) {
@@ -43,7 +42,6 @@ fun HomeTopBar(
             SpanStyle(
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 1.sp,
                 fontSize = 26.sp
             )
         ) {
