@@ -2,7 +2,7 @@
     <img src="app/src/main/res/ic_launcher-playstore.png" height="128">
     <h1 align="center">Zen Music Player</h1>
 </p>
-<img src="screenshots/banner.png" style="width: 90%; display: block; margin-left: auto; margin-right: auto;">
+<img src="screenshots/banner.png" style="width: 100vw;">
 <h3>
     Material You Themed music player for android
 </h3>
