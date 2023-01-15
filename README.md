@@ -2,6 +2,9 @@
     <img src="app/src/main/res/ic_launcher-playstore.png" height="128">
     <h1 align="center">Zen Music Player</h1>
 </p>
+<h3>Download:
+    <a href="https://github.com/pakka-papad/Zen/releases">Github</a>        
+</h3>
 <img src="screenshots/banner.png" style="width: 100vw;">
 <h3>
     Material You Themed music player for android
