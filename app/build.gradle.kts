@@ -21,8 +21,8 @@ android {
         applicationId = "com.github.pakka_papad"
         minSdk = Api.minSdk
         targetSdk = Api.targetSdk
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = AppVersion.Code
+        versionName = AppVersion.Name
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

@@ -1,5 +1,6 @@
 package com.github.pakka_papad.settings
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -21,6 +22,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.github.pakka_papad.BuildConfig
 import com.github.pakka_papad.R
 import com.github.pakka_papad.components.OutlinedBox
 import com.github.pakka_papad.data.UserPreferences
@@ -28,6 +30,7 @@ import com.github.pakka_papad.data.UserPreferences.Accent
 import com.github.pakka_papad.data.music.ScanStatus
 import com.github.pakka_papad.ui.theme.ThemePreference
 import com.github.pakka_papad.ui.theme.getSeedColor
+import timber.log.Timber
 
 @Composable
 fun SettingsList(
@@ -57,6 +60,9 @@ fun SettingsList(
                 onScanClicked = onScanClicked,
                 onRestoreClicked = onRestoreClicked
             )
+        }
+        item {
+            ReportBug()
         }
         item {
             MadeBy()
@@ -404,6 +410,60 @@ private fun MusicLibrarySettings(
             }
         }
 
+    }
+}
+
+private fun getSystemDetail(): String {
+    return "Brand: ${Build.BRAND} \n" +
+            "Model: ${Build.MODEL} \n" +
+            "SDK: ${Build.VERSION.SDK_INT} \n" +
+            "Manufacturer: ${Build.MANUFACTURER} \n" +
+            "Version Code: ${Build.VERSION.RELEASE} \n" +
+            "App Version Name: ${BuildConfig.VERSION_NAME}"
+}
+
+@Composable
+private fun ReportBug(){
+    val context = LocalContext.current
+    OutlinedBox(
+        label = "Report",
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 13.dp),
+        modifier = Modifier.padding(10.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Report any bugs/crashes",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Button(
+                onClick = {
+                    val intent = Intent(Intent.ACTION_SENDTO)
+                    intent.apply {
+                        putExtra(Intent.EXTRA_EMAIL, arrayOf("music.zen@outlook.com"))
+                        putExtra(Intent.EXTRA_SUBJECT,"Zen Music | Bug Report")
+                        putExtra(Intent.EXTRA_TEXT, getSystemDetail() + "\n\n[Describe the bug or crash here]")
+//                        setDataAndType(Uri.parse("mailto://"),"message/rfc822")
+//                        type = "message/rfc822"
+                        data = Uri.parse("mailto:")
+                    }
+                    try {
+                        context.startActivity(intent)
+                    }catch (e: Exception){
+                        Timber.e(e)
+                    }
+                },
+                content = {
+                    Text(
+                        text = "Report",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+            )
+        }
     }
 }
 
