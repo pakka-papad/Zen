@@ -99,6 +99,9 @@ class DataManager(
     suspend fun insertPlaylistSongCrossRefs(playlistSongCrossRefs: List<PlaylistSongCrossRef>) =
         playlistDao.insertPlaylistSongCrossRef(playlistSongCrossRefs)
 
+    suspend fun deletePlaylistSongCrossRef(playlistSongCrossRef: PlaylistSongCrossRef) =
+        playlistDao.deletePlaylistSongCrossRef(playlistSongCrossRef)
+
     private val _scanStatus = Channel<ScanStatus>()
     val scanStatus = _scanStatus.receiveAsFlow()
 

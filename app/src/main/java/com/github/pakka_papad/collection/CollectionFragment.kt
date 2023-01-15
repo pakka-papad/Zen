@@ -124,6 +124,8 @@ class CollectionFragment : Fragment() {
                                                     )
                                             )
                                         },
+                                        isPlaylistCollection = args.collectionType?.type == CollectionType.PlaylistType,
+                                        onRemoveFromPlaylistClicked = viewModel::removeFromPlaylist
                                     )
                                 }
                             }

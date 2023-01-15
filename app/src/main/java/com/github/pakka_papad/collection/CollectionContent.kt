@@ -26,6 +26,8 @@ fun CollectionContent(
     onPlayAllClicked: () -> Unit,
     onShuffleClicked: () -> Unit,
     onAddToPlaylistsClicked: (Song) -> Unit,
+    isPlaylistCollection: Boolean,
+    onRemoveFromPlaylistClicked: (Song) -> Unit,
 ) {
     if (songs.isEmpty()) {
         FullScreenSadMessage(
@@ -62,7 +64,9 @@ fun CollectionContent(
                         SongOptions.Info { infoVisible = true },
                         SongOptions.AddToQueue { onAddToQueueClicked(song) },
                         SongOptions.AddToPlaylist { onAddToPlaylistsClicked(song) },
-                    ),
+                    ) + if (isPlaylistCollection) listOf(
+                        SongOptions.RemoveFromPlaylist { onRemoveFromPlaylistClicked(song) }
+                    ) else listOf(),
                     currentlyPlaying = (song.location == currentSong?.location)
                 )
                 if (infoVisible) {

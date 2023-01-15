@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.pakka_papad.data.DataManager
+import com.github.pakka_papad.data.music.PlaylistSongCrossRef
 import com.github.pakka_papad.data.music.Song
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -169,6 +170,20 @@ class CollectionViewModel @Inject constructor(
         val updatedSong = song.copy(favourite = !song.favourite)
         viewModelScope.launch(Dispatchers.IO) {
             manager.updateSong(updatedSong)
+        }
+    }
+
+    fun removeFromPlaylist(song: Song){
+        viewModelScope.launch {
+            try {
+                val playlistId = _collectionType.value?.id?.toLong() ?: throw IllegalArgumentException()
+                val playlistSongCrossRef = PlaylistSongCrossRef(playlistId,song.location)
+                manager.deletePlaylistSongCrossRef(playlistSongCrossRef)
+                Toast.makeText(context,"Removed",Toast.LENGTH_SHORT).show()
+            } catch (e: Exception){
+                Timber.e(e)
+                Toast.makeText(context,"Some error occurred",Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

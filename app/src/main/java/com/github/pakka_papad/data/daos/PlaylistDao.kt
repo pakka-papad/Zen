@@ -17,6 +17,9 @@ interface PlaylistDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertPlaylistSongCrossRef(playlistSongCrossRefs: List<PlaylistSongCrossRef>)
 
+    @Delete
+    suspend fun deletePlaylistSongCrossRef(playlistSongCrossRef: PlaylistSongCrossRef)
+
     @Query("SELECT * FROM ${Constants.Tables.PLAYLIST_TABLE}")
     fun getAllPlaylists(): Flow<List<Playlist>>
 
