@@ -133,9 +133,6 @@ class NowPlayingFragment : Fragment() {
                         sheetContent = {
                             Queue(
                                 queue = queue,
-                                onSongClicked = { index ->
-
-                                },
                                 onFavouriteClicked = viewModel::changeFavouriteValue,
                                 currentSong = song,
                                 onDownArrowClicked = {

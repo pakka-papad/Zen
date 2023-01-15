@@ -28,7 +28,6 @@ import timber.log.Timber
 @Composable
 fun ColumnScope.Queue(
     queue: List<Song>,
-    onSongClicked: (index: Int) -> Unit,
     onFavouriteClicked: (Song) -> Unit,
     currentSong: Song?,
     onDownArrowClicked: () -> Unit,
@@ -85,12 +84,13 @@ fun ColumnScope.Queue(
             items = queue,
             key = { _, song -> song.location }
         ) { index, song ->
+            val isPlaying = currentSong?.location == song.location
             DraggableItem(dragDropState, index) {
                 SongCardV2(
                     song = song,
-                    onSongClicked = { onSongClicked(index) },
+                    onSongClicked = { if(!isPlaying){ exoPlayer.seekTo(index,0) } },
                     onFavouriteClicked = onFavouriteClicked,
-                    currentlyPlaying = (currentSong?.location == song.location),
+                    currentlyPlaying = isPlaying,
                 )
             }
         }
