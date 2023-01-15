@@ -17,7 +17,7 @@ import com.github.pakka_papad.data.music.*
         Lyricist::class,
         BlacklistedSong::class
     ],
-    version = 1, exportSchema = false)
+    version = 1, exportSchema = true)
 abstract class AppDatabase: RoomDatabase() {
 
     abstract fun songDao(): SongDao
