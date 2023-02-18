@@ -49,6 +49,7 @@ private fun TopBarTitle(
     color = textColor,
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CenterAlignedTopBar(
     leadingIcon: @Composable () -> Unit,
@@ -77,6 +78,7 @@ fun CenterAlignedTopBar(
     backgroundColor = backgroundColor,
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SmallTopBar(
     leadingIcon: @Composable () -> Unit,
@@ -87,7 +89,7 @@ fun SmallTopBar(
     titleMaxLines: Int,
 ) = BaseTopBar(
     appBar = {
-        SmallTopAppBar(
+        TopAppBar(
             modifier = Modifier
                 .background(backgroundColor)
                 .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)),

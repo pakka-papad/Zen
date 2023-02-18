@@ -21,7 +21,7 @@ object Versions {
     const val datastore = "1.0.0"
     const val kotlinLite = "3.18.0"
 
-    const val material3 = "1.0.0-alpha14"
+    const val material3 = "1.0.1"
     const val accompanist = "0.25.1"
 
     const val junit = "4.13.2"
@@ -100,9 +100,9 @@ object Libraries {
 }
 
 object Api {
-    const val compileSdk = 32
+    const val compileSdk = 33
     const val minSdk = 23
-    const val targetSdk = 32
+    const val targetSdk = 33
 }
 
 object AnnotationProcessors {

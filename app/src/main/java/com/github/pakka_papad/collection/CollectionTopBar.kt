@@ -29,6 +29,7 @@ import com.github.pakka_papad.components.more_options.OptionsDropDown
 import com.github.pakka_papad.data.UserPreferences
 import com.github.pakka_papad.ui.theme.ThemePreference
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CollectionTopBar(
     topBarTitle: String,
@@ -94,7 +95,7 @@ fun CollectionTopBar(
                     )
                     .align(Alignment.TopCenter)
             )
-            SmallTopAppBar(
+            TopAppBar(
                 modifier = Modifier
                     .background(Color.Transparent)
                     .padding(

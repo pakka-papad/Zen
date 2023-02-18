@@ -57,6 +57,7 @@ fun Playlists(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreatePlaylistCard(
     onPlaylistCreate: (String) -> Unit,
