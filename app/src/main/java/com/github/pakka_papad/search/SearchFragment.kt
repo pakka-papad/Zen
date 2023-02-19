@@ -15,7 +15,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
@@ -37,7 +36,7 @@ class SearchFragment : Fragment() {
     @Inject
     lateinit var preferenceProvider: ZenPreferenceProvider
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalLifecycleComposeApi::class)
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
