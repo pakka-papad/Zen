@@ -15,14 +15,14 @@ object Versions {
     const val androidxSplashScreen = "1.0.0-beta02"
 
     const val appCompat = "1.4.2"
-    const val navigation = "2.4.2"
+    const val navigation = "2.5.3"
 
-    const val room = "2.4.3"
+    const val room = "2.5.0"
     const val datastore = "1.0.0"
     const val kotlinLite = "3.18.0"
 
     const val material3 = "1.0.1"
-    const val accompanist = "0.25.1"
+    const val accompanist = "0.28.0"
 
     const val junit = "4.13.2"
 
