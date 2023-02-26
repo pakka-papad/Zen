@@ -23,8 +23,34 @@ fun Page(
     onStartScanClicked: () -> Unit
 ){
     when(pageIndex){
-        0 -> StoragePermissionPage(readExternalStoragePermissionState)
+        0 -> ReadStoragePermissionPage(readExternalStoragePermissionState)
         1 -> ScanningPage(
+            scanStatus = scanStatus,
+            onStartScanClicked = onStartScanClicked
+        )
+        else -> Text(
+            text = "Page $pageIndex",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.fillMaxSize(),
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+    }
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun PageApi33(
+    pageIndex: Int,
+    readExternalStoragePermissionState: PermissionState,
+    notificationPermissionState: PermissionState,
+    scanStatus: ScanStatus,
+    onStartScanClicked: () -> Unit
+){
+    when(pageIndex){
+        0 -> NotificationPermissionPage(notificationPermissionState)
+        1 -> ReadAudioPermissionPage(readExternalStoragePermissionState)
+        2 -> ScanningPage(
             scanStatus = scanStatus,
             onStartScanClicked = onStartScanClicked
         )
