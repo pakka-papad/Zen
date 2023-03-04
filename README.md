@@ -2,8 +2,10 @@
     <img src="app/src/main/res/ic_launcher-playstore.png" height="128">
     <h1 align="center">Zen Music Player</h1>
 </p>
-<h3>Download:
-    <a href="https://github.com/pakka-papad/Zen/releases">Github</a>        
+<h3>
+    <a href='https://play.google.com/store/apps/details?id=com.github.pakka_papad&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>
+        <img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/>
+    </a>     
 </h3>
 <img src="screenshots/banner.png" style="width: 100vw;">
 <h3>
