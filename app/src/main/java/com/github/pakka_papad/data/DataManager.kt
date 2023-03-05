@@ -8,7 +8,7 @@ import android.os.Build
 import android.provider.MediaStore.Audio
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
-import com.github.pakka_papad.data.daos.*
+import com.github.pakka_papad.data.components.*
 import com.github.pakka_papad.data.music.*
 import com.github.pakka_papad.data.notification.ZenNotificationManager
 import com.github.pakka_papad.formatToDate
@@ -28,49 +28,19 @@ import java.util.*
 class DataManager(
     private val context: Context,
     private val notificationManager: ZenNotificationManager,
-    private val songDao: SongDao,
-    private val albumDao: AlbumDao,
-    private val artistDao: ArtistDao,
-    private val albumArtistDao: AlbumArtistDao,
-    private val composerDao: ComposerDao,
-    private val lyricistDao: LyricistDao,
-    private val playlistDao: PlaylistDao,
-    private val genreDao: GenreDao,
-    private val blacklistDao: BlacklistDao,
+    private val daoCollection: DaoCollection,
 ) {
 
-    val allSongs = songDao.getAllSongs()
-    val allAlbums = albumDao.getAllAlbums()
-    val allArtistWithSongCount = songDao.getAllArtistsWithSongCount()
-    val allAlbumArtistWithSongCount = songDao.getAllAlbumArtistsWithSongCount()
-    val allComposerWithSongCount = songDao.getAllComposersWithSongCount()
-    val allLyricistWithSongCount = songDao.getAllLyricistsWithSongCount()
-    val allPlaylistsWithSongCount = playlistDao.getAllPlaylistWithSongCount()
-    val allGenresWithSongCount = songDao.getAllGenresWithSongCount()
+    val getAll by lazy { GetAll(daoCollection) }
 
-    fun getPlaylistWithSongsById(id: Long) = playlistDao.getPlaylistWithSongs(id)
-    fun getAlbumWithSongsByName(albumName: String) = albumDao.getAlbumWithSongsByName(albumName)
-    fun getArtistWithSongsByName(artistName: String) = artistDao.getArtistWithSongsByName(artistName)
-    fun getAlbumArtistWithSings(albumArtistName: String) = albumArtistDao.getAlbumArtistWithSongs(albumArtistName)
-    fun getComposerWithSongs(composerName: String) = composerDao.getComposerWithSongs(composerName)
-    fun getLyricistWithSongs(lyricistName: String) = lyricistDao.getLyricistWithSongs(lyricistName)
-    fun getGenreWithSongs(genreName: String) = genreDao.getGenreWithSongs(genreName)
-    fun getFavourites() = songDao.getAllFavourites()
+    val findCollection by lazy { FindCollection(daoCollection) }
 
-    suspend fun searchSongs(query: String) = songDao.searchSongs(query)
-    suspend fun searchAlbums(query: String) = albumDao.searchAlbums(query)
-    suspend fun searchArtists(query: String) = artistDao.searchArtists(query)
-    suspend fun searchAlbumArtists(query: String) = albumArtistDao.searchAlbumArtists(query)
-    suspend fun searchComposers(query: String) = composerDao.searchComposers(query)
-    suspend fun searchLyricists(query: String) = lyricistDao.searchLyricists(query)
-    suspend fun searchPlaylists(query: String) = playlistDao.searchPlaylists(query)
-    suspend fun searchGenres(query: String) = genreDao.searchGenres(query)
+    val querySearch by lazy { QuerySearch(daoCollection) }
 
-    val blacklistedSongsFlow = blacklistDao.getBlacklistedSongsFlow()
     suspend fun removeFromBlacklist(data: List<BlacklistedSong>){
         data.forEach {
             Timber.d("bs: $it")
-            blacklistDao.deleteBlacklistedSong(it)
+            daoCollection.blacklistDao.deleteBlacklistedSong(it)
         }
     }
 
@@ -80,14 +50,14 @@ class DataManager(
             playlistName = playlistName.trim(),
             createdAt = System.currentTimeMillis()
         )
-        playlistDao.insertPlaylist(playlist)
+        daoCollection.playlistDao.insertPlaylist(playlist)
         showToast("Playlist $playlistName created")
     }
 
-    suspend fun deletePlaylist(playlist: Playlist) = playlistDao.deletePlaylist(playlist)
+    suspend fun deletePlaylist(playlist: Playlist) = daoCollection.playlistDao.deletePlaylist(playlist)
     suspend fun deleteSong(song: Song) {
-        songDao.deleteSong(song)
-        blacklistDao.addSong(
+        daoCollection.songDao.deleteSong(song)
+        daoCollection.blacklistDao.addSong(
             BlacklistedSong(
                 location = song.location,
                 title = song.title,
@@ -97,10 +67,10 @@ class DataManager(
     }
 
     suspend fun insertPlaylistSongCrossRefs(playlistSongCrossRefs: List<PlaylistSongCrossRef>) =
-        playlistDao.insertPlaylistSongCrossRef(playlistSongCrossRefs)
+        daoCollection.playlistDao.insertPlaylistSongCrossRef(playlistSongCrossRefs)
 
     suspend fun deletePlaylistSongCrossRef(playlistSongCrossRef: PlaylistSongCrossRef) =
-        playlistDao.deletePlaylistSongCrossRef(playlistSongCrossRef)
+        daoCollection.playlistDao.deletePlaylistSongCrossRef(playlistSongCrossRef)
 
     private val _scanStatus = Channel<ScanStatus>()
     val scanStatus = _scanStatus.receiveAsFlow()
@@ -108,7 +78,7 @@ class DataManager(
     suspend fun scanForMusic() {
         _scanStatus.send(ScanStatus.ScanStarted)
         notificationManager.sendScanningNotification()
-        val blacklistedSongs = blacklistDao.getBlacklistedSongs()
+        val blacklistedSongs = daoCollection.blacklistDao.getBlacklistedSongs()
         val blacklistedSongLocations = blacklistedSongs.map { it.location }.toSet()
         val selection = Audio.Media.IS_MUSIC + " != 0"
         val projection = arrayOf(
@@ -196,13 +166,13 @@ class DataManager(
             _scanStatus.send(ScanStatus.ScanProgress(parsedSongs, totalSongs))
         } while (cursor.moveToNext())
         cursor.close()
-        albumDao.insertAllAlbums(albumArtMap.entries.map { (t, u) -> Album(t, u) })
-        artistDao.insertAllArtists(artistSet.map { Artist(it) })
-        albumArtistDao.insertAllAlbumArtists(albumArtistSet.map { AlbumArtist(it) })
-        composerDao.insertAllComposers(composerSet.map { Composer(it) })
-        lyricistDao.insertAllLyricists(lyricistSet.map { Lyricist(it) })
-        genreDao.insertAllGenres(genreSet.map { Genre(it) })
-        songDao.insertAllSongs(songs)
+        daoCollection.albumDao.insertAllAlbums(albumArtMap.entries.map { (t, u) -> Album(t, u) })
+        daoCollection.artistDao.insertAllArtists(artistSet.map { Artist(it) })
+        daoCollection.albumArtistDao.insertAllAlbumArtists(albumArtistSet.map { AlbumArtist(it) })
+        daoCollection.composerDao.insertAllComposers(composerSet.map { Composer(it) })
+        daoCollection.lyricistDao.insertAllLyricists(lyricistSet.map { Lyricist(it) })
+        daoCollection.genreDao.insertAllGenres(genreSet.map { Genre(it) })
+        daoCollection.songDao.insertAllSongs(songs)
         notificationManager.removeScanningNotification()
         _scanStatus.send(ScanStatus.ScanComplete)
     }
@@ -234,7 +204,7 @@ class DataManager(
                 break
             }
         }
-        songDao.updateSong(song)
+        daoCollection.songDao.updateSong(song)
     }
 
     private var remIdx = 0

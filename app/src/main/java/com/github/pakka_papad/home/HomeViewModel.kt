@@ -21,7 +21,7 @@ class HomeViewModel @Inject constructor(
     private val exoPlayer: ExoPlayer,
 ) : ViewModel() {
 
-    val songs = manager.allSongs
+    val songs = manager.getAll.songs()
         .catch { exception ->
             Timber.e(exception)
         }.stateIn(
@@ -30,7 +30,7 @@ class HomeViewModel @Inject constructor(
             initialValue = null
         )
 
-    val albums = manager.allAlbums
+    val albums = manager.getAll.albums()
         .catch { exception ->
             Timber.e(exception)
         }.stateIn(
@@ -50,10 +50,10 @@ class HomeViewModel @Inject constructor(
     val personsWithSongCount = _selectedPerson
         .flatMapLatest {
             when (it) {
-                Person.Artist -> manager.allArtistWithSongCount
-                Person.AlbumArtist -> manager.allAlbumArtistWithSongCount
-                Person.Composer -> manager.allComposerWithSongCount
-                Person.Lyricist -> manager.allLyricistWithSongCount
+                Person.Artist -> manager.getAll.artists()
+                Person.AlbumArtist -> manager.getAll.albumArtists()
+                Person.Composer -> manager.getAll.composers()
+                Person.Lyricist -> manager.getAll.lyricists()
             }
         }.catch { exception ->
             Timber.e(exception)
@@ -63,7 +63,7 @@ class HomeViewModel @Inject constructor(
             initialValue = null
         )
 
-    val playlistsWithSongCount = manager.allPlaylistsWithSongCount
+    val playlistsWithSongCount = manager.getAll.playlists()
         .catch { exception ->
             Timber.e(exception)
         }.stateIn(
@@ -72,7 +72,7 @@ class HomeViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    val genresWithSongCount = manager.allGenresWithSongCount
+    val genresWithSongCount = manager.getAll.genres()
         .catch { exception ->
             Timber.e(exception)
         }.stateIn(

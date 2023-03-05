@@ -31,7 +31,7 @@ class CollectionViewModel @Inject constructor(
         .flatMapLatest { type ->
             when (type?.type) {
                 CollectionType.AlbumType -> {
-                    manager.getAlbumWithSongsByName(type.id).map {
+                    manager.findCollection.getAlbumWithSongsByName(type.id).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
@@ -43,7 +43,7 @@ class CollectionViewModel @Inject constructor(
                     }
                 }
                 CollectionType.ArtistType -> {
-                    manager.getArtistWithSongsByName(type.id).map {
+                    manager.findCollection.getArtistWithSongsByName(type.id).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
@@ -54,7 +54,7 @@ class CollectionViewModel @Inject constructor(
                     }
                 }
                 CollectionType.PlaylistType -> {
-                    manager.getPlaylistWithSongsById(type.id.toLong()).map {
+                    manager.findCollection.getPlaylistWithSongsById(type.id.toLong()).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
@@ -65,7 +65,7 @@ class CollectionViewModel @Inject constructor(
                     }
                 }
                 CollectionType.AlbumArtistType -> {
-                    manager.getAlbumArtistWithSings(type.id).map {
+                    manager.findCollection.getAlbumArtistWithSings(type.id).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
@@ -76,7 +76,7 @@ class CollectionViewModel @Inject constructor(
                     }
                 }
                 CollectionType.ComposerType -> {
-                    manager.getComposerWithSongs(type.id).map {
+                    manager.findCollection.getComposerWithSongs(type.id).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
@@ -87,7 +87,7 @@ class CollectionViewModel @Inject constructor(
                     }
                 }
                 CollectionType.LyricistType -> {
-                    manager.getLyricistWithSongs(type.id).map {
+                    manager.findCollection.getLyricistWithSongs(type.id).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
@@ -98,7 +98,7 @@ class CollectionViewModel @Inject constructor(
                     }
                 }
                 CollectionType.GenreType -> {
-                    manager.getGenreWithSongs(type.id).map {
+                    manager.findCollection.getGenreWithSongs(type.id).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
@@ -109,7 +109,7 @@ class CollectionViewModel @Inject constructor(
                     }
                 }
                 CollectionType.FavouritesType -> {
-                    manager.getFavourites().map {
+                    manager.findCollection.getFavourites().map {
                         CollectionUi(
                             songs = it,
                             topBarTitle = "Favourites",

@@ -13,6 +13,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.data.*
+import com.github.pakka_papad.data.components.DaoCollection
 import com.github.pakka_papad.data.notification.ZenNotificationManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -45,15 +46,17 @@ object AppModule {
         return DataManager(
             context = context,
             notificationManager = notificationManager,
-            songDao = db.songDao(),
-            albumDao = db.albumDao(),
-            artistDao = db.artistDao(),
-            albumArtistDao = db.albumArtistDao(),
-            composerDao = db.composerDao(),
-            lyricistDao = db.lyricistDao(),
-            genreDao = db.genreDao(),
-            playlistDao = db.playlistDao(),
-            blacklistDao = db.blacklistDao()
+            daoCollection = DaoCollection(
+                songDao = db.songDao(),
+                albumDao = db.albumDao(),
+                artistDao = db.artistDao(),
+                albumArtistDao = db.albumArtistDao(),
+                composerDao = db.composerDao(),
+                lyricistDao = db.lyricistDao(),
+                genreDao = db.genreDao(),
+                playlistDao = db.playlistDao(),
+                blacklistDao = db.blacklistDao(),
+            )
         )
     }
 
