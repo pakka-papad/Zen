@@ -4,7 +4,13 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.dataStoreFile
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C.AUDIO_CONTENT_TYPE_MUSIC
+import androidx.media3.common.C.USAGE_MEDIA
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.extractor.DefaultExtractorsFactory
+import androidx.media3.extractor.mp3.Mp3Extractor
 import androidx.room.Room
 import dagger.Module
 import dagger.Provides
@@ -71,7 +77,18 @@ object AppModule {
     fun providesExoPlayer(
         @ApplicationContext context: Context
     ): ExoPlayer {
-        return ExoPlayer.Builder(context).build()
+        val extractorsFactory = DefaultExtractorsFactory().apply {
+            setMp3ExtractorFlags(Mp3Extractor.FLAG_DISABLE_ID3_METADATA)
+        }
+        val audioAttributes = AudioAttributes.Builder().apply {
+            setContentType(AUDIO_CONTENT_TYPE_MUSIC)
+            setUsage(USAGE_MEDIA)
+        }.build()
+        return ExoPlayer.Builder(context).apply {
+            setMediaSourceFactory(DefaultMediaSourceFactory(context,extractorsFactory))
+            setAudioAttributes(audioAttributes,true)
+            setHandleAudioBecomingNoisy(true)
+        }.build()
     }
 
     @Singleton

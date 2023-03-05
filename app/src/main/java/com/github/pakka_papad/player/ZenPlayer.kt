@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioManager
+import android.net.Uri
 import android.os.IBinder
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -21,6 +22,7 @@ import com.github.pakka_papad.data.notification.ZenNotificationManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import timber.log.Timber
+import java.io.File
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -219,7 +221,7 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
         val mediaItems = newQueue.map {
-            MediaItem.fromUri(it.location)
+            MediaItem.fromUri(Uri.fromFile(File(it.location)))
         }
         exoPlayer.addMediaItems(mediaItems)
         exoPlayer.prepare()
@@ -231,7 +233,7 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
 
     @Synchronized
     override fun addToQueue(song: Song) {
-        exoPlayer.addMediaItem(MediaItem.fromUri(song.location))
+        exoPlayer.addMediaItem(MediaItem.fromUri(Uri.fromFile(File(song.location))))
     }
 
     @Synchronized
