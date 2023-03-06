@@ -2,9 +2,9 @@ object Versions {
     const val kotlin = "1.8.0"
     const val coroutines = "1.6.1"
 
-    const val androidxComposeUi = "1.2.1"
+    const val androidxComposeUi = "1.3.3"
     const val androidxComposeCompiler = "1.4.1"
-    const val androidxComposeMaterial = "1.2.1"
+    const val androidxComposeMaterial = "1.3.1"
     const val androidxCore = "1.7.0"
     const val androidxLifecycle = "2.6.0-beta01"
 //    const val androidxLifecycleRuntimeCompose = "2.6.0-beta01"
@@ -20,6 +20,10 @@ object Versions {
     const val room = "2.5.0"
     const val datastore = "1.0.0"
     const val kotlinLite = "3.18.0"
+
+    const val firebaseBom = "31.2.3"
+    const val googleServices = "4.3.15"
+    const val crashlyticsGradlePlugin = "2.9.4"
 
     const val material3 = "1.0.1"
     const val accompanist = "0.28.0"
@@ -43,6 +47,8 @@ object Plugins {
     const val hilt = "com.google.dagger:hilt-android-gradle-plugin:${Versions.hilt}"
     const val navSafeArgs = "androidx.navigation:navigation-safe-args-gradle-plugin:${Versions.navigation}"
     const val kotlin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}"
+    const val googleServices = "com.google.gms:google-services:${Versions.googleServices}"
+    const val crashlytics = "com.google.firebase:firebase-crashlytics-gradle:${Versions.crashlyticsGradlePlugin}"
 }
 
 object Libraries {
@@ -65,6 +71,9 @@ object Libraries {
     const val roomKtx = "androidx.room:room-ktx:${Versions.room}"
     const val datastore = "androidx.datastore:datastore:${Versions.datastore}"
     const val kotlinLite = "com.google.protobuf:protobuf-kotlin-lite:${Versions.kotlinLite}"
+
+    const val firebaseBom = "com.google.firebase:firebase-bom:${Versions.firebaseBom}"
+    const val firebaseCrashlytics = "com.google.firebase:firebase-crashlytics-ktx"
 
     const val androidxComposeMaterial = "androidx.compose.material:material:${Versions.androidxComposeMaterial}"
 
