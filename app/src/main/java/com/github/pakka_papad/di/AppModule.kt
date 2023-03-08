@@ -21,6 +21,7 @@ import com.github.pakka_papad.Constants
 import com.github.pakka_papad.data.*
 import com.github.pakka_papad.data.components.DaoCollection
 import com.github.pakka_papad.data.notification.ZenNotificationManager
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -116,10 +117,20 @@ object AppModule {
     fun providesZenPreferencesDatastore(
         userPreferences: DataStore<UserPreferences>,
         coroutineScope: CoroutineScope,
+        crashReporter: ZenCrashReporter,
     ): ZenPreferenceProvider {
         return ZenPreferenceProvider(
             userPreferences = userPreferences,
             coroutineScope = coroutineScope,
+            crashReporter = crashReporter,
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun providesZenCrashReporter(): ZenCrashReporter {
+        return ZenCrashReporter(
+            firebase = FirebaseCrashlytics.getInstance()
         )
     }
 }

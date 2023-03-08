@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.github.pakka_papad.R
@@ -48,6 +49,7 @@ class SettingsFragment : Fragment() {
                 ZenTheme(
                     themePreference = themePreference
                 ) {
+                    val isCrashlyticsDisabled by preferenceProvider.isCrashlyticsDisabled.collectAsStateWithLifecycle()
                     Scaffold(
                         topBar = {
                             TopBarWithBackArrow(
@@ -74,7 +76,9 @@ class SettingsFragment : Fragment() {
                                     navController.navigate(
                                         R.id.action_settingsFragment_to_restoreFragment
                                     )
-                                }
+                                },
+                                disabledCrashlytics = isCrashlyticsDisabled,
+                                onAutoReportCrashClicked = preferenceProvider::toggleCrashlytics
                             )
                         }
                     )

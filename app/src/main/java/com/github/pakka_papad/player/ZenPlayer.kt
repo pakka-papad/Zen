@@ -13,10 +13,12 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.widget.Toast
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.data.DataManager
+import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.data.notification.ZenNotificationManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -36,6 +38,9 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
 
     @Inject
     lateinit var exoPlayer: ExoPlayer
+
+    @Inject
+    lateinit var crashReporter: ZenCrashReporter
 
     private var broadcastReceiver: ZenBroadcastReceiver? = null
 
@@ -69,6 +74,16 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
             super.onIsPlayingChanged(isPlaying)
             updateMediaSessionState()
             updateMediaSessionMetadata()
+        }
+
+        override fun onPlayerError(error: PlaybackException) {
+            super.onPlayerError(error)
+            crashReporter.logException(error)
+        }
+
+        override fun onPlayerErrorChanged(error: PlaybackException?) {
+            super.onPlayerErrorChanged(error)
+            crashReporter.logException(error)
         }
     }
 

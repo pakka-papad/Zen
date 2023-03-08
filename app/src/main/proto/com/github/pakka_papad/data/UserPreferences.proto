@@ -21,4 +21,5 @@ message UserPreferences {
     JacksonsPurple = 5;
   }
   Accent chosenAccent = 4;
+  bool crashlyticsDisabled = 5;
 }

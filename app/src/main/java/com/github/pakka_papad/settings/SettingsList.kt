@@ -39,6 +39,8 @@ fun SettingsList(
     scanStatus: ScanStatus,
     onScanClicked: () -> Unit,
     onRestoreClicked: () -> Unit,
+    disabledCrashlytics: Boolean,
+    onAutoReportCrashClicked: (Boolean) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -61,7 +63,10 @@ fun SettingsList(
             )
         }
         item {
-            ReportBug()
+            ReportBug(
+                disabledCrashlytics = disabledCrashlytics,
+                onAutoReportCrashClicked = onAutoReportCrashClicked,
+            )
         }
         item {
             MadeBy()
@@ -245,7 +250,6 @@ private fun AccentSelectorDialog(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ThemeSelectorDialog(
     themePreference: ThemePreference,
@@ -422,46 +426,67 @@ private fun getSystemDetail(): String {
 }
 
 @Composable
-private fun ReportBug(){
+private fun ReportBug(
+    disabledCrashlytics: Boolean,
+    onAutoReportCrashClicked: (Boolean) -> Unit,
+){
     val context = LocalContext.current
     OutlinedBox(
         label = "Report",
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 13.dp),
         modifier = Modifier.padding(10.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Report any bugs/crashes",
-                style = MaterialTheme.typography.titleMedium
-            )
-            Button(
-                onClick = {
-                    val intent = Intent(Intent.ACTION_SENDTO)
-                    intent.apply {
-                        putExtra(Intent.EXTRA_EMAIL, arrayOf("music.zen@outlook.com"))
-                        putExtra(Intent.EXTRA_SUBJECT,"Zen Music | Bug Report")
-                        putExtra(Intent.EXTRA_TEXT, getSystemDetail() + "\n\n[Describe the bug or crash here]")
-//                        setDataAndType(Uri.parse("mailto://"),"message/rfc822")
-//                        type = "message/rfc822"
-                        data = Uri.parse("mailto:")
+        Column(Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Auto crash reporting",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Switch(
+                    checked = !disabledCrashlytics,
+                    onCheckedChange = onAutoReportCrashClicked
+                )
+            }
+            Spacer(Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Report any bugs/crashes",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Button(
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_SENDTO)
+                        intent.apply {
+                            putExtra(Intent.EXTRA_EMAIL, arrayOf("music.zen@outlook.com"))
+                            putExtra(Intent.EXTRA_SUBJECT, "Zen Music | Bug Report")
+                            putExtra(
+                                Intent.EXTRA_TEXT,
+                                getSystemDetail() + "\n\n[Describe the bug or crash here]"
+                            )
+                            data = Uri.parse("mailto:")
+                        }
+                        try {
+                            context.startActivity(intent)
+                        } catch (e: Exception) {
+                            Timber.e(e)
+                        }
+                    },
+                    content = {
+                        Text(
+                            text = "Report",
+                            style = MaterialTheme.typography.titleMedium
+                        )
                     }
-                    try {
-                        context.startActivity(intent)
-                    }catch (e: Exception){
-                        Timber.e(e)
-                    }
-                },
-                content = {
-                    Text(
-                        text = "Report",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-            )
+                )
+            }
         }
     }
 }
