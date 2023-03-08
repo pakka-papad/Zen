@@ -309,7 +309,8 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
      * This stops the service and onDestroy is called
      */
     override fun onBroadcastCancel() {
-        stopForeground(true)
+        // Deprecated in api level 33
+//        stopForeground(true)
         stopSelf()
     }
 }
