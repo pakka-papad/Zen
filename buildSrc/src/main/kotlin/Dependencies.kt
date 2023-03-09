@@ -40,6 +40,7 @@ object Versions {
     const val media3 = "1.0.0-beta02"
 
     const val coilCompose = "2.2.2"
+    const val palette = "1.0.0"
     const val lottie = "5.2.0"
 }
 
@@ -105,6 +106,7 @@ object Libraries {
     const val exoPlayerUi = "com.google.android.exoplayer:exoplayer-ui:${Versions.exoPlayer}"
 
     const val coilCompose = "io.coil-kt:coil-compose:${Versions.coilCompose}"
+    const val palette = "androidx.palette:palette-ktx:${Versions.palette}"
     const val lottie = "com.airbnb.android:lottie-compose:${Versions.lottie}"
 }
 

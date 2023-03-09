@@ -1,10 +1,8 @@
 package com.github.pakka_papad.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +24,7 @@ fun PlayShuffleCard(
         modifier = Modifier
             .fillMaxWidth()
             .height(70.dp)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically,

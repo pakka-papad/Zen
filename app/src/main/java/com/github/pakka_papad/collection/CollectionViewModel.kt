@@ -49,6 +49,7 @@ class CollectionViewModel @Inject constructor(
                             CollectionUi(
                                 songs = it.songs,
                                 topBarTitle = it.artist.name,
+                                topBarBackgroundImageUri = it.songs.randomOrNull()?.artUri ?: ""
                             )
                         }
                     }
@@ -60,6 +61,7 @@ class CollectionViewModel @Inject constructor(
                             CollectionUi(
                                 songs = it.songs,
                                 topBarTitle = it.playlist.playlistName,
+                                topBarBackgroundImageUri = it.songs.randomOrNull()?.artUri ?: ""
                             )
                         }
                     }
@@ -71,6 +73,7 @@ class CollectionViewModel @Inject constructor(
                             CollectionUi(
                                 songs = it.songs,
                                 topBarTitle = it.albumArtist.name,
+                                topBarBackgroundImageUri = it.songs.randomOrNull()?.artUri ?: ""
                             )
                         }
                     }
@@ -82,6 +85,7 @@ class CollectionViewModel @Inject constructor(
                             CollectionUi(
                                 songs = it.songs,
                                 topBarTitle = it.composer.name,
+                                topBarBackgroundImageUri = it.songs.randomOrNull()?.artUri ?: ""
                             )
                         }
                     }
@@ -93,6 +97,7 @@ class CollectionViewModel @Inject constructor(
                             CollectionUi(
                                 songs = it.songs,
                                 topBarTitle = it.lyricist.name,
+                                topBarBackgroundImageUri = it.songs.randomOrNull()?.artUri ?: ""
                             )
                         }
                     }
@@ -104,6 +109,7 @@ class CollectionViewModel @Inject constructor(
                             CollectionUi(
                                 songs = it.songs,
                                 topBarTitle = it.genre.genre,
+                                topBarBackgroundImageUri = it.songs.randomOrNull()?.artUri ?: ""
                             )
                         }
                     }
@@ -113,6 +119,7 @@ class CollectionViewModel @Inject constructor(
                         CollectionUi(
                             songs = it,
                             topBarTitle = "Favourites",
+                            topBarBackgroundImageUri = it.randomOrNull()?.artUri ?: ""
                         )
                     }
                 }

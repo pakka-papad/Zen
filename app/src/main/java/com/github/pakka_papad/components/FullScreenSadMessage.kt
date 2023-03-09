@@ -20,7 +20,7 @@ fun FullScreenSadMessage(
     paddingValues: PaddingValues = PaddingValues(),
 ) = Column(
     modifier = modifier
-        .fillMaxSize()
+        .sizeIn(minWidth = 200.dp, minHeight = 200.dp, maxWidth = 500.dp, maxHeight = 500.dp)
         .padding(paddingValues)
         .alpha(0.4f),
     horizontalAlignment = Alignment.CenterHorizontally,
@@ -34,6 +34,7 @@ fun FullScreenSadMessage(
                 .padding(24.dp),
             painter = painterResource(R.drawable.ic_baseline_sentiment_very_dissatisfied_40),
             contentDescription = "sad-face",
+            tint = MaterialTheme.colorScheme.onSurface
         )
         message?.let {
             Text(
@@ -42,7 +43,8 @@ fun FullScreenSadMessage(
                     .padding(24.dp),
                 text = it,
                 style = MaterialTheme.typography.headlineSmall,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }
