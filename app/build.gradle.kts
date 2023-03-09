@@ -20,9 +20,9 @@ android {
     signingConfigs {
         create("prod") {
             storeFile = gradleLocalProperties(rootDir)["STORE_FILE"]?.let { file(it) }
-            storePassword = gradleLocalProperties(rootDir)["STORE_PASSWORD"] as String?
-            keyAlias = gradleLocalProperties(rootDir)["KEY_ALIAS"] as String?
-            keyPassword = gradleLocalProperties(rootDir)["STORE_PASSWORD"] as String?
+            storePassword = gradleLocalProperties(rootDir)["STORE_PASSWORD"] as String
+            keyAlias = gradleLocalProperties(rootDir)["KEY_ALIAS"] as String
+            keyPassword = gradleLocalProperties(rootDir)["KEY_PASSWORD"] as String
         }
     }
     namespace = "com.github.pakka_papad"
@@ -50,6 +50,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            versionNameSuffix = "-debug"
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
