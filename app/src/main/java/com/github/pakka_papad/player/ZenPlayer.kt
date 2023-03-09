@@ -83,6 +83,11 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
         override fun onPlayerError(error: PlaybackException) {
             super.onPlayerError(error)
             crashReporter.logException(error)
+            if (error.errorCode == PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND){
+                dataManager.cleanData()
+                showToast("Could not find the song ${dataManager.currentSong.value?.title ?: ""} at the specified path")
+                onBroadcastCancel()
+            }
         }
 
         override fun onPlayerErrorChanged(error: PlaybackException?) {

@@ -15,6 +15,7 @@ import com.github.pakka_papad.formatToDate
 import com.github.pakka_papad.player.ZenPlayer
 import com.github.pakka_papad.toMBfromB
 import com.github.pakka_papad.toMS
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +30,7 @@ class DataManager(
     private val context: Context,
     private val notificationManager: ZenNotificationManager,
     private val daoCollection: DaoCollection,
+    private val scope: CoroutineScope,
 ) {
 
     val getAll by lazy { GetAll(daoCollection) }
@@ -36,6 +38,24 @@ class DataManager(
     val findCollection by lazy { FindCollection(daoCollection) }
 
     val querySearch by lazy { QuerySearch(daoCollection) }
+
+    init {
+        cleanData()
+    }
+
+    fun cleanData() {
+        scope.launch {
+            daoCollection.songDao.getSongs().forEach {
+                try {
+                    if(!File(it.location).exists()){
+                        launch { daoCollection.songDao.deleteSong(it) }
+                    }
+                } catch (_: Exception){
+
+                }
+            }
+        }
+    }
 
     suspend fun removeFromBlacklist(data: List<BlacklistedSong>){
         data.forEach {

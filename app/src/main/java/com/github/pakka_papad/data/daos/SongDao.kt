@@ -14,6 +14,9 @@ interface SongDao {
     @Query("SELECT * FROM ${Constants.Tables.SONG_TABLE} ORDER BY title ASC")
     fun getAllSongs(): Flow<List<Song>>
 
+    @Query("SELECT * FROM ${Constants.Tables.SONG_TABLE}")
+    suspend fun getSongs(): List<Song>
+
     @Update
     suspend fun updateSong(song: Song)
 

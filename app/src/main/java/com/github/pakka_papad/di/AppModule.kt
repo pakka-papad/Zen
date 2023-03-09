@@ -49,6 +49,7 @@ object AppModule {
         @ApplicationContext context: Context,
         notificationManager: ZenNotificationManager,
         db: AppDatabase,
+        scope: CoroutineScope
     ): DataManager {
         return DataManager(
             context = context,
@@ -63,7 +64,8 @@ object AppModule {
                 genreDao = db.genreDao(),
                 playlistDao = db.playlistDao(),
                 blacklistDao = db.blacklistDao(),
-            )
+            ),
+            scope = scope,
         )
     }
 
