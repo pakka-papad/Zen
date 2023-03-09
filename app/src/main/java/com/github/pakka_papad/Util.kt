@@ -1,6 +1,6 @@
 package com.github.pakka_papad
 
-import android.icu.text.SimpleDateFormat
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.round
 

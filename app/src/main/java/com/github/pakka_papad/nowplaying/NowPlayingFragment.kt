@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavController
@@ -76,6 +77,7 @@ class NowPlayingFragment : Fragment() {
             ),
             PendingIntent.FLAG_IMMUTABLE
         )
+        val initialRepeatMode = toRepeatMode(exoPlayer.repeatMode)
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -86,6 +88,8 @@ class NowPlayingFragment : Fragment() {
                     val song by viewModel.currentSong.collectAsState()
                     val songPlaying by viewModel.currentSongPlaying.collectAsState()
                     val queue = viewModel.queue
+                    val playbackSpeed by preferenceProvider.playbackSpeed.collectAsStateWithLifecycle()
+                    var repeatMode by remember { mutableStateOf(initialRepeatMode) }
                     val scope = rememberCoroutineScope()
                     val scaffoldState = rememberBottomSheetScaffoldState()
                     LaunchedEffect(key1 = song) {
@@ -128,7 +132,14 @@ class NowPlayingFragment : Fragment() {
                                         scope.launch {
                                             scaffoldState.bottomSheetState.expand()
                                         }
-                                    }
+                                    },
+                                    playbackSpeed = playbackSpeed,
+                                    updatePlaybackSpeed = this@NowPlayingFragment::updatePlaybackSpeed,
+                                    repeatMode = repeatMode,
+                                    toggleRepeatMode = {
+                                        exoPlayer.repeatMode = toExoPlayerRepeatMode(repeatMode.next())
+                                        repeatMode = repeatMode.next()
+                                    },
                                 )
                             }
                         },
@@ -162,6 +173,25 @@ class NowPlayingFragment : Fragment() {
         }
     }
 
+    companion object {
+        private fun toRepeatMode(mode: Int): RepeatMode {
+            return when(mode) {
+                ExoPlayer.REPEAT_MODE_OFF -> RepeatMode.NO_REPEAT
+                ExoPlayer.REPEAT_MODE_ALL -> RepeatMode.REPEAT_ALL
+                ExoPlayer.REPEAT_MODE_ONE -> RepeatMode.REPEAT_ONE
+                else -> RepeatMode.NO_REPEAT
+            }
+        }
+
+        private fun toExoPlayerRepeatMode(repeatMode: RepeatMode): Int {
+            return when(repeatMode){
+                RepeatMode.NO_REPEAT -> ExoPlayer.REPEAT_MODE_OFF
+                RepeatMode.REPEAT_ALL -> ExoPlayer.REPEAT_MODE_ALL
+                RepeatMode.REPEAT_ONE -> ExoPlayer.REPEAT_MODE_ONE
+            }
+        }
+    }
+
     private fun saveToPlaylistClicked(queue: List<Song>){
         lifecycleScope.launch {
             val songLocations = queue.map { it.location }
@@ -170,5 +200,11 @@ class NowPlayingFragment : Fragment() {
                     .actionNowPlayingToSelectPlaylistFragment(songLocations.toTypedArray())
             )
         }
+    }
+
+    private fun updatePlaybackSpeed(newPlaybackSpeed: Int) {
+        val speed = if (newPlaybackSpeed < 10 || newPlaybackSpeed > 200) 100 else newPlaybackSpeed
+        exoPlayer.setPlaybackSpeed(speed.toFloat()/100)
+        preferenceProvider.updatePlaybackSpeed(speed)
     }
 }

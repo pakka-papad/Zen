@@ -19,6 +19,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.ZenCrashReporter
+import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.data.notification.ZenNotificationManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -41,6 +42,9 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
 
     @Inject
     lateinit var crashReporter: ZenCrashReporter
+
+    @Inject
+    lateinit var preferencesProvider: ZenPreferenceProvider
 
     private var broadcastReceiver: ZenBroadcastReceiver? = null
 
@@ -241,6 +245,9 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
         exoPlayer.addMediaItems(mediaItems)
         exoPlayer.prepare()
         exoPlayer.seekTo(startPlayingFromIndex,0)
+        exoPlayer.repeatMode = ExoPlayer.REPEAT_MODE_OFF
+        val speed = preferencesProvider.playbackSpeed.value
+        exoPlayer.setPlaybackSpeed(if (speed < 10 || speed > 200) 1.0f else speed.toFloat()/100)
         exoPlayer.play()
         updateMediaSessionState()
         updateMediaSessionMetadata()

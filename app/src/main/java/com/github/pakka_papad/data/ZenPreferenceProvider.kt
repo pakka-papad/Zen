@@ -79,11 +79,38 @@ class ZenPreferenceProvider @Inject constructor(
         }
     }
 
+    val playbackSpeed = userPreferences.data
+        .map {
+            it.playbackSpeed
+        }.stateIn(
+            scope = coroutineScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = 100
+        )
+
+    fun updatePlaybackSpeed(newPlaybackSpeed: Int) {
+        coroutineScope.launch {
+            userPreferences.updateData {
+                it.copy {
+                    this.playbackSpeed = if (newPlaybackSpeed < 10 || newPlaybackSpeed > 200) 100
+                    else newPlaybackSpeed
+                }
+            }
+        }
+    }
+
     init {
         val initJob = coroutineScope.launch {
             launch { theme.collect { } }
             launch { isOnBoardingComplete.collect { } }
-            launch { isCrashlyticsDisabled.collect { } }
+            launch {
+                isCrashlyticsDisabled.collect { crashReporter.sendCrashData(!it) }
+            }
+            launch {
+                playbackSpeed.collect {
+                    if (it < 10 || it > 200) updatePlaybackSpeed(100)
+                }
+            }
         }
         coroutineScope.launch {
             delay(1.minutes)

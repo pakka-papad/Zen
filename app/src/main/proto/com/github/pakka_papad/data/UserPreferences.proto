@@ -22,4 +22,5 @@ message UserPreferences {
   }
   Accent chosenAccent = 4;
   bool crashlyticsDisabled = 5;
+  int32 playbackSpeed = 6;
 }

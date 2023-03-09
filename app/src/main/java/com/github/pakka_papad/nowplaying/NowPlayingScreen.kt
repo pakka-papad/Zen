@@ -12,12 +12,12 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,12 +29,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.media3.exoplayer.ExoPlayer
 import coil.compose.AsyncImage
 import com.github.pakka_papad.R
+import com.github.pakka_papad.nowplaying.RepeatMode as RepeatModeEnum
 import com.github.pakka_papad.data.music.Song
 import kotlinx.coroutines.launch
 import kotlin.math.max
@@ -51,6 +53,10 @@ fun NowPlayingScreen(
     exoPlayer: ExoPlayer,
     onFavouriteClicked: () -> Unit,
     onQueueClicked: () -> Unit,
+    playbackSpeed: Int,
+    updatePlaybackSpeed: (Int) -> Unit,
+    repeatMode: RepeatModeEnum,
+    toggleRepeatMode: () -> Unit,
 ) {
     if (song == null || songPlaying == null) return
     val configuration = LocalConfiguration.current
@@ -86,7 +92,11 @@ fun NowPlayingScreen(
                 onQueueClicked = onQueueClicked,
                 modifier = Modifier
                     .width(infoAndControlsMaxWidth.dp)
-                    .fillMaxHeight()
+                    .fillMaxHeight(),
+                playbackSpeed = playbackSpeed,
+                updatePlaybackSpeed = updatePlaybackSpeed,
+                repeatMode = repeatMode,
+                toggleRepeatMode = toggleRepeatMode,
             )
         }
     } else {
@@ -121,7 +131,11 @@ fun NowPlayingScreen(
                 onQueueClicked = onQueueClicked,
                 modifier = Modifier
                     .height(infoAndControlsMaxHeight.dp)
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                playbackSpeed = playbackSpeed,
+                updatePlaybackSpeed = updatePlaybackSpeed,
+                repeatMode = repeatMode,
+                toggleRepeatMode = toggleRepeatMode,
             )
         }
     }
@@ -158,6 +172,10 @@ private fun InfoAndControls(
     onFavouriteClicked: () -> Unit,
     onQueueClicked: () -> Unit,
     modifier: Modifier = Modifier,
+    playbackSpeed: Int,
+    updatePlaybackSpeed: (Int) -> Unit,
+    repeatMode: RepeatModeEnum,
+    toggleRepeatMode: () -> Unit,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -169,10 +187,26 @@ private fun InfoAndControls(
             song = song,
             modifier = Modifier.weight(1f)
         )
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+        ) {
+            PlaybackSpeedController(
+                currentSpeed = playbackSpeed,
+                updatePlaybackSpeed = updatePlaybackSpeed
+            )
+            RepeatModeController(
+                currentRepeatMode = repeatMode,
+                toggleRepeatMode = toggleRepeatMode
+            )
+        }
         MusicSlider(
             modifier = Modifier
-                .weight(1f)
-                .padding(vertical = 14.dp, horizontal = 24.dp),
+                .weight(0.7f)
+                .padding(vertical = 0.dp, horizontal = 24.dp),
             mediaPlayer = exoPlayer,
             duration = song.durationMillis,
         )
@@ -377,5 +411,110 @@ private fun SongInfo(
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         color = MaterialTheme.colorScheme.onSurface,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PlaybackSpeedController(
+    currentSpeed: Int,
+    updatePlaybackSpeed: (Int) -> Unit,
+){
+    var showDialog by remember { mutableStateOf(false) }
+    Text(
+        text = "${currentSpeed/100}.${(currentSpeed%100)/10}${currentSpeed%10}x",
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.clickable {
+            showDialog = true
+        }
+    )
+    if (showDialog) {
+        var newSpeed by remember { mutableStateOf((currentSpeed.toFloat()/100).toString())}
+        val error by remember {
+            derivedStateOf {
+                try {
+                    val hundredTimes = newSpeed.toFloat().times(100).toInt()
+                    (hundredTimes < 10 || hundredTimes > 200)
+                } catch (_ : Exception) {
+                    true
+                }
+            }
+        }
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        try {
+                            if (!error) {
+                                updatePlaybackSpeed(newSpeed.toFloat().times(100).toInt())
+                                showDialog = false
+                            }
+                        } catch (_ : Exception) {
+
+                        }
+                    },
+                    enabled = !error,
+                    content = {
+                        Text(text = "Ok")
+                    }
+                )
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { showDialog = false },
+                    content = {
+                        Text(text = "Cancel")
+                    }
+                )
+            },
+            title = {
+                Text(
+                    text = "Playback Speed",
+                    style = MaterialTheme.typography.titleLarge,
+                )
+            },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    TextField(
+                        value = newSpeed,
+                        onValueChange = {
+                            if (it.length <= 4){
+                                newSpeed = it
+                            }
+                        },
+                        isError = error,
+                        textStyle = MaterialTheme.typography.titleMedium,
+                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
+                        maxLines = 1,
+                        singleLine = true,
+                    )
+                    Text(
+                        text = "Playback speed must be between 0.1 and 2.0. Input only upto 2 decimals are considered",
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun RepeatModeController(
+    currentRepeatMode: RepeatModeEnum,
+    toggleRepeatMode: () -> Unit,
+) {
+    Icon(
+        painter = painterResource(currentRepeatMode.iconResource),
+        contentDescription = "repeat mode",
+        modifier = Modifier
+            .size(30.dp)
+            .clickable(
+                onClick = toggleRepeatMode
+            ),
+        tint = MaterialTheme.colorScheme.onSurface
     )
 }
