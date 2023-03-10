@@ -39,3 +39,8 @@ fun Long.toMS(): String {
     val seconds = totalSeconds%60
     return "${if(minutes < 10) "0" else ""}${minutes}:${if (seconds < 10) "0"  else ""}${seconds}"
 }
+
+fun Int.toCorrectedSpeed() : Float {
+    return if (this < 10 || this > 200) 1f
+    else this.toFloat()/100
+}

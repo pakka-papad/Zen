@@ -22,6 +22,7 @@ import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.data.notification.ZenNotificationManager
+import com.github.pakka_papad.toCorrectedSpeed
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import timber.log.Timber
@@ -146,6 +147,13 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
             )
         )
 
+        scope.launch {
+            preferencesProvider.playbackSpeed.collect {
+                updateMediaSessionState()
+                withContext(Dispatchers.Main){ exoPlayer.setPlaybackSpeed(it.toCorrectedSpeed()) }
+            }
+        }
+
         val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         audioManager.isSpeakerphoneOn = true
 
@@ -226,7 +234,7 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
                         setState(
                             if (exoPlayer.isPlaying) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED,
                             exoPlayer.currentPosition,
-                            1f,
+                            preferencesProvider.playbackSpeed.value.toCorrectedSpeed(),
                         )
                         setActions(
                             (if (exoPlayer.isPlaying) PlaybackStateCompat.ACTION_PAUSE else PlaybackStateCompat.ACTION_PLAY)
@@ -251,8 +259,7 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
         exoPlayer.prepare()
         exoPlayer.seekTo(startPlayingFromIndex,0)
         exoPlayer.repeatMode = ExoPlayer.REPEAT_MODE_OFF
-        val speed = preferencesProvider.playbackSpeed.value
-        exoPlayer.setPlaybackSpeed(if (speed < 10 || speed > 200) 1.0f else speed.toFloat()/100)
+        exoPlayer.setPlaybackSpeed(preferencesProvider.playbackSpeed.value.toCorrectedSpeed())
         exoPlayer.play()
         updateMediaSessionState()
         updateMediaSessionMetadata()

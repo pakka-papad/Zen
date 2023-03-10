@@ -134,7 +134,7 @@ class NowPlayingFragment : Fragment() {
                                         }
                                     },
                                     playbackSpeed = playbackSpeed,
-                                    updatePlaybackSpeed = this@NowPlayingFragment::updatePlaybackSpeed,
+                                    updatePlaybackSpeed = preferenceProvider::updatePlaybackSpeed,
                                     repeatMode = repeatMode,
                                     toggleRepeatMode = {
                                         exoPlayer.repeatMode = toExoPlayerRepeatMode(repeatMode.next())
@@ -200,11 +200,5 @@ class NowPlayingFragment : Fragment() {
                     .actionNowPlayingToSelectPlaylistFragment(songLocations.toTypedArray())
             )
         }
-    }
-
-    private fun updatePlaybackSpeed(newPlaybackSpeed: Int) {
-        val speed = if (newPlaybackSpeed < 10 || newPlaybackSpeed > 200) 100 else newPlaybackSpeed
-        exoPlayer.setPlaybackSpeed(speed.toFloat()/100)
-        preferenceProvider.updatePlaybackSpeed(speed)
     }
 }
