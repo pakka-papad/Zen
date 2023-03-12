@@ -2,13 +2,17 @@ package com.github.pakka_papad.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,20 +29,11 @@ fun MiniPlayer(
     showPlayButton: Boolean,
     onPausePlayPressed: () -> Unit,
     song: Song?,
-    paddingValues: PaddingValues,
-    onMiniPlayerClicked: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     if (song == null) return
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .padding(paddingValues)
-            .clickable(
-                onClick = onMiniPlayerClicked,
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            ),
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AsyncImage(
@@ -58,7 +53,8 @@ fun MiniPlayer(
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            color = MaterialTheme.colorScheme.onSurface
         )
         Icon(
             painter = painterResource(
@@ -75,7 +71,8 @@ fun MiniPlayer(
                         bounded = true,
                         radius = 22.dp
                     )
-                )
+                ),
+            tint = MaterialTheme.colorScheme.onSurface
         )
     }
 }

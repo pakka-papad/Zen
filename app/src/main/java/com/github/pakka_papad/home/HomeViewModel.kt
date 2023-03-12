@@ -205,4 +205,7 @@ class HomeViewModel @Inject constructor(
             manager.updateSong(updatedSong)
         }
     }
+
+    fun onSongDrag(fromIndex: Int, toIndex: Int) = manager.moveItem(fromIndex,toIndex)
+
 }

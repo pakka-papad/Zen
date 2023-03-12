@@ -10,13 +10,6 @@
         android:name="com.github.pakka_papad.home.HomeFragment"
         android:label="HomeFragment" >
         <action
-            android:id="@+id/action_homeFragment_to_nowPlaying"
-            app:destination="@id/nowPlaying"
-            app:enterAnim="@anim/enter_from_bottom"
-            app:exitAnim="@anim/shrink_towards_top"
-            app:popEnterAnim="@anim/grow_from_top"
-            app:popExitAnim="@anim/exit_to_bottom" />
-        <action
             android:id="@+id/action_homeFragment_to_collectionFragment"
             app:destination="@id/collectionFragment"
             app:enterAnim="@anim/zen_open_enter"
@@ -44,14 +37,6 @@
             app:exitAnim="@anim/fade_out_exit"
             app:popEnterAnim="@anim/fade_in_enter"
             app:popExitAnim="@anim/fade_out_exit" />
-    </fragment>
-    <fragment
-        android:id="@+id/nowPlaying"
-        android:name="com.github.pakka_papad.nowplaying.NowPlayingFragment"
-        android:label="NowPlaying" >
-        <action
-            android:id="@+id/action_nowPlaying_to_selectPlaylistFragment"
-            app:destination="@id/selectPlaylistFragment" />
     </fragment>
     <fragment
         android:id="@+id/collectionFragment"
