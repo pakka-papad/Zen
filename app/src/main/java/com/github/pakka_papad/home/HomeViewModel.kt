@@ -85,6 +85,12 @@ class HomeViewModel @Inject constructor(
 
     val queue = manager.queue
 
+    val repeatMode = manager.repeatMode
+
+    fun toggleRepeatMode(){
+        manager.updateRepeatMode(repeatMode.value.next())
+    }
+
     private val _currentSongPlaying = MutableStateFlow<Boolean?>(null)
     val currentSongPlaying = _currentSongPlaying.asStateFlow()
 

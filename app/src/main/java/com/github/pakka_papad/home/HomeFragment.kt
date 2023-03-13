@@ -331,7 +331,7 @@ class HomeFragment : Fragment() {
                                 currentSong?.let {
                                     val queue = viewModel.queue
                                     val playbackSpeed by preferenceProvider.playbackSpeed.collectAsStateWithLifecycle()
-                                    var repeatMode by remember { mutableStateOf(toRepeatMode(exoPlayer.repeatMode)) }
+                                    val repeatMode by viewModel.repeatMode.collectAsStateWithLifecycle()
                                     val scaffoldState = rememberBottomSheetScaffoldState()
                                     BackHandler(
                                         enabled = swipeableState.currentValue == 1,
@@ -377,10 +377,7 @@ class HomeFragment : Fragment() {
                                                 playbackSpeed = playbackSpeed,
                                                 updatePlaybackSpeed = preferenceProvider::updatePlaybackSpeed,
                                                 repeatMode = repeatMode,
-                                                toggleRepeatMode = {
-                                                    exoPlayer.repeatMode = toExoPlayerRepeatMode(repeatMode.next())
-                                                    repeatMode = repeatMode.next()
-                                                },
+                                                toggleRepeatMode = viewModel::toggleRepeatMode
                                             )
                                         },
                                         sheetContent = {
@@ -507,25 +504,6 @@ class HomeFragment : Fragment() {
                 CollectionType(CollectionType.FavouritesType)
             )
         )
-    }
-
-    companion object {
-        private fun toRepeatMode(mode: Int): RepeatMode {
-            return when(mode) {
-                ExoPlayer.REPEAT_MODE_OFF -> RepeatMode.NO_REPEAT
-                ExoPlayer.REPEAT_MODE_ALL -> RepeatMode.REPEAT_ALL
-                ExoPlayer.REPEAT_MODE_ONE -> RepeatMode.REPEAT_ONE
-                else -> RepeatMode.NO_REPEAT
-            }
-        }
-
-        private fun toExoPlayerRepeatMode(repeatMode: RepeatMode): Int {
-            return when(repeatMode){
-                RepeatMode.NO_REPEAT -> ExoPlayer.REPEAT_MODE_OFF
-                RepeatMode.REPEAT_ALL -> ExoPlayer.REPEAT_MODE_ALL
-                RepeatMode.REPEAT_ONE -> ExoPlayer.REPEAT_MODE_ONE
-            }
-        }
     }
 
     private fun saveToPlaylistClicked(queue: List<Song>){

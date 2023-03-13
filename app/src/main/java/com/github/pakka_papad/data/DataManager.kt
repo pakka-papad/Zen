@@ -12,6 +12,7 @@ import com.github.pakka_papad.data.components.*
 import com.github.pakka_papad.data.music.*
 import com.github.pakka_papad.data.notification.ZenNotificationManager
 import com.github.pakka_papad.formatToDate
+import com.github.pakka_papad.nowplaying.RepeatMode
 import com.github.pakka_papad.player.ZenPlayer
 import com.github.pakka_papad.toMBfromB
 import com.github.pakka_papad.toMS
@@ -225,6 +226,13 @@ class DataManager(
             }
         }
         daoCollection.songDao.updateSong(song)
+    }
+
+    private val _repeatMode = MutableStateFlow<RepeatMode>(RepeatMode.NO_REPEAT)
+    val repeatMode = _repeatMode.asStateFlow()
+
+    fun updateRepeatMode(newRepeatMode: RepeatMode){
+        _repeatMode.update { newRepeatMode }
     }
 
     private var remIdx = 0

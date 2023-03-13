@@ -153,6 +153,11 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
                 withContext(Dispatchers.Main){ exoPlayer.setPlaybackSpeed(it.toCorrectedSpeed()) }
             }
         }
+        scope.launch {
+            dataManager.repeatMode.collect {
+                withContext(Dispatchers.Main) { exoPlayer.repeatMode = it.toExoPlayerRepeatMode() }
+            }
+        }
 
         val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         audioManager.isSpeakerphoneOn = true
@@ -258,7 +263,7 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
         exoPlayer.addMediaItems(mediaItems)
         exoPlayer.prepare()
         exoPlayer.seekTo(startPlayingFromIndex,0)
-        exoPlayer.repeatMode = ExoPlayer.REPEAT_MODE_OFF
+        exoPlayer.repeatMode = dataManager.repeatMode.value.toExoPlayerRepeatMode()
         exoPlayer.setPlaybackSpeed(preferencesProvider.playbackSpeed.value.toCorrectedSpeed())
         exoPlayer.play()
         updateMediaSessionState()
