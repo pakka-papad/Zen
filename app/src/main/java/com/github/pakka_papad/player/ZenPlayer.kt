@@ -16,13 +16,12 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
-import com.github.pakka_papad.Constants
+import com.github.pakka_papad.*
 import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.data.notification.ZenNotificationManager
-import com.github.pakka_papad.toCorrectedSpeed
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import timber.log.Timber
@@ -148,9 +147,12 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
         )
 
         scope.launch {
-            preferencesProvider.playbackSpeed.collect {
+            preferencesProvider.playbackParams.collect {
                 updateMediaSessionState()
-                withContext(Dispatchers.Main){ exoPlayer.setPlaybackSpeed(it.toCorrectedSpeed()) }
+                val params = it.toCorrectedParams().toExoPlayerPlaybackParameters()
+                withContext(Dispatchers.Main){
+                    exoPlayer.playbackParameters = params
+                }
             }
         }
         scope.launch {
@@ -233,13 +235,14 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
     private fun updateMediaSessionState() {
         scope.launch {
             delay(100)
+            val speed = preferencesProvider.playbackParams.value.playbackSpeed
             withContext(Dispatchers.Main) {
                 mediaSession.setPlaybackState(
                     PlaybackStateCompat.Builder().apply {
                         setState(
                             if (exoPlayer.isPlaying) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED,
                             exoPlayer.currentPosition,
-                            preferencesProvider.playbackSpeed.value.toCorrectedSpeed(),
+                            if (speed < 1 || speed > 200) 1f else speed.toFloat()/100,
                         )
                         setActions(
                             (if (exoPlayer.isPlaying) PlaybackStateCompat.ACTION_PAUSE else PlaybackStateCompat.ACTION_PLAY)
@@ -264,7 +267,9 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
         exoPlayer.prepare()
         exoPlayer.seekTo(startPlayingFromIndex,0)
         exoPlayer.repeatMode = dataManager.repeatMode.value.toExoPlayerRepeatMode()
-        exoPlayer.setPlaybackSpeed(preferencesProvider.playbackSpeed.value.toCorrectedSpeed())
+        exoPlayer.playbackParameters = preferencesProvider.playbackParams.value
+            .toCorrectedParams()
+            .toExoPlayerPlaybackParameters()
         exoPlayer.play()
         updateMediaSessionState()
         updateMediaSessionMetadata()

@@ -13,7 +13,11 @@ class UserPreferencesSerializer @Inject constructor() : Serializer<UserPreferenc
             chosenAccent = UserPreferences.Accent.Elm
             onBoardingComplete = false
             crashlyticsDisabled = false
-            playbackSpeed = 100
+            playbackParams = UserPreferences.PlaybackParams
+                .getDefaultInstance().copy {
+                    playbackSpeed = 100
+                    playbackPitch = 100
+                }
         }
 
     override suspend fun readFrom(input: InputStream): UserPreferences =

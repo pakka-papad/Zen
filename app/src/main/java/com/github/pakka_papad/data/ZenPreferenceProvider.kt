@@ -1,6 +1,7 @@
 package com.github.pakka_papad.data
 
 import androidx.datastore.core.DataStore
+import com.github.pakka_papad.data.UserPreferences.PlaybackParams
 import com.github.pakka_papad.ui.theme.ThemePreference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -79,21 +80,28 @@ class ZenPreferenceProvider @Inject constructor(
         }
     }
 
-    val playbackSpeed = userPreferences.data
+    val playbackParams = userPreferences.data
         .map {
-            it.playbackSpeed
+            it.playbackParams
         }.stateIn(
             scope = coroutineScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = 100
+            initialValue = PlaybackParams
+                .getDefaultInstance().copy {
+                    playbackSpeed = 100
+                    playbackPitch = 100
+                }
         )
 
-    fun updatePlaybackSpeed(newPlaybackSpeed: Int) {
+    fun updatePlaybackParams(speed: Int, pitch: Int){
         coroutineScope.launch {
+            val correctedParams = PlaybackParams.getDefaultInstance().copy{
+                playbackSpeed = if (speed < 1 || speed > 200) 100 else speed
+                playbackPitch = if (pitch < 1 || pitch > 200) 100 else pitch
+            }
             userPreferences.updateData {
                 it.copy {
-                    this.playbackSpeed = if (newPlaybackSpeed < 10 || newPlaybackSpeed > 200) 100
-                    else newPlaybackSpeed
+                    playbackParams = correctedParams
                 }
             }
         }
@@ -103,14 +111,8 @@ class ZenPreferenceProvider @Inject constructor(
         val initJob = coroutineScope.launch {
             launch { theme.collect { } }
             launch { isOnBoardingComplete.collect { } }
-            launch {
-                isCrashlyticsDisabled.collect { crashReporter.sendCrashData(!it) }
-            }
-            launch {
-                playbackSpeed.collect {
-                    if (it < 10 || it > 200) updatePlaybackSpeed(100)
-                }
-            }
+            launch { isCrashlyticsDisabled.collect { } }
+            launch { playbackParams.collect { updatePlaybackParams(it.playbackSpeed,it.playbackPitch) } }
         }
         coroutineScope.launch {
             delay(1.minutes)

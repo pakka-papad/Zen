@@ -12,7 +12,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
@@ -29,15 +28,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.media3.exoplayer.ExoPlayer
 import coil.compose.AsyncImage
 import com.github.pakka_papad.R
+import com.github.pakka_papad.data.UserPreferences.PlaybackParams
 import com.github.pakka_papad.nowplaying.RepeatMode as RepeatModeEnum
 import com.github.pakka_papad.data.music.Song
+import com.github.pakka_papad.round
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
@@ -53,10 +53,10 @@ fun NowPlayingScreen(
     exoPlayer: ExoPlayer,
     onFavouriteClicked: () -> Unit,
     onQueueClicked: () -> Unit,
-    playbackSpeed: Int,
-    updatePlaybackSpeed: (Int) -> Unit,
     repeatMode: RepeatModeEnum,
     toggleRepeatMode: () -> Unit,
+    playbackParams: PlaybackParams,
+    updatePlaybackParams: (speed: Int, pitch: Int) -> Unit,
 ) {
     if (song == null || songPlaying == null) return
     val configuration = LocalConfiguration.current
@@ -93,10 +93,10 @@ fun NowPlayingScreen(
                 modifier = Modifier
                     .width(infoAndControlsMaxWidth.dp)
                     .fillMaxHeight(),
-                playbackSpeed = playbackSpeed,
-                updatePlaybackSpeed = updatePlaybackSpeed,
                 repeatMode = repeatMode,
                 toggleRepeatMode = toggleRepeatMode,
+                playbackParams = playbackParams,
+                updatePlaybackParams = updatePlaybackParams,
             )
         }
     } else {
@@ -132,10 +132,10 @@ fun NowPlayingScreen(
                 modifier = Modifier
                     .height(infoAndControlsMaxHeight.dp)
                     .fillMaxWidth(),
-                playbackSpeed = playbackSpeed,
-                updatePlaybackSpeed = updatePlaybackSpeed,
                 repeatMode = repeatMode,
                 toggleRepeatMode = toggleRepeatMode,
+                playbackParams = playbackParams,
+                updatePlaybackParams = updatePlaybackParams,
             )
         }
     }
@@ -172,10 +172,10 @@ private fun InfoAndControls(
     onFavouriteClicked: () -> Unit,
     onQueueClicked: () -> Unit,
     modifier: Modifier = Modifier,
-    playbackSpeed: Int,
-    updatePlaybackSpeed: (Int) -> Unit,
     repeatMode: RepeatModeEnum,
     toggleRepeatMode: () -> Unit,
+    playbackParams: PlaybackParams,
+    updatePlaybackParams: (speed: Int, pitch: Int) -> Unit,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -194,9 +194,9 @@ private fun InfoAndControls(
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
         ) {
-            PlaybackSpeedController(
-                currentSpeed = playbackSpeed,
-                updatePlaybackSpeed = updatePlaybackSpeed
+            PlaybackSpeedAndPitchController(
+                playbackParams = playbackParams,
+                updatePlaybackParams = updatePlaybackParams
             )
             RepeatModeController(
                 currentRepeatMode = repeatMode,
@@ -414,48 +414,34 @@ private fun SongInfo(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlaybackSpeedController(
-    currentSpeed: Int,
-    updatePlaybackSpeed: (Int) -> Unit,
+fun PlaybackSpeedAndPitchController(
+    playbackParams: PlaybackParams,
+    updatePlaybackParams: (speed: Int, pitch: Int) -> Unit,
 ){
+    val speed = playbackParams.playbackSpeed
+    val pitch = playbackParams.playbackPitch
     var showDialog by remember { mutableStateOf(false) }
-    Text(
-        text = "${currentSpeed/100}.${(currentSpeed%100)/10}${currentSpeed%10}x",
-        style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier.clickable {
-            showDialog = true
-        }
+    Icon(
+        painter = painterResource(R.drawable.baseline_speed_24),
+        contentDescription = "speed and pitch controller",
+        modifier = Modifier.size(30.dp).clickable { showDialog = true },
+        tint = MaterialTheme.colorScheme.onSurface
     )
     if (showDialog) {
-        var newSpeed by remember { mutableStateOf((currentSpeed.toFloat()/100).toString())}
-        val error by remember {
-            derivedStateOf {
-                try {
-                    val hundredTimes = newSpeed.toFloat().times(100).toInt()
-                    (hundredTimes < 10 || hundredTimes > 200)
-                } catch (_ : Exception) {
-                    true
-                }
-            }
-        }
+        var newSpeed by remember { mutableStateOf((speed.toFloat()/100).round(2))}
+        var newPitch by remember { mutableStateOf((pitch.toFloat()/100).round(2)) }
         AlertDialog(
             onDismissRequest = { showDialog = false },
             confirmButton = {
                 Button(
                     onClick = {
-                        try {
-                            if (!error) {
-                                updatePlaybackSpeed(newSpeed.toFloat().times(100).toInt())
-                                showDialog = false
-                            }
-                        } catch (_ : Exception) {
-
-                        }
+                        showDialog = false
+                        updatePlaybackParams(
+                            newSpeed.times(100).toInt(),
+                            newPitch.times(100).toInt()
+                        )
                     },
-                    enabled = !error,
                     content = {
                         Text(text = "Ok")
                     }
@@ -469,32 +455,53 @@ fun PlaybackSpeedController(
                     }
                 )
             },
-            title = {
-                Text(
-                    text = "Playback Speed",
-                    style = MaterialTheme.typography.titleLarge,
-                )
-            },
             text = {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    TextField(
+                Column() {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ){
+                        Text(
+                            text = "Speed: ${newSpeed}x",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.alignByBaseline()
+                        )
+                        TextButton(
+                            onClick = { newSpeed = 1f },
+                            content = {
+                                Text(text = "Reset")
+                            },
+                            modifier = Modifier.alignByBaseline()
+                        )
+                    }
+                    Slider(
                         value = newSpeed,
-                        onValueChange = {
-                            if (it.length <= 4){
-                                newSpeed = it
-                            }
-                        },
-                        isError = error,
-                        textStyle = MaterialTheme.typography.titleMedium,
-                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
-                        maxLines = 1,
-                        singleLine = true,
+                        onValueChange = { newSpeed = it.round(2) },
+                        valueRange = 0.01f..2.0f,
+                        steps = 20,
                     )
-                    Text(
-                        text = "Playback speed must be between 0.1 and 2.0. Input only upto 2 decimals are considered",
-                        style = MaterialTheme.typography.titleSmall,
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth(),
+                    ){
+                        Text(
+                            text = "Pitch: ${newPitch}x",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.alignByBaseline()
+                        )
+                        TextButton(
+                            onClick = { newPitch = 1f },
+                            content = {
+                                Text(text = "Reset")
+                            },
+                            modifier = Modifier.alignByBaseline()
+                        )
+                    }
+                    Slider(
+                        value = newPitch,
+                        onValueChange = { newPitch = it.round(2) },
+                        valueRange = 0.01f..2.0f,
+                        steps = 20,
                     )
                 }
             }

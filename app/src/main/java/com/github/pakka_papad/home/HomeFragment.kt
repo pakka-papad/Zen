@@ -313,7 +313,7 @@ class HomeFragment : Fragment() {
                             content = {
                                 currentSong?.let {
                                     val queue = viewModel.queue
-                                    val playbackSpeed by preferenceProvider.playbackSpeed.collectAsStateWithLifecycle()
+                                    val playbackParams by  preferenceProvider.playbackParams.collectAsStateWithLifecycle()
                                     val repeatMode by viewModel.repeatMode.collectAsStateWithLifecycle()
                                     val scaffoldState = rememberBottomSheetScaffoldState()
                                     BackHandler(
@@ -357,10 +357,10 @@ class HomeFragment : Fragment() {
                                                         scaffoldState.bottomSheetState.expand()
                                                     }
                                                 },
-                                                playbackSpeed = playbackSpeed,
-                                                updatePlaybackSpeed = preferenceProvider::updatePlaybackSpeed,
                                                 repeatMode = repeatMode,
-                                                toggleRepeatMode = viewModel::toggleRepeatMode
+                                                toggleRepeatMode = viewModel::toggleRepeatMode,
+                                                playbackParams = playbackParams,
+                                                updatePlaybackParams = preferenceProvider::updatePlaybackParams
                                             )
                                         },
                                         sheetContent = {
