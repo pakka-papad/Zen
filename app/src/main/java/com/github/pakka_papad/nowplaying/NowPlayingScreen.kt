@@ -279,9 +279,11 @@ private fun LikeButton(
                             )
                         )
                     }
-                }, indication = rememberRipple(
+                },
+                indication = rememberRipple(
                     bounded = false, radius = 25.dp
-                ), interactionSource = MutableInteractionSource()
+                ),
+                interactionSource = remember { MutableInteractionSource() }
             )
             .padding(10.dp),
         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
@@ -300,7 +302,7 @@ private fun PreviousButton(
         .clip(RoundedCornerShape(35.dp))
         .clickable(
             onClick = onPreviousPressed,
-            interactionSource = MutableInteractionSource(),
+            interactionSource = remember { MutableInteractionSource() },
             indication = rememberRipple(
                 bounded = true, radius = 35.dp
             )
@@ -324,7 +326,7 @@ private fun PausePlayButton(
         .clip(CircleShape)
         .clickable(
             onClick = onPausePlayPressed,
-            interactionSource = MutableInteractionSource(),
+            interactionSource = remember { MutableInteractionSource() },
             indication = rememberRipple(
                 bounded = true, radius = 35.dp
             )
@@ -348,7 +350,7 @@ private fun NextButton(
         .clip(RoundedCornerShape(35.dp))
         .clickable(
             onClick = onNextPressed,
-            interactionSource = MutableInteractionSource(),
+            interactionSource = remember { MutableInteractionSource() },
             indication = rememberRipple(
                 bounded = true, radius = 35.dp
             )
@@ -367,9 +369,11 @@ private fun QueueButton(
     modifier = modifier
         .size(50.dp)
         .clickable(
-            onClick = onQueueClicked, indication = rememberRipple(
+            onClick = onQueueClicked,
+            indication = rememberRipple(
                 bounded = false, radius = 25.dp
-            ), interactionSource = MutableInteractionSource()
+            ),
+            interactionSource = remember { MutableInteractionSource() }
         )
         .padding(10.dp),
     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
