@@ -102,7 +102,7 @@ class HomeFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                val systemUiController = rememberSystemUiController(requireActivity().window)
+                val systemUiController = rememberSystemUiController()
                 val themePreference by preferenceProvider.theme.collectAsStateWithLifecycle()
                 ZenTheme(themePreference, systemUiController) {
                     var currentScreen by rememberSaveable { mutableStateOf(Screens.Songs) }
@@ -182,9 +182,7 @@ class HomeFragment : Fragment() {
                                         .padding(
                                             top = it.calculateTopPadding(),
                                             bottom = if (currentSong == null) 88.dp else 146.dp,
-                                            start = windowInsets.calculateStartPadding(
-                                                LayoutDirection.Ltr
-                                            ),
+                                            start = windowInsets.calculateStartPadding(LayoutDirection.Ltr),
                                             end = windowInsets.calculateEndPadding(LayoutDirection.Ltr)
                                         )
                                         .fillMaxSize(),
@@ -213,13 +211,7 @@ class HomeFragment : Fragment() {
                                                         onShuffleClicked = {
                                                             viewModel.shufflePlay(songs)
                                                         },
-                                                        onAddToPlaylistsClicked = {song ->
-                                                            navController.navigate(
-                                                                HomeFragmentDirections.actionHomeFragmentToSelectPlaylistFragment(
-                                                                    arrayOf(song.location)
-                                                                )
-                                                            )
-                                                        },
+                                                        onAddToPlaylistsClicked = this@HomeFragment::addToPlaylistClicked,
                                                         onBlacklistClicked = viewModel::onSongBlacklist
                                                     )
                                                 }
@@ -270,12 +262,8 @@ class HomeFragment : Fragment() {
                                         .fillMaxWidth()
                                         .background(bottomBarColor)
                                         .padding(
-                                            start = windowInsets.calculateStartPadding(
-                                                LayoutDirection.Ltr
-                                            ),
-                                            end = windowInsets.calculateEndPadding(
-                                                LayoutDirection.Ltr
-                                            ),
+                                            start = windowInsets.calculateStartPadding(LayoutDirection.Ltr),
+                                            end = windowInsets.calculateEndPadding(LayoutDirection.Ltr),
                                         )
                                 ) {
                                     MiniPlayer(
@@ -292,15 +280,10 @@ class HomeFragment : Fragment() {
                                     )
 
                                     var progress by remember { mutableStateOf(0f) }
-                                    var isPlaying by remember { mutableStateOf(exoPlayer.isPlaying) }
 
                                     DisposableEffect(Unit) {
                                         progress = exoPlayer.currentPosition.toFloat() / exoPlayer.duration.toFloat()
                                         val listener = object : Player.Listener {
-                                            override fun onIsPlayingChanged(isPlaying_: Boolean) {
-                                                isPlaying = isPlaying_
-                                            }
-
                                             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                                                 super.onMediaItemTransition(mediaItem, reason)
                                                 progress = 0f
@@ -311,7 +294,7 @@ class HomeFragment : Fragment() {
                                             exoPlayer.removeListener(listener)
                                         }
                                     }
-                                    if (isPlaying && swipeableState.currentValue == 0) {
+                                    if (songPlaying == true && swipeableState.currentValue == 0) {
                                         LaunchedEffect(Unit) {
                                             while (true) {
                                                 progress = exoPlayer.currentPosition.toFloat() / exoPlayer.duration.toFloat()
@@ -514,5 +497,9 @@ class HomeFragment : Fragment() {
                     .actionHomeFragmentToSelectPlaylistFragment(songLocations.toTypedArray())
             )
         }
+    }
+
+    private fun addToPlaylistClicked(song: Song){
+        saveToPlaylistClicked(listOf(song))
     }
 }
