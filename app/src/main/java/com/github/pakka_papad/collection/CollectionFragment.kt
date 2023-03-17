@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
@@ -64,13 +65,13 @@ class CollectionFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                val themePreference by preferenceProvider.theme.collectAsState()
+                val themePreference by preferenceProvider.theme.collectAsStateWithLifecycle()
                 ZenTheme(
                     themePreference = themePreference
                 ) {
-                    val collectionUi by viewModel.collectionUi.collectAsState()
+                    val collectionUi by viewModel.collectionUi.collectAsStateWithLifecycle()
                     val songsListState = rememberLazyListState()
-                    val currentSong by viewModel.currentSong.collectAsState()
+                    val currentSong by viewModel.currentSong.collectAsStateWithLifecycle()
                     val insetsPadding =
                         WindowInsets.systemBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
                             .asPaddingValues()
@@ -123,7 +124,7 @@ class CollectionFragment : Fragment() {
                                             .fillMaxWidth()
                                             .background(
                                                 Brush.verticalGradient(
-                                                    listOf(Color.Transparent,backgroundColor)
+                                                    listOf(Color.Transparent, backgroundColor)
                                                 )
                                             )
                                             .padding(10.dp),

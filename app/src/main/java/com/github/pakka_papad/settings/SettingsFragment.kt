@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -44,12 +43,10 @@ class SettingsFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                val themePreference by preferenceProvider.theme.collectAsState()
-                val scanStatus by viewModel.scanStatus.collectAsState()
-                ZenTheme(
-                    themePreference = themePreference
-                ) {
-                    val isCrashlyticsDisabled by preferenceProvider.isCrashlyticsDisabled.collectAsStateWithLifecycle()
+                val themePreference by preferenceProvider.theme.collectAsStateWithLifecycle()
+                val scanStatus by viewModel.scanStatus.collectAsStateWithLifecycle()
+                val isCrashlyticsDisabled by preferenceProvider.isCrashlyticsDisabled.collectAsStateWithLifecycle()
+                ZenTheme(themePreference) {
                     Scaffold(
                         topBar = {
                             TopBarWithBackArrow(

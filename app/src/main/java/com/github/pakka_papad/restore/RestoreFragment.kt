@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,6 +16,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.github.pakka_papad.data.ZenPreferenceProvider
@@ -44,9 +44,9 @@ class RestoreFragment: Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                val theme by preferenceProvider.theme.collectAsState()
+                val theme by preferenceProvider.theme.collectAsStateWithLifecycle()
                 ZenTheme(theme) {
-                    val songs by viewModel.blackListedSongs.collectAsState()
+                    val songs by viewModel.blackListedSongs.collectAsStateWithLifecycle()
                     val selectList = viewModel.restoreList
                     Scaffold(
                         topBar = {
