@@ -1,8 +1,12 @@
 package com.github.pakka_papad.settings
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -491,6 +495,7 @@ private fun ReportBug(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MadeBy() {
     val githubUrl = "https://github.com/pakka-papad"
@@ -522,11 +527,26 @@ private fun MadeBy() {
                 painter = painterResource(R.drawable.github_mark),
                 contentDescription = "github",
                 modifier = iconModifier
-                    .clickable {
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.data = Uri.parse(githubUrl)
-                        context.startActivity(intent)
-                    },
+                    .combinedClickable(
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_VIEW)
+                            intent.data = Uri.parse(githubUrl)
+                            try {
+                                context.startActivity(intent)
+                            } catch (_: Exception){
+                                Toast.makeText(context,"Error opening url. Long press to copy.",Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        onLongClick = {
+                            val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
+                            if (clipboardManager == null){
+                                Toast.makeText(context,"Error",Toast.LENGTH_SHORT).show()
+                            } else {
+                                clipboardManager.setPrimaryClip(ClipData.newPlainText("Github url",githubUrl))
+                                Toast.makeText(context,"Copied",Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    ),
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                 contentScale = ContentScale.Inside,
             )
@@ -534,11 +554,26 @@ private fun MadeBy() {
                 painter = painterResource(R.drawable.linkedin),
                 contentDescription = "linkedin",
                 modifier = iconModifier
-                    .clickable {
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.data = Uri.parse(linkedinUrl)
-                        context.startActivity(intent)
-                    },
+                    .combinedClickable(
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_VIEW)
+                            intent.data = Uri.parse(linkedinUrl)
+                            try {
+                                context.startActivity(intent)
+                            } catch (_: Exception){
+                                Toast.makeText(context,"Error opening url. Long press to copy.",Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        onLongClick = {
+                            val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
+                            if (clipboardManager == null){
+                                Toast.makeText(context,"Error",Toast.LENGTH_SHORT).show()
+                            } else {
+                                clipboardManager.setPrimaryClip(ClipData.newPlainText("Linkedin url",linkedinUrl))
+                                Toast.makeText(context,"Copied",Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    ),
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                 contentScale = ContentScale.Inside,
             )
