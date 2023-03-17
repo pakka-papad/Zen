@@ -16,6 +16,7 @@ import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.databinding.FragmentSplashBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -51,15 +52,16 @@ class SplashFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                preferenceProvider.isOnBoardingComplete.collect {
-                    if (it == null) return@collect
+                preferenceProvider.isOnBoardingComplete.collectLatest {
+                    if (it == null) return@collectLatest
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S){
                         delay(400)
                     }
-                    navController.navigate(
-                        if (it) R.id.action_splashFragment_to_homeFragment
-                        else R.id.action_splashFragment_to_onBoardingFragment
-                    )
+                    val nextFragment = when(it){
+                        true -> R.id.action_splashFragment_to_homeFragment
+                        false -> R.id.action_splashFragment_to_onBoardingFragment
+                    }
+                    navController.navigate(nextFragment)
                 }
             }
         }
