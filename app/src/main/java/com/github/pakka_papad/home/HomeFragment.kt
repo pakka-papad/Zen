@@ -127,6 +127,12 @@ class HomeFragment : Fragment() {
                     val genresWithSongCount by viewModel.genresWithSongCount.collectAsStateWithLifecycle()
                     val allGenresListState = rememberLazyListState()
 
+                    val dataRetrieved by remember {
+                        derivedStateOf {
+                            songs != null && albums != null && personsWithSongCount != null
+                        }
+                    }
+
                     val swipeableState = rememberSwipeableState(initialValue = 0)
                     val bottomBarColor = MaterialTheme.colorScheme
                         .surfaceColorAtElevation(3.dp + LocalAbsoluteTonalElevation.current)
@@ -155,6 +161,62 @@ class HomeFragment : Fragment() {
                     }
                     val windowInsets = WindowInsets.systemBars.asPaddingValues()
 
+                    val queue = viewModel.queue
+                    val playbackParams by  preferenceProvider.playbackParams.collectAsStateWithLifecycle()
+                    val repeatMode by viewModel.repeatMode.collectAsStateWithLifecycle()
+                    val playerScaffoldState = rememberBottomSheetScaffoldState()
+
+                    BackHandler(
+                        enabled = swipeableState.currentValue == 1,
+                        onBack = {
+                            scope.launch {
+                                if (playerScaffoldState.bottomSheetState.isExpanded) playerScaffoldState.bottomSheetState.collapse()
+                                else swipeableState.animateTo(0)
+                            }
+                        }
+                    )
+
+                    val navigateToSettings = remember{
+                        { navController.navigate(R.id.action_homeFragment_to_settingsFragment) }
+                    }
+                    val navigateToSearch = remember{
+                        { navController.navigate(R.id.action_homeFragment_to_searchFragment) }
+                    }
+                    val songScreenSongClicked = remember{
+                        { index: Int -> viewModel.setQueue(songs,index) }
+                    }
+                    val songScreenPlayAllClicked = remember{ { viewModel.setQueue(songs) } }
+                    val songScreenShuffleClicked = remember{ { viewModel.shufflePlay(songs) } }
+                    val miniPlayerPlayPauseClicked = remember{ {
+                        if (swipeableState.currentValue == 0){
+                            pendingPausePlayIntent.send()
+                        }
+                    } }
+                    val nowPlayingBackArrowClicked = remember<() -> Unit>{ {
+                        scope.launch { swipeableState.animateTo(0) }
+                    } }
+                    val expandQueueBottomSheet = remember<() -> Unit>{
+                        { scope.launch { playerScaffoldState.bottomSheetState.expand() } }
+                    }
+                    val collapseQueueBottomSheet = remember<() -> Unit>{
+                        { scope.launch { playerScaffoldState.bottomSheetState.collapse() } }
+                    }
+                    val updateScreen = remember<(Screens) -> Unit>{ {
+                        if (currentScreen == it){
+                            scope.launch {
+                                when(it){
+                                    Screens.Songs -> allSongsListState.scrollToItem(0)
+                                    Screens.Albums -> allAlbumsGridState.scrollToItem(0)
+                                    Screens.Artists -> allPersonsListState.scrollToItem(0)
+                                    Screens.Playlists -> allPlaylistsListState.scrollToItem(0)
+                                    Screens.Genres -> allGenresListState.scrollToItem(0)
+                                }
+                            }
+                        } else {
+                            currentScreen = it
+                        }
+                    } }
+
                     Box(
                         modifier = Modifier
                             .fillMaxSize(),
@@ -163,20 +225,11 @@ class HomeFragment : Fragment() {
                         Scaffold(
                             topBar = {
                                 HomeTopBar(
-                                    onSettingsClicked = {
-                                        navController.navigate(R.id.action_homeFragment_to_settingsFragment)
-                                    },
-                                    onSearchClicked = {
-                                        navController.navigate(R.id.action_homeFragment_to_searchFragment)
-                                    },
+                                    onSettingsClicked = navigateToSettings,
+                                    onSearchClicked = navigateToSearch,
                                 )
                             },
                             content = {
-                                val dataRetrieved by remember {
-                                    derivedStateOf {
-                                        songs != null && albums != null && personsWithSongCount != null
-                                    }
-                                }
                                 Box(
                                     modifier = Modifier
                                         .padding(
@@ -198,19 +251,13 @@ class HomeFragment : Fragment() {
                                                 Screens.Songs -> {
                                                     AllSongs(
                                                         songs = songs,
-                                                        onSongClicked = { index ->
-                                                            viewModel.setQueue(songs, index)
-                                                        },
+                                                        onSongClicked = songScreenSongClicked,
                                                         listState = allSongsListState,
                                                         onFavouriteClicked = viewModel::changeFavouriteValue,
                                                         currentSong = currentSong,
                                                         onAddToQueueClicked = viewModel::addToQueue,
-                                                        onPlayAllClicked = {
-                                                            viewModel.setQueue(songs)
-                                                        },
-                                                        onShuffleClicked = {
-                                                            viewModel.shufflePlay(songs)
-                                                        },
+                                                        onPlayAllClicked = songScreenPlayAllClicked,
+                                                        onShuffleClicked = songScreenShuffleClicked,
                                                         onAddToPlaylistsClicked = this@HomeFragment::addToPlaylistClicked,
                                                         onBlacklistClicked = viewModel::onSongBlacklist
                                                     )
@@ -267,11 +314,7 @@ class HomeFragment : Fragment() {
                                         )
                                 ) {
                                     MiniPlayer(
-                                        onPausePlayPressed = {
-                                            if (swipeableState.currentValue == 0){
-                                                pendingPausePlayIntent.send()
-                                            }
-                                        },
+                                        onPausePlayPressed = miniPlayerPlayPauseClicked,
                                         song = currentSong,
                                         showPlayButton = songPlaying == false,
                                         modifier = Modifier
@@ -312,28 +355,11 @@ class HomeFragment : Fragment() {
                             },
                             content = {
                                 currentSong?.let {
-                                    val queue = viewModel.queue
-                                    val playbackParams by  preferenceProvider.playbackParams.collectAsStateWithLifecycle()
-                                    val repeatMode by viewModel.repeatMode.collectAsStateWithLifecycle()
-                                    val scaffoldState = rememberBottomSheetScaffoldState()
-                                    BackHandler(
-                                        enabled = swipeableState.currentValue == 1,
-                                        onBack = {
-                                            scope.launch {
-                                                if (scaffoldState.bottomSheetState.isExpanded) scaffoldState.bottomSheetState.collapse()
-                                                else swipeableState.animateTo(0)
-                                            }
-                                        }
-                                    )
                                     BottomSheetScaffold(
-                                        scaffoldState = scaffoldState,
+                                        scaffoldState = playerScaffoldState,
                                         topBar = {
                                             NowPlayingTopBar(
-                                                onBackArrowPressed = {
-                                                    scope.launch {
-                                                        swipeableState.animateTo(0)
-                                                    }
-                                                },
+                                                onBackArrowPressed = nowPlayingBackArrowClicked,
                                                 title = it.title,
                                                 options = listOf(
                                                     NowPlayingOptions.SaveToPlaylist {
@@ -352,11 +378,7 @@ class HomeFragment : Fragment() {
                                                 songPlaying = songPlaying,
                                                 exoPlayer = exoPlayer,
                                                 onFavouriteClicked = viewModel::changeFavouriteValue,
-                                                onQueueClicked = {
-                                                    scope.launch {
-                                                        scaffoldState.bottomSheetState.expand()
-                                                    }
-                                                },
+                                                onQueueClicked = expandQueueBottomSheet,
                                                 repeatMode = repeatMode,
                                                 toggleRepeatMode = viewModel::toggleRepeatMode,
                                                 playbackParams = playbackParams,
@@ -368,12 +390,8 @@ class HomeFragment : Fragment() {
                                                 queue = queue,
                                                 onFavouriteClicked = viewModel::changeFavouriteValue,
                                                 currentSong = it,
-                                                onDownArrowClicked = {
-                                                    scope.launch {
-                                                        scaffoldState.bottomSheetState.collapse()
-                                                    }
-                                                },
-                                                expanded = scaffoldState.bottomSheetState.isExpanded,
+                                                onDownArrowClicked = collapseQueueBottomSheet,
+                                                expanded = playerScaffoldState.bottomSheetState.isExpanded,
                                                 exoPlayer = exoPlayer,
                                                 onDrag = viewModel::onSongDrag
                                             )
@@ -400,21 +418,7 @@ class HomeFragment : Fragment() {
                         ){
                             HomeBottomBar(
                                 currentScreen = currentScreen,
-                                onScreenChange = {
-                                    if (currentScreen == it){
-                                        scope.launch {
-                                            when(it){
-                                                Screens.Songs -> allSongsListState.scrollToItem(0)
-                                                Screens.Albums -> allAlbumsGridState.scrollToItem(0)
-                                                Screens.Artists -> allPersonsListState.scrollToItem(0)
-                                                Screens.Playlists -> allPlaylistsListState.scrollToItem(0)
-                                                Screens.Genres -> allGenresListState.scrollToItem(0)
-                                            }
-                                        }
-                                    } else {
-                                        currentScreen = it
-                                    }
-                                },
+                                onScreenChange = updateScreen,
                                 bottomBarColor = bottomBarColor
                             )
                         }
