@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.LayoutDirection
@@ -46,6 +47,11 @@ class SettingsFragment : Fragment() {
                 val themePreference by preferenceProvider.theme.collectAsStateWithLifecycle()
                 val scanStatus by viewModel.scanStatus.collectAsStateWithLifecycle()
                 val isCrashlyticsDisabled by preferenceProvider.isCrashlyticsDisabled.collectAsStateWithLifecycle()
+
+                val restoreClicked = remember{ {
+                    navController.navigate(R.id.action_settingsFragment_to_restoreFragment)
+                } }
+
                 ZenTheme(themePreference) {
                     Scaffold(
                         topBar = {
@@ -69,11 +75,7 @@ class SettingsFragment : Fragment() {
                                 onThemePreferenceChanged = preferenceProvider::updateTheme,
                                 scanStatus = scanStatus,
                                 onScanClicked = viewModel::scanForMusic,
-                                onRestoreClicked = {
-                                    navController.navigate(
-                                        R.id.action_settingsFragment_to_restoreFragment
-                                    )
-                                },
+                                onRestoreClicked = restoreClicked,
                                 disabledCrashlytics = isCrashlyticsDisabled,
                                 onAutoReportCrashClicked = preferenceProvider::toggleCrashlytics
                             )

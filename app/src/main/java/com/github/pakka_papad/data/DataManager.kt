@@ -17,6 +17,7 @@ import com.github.pakka_papad.player.ZenPlayer
 import com.github.pakka_papad.toMBfromB
 import com.github.pakka_papad.toMS
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -93,12 +94,12 @@ class DataManager(
     suspend fun deletePlaylistSongCrossRef(playlistSongCrossRef: PlaylistSongCrossRef) =
         daoCollection.playlistDao.deletePlaylistSongCrossRef(playlistSongCrossRef)
 
-    private val _scanStatus = Channel<ScanStatus>()
+    private val _scanStatus = Channel<ScanStatus>(onBufferOverflow = BufferOverflow.DROP_OLDEST)
     val scanStatus = _scanStatus.receiveAsFlow()
 
-    suspend fun scanForMusic() {
+    fun scanForMusic() = scope.launch {
         _scanStatus.send(ScanStatus.ScanStarted)
-        notificationManager.sendScanningNotification()
+//        notificationManager.sendScanningNotification()
         val blacklistedSongs = daoCollection.blacklistDao.getBlacklistedSongs()
         val blacklistedSongLocations = blacklistedSongs.map { it.location }.toSet()
         val selection = Audio.Media.IS_MUSIC + " != 0"
@@ -119,7 +120,7 @@ class DataManager(
             null,
             Audio.Media.DATE_ADDED,
             null
-        ) ?: return
+        ) ?: return@launch
         val totalSongs = cursor.count
         var parsedSongs = 0
         cursor.moveToFirst()
@@ -194,7 +195,7 @@ class DataManager(
         daoCollection.lyricistDao.insertAllLyricists(lyricistSet.map { Lyricist(it) })
         daoCollection.genreDao.insertAllGenres(genreSet.map { Genre(it) })
         daoCollection.songDao.insertAllSongs(songs)
-        notificationManager.removeScanningNotification()
+//        notificationManager.removeScanningNotification()
         _scanStatus.send(ScanStatus.ScanComplete)
     }
 

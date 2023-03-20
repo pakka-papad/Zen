@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.support.v4.media.session.MediaSessionCompat
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.IconCompat
@@ -27,19 +28,20 @@ class ZenNotificationManager(
     }
 
     companion object {
-        const val RUNNING_SCAN = "running_scan"
+//        const val RUNNING_SCAN = "running_scan"
         const val PLAYER_SERVICE = "zen_player"
-        const val SCANNING_NOTIFICATION_ID = 10
+//        const val SCANNING_NOTIFICATION_ID = 10
         const val PLAYER_NOTIFICATION_ID = 12
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannels() {
         val requiredChannels = listOf(
-            NotificationChannel(
-                RUNNING_SCAN,
-                "Scan",
-                NotificationManager.IMPORTANCE_HIGH
-            ),
+//            NotificationChannel(
+//                RUNNING_SCAN,
+//                "Scan",
+//                NotificationManager.IMPORTANCE_HIGH
+//            ),
             NotificationChannel(
                 PLAYER_SERVICE,
                 "Player",
@@ -51,26 +53,26 @@ class ZenNotificationManager(
         notificationManager.createNotificationChannels(requiredChannels)
     }
 
-    fun sendScanningNotification() {
-        val notification = NotificationCompat.Builder(context, RUNNING_SCAN).apply {
-            setSmallIcon(R.mipmap.ic_notification)
-            setContentTitle("Scanning")
-            setContentText("Looking for music \uD83E\uDDD0")
-            setOngoing(true)
-            priority = NotificationCompat.PRIORITY_HIGH
-            setProgress(0, 0, true)
-            setSilent(true)
-        }.build()
-        with(NotificationManagerCompat.from(context)) {
-            notify(SCANNING_NOTIFICATION_ID, notification)
-        }
-    }
-
-    fun removeScanningNotification() {
-        with(NotificationManagerCompat.from(context)) {
-            cancel(SCANNING_NOTIFICATION_ID)
-        }
-    }
+//    fun sendScanningNotification() {
+//        val notification = NotificationCompat.Builder(context, RUNNING_SCAN).apply {
+//            setSmallIcon(R.mipmap.ic_notification)
+//            setContentTitle("Scanning")
+//            setContentText("Looking for music \uD83E\uDDD0")
+//            setOngoing(true)
+//            priority = NotificationCompat.PRIORITY_HIGH
+//            setProgress(0, 0, true)
+//            setSilent(true)
+//        }.build()
+//        with(NotificationManagerCompat.from(context)) {
+//            notify(SCANNING_NOTIFICATION_ID, notification)
+//        }
+//    }
+//
+//    fun removeScanningNotification() {
+//        with(NotificationManagerCompat.from(context)) {
+//            cancel(SCANNING_NOTIFICATION_ID)
+//        }
+//    }
 
     private val previousAction = NotificationCompat.Action.Builder(
         IconCompat.createWithResource(context,R.drawable.ic_baseline_skip_previous_40),
