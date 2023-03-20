@@ -35,6 +35,8 @@ android {
         versionCode = AppVersion.Code
         versionName = AppVersion.Name
 
+        resValue("integer","app_version_code",versionCode.toString())
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         vectorDrawables {
@@ -52,6 +54,7 @@ android {
     buildTypes {
         debug {
             versionNameSuffix = "-debug"
+            resValue("string","app_version_name",AppVersion.Name+versionNameSuffix)
         }
         release {
             isMinifyEnabled = true
@@ -61,6 +64,7 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.findByName("prod")
+            resValue("string","app_version_name",AppVersion.Name)
         }
     }
 

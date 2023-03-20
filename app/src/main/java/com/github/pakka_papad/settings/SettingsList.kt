@@ -20,9 +20,11 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.BuildConfig
@@ -45,6 +47,7 @@ fun SettingsList(
     onRestoreClicked: () -> Unit,
     disabledCrashlytics: Boolean,
     onAutoReportCrashClicked: (Boolean) -> Unit,
+    onWhatsNewClicked: () -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -73,7 +76,9 @@ fun SettingsList(
             )
         }
         item {
-            MadeBy()
+            MadeBy(
+                onWhatsNewClicked = onWhatsNewClicked
+            )
         }
     }
 }
@@ -497,24 +502,45 @@ private fun ReportBug(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun MadeBy() {
+private fun MadeBy(
+    onWhatsNewClicked: () -> Unit,
+) {
     val githubUrl = "https://github.com/pakka-papad"
     val linkedinUrl = "https://www.linkedin.com/in/sumitzbera/"
     val context = LocalContext.current
+    val appVersion = stringResource(id = R.string.app_version_name)
     Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
+        val semiTransparentSpanStyle = SpanStyle(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
         Text(
             text = buildAnnotatedString {
-                withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))) {
+                withStyle(semiTransparentSpanStyle) {
+                    append("App version ")
+                }
+                append(appVersion)
+            },
+            style = MaterialTheme.typography.titleSmall,
+        )
+        Text(
+            text = "Check what's new!",
+            modifier = Modifier
+                .alpha(0.5f)
+                .clickable(onClick = onWhatsNewClicked),
+            style = MaterialTheme.typography.titleSmall.copy(textDecoration = TextDecoration.Underline)
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = buildAnnotatedString {
+                withStyle(semiTransparentSpanStyle) {
                     append("Made by ")
                 }
                 append("Sumit Bera")
             },
             style = MaterialTheme.typography.titleMedium,
         )
-        Spacer(Modifier.height(10.dp))
         val iconModifier = Modifier
             .size(30.dp)
             .alpha(0.5f)
