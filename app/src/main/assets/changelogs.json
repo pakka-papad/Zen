@@ -1,0 +1,13 @@
+[
+  {
+    "versionCode": 1,
+    "versionName": "1.0",
+    "date": "15 January, 2023",
+    "changes": [
+      "Added multiple theming options",
+      "Added playlist feature",
+      "Added search feature",
+      "Added song blacklist feature"
+    ]
+  }
+]

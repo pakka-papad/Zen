@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -56,7 +55,7 @@ class SettingsFragment : Fragment() {
                 } }
                 val whatsNewClicked = remember{ {
                     if (navController.currentDestination?.id == R.id.settingsFragment){
-                        Toast.makeText(requireContext(),"something",Toast.LENGTH_SHORT).show()
+                        navController.navigate(R.id.action_settingsFragment_to_whatsNewFragment)
                     }
                 } }
 
