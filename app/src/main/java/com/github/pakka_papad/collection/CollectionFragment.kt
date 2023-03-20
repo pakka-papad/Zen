@@ -32,6 +32,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.palette.graphics.Palette
 import coil.compose.AsyncImage
+import com.github.pakka_papad.R
 import com.github.pakka_papad.components.FullScreenSadMessage
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.Song
@@ -166,14 +167,7 @@ class CollectionFragment : Fragment() {
                                     onShuffleClicked = {
                                        viewModel.shufflePlay(collectionUi?.songs)
                                     },
-                                    onAddToPlaylistsClicked = {
-                                        navController.navigate(
-                                            CollectionFragmentDirections
-                                                .actionCollectionFragmentToSelectPlaylistFragment(
-                                                    arrayOf(it.location)
-                                                )
-                                        )
-                                    },
+                                    onAddToPlaylistsClicked = this@CollectionFragment::addToPlaylistClicked,
                                     isPlaylistCollection = args.collectionType?.type == CollectionType.PlaylistType,
                                     onRemoveFromPlaylistClicked = viewModel::removeFromPlaylist
                                 )
@@ -201,11 +195,16 @@ class CollectionFragment : Fragment() {
     private fun addAllSongsToPlaylistClicked(songs: List<Song>?){
         lifecycleScope.launch {
             if (songs == null) return@launch
+            if (navController.currentDestination?.id != R.id.collectionFragment) return@launch
             val songLocations = songs.map { it.location }
             navController.navigate(
                 CollectionFragmentDirections
                     .actionCollectionFragmentToSelectPlaylistFragment(songLocations.toTypedArray())
             )
         }
+    }
+
+    private fun addToPlaylistClicked(song: Song){
+        addAllSongsToPlaylistClicked(listOf(song))
     }
 }

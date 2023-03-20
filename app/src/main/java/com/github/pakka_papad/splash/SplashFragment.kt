@@ -57,6 +57,7 @@ class SplashFragment : Fragment() {
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S){
                         delay(400)
                     }
+                    if (navController.currentDestination?.id != R.id.splashFragment) return@collectLatest
                     val nextFragment = when(it){
                         true -> R.id.action_splashFragment_to_homeFragment
                         false -> R.id.action_splashFragment_to_onBoardingFragment

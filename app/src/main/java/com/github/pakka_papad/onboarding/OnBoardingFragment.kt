@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -42,6 +43,12 @@ class OnBoardingFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
+                val setOnBoardingComplete = remember{ {
+                    preferenceProvider.setOnBoardingComplete()
+                    if (navController.currentDestination?.id == R.id.onBoardingFragment){
+                        navController.navigate(R.id.action_onBoardingFragment_to_homeFragment)
+                    }
+                } }
                 DefaultTheme {
                     Column(
                         modifier = Modifier
@@ -54,19 +61,13 @@ class OnBoardingFragment : Fragment() {
                             ContentApi33(
                                 scanStatus = scanStatus,
                                 scanForMusic = viewModel::scanForMusic,
-                                setOnBoardingComplete = {
-                                    preferenceProvider.setOnBoardingComplete()
-                                    navController.navigate(R.id.action_onBoardingFragment_to_homeFragment)
-                                }
+                                setOnBoardingComplete = setOnBoardingComplete
                             )
                         } else {
                             Content(
                                 scanStatus = scanStatus,
                                 scanForMusic = viewModel::scanForMusic,
-                                setOnBoardingComplete = {
-                                    preferenceProvider.setOnBoardingComplete()
-                                    navController.navigate(R.id.action_onBoardingFragment_to_homeFragment)
-                                }
+                                setOnBoardingComplete = setOnBoardingComplete
                             )
                         }
                     }

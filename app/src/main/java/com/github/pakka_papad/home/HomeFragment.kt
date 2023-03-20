@@ -44,7 +44,10 @@ import com.github.pakka_papad.collection.CollectionType
 import com.github.pakka_papad.components.BottomSheet
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.*
-import com.github.pakka_papad.nowplaying.*
+import com.github.pakka_papad.nowplaying.NowPlayingOptions
+import com.github.pakka_papad.nowplaying.NowPlayingScreen
+import com.github.pakka_papad.nowplaying.NowPlayingTopBar
+import com.github.pakka_papad.nowplaying.Queue
 import com.github.pakka_papad.player.ZenBroadcastReceiver
 import com.github.pakka_papad.ui.theme.ZenTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -176,12 +179,16 @@ class HomeFragment : Fragment() {
                         }
                     )
 
-                    val navigateToSettings = remember{
-                        { navController.navigate(R.id.action_homeFragment_to_settingsFragment) }
-                    }
-                    val navigateToSearch = remember{
-                        { navController.navigate(R.id.action_homeFragment_to_searchFragment) }
-                    }
+                    val navigateToSettings = remember{ {
+                        if (navController.currentDestination?.id == R.id.homeFragment){
+                            navController.navigate(R.id.action_homeFragment_to_settingsFragment)
+                        }
+                    } }
+                    val navigateToSearch = remember{ {
+                        if(navController.currentDestination?.id == R.id.homeFragment){
+                            navController.navigate(R.id.action_homeFragment_to_searchFragment)
+                        }
+                    } }
                     val songScreenSongClicked = remember{
                         { index: Int -> viewModel.setQueue(songs,index) }
                     }
@@ -429,6 +436,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun navigateToCollection(album: Album){
+        if (navController.currentDestination?.id != R.id.homeFragment) return
         navController.navigate(
             HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
                 CollectionType(CollectionType.AlbumType,album.name)
@@ -437,6 +445,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun navigateToCollection(personWithSongCount: PersonWithSongCount) {
+        if (navController.currentDestination?.id != R.id.homeFragment) return
         when(personWithSongCount){
             is ArtistWithSongCount -> {
                 navController.navigate(
@@ -470,6 +479,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun navigateToCollection(playlistId: Long){
+        if (navController.currentDestination?.id != R.id.homeFragment) return
         navController.navigate(
             HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
                 CollectionType(CollectionType.PlaylistType,playlistId.toString())
@@ -478,6 +488,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun navigateToCollection(genreWithSongCount: GenreWithSongCount){
+        if (navController.currentDestination?.id != R.id.homeFragment) return
         navController.navigate(
             HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
                 CollectionType(CollectionType.GenreType,genreWithSongCount.genreName)
@@ -486,6 +497,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun navigateToCollection(){
+        if (navController.currentDestination?.id != R.id.homeFragment) return
         navController.navigate(
             HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
                 CollectionType(CollectionType.FavouritesType)
@@ -496,6 +508,7 @@ class HomeFragment : Fragment() {
     private fun saveToPlaylistClicked(queue: List<Song>){
         lifecycleScope.launch {
             val songLocations = queue.map { it.location }
+            if (navController.currentDestination?.id != R.id.homeFragment) return@launch
             navController.navigate(
                 HomeFragmentDirections
                     .actionHomeFragmentToSelectPlaylistFragment(songLocations.toTypedArray())
