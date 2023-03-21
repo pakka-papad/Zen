@@ -6,21 +6,26 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioManager
+import android.net.Uri
 import android.os.IBinder
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.widget.Toast
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
-import com.github.pakka_papad.Constants
+import com.github.pakka_papad.*
 import com.github.pakka_papad.data.DataManager
+import com.github.pakka_papad.data.ZenCrashReporter
+import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.data.notification.ZenNotificationManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import timber.log.Timber
+import java.io.File
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -34,6 +39,12 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
 
     @Inject
     lateinit var exoPlayer: ExoPlayer
+
+    @Inject
+    lateinit var crashReporter: ZenCrashReporter
+
+    @Inject
+    lateinit var preferencesProvider: ZenPreferenceProvider
 
     private var broadcastReceiver: ZenBroadcastReceiver? = null
 
@@ -67,6 +78,21 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
             super.onIsPlayingChanged(isPlaying)
             updateMediaSessionState()
             updateMediaSessionMetadata()
+        }
+
+        override fun onPlayerError(error: PlaybackException) {
+            super.onPlayerError(error)
+            crashReporter.logException(error)
+            if (error.errorCode == PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND){
+                dataManager.cleanData()
+                showToast("Could not find the song ${dataManager.currentSong.value?.title ?: ""} at the specified path")
+                onBroadcastCancel()
+            }
+        }
+
+        override fun onPlayerErrorChanged(error: PlaybackException?) {
+            super.onPlayerErrorChanged(error)
+            crashReporter.logException(error)
         }
     }
 
@@ -119,6 +145,21 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
                 isLiked = dataManager.getSongAtIndex(exoPlayer.currentMediaItemIndex)?.favourite ?: false
             )
         )
+
+        scope.launch {
+            preferencesProvider.playbackParams.collect {
+                updateMediaSessionState()
+                val params = it.toCorrectedParams().toExoPlayerPlaybackParameters()
+                withContext(Dispatchers.Main){
+                    exoPlayer.playbackParameters = params
+                }
+            }
+        }
+        scope.launch {
+            dataManager.repeatMode.collect {
+                withContext(Dispatchers.Main) { exoPlayer.repeatMode = it.toExoPlayerRepeatMode() }
+            }
+        }
 
         val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         audioManager.isSpeakerphoneOn = true
@@ -194,13 +235,14 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
     private fun updateMediaSessionState() {
         scope.launch {
             delay(100)
+            val speed = preferencesProvider.playbackParams.value.playbackSpeed
             withContext(Dispatchers.Main) {
                 mediaSession.setPlaybackState(
                     PlaybackStateCompat.Builder().apply {
                         setState(
                             if (exoPlayer.isPlaying) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED,
                             exoPlayer.currentPosition,
-                            1f,
+                            if (speed < 1 || speed > 200) 1f else speed.toFloat()/100,
                         )
                         setActions(
                             (if (exoPlayer.isPlaying) PlaybackStateCompat.ACTION_PAUSE else PlaybackStateCompat.ACTION_PLAY)
@@ -219,11 +261,15 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
         val mediaItems = newQueue.map {
-            MediaItem.fromUri(it.location)
+            MediaItem.fromUri(Uri.fromFile(File(it.location)))
         }
         exoPlayer.addMediaItems(mediaItems)
         exoPlayer.prepare()
         exoPlayer.seekTo(startPlayingFromIndex,0)
+        exoPlayer.repeatMode = dataManager.repeatMode.value.toExoPlayerRepeatMode()
+        exoPlayer.playbackParameters = preferencesProvider.playbackParams.value
+            .toCorrectedParams()
+            .toExoPlayerPlaybackParameters()
         exoPlayer.play()
         updateMediaSessionState()
         updateMediaSessionMetadata()
@@ -231,7 +277,7 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
 
     @Synchronized
     override fun addToQueue(song: Song) {
-        exoPlayer.addMediaItem(MediaItem.fromUri(song.location))
+        exoPlayer.addMediaItem(MediaItem.fromUri(Uri.fromFile(File(song.location))))
     }
 
     @Synchronized
@@ -292,7 +338,8 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
      * This stops the service and onDestroy is called
      */
     override fun onBroadcastCancel() {
-        stopForeground(true)
+        // Deprecated in api level 33
+//        stopForeground(true)
         stopSelf()
     }
 }

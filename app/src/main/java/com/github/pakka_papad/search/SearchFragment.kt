@@ -18,6 +18,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import com.github.pakka_papad.R
 import com.github.pakka_papad.collection.CollectionType
 import com.github.pakka_papad.components.FullScreenSadMessage
 import com.github.pakka_papad.data.ZenPreferenceProvider
@@ -107,6 +108,7 @@ class SearchFragment : Fragment() {
     }
 
     private fun handleClick(album: Album){
+        if (navController.currentDestination?.id != R.id.searchFragment) return
         navController.navigate(
             SearchFragmentDirections
                 .actionSearchFragmentToCollectionFragment(CollectionType(CollectionType.AlbumType,album.name))
@@ -114,6 +116,7 @@ class SearchFragment : Fragment() {
     }
 
     private fun handleClick(artist: Artist){
+        if (navController.currentDestination?.id != R.id.searchFragment) return
         navController.navigate(
             SearchFragmentDirections
                 .actionSearchFragmentToCollectionFragment(CollectionType(CollectionType.ArtistType,artist.name))
@@ -121,6 +124,7 @@ class SearchFragment : Fragment() {
     }
 
     private fun handleClick(albumArtist: AlbumArtist){
+        if (navController.currentDestination?.id != R.id.searchFragment) return
         navController.navigate(
             SearchFragmentDirections
                 .actionSearchFragmentToCollectionFragment(CollectionType(CollectionType.AlbumArtistType,albumArtist.name))
@@ -128,6 +132,7 @@ class SearchFragment : Fragment() {
     }
 
     private fun handleClick(composer: Composer){
+        if (navController.currentDestination?.id != R.id.searchFragment) return
         navController.navigate(
             SearchFragmentDirections
                 .actionSearchFragmentToCollectionFragment(CollectionType(CollectionType.ComposerType,composer.name))
@@ -135,6 +140,7 @@ class SearchFragment : Fragment() {
     }
 
     private fun handleClick(lyricist: Lyricist){
+        if (navController.currentDestination?.id != R.id.searchFragment) return
         navController.navigate(
             SearchFragmentDirections.actionSearchFragmentToCollectionFragment(
                 CollectionType(CollectionType.LyricistType,lyricist.name)
@@ -143,12 +149,14 @@ class SearchFragment : Fragment() {
     }
 
     private fun handleClick(genre: Genre){
+        if (navController.currentDestination?.id != R.id.searchFragment) return
         navController.navigate(
             SearchFragmentDirections.actionSearchFragmentToCollectionFragment(CollectionType(CollectionType.GenreType,genre.genre))
         )
     }
 
     private fun handleClick(playlist: Playlist){
+        if (navController.currentDestination?.id != R.id.searchFragment) return
         navController.navigate(
             SearchFragmentDirections
                 .actionSearchFragmentToCollectionFragment(CollectionType(CollectionType.PlaylistType,playlist.playlistId.toString()))

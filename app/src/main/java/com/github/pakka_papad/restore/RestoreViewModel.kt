@@ -23,7 +23,7 @@ class RestoreViewModel @Inject constructor(
     private val _restoreList = mutableStateListOf<Boolean>()
     val restoreList : List<Boolean> = _restoreList
 
-    val blackListedSongs = manager.blacklistedSongsFlow
+    val blackListedSongs = manager.getAll.blacklistedSongs()
         .onEach {
             while (_restoreList.size < it.size) _restoreList.add(false)
             while (_restoreList.size > it.size) _restoreList.removeLast()

@@ -16,8 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,7 +34,10 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.exoplayer.ExoPlayer
 import coil.compose.AsyncImage
 import com.github.pakka_papad.R
+import com.github.pakka_papad.data.UserPreferences.PlaybackParams
+import com.github.pakka_papad.nowplaying.RepeatMode as RepeatModeEnum
 import com.github.pakka_papad.data.music.Song
+import com.github.pakka_papad.round
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
@@ -51,6 +53,10 @@ fun NowPlayingScreen(
     exoPlayer: ExoPlayer,
     onFavouriteClicked: () -> Unit,
     onQueueClicked: () -> Unit,
+    repeatMode: RepeatModeEnum,
+    toggleRepeatMode: () -> Unit,
+    playbackParams: PlaybackParams,
+    updatePlaybackParams: (speed: Int, pitch: Int) -> Unit,
 ) {
     if (song == null || songPlaying == null) return
     val configuration = LocalConfiguration.current
@@ -86,7 +92,11 @@ fun NowPlayingScreen(
                 onQueueClicked = onQueueClicked,
                 modifier = Modifier
                     .width(infoAndControlsMaxWidth.dp)
-                    .fillMaxHeight()
+                    .fillMaxHeight(),
+                repeatMode = repeatMode,
+                toggleRepeatMode = toggleRepeatMode,
+                playbackParams = playbackParams,
+                updatePlaybackParams = updatePlaybackParams,
             )
         }
     } else {
@@ -121,7 +131,11 @@ fun NowPlayingScreen(
                 onQueueClicked = onQueueClicked,
                 modifier = Modifier
                     .height(infoAndControlsMaxHeight.dp)
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                repeatMode = repeatMode,
+                toggleRepeatMode = toggleRepeatMode,
+                playbackParams = playbackParams,
+                updatePlaybackParams = updatePlaybackParams,
             )
         }
     }
@@ -158,6 +172,10 @@ private fun InfoAndControls(
     onFavouriteClicked: () -> Unit,
     onQueueClicked: () -> Unit,
     modifier: Modifier = Modifier,
+    repeatMode: RepeatModeEnum,
+    toggleRepeatMode: () -> Unit,
+    playbackParams: PlaybackParams,
+    updatePlaybackParams: (speed: Int, pitch: Int) -> Unit,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -169,10 +187,26 @@ private fun InfoAndControls(
             song = song,
             modifier = Modifier.weight(1f)
         )
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+        ) {
+            PlaybackSpeedAndPitchController(
+                playbackParams = playbackParams,
+                updatePlaybackParams = updatePlaybackParams
+            )
+            RepeatModeController(
+                currentRepeatMode = repeatMode,
+                toggleRepeatMode = toggleRepeatMode
+            )
+        }
         MusicSlider(
             modifier = Modifier
-                .weight(1f)
-                .padding(vertical = 14.dp, horizontal = 24.dp),
+                .weight(0.7f)
+                .padding(vertical = 0.dp, horizontal = 24.dp),
             mediaPlayer = exoPlayer,
             duration = song.durationMillis,
         )
@@ -245,9 +279,11 @@ private fun LikeButton(
                             )
                         )
                     }
-                }, indication = rememberRipple(
+                },
+                indication = rememberRipple(
                     bounded = false, radius = 25.dp
-                ), interactionSource = MutableInteractionSource()
+                ),
+                interactionSource = remember { MutableInteractionSource() }
             )
             .padding(10.dp),
         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
@@ -266,7 +302,7 @@ private fun PreviousButton(
         .clip(RoundedCornerShape(35.dp))
         .clickable(
             onClick = onPreviousPressed,
-            interactionSource = MutableInteractionSource(),
+            interactionSource = remember { MutableInteractionSource() },
             indication = rememberRipple(
                 bounded = true, radius = 35.dp
             )
@@ -290,7 +326,7 @@ private fun PausePlayButton(
         .clip(CircleShape)
         .clickable(
             onClick = onPausePlayPressed,
-            interactionSource = MutableInteractionSource(),
+            interactionSource = remember { MutableInteractionSource() },
             indication = rememberRipple(
                 bounded = true, radius = 35.dp
             )
@@ -314,7 +350,7 @@ private fun NextButton(
         .clip(RoundedCornerShape(35.dp))
         .clickable(
             onClick = onNextPressed,
-            interactionSource = MutableInteractionSource(),
+            interactionSource = remember { MutableInteractionSource() },
             indication = rememberRipple(
                 bounded = true, radius = 35.dp
             )
@@ -333,9 +369,11 @@ private fun QueueButton(
     modifier = modifier
         .size(50.dp)
         .clickable(
-            onClick = onQueueClicked, indication = rememberRipple(
+            onClick = onQueueClicked,
+            indication = rememberRipple(
                 bounded = false, radius = 25.dp
-            ), interactionSource = MutableInteractionSource()
+            ),
+            interactionSource = remember { MutableInteractionSource() }
         )
         .padding(10.dp),
     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
@@ -377,5 +415,117 @@ private fun SongInfo(
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         color = MaterialTheme.colorScheme.onSurface,
+    )
+}
+
+@Composable
+fun PlaybackSpeedAndPitchController(
+    playbackParams: PlaybackParams,
+    updatePlaybackParams: (speed: Int, pitch: Int) -> Unit,
+){
+    val speed = playbackParams.playbackSpeed
+    val pitch = playbackParams.playbackPitch
+    var showDialog by remember { mutableStateOf(false) }
+    Icon(
+        painter = painterResource(R.drawable.baseline_speed_24),
+        contentDescription = "speed and pitch controller",
+        modifier = Modifier.size(30.dp).clickable { showDialog = true },
+        tint = MaterialTheme.colorScheme.onSurface
+    )
+    if (showDialog) {
+        var newSpeed by remember { mutableStateOf((speed.toFloat()/100).round(2))}
+        var newPitch by remember { mutableStateOf((pitch.toFloat()/100).round(2)) }
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog = false
+                        updatePlaybackParams(
+                            newSpeed.times(100).toInt(),
+                            newPitch.times(100).toInt()
+                        )
+                    },
+                    content = {
+                        Text(text = "Ok")
+                    }
+                )
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { showDialog = false },
+                    content = {
+                        Text(text = "Cancel")
+                    }
+                )
+            },
+            text = {
+                Column() {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ){
+                        Text(
+                            text = "Speed: ${newSpeed}x",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.alignByBaseline()
+                        )
+                        TextButton(
+                            onClick = { newSpeed = 1f },
+                            content = {
+                                Text(text = "Reset")
+                            },
+                            modifier = Modifier.alignByBaseline()
+                        )
+                    }
+                    Slider(
+                        value = newSpeed,
+                        onValueChange = { newSpeed = it.round(2) },
+                        valueRange = 0.01f..2.0f,
+                        steps = 20,
+                    )
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth(),
+                    ){
+                        Text(
+                            text = "Pitch: ${newPitch}x",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.alignByBaseline()
+                        )
+                        TextButton(
+                            onClick = { newPitch = 1f },
+                            content = {
+                                Text(text = "Reset")
+                            },
+                            modifier = Modifier.alignByBaseline()
+                        )
+                    }
+                    Slider(
+                        value = newPitch,
+                        onValueChange = { newPitch = it.round(2) },
+                        valueRange = 0.01f..2.0f,
+                        steps = 20,
+                    )
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun RepeatModeController(
+    currentRepeatMode: RepeatModeEnum,
+    toggleRepeatMode: () -> Unit,
+) {
+    Icon(
+        painter = painterResource(currentRepeatMode.iconResource),
+        contentDescription = "repeat mode",
+        modifier = Modifier
+            .size(30.dp)
+            .clickable(
+                onClick = toggleRepeatMode
+            ),
+        tint = MaterialTheme.colorScheme.onSurface
     )
 }

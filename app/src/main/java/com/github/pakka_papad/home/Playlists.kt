@@ -165,7 +165,8 @@ fun CreatePlaylistCard(
                     label = {
                         Text(text = "Playlist name")
                     },
-                    textStyle = MaterialTheme.typography.bodyLarge
+                    textStyle = MaterialTheme.typography.bodyLarge,
+                    singleLine = true,
                 )
             }
         )

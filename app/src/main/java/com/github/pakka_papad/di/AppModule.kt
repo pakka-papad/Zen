@@ -4,7 +4,13 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.dataStoreFile
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C.AUDIO_CONTENT_TYPE_MUSIC
+import androidx.media3.common.C.USAGE_MEDIA
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.extractor.DefaultExtractorsFactory
+import androidx.media3.extractor.mp3.Mp3Extractor
 import androidx.room.Room
 import dagger.Module
 import dagger.Provides
@@ -13,7 +19,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.data.*
+import com.github.pakka_papad.data.components.DaoCollection
 import com.github.pakka_papad.data.notification.ZenNotificationManager
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -41,19 +49,23 @@ object AppModule {
         @ApplicationContext context: Context,
         notificationManager: ZenNotificationManager,
         db: AppDatabase,
+        scope: CoroutineScope
     ): DataManager {
         return DataManager(
             context = context,
             notificationManager = notificationManager,
-            songDao = db.songDao(),
-            albumDao = db.albumDao(),
-            artistDao = db.artistDao(),
-            albumArtistDao = db.albumArtistDao(),
-            composerDao = db.composerDao(),
-            lyricistDao = db.lyricistDao(),
-            genreDao = db.genreDao(),
-            playlistDao = db.playlistDao(),
-            blacklistDao = db.blacklistDao()
+            daoCollection = DaoCollection(
+                songDao = db.songDao(),
+                albumDao = db.albumDao(),
+                artistDao = db.artistDao(),
+                albumArtistDao = db.albumArtistDao(),
+                composerDao = db.composerDao(),
+                lyricistDao = db.lyricistDao(),
+                genreDao = db.genreDao(),
+                playlistDao = db.playlistDao(),
+                blacklistDao = db.blacklistDao(),
+            ),
+            scope = scope,
         )
     }
 
@@ -68,7 +80,18 @@ object AppModule {
     fun providesExoPlayer(
         @ApplicationContext context: Context
     ): ExoPlayer {
-        return ExoPlayer.Builder(context).build()
+        val extractorsFactory = DefaultExtractorsFactory().apply {
+            setMp3ExtractorFlags(Mp3Extractor.FLAG_DISABLE_ID3_METADATA)
+        }
+        val audioAttributes = AudioAttributes.Builder().apply {
+            setContentType(AUDIO_CONTENT_TYPE_MUSIC)
+            setUsage(USAGE_MEDIA)
+        }.build()
+        return ExoPlayer.Builder(context).apply {
+            setMediaSourceFactory(DefaultMediaSourceFactory(context,extractorsFactory))
+            setAudioAttributes(audioAttributes,true)
+            setHandleAudioBecomingNoisy(true)
+        }.build()
     }
 
     @Singleton
@@ -96,10 +119,20 @@ object AppModule {
     fun providesZenPreferencesDatastore(
         userPreferences: DataStore<UserPreferences>,
         coroutineScope: CoroutineScope,
+        crashReporter: ZenCrashReporter,
     ): ZenPreferenceProvider {
         return ZenPreferenceProvider(
             userPreferences = userPreferences,
             coroutineScope = coroutineScope,
+            crashReporter = crashReporter,
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun providesZenCrashReporter(): ZenCrashReporter {
+        return ZenCrashReporter(
+            firebase = FirebaseCrashlytics.getInstance()
         )
     }
 }

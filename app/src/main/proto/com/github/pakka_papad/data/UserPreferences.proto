@@ -21,4 +21,10 @@ message UserPreferences {
     JacksonsPurple = 5;
   }
   Accent chosenAccent = 4;
+  bool crashlyticsDisabled = 5;
+  message PlaybackParams {
+    int32 playbackSpeed = 1;
+    int32 playbackPitch = 2;
+  }
+  PlaybackParams playbackParams = 6;
 }

@@ -2,6 +2,7 @@ import com.google.protobuf.gradle.builtins
 import com.google.protobuf.gradle.generateProtoTasks
 import com.google.protobuf.gradle.protobuf
 import com.google.protobuf.gradle.protoc
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 
 plugins {
     id ("com.android.application")
@@ -11,9 +12,19 @@ plugins {
     id("androidx.navigation.safeargs.kotlin")
     id("kotlin-parcelize")
     id("com.google.protobuf") version "0.8.19"
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
+    signingConfigs {
+        create("prod") {
+            storeFile = gradleLocalProperties(rootDir)["STORE_FILE"]?.let { file(it) }
+            storePassword = gradleLocalProperties(rootDir)["STORE_PASSWORD"] as String
+            keyAlias = gradleLocalProperties(rootDir)["KEY_ALIAS"] as String
+            keyPassword = gradleLocalProperties(rootDir)["KEY_PASSWORD"] as String
+        }
+    }
     namespace = "com.github.pakka_papad"
     compileSdk = Api.compileSdk
 
@@ -23,6 +34,8 @@ android {
         targetSdk = Api.targetSdk
         versionCode = AppVersion.Code
         versionName = AppVersion.Name
+
+        resValue("integer","app_version_code",versionCode.toString())
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -39,6 +52,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            versionNameSuffix = "-debug"
+            resValue("string","app_version_name",AppVersion.Name+versionNameSuffix)
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
@@ -46,6 +63,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.findByName("prod")
+            resValue("string","app_version_name",AppVersion.Name)
         }
     }
 
@@ -120,12 +139,16 @@ dependencies {
     implementation(Libraries.datastore)
     implementation(Libraries.kotlinLite)
 
+    implementation(platform(Libraries.firebaseBom))
+    implementation(Libraries.firebaseCrashlytics)
+
     implementation(Libraries.exoPlayer)
     implementation(Libraries.media3ExoPlayer)
     implementation(Libraries.media3Transformer)
     implementation(Libraries.exoPlayerUi)
 
     implementation(Libraries.coilCompose)
+    implementation(Libraries.palette)
     implementation(Libraries.lottie)
 }
 

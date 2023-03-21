@@ -1,0 +1,26 @@
+[
+  {
+    "versionCode": 1,
+    "versionName": "1.0",
+    "date": "15 January, 2023",
+    "changes": [
+      "Added multiple theming options",
+      "Added playlist feature",
+      "Added search feature",
+      "Added song blacklist feature"
+    ]
+  },
+  {
+    "versionCode": 2,
+    "versionName": "1.1",
+    "date": "21 March, 2023",
+    "changes": [
+      "Bug fixes and improvements",
+      "Themed icon support on Android 13 and above",
+      "Support for swipe gesture to open and close music player",
+      "Added player speed and pitch controller",
+      "Added option to select repeat mode",
+      "Some UI improvements"
+    ]
+  }
+]

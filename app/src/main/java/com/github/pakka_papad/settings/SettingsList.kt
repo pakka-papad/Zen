@@ -1,9 +1,12 @@
 package com.github.pakka_papad.settings
 
-import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,9 +20,11 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.BuildConfig
@@ -40,6 +45,9 @@ fun SettingsList(
     scanStatus: ScanStatus,
     onScanClicked: () -> Unit,
     onRestoreClicked: () -> Unit,
+    disabledCrashlytics: Boolean,
+    onAutoReportCrashClicked: (Boolean) -> Unit,
+    onWhatsNewClicked: () -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -62,10 +70,15 @@ fun SettingsList(
             )
         }
         item {
-            ReportBug()
+            ReportBug(
+                disabledCrashlytics = disabledCrashlytics,
+                onAutoReportCrashClicked = onAutoReportCrashClicked,
+            )
         }
         item {
-            MadeBy()
+            MadeBy(
+                onWhatsNewClicked = onWhatsNewClicked
+            )
         }
     }
 }
@@ -246,7 +259,6 @@ private fun AccentSelectorDialog(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ThemeSelectorDialog(
     themePreference: ThemePreference,
@@ -423,69 +435,112 @@ private fun getSystemDetail(): String {
 }
 
 @Composable
-private fun ReportBug(){
+private fun ReportBug(
+    disabledCrashlytics: Boolean,
+    onAutoReportCrashClicked: (Boolean) -> Unit,
+){
     val context = LocalContext.current
     OutlinedBox(
         label = "Report",
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 13.dp),
         modifier = Modifier.padding(10.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Report any bugs/crashes",
-                style = MaterialTheme.typography.titleMedium
-            )
-            Button(
-                onClick = {
-                    val intent = Intent(Intent.ACTION_SENDTO)
-                    intent.apply {
-                        putExtra(Intent.EXTRA_EMAIL, arrayOf("music.zen@outlook.com"))
-                        putExtra(Intent.EXTRA_SUBJECT,"Zen Music | Bug Report")
-                        putExtra(Intent.EXTRA_TEXT, getSystemDetail() + "\n\n[Describe the bug or crash here]")
-//                        setDataAndType(Uri.parse("mailto://"),"message/rfc822")
-//                        type = "message/rfc822"
-                        data = Uri.parse("mailto:")
+        Column(Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Auto crash reporting",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Switch(
+                    checked = !disabledCrashlytics,
+                    onCheckedChange = onAutoReportCrashClicked
+                )
+            }
+            Spacer(Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Report any bugs/crashes",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Button(
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_SENDTO)
+                        intent.apply {
+                            putExtra(Intent.EXTRA_EMAIL, arrayOf("music.zen@outlook.com"))
+                            putExtra(Intent.EXTRA_SUBJECT, "Zen Music | Bug Report")
+                            putExtra(
+                                Intent.EXTRA_TEXT,
+                                getSystemDetail() + "\n\n[Describe the bug or crash here]"
+                            )
+                            data = Uri.parse("mailto:")
+                        }
+                        try {
+                            context.startActivity(intent)
+                        } catch (e: Exception) {
+                            Timber.e(e)
+                        }
+                    },
+                    content = {
+                        Text(
+                            text = "Report",
+                            style = MaterialTheme.typography.titleMedium
+                        )
                     }
-                    try {
-                        context.startActivity(intent)
-                    }catch (e: Exception){
-                        Timber.e(e)
-                    }
-                },
-                content = {
-                    Text(
-                        text = "Report",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-            )
+                )
+            }
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun MadeBy() {
+private fun MadeBy(
+    onWhatsNewClicked: () -> Unit,
+) {
     val githubUrl = "https://github.com/pakka-papad"
     val linkedinUrl = "https://www.linkedin.com/in/sumitzbera/"
     val context = LocalContext.current
+    val appVersion = stringResource(id = R.string.app_version_name)
     Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
+        val semiTransparentSpanStyle = SpanStyle(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
         Text(
             text = buildAnnotatedString {
-                withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))) {
+                withStyle(semiTransparentSpanStyle) {
+                    append("App version ")
+                }
+                append(appVersion)
+            },
+            style = MaterialTheme.typography.titleSmall,
+        )
+        Text(
+            text = "Check what's new!",
+            modifier = Modifier
+                .alpha(0.5f)
+                .clickable(onClick = onWhatsNewClicked),
+            style = MaterialTheme.typography.titleSmall.copy(textDecoration = TextDecoration.Underline)
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = buildAnnotatedString {
+                withStyle(semiTransparentSpanStyle) {
                     append("Made by ")
                 }
                 append("Sumit Bera")
             },
             style = MaterialTheme.typography.titleMedium,
         )
-        Spacer(Modifier.height(10.dp))
         val iconModifier = Modifier
             .size(30.dp)
             .alpha(0.5f)
@@ -498,11 +553,26 @@ private fun MadeBy() {
                 painter = painterResource(R.drawable.github_mark),
                 contentDescription = "github",
                 modifier = iconModifier
-                    .clickable {
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.data = Uri.parse(githubUrl)
-                        context.startActivity(intent)
-                    },
+                    .combinedClickable(
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_VIEW)
+                            intent.data = Uri.parse(githubUrl)
+                            try {
+                                context.startActivity(intent)
+                            } catch (_: Exception){
+                                Toast.makeText(context,"Error opening url. Long press to copy.",Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        onLongClick = {
+                            val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
+                            if (clipboardManager == null){
+                                Toast.makeText(context,"Error",Toast.LENGTH_SHORT).show()
+                            } else {
+                                clipboardManager.setPrimaryClip(ClipData.newPlainText("Github url",githubUrl))
+                                Toast.makeText(context,"Copied",Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    ),
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                 contentScale = ContentScale.Inside,
             )
@@ -510,14 +580,30 @@ private fun MadeBy() {
                 painter = painterResource(R.drawable.linkedin),
                 contentDescription = "linkedin",
                 modifier = iconModifier
-                    .clickable {
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.data = Uri.parse(linkedinUrl)
-                        context.startActivity(intent)
-                    },
+                    .combinedClickable(
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_VIEW)
+                            intent.data = Uri.parse(linkedinUrl)
+                            try {
+                                context.startActivity(intent)
+                            } catch (_: Exception){
+                                Toast.makeText(context,"Error opening url. Long press to copy.",Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        onLongClick = {
+                            val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
+                            if (clipboardManager == null){
+                                Toast.makeText(context,"Error",Toast.LENGTH_SHORT).show()
+                            } else {
+                                clipboardManager.setPrimaryClip(ClipData.newPlainText("Linkedin url",linkedinUrl))
+                                Toast.makeText(context,"Copied",Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    ),
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                 contentScale = ContentScale.Inside,
             )
         }
+        Spacer(Modifier.height(36.dp))
     }
 }

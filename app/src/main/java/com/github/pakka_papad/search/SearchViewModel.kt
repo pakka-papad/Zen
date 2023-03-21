@@ -30,14 +30,14 @@ class SearchViewModel @Inject constructor(
                 SearchResult()
             } else {
                 when (type) {
-                    SearchType.Songs -> SearchResult(songs = manager.searchSongs(trimmedQuery))
-                    SearchType.Albums -> SearchResult(albums = manager.searchAlbums(trimmedQuery))
-                    SearchType.Artists -> SearchResult(artists = manager.searchArtists(trimmedQuery))
-                    SearchType.AlbumArtists -> SearchResult(albumArtists = manager.searchAlbumArtists(trimmedQuery))
-                    SearchType.Composers -> SearchResult(composers = manager.searchComposers(trimmedQuery))
-                    SearchType.Lyricists -> SearchResult(lyricists = manager.searchLyricists(trimmedQuery))
-                    SearchType.Genres -> SearchResult(genres = manager.searchGenres(trimmedQuery))
-                    SearchType.Playlists -> SearchResult(playlists = manager.searchPlaylists(trimmedQuery))
+                    SearchType.Songs -> SearchResult(songs = manager.querySearch.searchSongs(trimmedQuery))
+                    SearchType.Albums -> SearchResult(albums = manager.querySearch.searchAlbums(trimmedQuery))
+                    SearchType.Artists -> SearchResult(artists = manager.querySearch.searchArtists(trimmedQuery))
+                    SearchType.AlbumArtists -> SearchResult(albumArtists = manager.querySearch.searchAlbumArtists(trimmedQuery))
+                    SearchType.Composers -> SearchResult(composers = manager.querySearch.searchComposers(trimmedQuery))
+                    SearchType.Lyricists -> SearchResult(lyricists = manager.querySearch.searchLyricists(trimmedQuery))
+                    SearchType.Genres -> SearchResult(genres = manager.querySearch.searchGenres(trimmedQuery))
+                    SearchType.Playlists -> SearchResult(playlists = manager.querySearch.searchPlaylists(trimmedQuery))
                 }
             }
         }.catch { exception ->

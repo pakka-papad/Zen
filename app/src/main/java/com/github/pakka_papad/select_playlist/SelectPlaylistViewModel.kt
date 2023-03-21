@@ -25,7 +25,7 @@ class SelectPlaylistViewModel @Inject constructor(
     private val _selectList = mutableStateListOf<Boolean>()
     val selectList: List<Boolean> = _selectList
 
-    val playlistsWithSongCount = manager.allPlaylistsWithSongCount
+    val playlistsWithSongCount = manager.getAll.playlists()
         .onEach {
             while (_selectList.size < it.size) _selectList.add(false)
             while (_selectList.size > it.size) _selectList.removeLast()

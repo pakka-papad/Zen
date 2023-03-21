@@ -2,7 +2,9 @@ package com.github.pakka_papad.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.graphics.Color
@@ -12,7 +14,6 @@ import com.github.pakka_papad.ui.accent_colours.default.DefaultDarkColors
 import com.github.pakka_papad.ui.accent_colours.default.DefaultLightColors
 import com.google.accompanist.systemuicontroller.SystemUiController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-
 
 
 @Composable
@@ -54,7 +55,11 @@ fun ZenTheme(
     DisposableEffect(key1 = themePreference.theme, key2 = systemUiController) {
         systemUiController.setSystemBarsColor(
             color = Color.Transparent,
-            darkIcons = !isDark
+            darkIcons = !isDark,
+            isNavigationBarContrastEnforced = false,
+            transformColorForLightContent = {
+                Color.Transparent
+            }
         )
         onDispose { }
     }

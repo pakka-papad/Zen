@@ -7,7 +7,18 @@ import javax.inject.Inject
 
 class UserPreferencesSerializer @Inject constructor() : Serializer<UserPreferences> {
     override val defaultValue: UserPreferences
-        get() = UserPreferences.getDefaultInstance()
+        get() = UserPreferences.getDefaultInstance().copy {
+            useMaterialYouTheme = false
+            chosenTheme = UserPreferences.Theme.DARK_MODE
+            chosenAccent = UserPreferences.Accent.Elm
+            onBoardingComplete = false
+            crashlyticsDisabled = false
+            playbackParams = UserPreferences.PlaybackParams
+                .getDefaultInstance().copy {
+                    playbackSpeed = 100
+                    playbackPitch = 100
+                }
+        }
 
     override suspend fun readFrom(input: InputStream): UserPreferences =
         try {

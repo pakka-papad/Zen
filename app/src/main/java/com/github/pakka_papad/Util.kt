@@ -1,6 +1,9 @@
 package com.github.pakka_papad
 
-import android.icu.text.SimpleDateFormat
+import androidx.media3.common.PlaybackParameters
+import com.github.pakka_papad.data.UserPreferences.PlaybackParams
+import com.github.pakka_papad.data.copy
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.round
 
@@ -38,4 +41,23 @@ fun Long.toMS(): String {
     val minutes = totalSeconds/60
     val seconds = totalSeconds%60
     return "${if(minutes < 10) "0" else ""}${minutes}:${if (seconds < 10) "0"  else ""}${seconds}"
+}
+
+fun PlaybackParams.toCorrectedParams(): PlaybackParams {
+    val correctedSpeed = if (this.playbackSpeed < 1 || this.playbackSpeed > 200) 100 else this.playbackSpeed
+    val correctedPitch = if (this.playbackPitch < 1 || this.playbackPitch > 200) 100 else this.playbackPitch
+    return PlaybackParams.getDefaultInstance().copy {
+        playbackSpeed = correctedSpeed
+        playbackPitch = correctedPitch
+    }
+}
+
+/**
+ * Call on corrected PlaybackParams
+ */
+fun PlaybackParams.toExoPlayerPlaybackParameters(): PlaybackParameters {
+    return PlaybackParameters(
+        this.playbackSpeed.toFloat()/100,
+        this.playbackPitch.toFloat()/100
+    )
 }

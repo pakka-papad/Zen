@@ -7,13 +7,14 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.github.pakka_papad.R
@@ -43,11 +44,22 @@ class SettingsFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                val themePreference by preferenceProvider.theme.collectAsState()
-                val scanStatus by viewModel.scanStatus.collectAsState()
-                ZenTheme(
-                    themePreference = themePreference
-                ) {
+                val themePreference by preferenceProvider.theme.collectAsStateWithLifecycle()
+                val scanStatus by viewModel.scanStatus.collectAsStateWithLifecycle()
+                val isCrashlyticsDisabled by preferenceProvider.isCrashlyticsDisabled.collectAsStateWithLifecycle()
+
+                val restoreClicked = remember{ {
+                    if (navController.currentDestination?.id == R.id.settingsFragment){
+                        navController.navigate(R.id.action_settingsFragment_to_restoreFragment)
+                    }
+                } }
+                val whatsNewClicked = remember{ {
+                    if (navController.currentDestination?.id == R.id.settingsFragment){
+                        navController.navigate(R.id.action_settingsFragment_to_whatsNewFragment)
+                    }
+                } }
+
+                ZenTheme(themePreference) {
                     Scaffold(
                         topBar = {
                             TopBarWithBackArrow(
@@ -70,11 +82,10 @@ class SettingsFragment : Fragment() {
                                 onThemePreferenceChanged = preferenceProvider::updateTheme,
                                 scanStatus = scanStatus,
                                 onScanClicked = viewModel::scanForMusic,
-                                onRestoreClicked = {
-                                    navController.navigate(
-                                        R.id.action_settingsFragment_to_restoreFragment
-                                    )
-                                }
+                                onRestoreClicked = restoreClicked,
+                                disabledCrashlytics = isCrashlyticsDisabled,
+                                onAutoReportCrashClicked = preferenceProvider::toggleCrashlytics,
+                                onWhatsNewClicked = whatsNewClicked
                             )
                         }
                     )

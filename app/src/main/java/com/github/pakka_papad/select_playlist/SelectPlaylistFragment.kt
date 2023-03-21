@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,7 +50,7 @@ class SelectPlaylistFragment: Fragment() {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                val theme by preferenceProvider.theme.collectAsState()
+                val theme by preferenceProvider.theme.collectAsStateWithLifecycle()
                 ZenTheme(theme) {
                     val playlists by viewModel.playlistsWithSongCount.collectAsStateWithLifecycle()
                     val selectList = viewModel.selectList
