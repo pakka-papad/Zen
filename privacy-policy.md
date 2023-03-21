@@ -17,6 +17,10 @@ The reported log data is used to fix bugs or any other technical issues that may
 **Disclosure of your information**  
 We do not sell, trade, or otherwise transfer your information to outside parties. We may share your information with trusted third-party service providers such as Firebase Crashlytics.
 
+**Your Choices**  
+You may opt out of the automatic reporting of crash logs data through Firebase Crashlytics by disabling the feature in the app's settings. 
+However, please note that this may impact our ability to provide certain features and services.
+
 **Changes to the Policy**  
 If the Policy changes, the modification date below will be updated. The Policy may change from time to time, so please be sure to check back periodically.
 
