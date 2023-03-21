@@ -604,5 +604,6 @@ private fun MadeBy(
                 contentScale = ContentScale.Inside,
             )
         }
+        Spacer(Modifier.height(36.dp))
     }
 }
