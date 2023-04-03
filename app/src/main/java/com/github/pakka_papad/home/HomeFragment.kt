@@ -130,6 +130,8 @@ class HomeFragment : Fragment() {
                     val genresWithSongCount by viewModel.genresWithSongCount.collectAsStateWithLifecycle()
                     val allGenresListState = rememberLazyListState()
 
+                    val files by viewModel.filesInCurrentDestination.collectAsStateWithLifecycle()
+
                     val dataRetrieved by remember {
                         derivedStateOf {
                             songs != null && albums != null && personsWithSongCount != null
@@ -170,11 +172,15 @@ class HomeFragment : Fragment() {
                     val playerScaffoldState = rememberBottomSheetScaffoldState()
 
                     BackHandler(
-                        enabled = swipeableState.currentValue == 1,
+                        enabled = currentScreen == Screens.Folders || swipeableState.currentValue == 1,
                         onBack = {
-                            scope.launch {
-                                if (playerScaffoldState.bottomSheetState.isExpanded) playerScaffoldState.bottomSheetState.collapse()
-                                else swipeableState.animateTo(0)
+                            if (swipeableState.currentValue == 1){
+                                scope.launch {
+                                    if (playerScaffoldState.bottomSheetState.isExpanded) playerScaffoldState.bottomSheetState.collapse()
+                                    else swipeableState.animateTo(0)
+                                }
+                            } else {
+                                viewModel.moveToParent()
                             }
                         }
                     )
@@ -217,6 +223,7 @@ class HomeFragment : Fragment() {
                                     Screens.Artists -> allPersonsListState.scrollToItem(0)
                                     Screens.Playlists -> allPlaylistsListState.scrollToItem(0)
                                     Screens.Genres -> allGenresListState.scrollToItem(0)
+                                    else -> {}
                                 }
                             }
                         } else {
@@ -302,6 +309,12 @@ class HomeFragment : Fragment() {
                                                         onGenreClicked = this@HomeFragment::navigateToCollection
                                                     )
                                                 }
+                                                Screens.Folders -> {
+                                                     Files(
+                                                         files = files,
+                                                         onFileClicked = viewModel::onFileClicked
+                                                     )
+                                                }
                                             }
                                         }
                                     }
@@ -316,7 +329,9 @@ class HomeFragment : Fragment() {
                                         .fillMaxWidth()
                                         .background(bottomBarColor)
                                         .padding(
-                                            start = windowInsets.calculateStartPadding(LayoutDirection.Ltr),
+                                            start = windowInsets.calculateStartPadding(
+                                                LayoutDirection.Ltr
+                                            ),
                                             end = windowInsets.calculateEndPadding(LayoutDirection.Ltr),
                                         )
                                 ) {

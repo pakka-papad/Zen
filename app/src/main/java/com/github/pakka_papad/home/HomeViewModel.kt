@@ -8,10 +8,12 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.music.*
+import com.github.pakka_papad.storage_explorer.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import timber.log.Timber
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -113,6 +115,7 @@ class HomeViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         exoPlayer.removeListener(exoPlayerListener)
+        explorer.removeListener(directoryChangeListener)
     }
 
     /**
@@ -214,4 +217,36 @@ class HomeViewModel @Inject constructor(
 
     fun onSongDrag(fromIndex: Int, toIndex: Int) = manager.moveItem(fromIndex,toIndex)
 
+
+    private val _filesInCurrentDestination = MutableStateFlow(listOf<StorageFile>())
+    val filesInCurrentDestination = _filesInCurrentDestination.asStateFlow()
+
+    private val explorer = MusicFileExplorer()
+
+    private val directoryChangeListener = object : MusicFileExplorer.DirectoryChangeListener {
+        override fun onDirectoryChanged(path: String, files: Array<File>) {
+            val storageFiles = files.map {
+                if (it.isDirectory){
+                    StorageFile.Folder(it.name,it.absolutePath)
+                } else {
+                    StorageFile.MusicFile(it.name,it.absolutePath)
+                }
+            }
+            Timber.d(storageFiles.toString())
+            _filesInCurrentDestination.update { storageFiles }
+        }
+    }
+
+    init {
+        explorer.addListener(directoryChangeListener)
+    }
+
+    fun onFileClicked(file: StorageFile){
+        if (!file.isDirectory) return
+        explorer.moveInsideDirectory(file.absolutePath)
+    }
+
+    fun moveToParent() {
+        explorer.moveToParent()
+    }
 }
