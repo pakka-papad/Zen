@@ -223,6 +223,9 @@ class HomeViewModel @Inject constructor(
 
     private val explorer = MusicFileExplorer()
 
+    private val _isExplorerAtRoot = MutableStateFlow(true)
+    val isExplorerAtRoot = _isExplorerAtRoot.asStateFlow()
+
     private val directoryChangeListener = object : MusicFileExplorer.DirectoryChangeListener {
         override fun onDirectoryChanged(path: String, files: Array<File>) {
             val storageFiles = files.map {
@@ -243,10 +246,14 @@ class HomeViewModel @Inject constructor(
 
     fun onFileClicked(file: StorageFile){
         if (!file.isDirectory) return
+        _filesInCurrentDestination.update { emptyList() }
         explorer.moveInsideDirectory(file.absolutePath)
+        _isExplorerAtRoot.update { explorer.isRoot }
     }
 
     fun moveToParent() {
+        if (!isExplorerAtRoot.value) _filesInCurrentDestination.update { emptyList() }
         explorer.moveToParent()
+        _isExplorerAtRoot.update { explorer.isRoot }
     }
 }

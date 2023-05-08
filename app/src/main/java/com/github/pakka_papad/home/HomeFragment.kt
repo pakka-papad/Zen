@@ -171,8 +171,10 @@ class HomeFragment : Fragment() {
                     val repeatMode by viewModel.repeatMode.collectAsStateWithLifecycle()
                     val playerScaffoldState = rememberBottomSheetScaffoldState()
 
+                    val isExplorerAtRoot by viewModel.isExplorerAtRoot.collectAsStateWithLifecycle()
+
                     BackHandler(
-                        enabled = currentScreen == Screens.Folders || swipeableState.currentValue == 1,
+                        enabled = (currentScreen == Screens.Folders && !isExplorerAtRoot) || swipeableState.currentValue == 1,
                         onBack = {
                             if (swipeableState.currentValue == 1){
                                 scope.launch {
@@ -249,7 +251,9 @@ class HomeFragment : Fragment() {
                                         .padding(
                                             top = it.calculateTopPadding(),
                                             bottom = if (currentSong == null) 88.dp else 146.dp,
-                                            start = windowInsets.calculateStartPadding(LayoutDirection.Ltr),
+                                            start = windowInsets.calculateStartPadding(
+                                                LayoutDirection.Ltr
+                                            ),
                                             end = windowInsets.calculateEndPadding(LayoutDirection.Ltr)
                                         )
                                         .fillMaxSize(),

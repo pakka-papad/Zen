@@ -32,6 +32,7 @@ fun Files(
     ){
         items(
             items = files,
+            key = { it.absolutePath }
         ){
             File(
                 file = it,

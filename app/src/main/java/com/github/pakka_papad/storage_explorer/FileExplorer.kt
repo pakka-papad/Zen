@@ -9,6 +9,11 @@ class MusicFileExplorer {
     private val root = Environment.getExternalStorageDirectory().absolutePath
     private var currentPath = root
 
+    val isRoot: Boolean
+        get() {
+            return root == currentPath
+        }
+
     private val filterDirectoriesAndMusic = object : FileFilter {
         override fun accept(pathname: File?): Boolean {
             if (pathname == null || !pathname.exists()) return false
