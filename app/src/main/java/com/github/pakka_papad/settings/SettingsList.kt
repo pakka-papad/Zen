@@ -11,11 +11,15 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -48,6 +52,7 @@ fun SettingsList(
     disabledCrashlytics: Boolean,
     onAutoReportCrashClicked: (Boolean) -> Unit,
     onWhatsNewClicked: () -> Unit,
+    onFolderToScanClicked: () -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -66,7 +71,8 @@ fun SettingsList(
             MusicLibrarySettings(
                 scanStatus = scanStatus,
                 onScanClicked = onScanClicked,
-                onRestoreClicked = onRestoreClicked
+                onRestoreClicked = onRestoreClicked,
+                onFolderToScanClicked = onFolderToScanClicked
             )
         }
         item {
@@ -349,13 +355,17 @@ private fun MusicLibrarySettings(
     scanStatus: ScanStatus,
     onScanClicked: () -> Unit,
     onRestoreClicked: () -> Unit,
+    onFolderToScanClicked: () -> Unit,
 ) {
     OutlinedBox(
         label = "Music library",
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 13.dp),
         modifier = Modifier.padding(10.dp)
     ) {
-        Column(Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -400,7 +410,6 @@ private fun MusicLibrarySettings(
                     }
                 )
             }
-            Spacer(Modifier.height(10.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -418,6 +427,28 @@ private fun MusicLibrarySettings(
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Folders to scan",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Icon(
+                    imageVector = Icons.Outlined.KeyboardArrowRight,
+                    contentDescription = "right arrow",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                        .clickable(
+                            onClick = onFolderToScanClicked
+                        ),
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         }

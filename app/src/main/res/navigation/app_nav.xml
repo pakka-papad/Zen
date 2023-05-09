@@ -73,6 +73,13 @@
             app:exitAnim="@anim/zen_open_exit"
             app:popEnterAnim="@anim/zen_close_enter"
             app:popExitAnim="@anim/zen_close_exit" />
+        <action
+            android:id="@+id/action_settingsFragment_to_folderToScanFragment"
+            app:destination="@id/folderToScanFragment"
+            app:enterAnim="@anim/zen_open_enter"
+            app:exitAnim="@anim/zen_open_exit"
+            app:popEnterAnim="@anim/zen_close_enter"
+            app:popExitAnim="@anim/zen_close_exit"/>
     </fragment>
     <fragment
         android:id="@+id/splashFragment"
@@ -130,4 +137,8 @@
         android:id="@+id/whatsNewFragment"
         android:name="com.github.pakka_papad.whatsnew.WhatsNewFragment"
         android:label="WhatsNewFragment" />
+    <fragment
+        android:id="@+id/folderToScanFragment"
+        android:name="com.github.pakka_papad.settings.folder_scan.FolderToScanFragment"
+        android:label="FolderToScan" />
 </navigation>

@@ -64,6 +64,7 @@ object AppModule {
                 genreDao = db.genreDao(),
                 playlistDao = db.playlistDao(),
                 blacklistDao = db.blacklistDao(),
+                folderDao = db.folderDao()
             ),
             scope = scope,
         )

@@ -58,6 +58,11 @@ class SettingsFragment : Fragment() {
                         navController.navigate(R.id.action_settingsFragment_to_whatsNewFragment)
                     }
                 } }
+                val foldersToScanClicked = remember{ {
+                    if (navController.currentDestination?.id == R.id.settingsFragment){
+                        navController.navigate(R.id.action_settingsFragment_to_folderToScanFragment)
+                    }
+                } }
 
                 ZenTheme(themePreference) {
                     Scaffold(
@@ -85,7 +90,8 @@ class SettingsFragment : Fragment() {
                                 onRestoreClicked = restoreClicked,
                                 disabledCrashlytics = isCrashlyticsDisabled,
                                 onAutoReportCrashClicked = preferenceProvider::toggleCrashlytics,
-                                onWhatsNewClicked = whatsNewClicked
+                                onWhatsNewClicked = whatsNewClicked,
+                                onFolderToScanClicked = foldersToScanClicked
                             )
                         }
                     )
