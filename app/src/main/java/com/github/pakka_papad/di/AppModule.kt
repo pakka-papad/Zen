@@ -20,6 +20,7 @@ import dagger.hilt.components.SingletonComponent
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.data.*
 import com.github.pakka_papad.data.components.DaoCollection
+import com.github.pakka_papad.data.music.SongExtractor
 import com.github.pakka_papad.data.notification.ZenNotificationManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope
@@ -134,6 +135,18 @@ object AppModule {
     fun providesZenCrashReporter(): ZenCrashReporter {
         return ZenCrashReporter(
             firebase = FirebaseCrashlytics.getInstance()
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun providesSongExtractor(
+        @ApplicationContext context: Context,
+    ): SongExtractor {
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        return SongExtractor(
+            scope = scope,
+            context = context,
         )
     }
 }

@@ -21,6 +21,7 @@ class HomeViewModel @Inject constructor(
     private val context: Application,
     private val manager: DataManager,
     private val exoPlayer: ExoPlayer,
+    private val songExtractor: SongExtractor,
 ) : ViewModel() {
 
     val songs = manager.getAll.songs()
@@ -245,10 +246,27 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onFileClicked(file: StorageFile){
-        if (!file.isDirectory) return
-        _filesInCurrentDestination.update { emptyList() }
-        explorer.moveInsideDirectory(file.absolutePath)
-        _isExplorerAtRoot.update { explorer.isRoot }
+        if (file is StorageFile.MusicFile) {
+            viewModelScope.launch(Dispatchers.IO) {
+                val songs = songExtractor.extract(explorer.currentPath)
+                val favourites = this@HomeViewModel.songs.value
+                    ?.filter { it.favourite }
+                    ?.map { it.location }
+                    ?.toSet() ?: emptySet()
+                val updatedSongs = songs.map {
+                    it.copy(
+                        favourite = favourites.contains(it.location)
+                    )
+                }
+                val songIndex = updatedSongs.indexOfFirst { it.location == file.absolutePath }
+                if (songIndex == -1 || songIndex >= updatedSongs.size) return@launch
+                manager.setQueue(updatedSongs,songIndex)
+            }
+        } else {
+            _filesInCurrentDestination.update { emptyList() }
+            explorer.moveInsideDirectory(file.absolutePath)
+            _isExplorerAtRoot.update { explorer.isRoot }
+        }
     }
 
     fun moveToParent() {

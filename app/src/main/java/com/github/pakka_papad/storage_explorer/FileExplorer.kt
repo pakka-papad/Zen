@@ -6,8 +6,8 @@ import java.io.FileFilter
 
 class MusicFileExplorer {
 
-    private val root = Environment.getExternalStorageDirectory().absolutePath
-    private var currentPath = root
+    val root = Environment.getExternalStorageDirectory().absolutePath
+    var currentPath = root
 
     val isRoot: Boolean
         get() {
