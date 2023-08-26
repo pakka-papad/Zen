@@ -315,8 +315,10 @@ class HomeFragment : Fragment() {
                                                 }
                                                 Screens.Folders -> {
                                                      Files(
-                                                         files = files,
-                                                         onFileClicked = viewModel::onFileClicked
+                                                         contents = files,
+                                                         onDirectoryClicked = viewModel::onFileClicked,
+                                                         onSongClicked = viewModel::onFileClicked,
+                                                         currentSong = currentSong
                                                      )
                                                 }
                                             }

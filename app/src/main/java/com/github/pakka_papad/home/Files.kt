@@ -4,25 +4,37 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.components.FullScreenSadMessage
-import com.github.pakka_papad.storage_explorer.StorageFile
 import com.github.pakka_papad.R
+import com.github.pakka_papad.components.SongCardV4
+import com.github.pakka_papad.components.more_options.SongOptions
+import com.github.pakka_papad.data.music.Song
+import com.github.pakka_papad.storage_explorer.Directory
+import com.github.pakka_papad.storage_explorer.DirectoryContents
 
 @Composable
 fun Files(
-    files: List<StorageFile>,
-    onFileClicked: (StorageFile) -> Unit,
+    contents: DirectoryContents,
+    onDirectoryClicked: (Directory) -> Unit,
+    onSongClicked: (index: Int) -> Unit,
+    currentSong: Song?
 ){
-    if (files.isEmpty()){
+    if (contents.directories.isEmpty() && contents.songs.isEmpty()){
         FullScreenSadMessage("Nothing here")
         return
     }
@@ -31,30 +43,48 @@ fun Files(
         contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues(),
     ){
         items(
-            items = files,
+            items = contents.directories,
             key = { it.absolutePath }
         ){
             File(
                 file = it,
-                onFileClicked = onFileClicked,
+                onDirectoryClicked = onDirectoryClicked,
             )
+        }
+        itemsIndexed(
+            items = contents.songs,
+            key = { index, song -> song.location }
+        ){index, song ->
+            var infoVisible by remember { mutableStateOf(false) }
+            SongCardV4(
+                song = song,
+                onSongClicked = { onSongClicked(index) },
+                songOptions = listOf(
+                    SongOptions.Info { infoVisible = true }
+                ),
+                currentlyPlaying = (song.location == currentSong?.location)
+            )
+            if (infoVisible){
+                SongInfo(song = song) { infoVisible = false }
+            }
         }
     }
 }
 
 @Composable
 fun File(
-    file: StorageFile,
-    onFileClicked: (StorageFile) -> Unit,
+    file: Directory,
+    onDirectoryClicked: (Directory) -> Unit,
 ){
-    val resource = painterResource(
-        if (file.isDirectory) R.drawable.ic_outline_folder_40
-        else R.drawable.ic_outline_music_note_40
-    )
+    val resource = painterResource(R.drawable.ic_baseline_folder_40)
+    var showClickIndicator by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onFileClicked(file) }
+            .clickable {
+                onDirectoryClicked(file)
+                showClickIndicator = true
+            }
             .padding(horizontal = 10.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -71,5 +101,11 @@ fun File(
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
+        if(showClickIndicator){
+            CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                strokeWidth = 2.dp,
+            )
+        }
     }
 }

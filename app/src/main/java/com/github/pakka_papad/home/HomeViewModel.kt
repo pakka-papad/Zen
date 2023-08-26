@@ -9,11 +9,11 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.music.*
 import com.github.pakka_papad.storage_explorer.*
+import com.github.pakka_papad.storage_explorer.Directory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import timber.log.Timber
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -219,59 +219,41 @@ class HomeViewModel @Inject constructor(
     fun onSongDrag(fromIndex: Int, toIndex: Int) = manager.moveItem(fromIndex,toIndex)
 
 
-    private val _filesInCurrentDestination = MutableStateFlow(listOf<StorageFile>())
+    private val _filesInCurrentDestination = MutableStateFlow(DirectoryContents())
     val filesInCurrentDestination = _filesInCurrentDestination.asStateFlow()
 
-    private val explorer = MusicFileExplorer()
+    private val explorer = MusicFileExplorer(songExtractor)
 
     private val _isExplorerAtRoot = MutableStateFlow(true)
     val isExplorerAtRoot = _isExplorerAtRoot.asStateFlow()
 
     private val directoryChangeListener = object : MusicFileExplorer.DirectoryChangeListener {
-        override fun onDirectoryChanged(path: String, files: Array<File>) {
-            val storageFiles = files.map {
-                if (it.isDirectory){
-                    StorageFile.Folder(it.name,it.absolutePath)
-                } else {
-                    StorageFile.MusicFile(it.name,it.absolutePath)
-                }
-            }
-            Timber.d(storageFiles.toString())
-            _filesInCurrentDestination.update { storageFiles }
+        override fun onDirectoryChanged(path: String, files: DirectoryContents) {
+            _filesInCurrentDestination.update { files }
         }
     }
 
     init {
-        explorer.addListener(directoryChangeListener)
+        viewModelScope.launch {
+            explorer.addListener(directoryChangeListener)
+        }
     }
 
-    fun onFileClicked(file: StorageFile){
-        if (file is StorageFile.MusicFile) {
-            viewModelScope.launch(Dispatchers.IO) {
-                val songs = songExtractor.extract(explorer.currentPath)
-                val favourites = this@HomeViewModel.songs.value
-                    ?.filter { it.favourite }
-                    ?.map { it.location }
-                    ?.toSet() ?: emptySet()
-                val updatedSongs = songs.map {
-                    it.copy(
-                        favourite = favourites.contains(it.location)
-                    )
-                }
-                val songIndex = updatedSongs.indexOfFirst { it.location == file.absolutePath }
-                if (songIndex == -1 || songIndex >= updatedSongs.size) return@launch
-                manager.setQueue(updatedSongs,songIndex)
-            }
-        } else {
-            _filesInCurrentDestination.update { emptyList() }
+    fun onFileClicked(songIndex: Int){
+        setQueue(filesInCurrentDestination.value.songs,songIndex)
+    }
+
+    fun onFileClicked(file: Directory){
+        viewModelScope.launch(Dispatchers.Default) {
             explorer.moveInsideDirectory(file.absolutePath)
             _isExplorerAtRoot.update { explorer.isRoot }
         }
     }
 
     fun moveToParent() {
-        if (!isExplorerAtRoot.value) _filesInCurrentDestination.update { emptyList() }
-        explorer.moveToParent()
-        _isExplorerAtRoot.update { explorer.isRoot }
+        viewModelScope.launch(Dispatchers.Default) {
+            explorer.moveToParent()
+            _isExplorerAtRoot.update { explorer.isRoot }
+        }
     }
 }

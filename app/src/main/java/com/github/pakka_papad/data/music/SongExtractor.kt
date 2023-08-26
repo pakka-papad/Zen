@@ -21,7 +21,6 @@ class SongExtractor(
     private val context: Context,
 ) {
 
-    private val selection = MediaStore.Audio.Media.IS_MUSIC + " != 0"
     private val projection = arrayOf(
         MediaStore.Audio.Media._ID,
         MediaStore.Audio.Media.TITLE,
@@ -34,11 +33,15 @@ class SongExtractor(
     )
 
     suspend fun extract(folderPath: String? = null): List<Song> {
+        val selection = MediaStore.Audio.Media.DATA + " LIKE ?"
+        val selectionArgs = folderPath?.let {
+            arrayOf("$it%")
+        }
         val cursor = context.contentResolver.query(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             projection,
             selection,
-            null,
+            selectionArgs,
             MediaStore.Audio.Media.DATE_ADDED,
             null
         ) ?: return emptyList()
@@ -85,6 +88,7 @@ class SongExtractor(
 
     suspend fun extract(blacklistedSongs: List<Song>): Pair<List<Song>,List<Album>>  {
         val blacklistedSongLocations = blacklistedSongs.map { it.location }.toSet()
+        val selection = MediaStore.Audio.Media.IS_MUSIC + " != 0"
         val cursor = context.contentResolver.query(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             projection,
