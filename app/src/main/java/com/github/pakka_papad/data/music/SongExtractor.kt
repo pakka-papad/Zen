@@ -179,14 +179,25 @@ class SongExtractor(
         return songs
     }
 
-    suspend fun extract(blacklistedSongs: List<Song>): Pair<List<Song>,List<Album>>  {
-        val blacklistedSongLocations = blacklistedSongs.map { it.location }.toSet()
-        val selection = MediaStore.Audio.Media.IS_MUSIC + " != 0"
+    suspend fun extract(
+        blacklistedSongLocations: HashSet<String>,
+        blacklistedFolderPaths: HashSet<String>,
+        statusListener: ((parsed: Int, total: Int) -> Unit)? = null
+    ): Pair<List<Song>,List<Album>>  {
+        val selection = StringBuilder()
+        val selectionArgs = arrayListOf<String>()
+        selection.append(MediaStore.Audio.Media.IS_MUSIC + " != 0 ")
+        blacklistedFolderPaths.forEachIndexed { index, path ->
+            selection.append(" AND NOT ")
+                .append(MediaStore.Audio.Media.DATA)
+                .append(" LIKE ?")
+            selectionArgs.add("$path%")
+        }
         val cursor = context.contentResolver.query(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             projection,
-            selection,
-            null,
+            selection.toString(),
+            selectionArgs.toTypedArray(),
             MediaStore.Audio.Media.DATE_ADDED,
             null
         ) ?: return Pair(emptyList(), emptyList())
@@ -201,6 +212,8 @@ class SongExtractor(
         val dateModifiedIndex = cursor.getColumnIndex(MediaStore.Audio.Media.DATE_MODIFIED)
         val songIdIndex = cursor.getColumnIndex(MediaStore.Audio.Media._ID)
         val dSongs = ArrayList<Deferred<Song>>()
+        val total  = cursor.count
+        var parsed = 0
         cursor.moveToFirst()
         do {
             try {
@@ -226,6 +239,8 @@ class SongExtractor(
                         album = album,
                     )
                 })
+                parsed++
+                statusListener?.invoke(parsed, total)
             } catch (_: Exception){
 
             }

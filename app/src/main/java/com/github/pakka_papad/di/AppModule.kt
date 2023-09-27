@@ -50,7 +50,8 @@ object AppModule {
         @ApplicationContext context: Context,
         notificationManager: ZenNotificationManager,
         db: AppDatabase,
-        scope: CoroutineScope
+        scope: CoroutineScope,
+        extractor: SongExtractor,
     ): DataManager {
         return DataManager(
             context = context,
@@ -68,6 +69,7 @@ object AppModule {
                 blacklistedFolderDao = db.blacklistedFolderDao(),
             ),
             scope = scope,
+            songExtractor = extractor
         )
     }
 
