@@ -21,8 +21,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.components.FullScreenSadMessage
 import com.github.pakka_papad.R
-import com.github.pakka_papad.components.SongCardV4
+import com.github.pakka_papad.components.MiniSongCard
 import com.github.pakka_papad.components.more_options.SongOptions
+import com.github.pakka_papad.data.music.MiniSong
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.storage_explorer.Directory
 import com.github.pakka_papad.storage_explorer.DirectoryContents
@@ -32,7 +33,8 @@ fun Files(
     contents: DirectoryContents,
     onDirectoryClicked: (Directory) -> Unit,
     onSongClicked: (index: Int) -> Unit,
-    currentSong: Song?
+    currentSong: Song?,
+    onAddToPlaylistClicked: (MiniSong) -> Unit,
 ){
     if (contents.directories.isEmpty() && contents.songs.isEmpty()){
         FullScreenSadMessage("Nothing here")
@@ -55,18 +57,16 @@ fun Files(
             items = contents.songs,
             key = { index, song -> song.location }
         ){index, song ->
-            var infoVisible by remember { mutableStateOf(false) }
-            SongCardV4(
+            MiniSongCard(
                 song = song,
                 onSongClicked = { onSongClicked(index) },
                 songOptions = listOf(
-                    SongOptions.Info { infoVisible = true }
+                    SongOptions.Blacklist{  },
+                    SongOptions.AddToPlaylist{ onAddToPlaylistClicked(song) },
+                    SongOptions.AddToQueue{  },
                 ),
                 currentlyPlaying = (song.location == currentSong?.location)
             )
-            if (infoVisible){
-                SongInfo(song = song) { infoVisible = false }
-            }
         }
     }
 }
@@ -92,7 +92,7 @@ fun File(
         Icon(
             painter = resource,
             contentDescription = null,
-            modifier = Modifier.size(40.dp)
+            modifier = Modifier.size(50.dp)
         )
         Text(
             text = file.name,

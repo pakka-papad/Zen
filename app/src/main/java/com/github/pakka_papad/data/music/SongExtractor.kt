@@ -86,6 +86,53 @@ class SongExtractor(
         return songs
     }
 
+    fun extractMini(folderPath: String? = null): List<MiniSong> {
+        val projectionForMini = arrayOf(
+            MediaStore.Audio.Media._ID,
+            MediaStore.Audio.Media.TITLE,
+            MediaStore.Audio.Media.DATA,
+            MediaStore.Audio.Media.ARTIST,
+        )
+        val selection = MediaStore.Audio.Media.DATA + " LIKE ?"
+        val selectionArgs = folderPath?.let {
+            arrayOf("$it%")
+        }
+        val cursor = context.contentResolver.query(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            projectionForMini,
+            selection,
+            selectionArgs,
+            MediaStore.Audio.Media.DATE_ADDED,
+            null
+        ) ?: return emptyList()
+        val dataIndex = cursor.getColumnIndex(MediaStore.Audio.Media.DATA)
+        val titleIndex = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)
+        val artistIndex = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)
+        val songIdIndex = cursor.getColumnIndex(MediaStore.Audio.Media._ID)
+        val songs = ArrayList<MiniSong>()
+        cursor.moveToFirst()
+        do {
+            try {
+                val songPath = cursor.getString(dataIndex)
+                val songFile = File(songPath)
+                if (!songFile.exists()) throw FileNotFoundException()
+                if (folderPath != null && songFile.parentFile?.absolutePath != folderPath) throw Exception()
+                songs.add(
+                    MiniSong(
+                        location = songPath,
+                        title = cursor.getString(titleIndex),
+                        artUri = "content://media/external/audio/media/${cursor.getLong(songIdIndex)}/albumart",
+                        artist = cursor.getString(artistIndex)
+                    )
+                )
+            } catch (_: Exception){
+
+            }
+        } while (cursor.moveToNext())
+        cursor.close()
+        return songs
+    }
+
     suspend fun extract(blacklistedSongs: List<Song>): Pair<List<Song>,List<Album>>  {
         val blacklistedSongLocations = blacklistedSongs.map { it.location }.toSet()
         val selection = MediaStore.Audio.Media.IS_MUSIC + " != 0"

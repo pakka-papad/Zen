@@ -26,14 +26,14 @@ class MusicFileExplorer(
 
     private val listeners = arrayListOf<DirectoryChangeListener>()
 
-    suspend fun addListener(listener: DirectoryChangeListener){
+    fun addListener(listener: DirectoryChangeListener){
         listeners.add(listener)
         val directory = File(currentPath)
         if (!directory.exists() || !directory.isDirectory) return
         val directories = (directory.listFiles(filterDirectories) ?: arrayOf()).map {
             Directory(name = it.name, absolutePath = it.absolutePath)
         }
-        val songs = songExtractor.extract(currentPath)
+        val songs = songExtractor.extractMini(currentPath)
         listener.onDirectoryChanged(currentPath,DirectoryContents(directories,songs))
     }
 
@@ -41,18 +41,18 @@ class MusicFileExplorer(
         listeners.remove(listener)
     }
 
-    suspend fun moveInsideDirectory(directoryPath: String){
+    fun moveInsideDirectory(directoryPath: String){
         currentPath = directoryPath
         val directory = File(currentPath)
         if(!directory.exists() || !directory.isDirectory) return
         val directories = (directory.listFiles(filterDirectories) ?: arrayOf()).map {
             Directory(name = it.name, absolutePath = it.absolutePath)
         }
-        val songs = songExtractor.extract(currentPath)
+        val songs = songExtractor.extractMini(currentPath)
         listeners.forEach { it.onDirectoryChanged(currentPath, DirectoryContents(directories,songs)) }
     }
 
-    suspend fun moveToParent(){
+    fun moveToParent(){
         if (currentPath == root) return
         var directory = File(currentPath)
         directory = directory.parentFile ?: return
@@ -61,7 +61,7 @@ class MusicFileExplorer(
         val directories = (directory.listFiles(filterDirectories) ?: arrayOf()).map {
             Directory(name = it.name, absolutePath = it.absolutePath)
         }
-        val songs = songExtractor.extract(currentPath)
+        val songs = songExtractor.extractMini(currentPath)
         listeners.forEach { it.onDirectoryChanged(currentPath, DirectoryContents(directories,songs)) }
     }
 

@@ -318,7 +318,8 @@ class HomeFragment : Fragment() {
                                                          contents = files,
                                                          onDirectoryClicked = viewModel::onFileClicked,
                                                          onSongClicked = viewModel::onFileClicked,
-                                                         currentSong = currentSong
+                                                         currentSong = currentSong,
+                                                         onAddToPlaylistClicked = this@HomeFragment::addToPlaylistClicked,
                                                      )
                                                 }
                                             }
@@ -539,5 +540,15 @@ class HomeFragment : Fragment() {
 
     private fun addToPlaylistClicked(song: Song){
         saveToPlaylistClicked(listOf(song))
+    }
+
+    private fun addToPlaylistClicked(song: MiniSong){
+        lifecycleScope.launch {
+            if (navController.currentDestination?.id != R.id.homeFragment) return@launch
+            navController.navigate(
+                HomeFragmentDirections
+                    .actionHomeFragmentToSelectPlaylistFragment(arrayOf(song.location))
+            )
+        }
     }
 }

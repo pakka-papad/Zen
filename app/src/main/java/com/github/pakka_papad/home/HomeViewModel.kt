@@ -240,7 +240,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onFileClicked(songIndex: Int){
-        setQueue(filesInCurrentDestination.value.songs,songIndex)
+//        setQueue(filesInCurrentDestination.value.songs,songIndex)
     }
 
     fun onFileClicked(file: Directory){

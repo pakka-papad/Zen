@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.github.pakka_papad.components.more_options.OptionsAlertDialog
 import com.github.pakka_papad.components.more_options.SongOptions
+import com.github.pakka_papad.data.music.MiniSong
 import com.github.pakka_papad.data.music.Song
 import kotlinx.coroutines.launch
 
@@ -241,8 +242,8 @@ fun SongCardV3(
 }
 
 @Composable
-fun SongCardV4(
-    song: Song,
+fun MiniSongCard(
+    song: MiniSong,
     onSongClicked: () -> Unit,
     currentlyPlaying: Boolean = false,
     songOptions: List<SongOptions>,
