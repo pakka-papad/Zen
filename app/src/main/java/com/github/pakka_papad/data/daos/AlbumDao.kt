@@ -25,4 +25,10 @@ interface AlbumDao {
     @Query("SELECT * FROM ${Constants.Tables.ALBUM_TABLE} WHERE name LIKE '%' || :query || '%'")
     suspend fun searchAlbums(query: String): List<Album>
 
+    @Transaction
+    @Query("DELETE FROM ${Constants.Tables.ALBUM_TABLE} WHERE name IN " +
+            "(SELECT album.name as name FROM ${Constants.Tables.ALBUM_TABLE} as album LEFT JOIN " +
+            "${Constants.Tables.SONG_TABLE} as song ON album.name = song.album GROUP BY album.name " +
+            "HAVING COUNT(song.location) = 0)")
+    suspend fun cleanAlbumTable()
 }

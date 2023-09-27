@@ -50,16 +50,24 @@ class DataManager(
 
     fun cleanData() {
         scope.launch {
+            val jobs = mutableListOf<Job>()
             daoCollection.songDao.getSongs().forEach {
                 try {
                     if(!File(it.location).exists()){
-                        launch { daoCollection.songDao.deleteSong(it) }
+                        jobs += launch { daoCollection.songDao.deleteSong(it) }
                     }
                 } catch (_: Exception){
 
                 }
             }
-            // clean album, artist, lyricist, ...
+            jobs.joinAll()
+            jobs.clear()
+            daoCollection.albumDao.cleanAlbumTable()
+            daoCollection.artistDao.cleanArtistTable()
+            daoCollection.albumArtistDao.cleanAlbumArtistTable()
+            daoCollection.composerDao.cleanComposerTable()
+            daoCollection.lyricistDao.cleanLyricistTable()
+            daoCollection.genreDao.cleanGenreTable()
         }
     }
 
@@ -81,7 +89,7 @@ class DataManager(
     suspend fun addFolderToBlacklist(path: String){
         daoCollection.songDao.deleteSongsWithPathPrefix(path)
         daoCollection.blacklistedFolderDao.insertFolder(BlacklistedFolder(path))
-        // cleanup
+        cleanData()
     }
 
     suspend fun removeFolderFromBlacklist(folder: BlacklistedFolder){
