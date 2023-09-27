@@ -192,6 +192,11 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun addToQueue(song: MiniSong) {
+        val resolvedSong = songExtractor.resolveSong(song.location) ?: return
+        addToQueue(resolvedSong)
+    }
+
     /**
      * Create and set a new queue in exoplayer.
      * Old queue is discarded.
@@ -240,7 +245,13 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onFileClicked(songIndex: Int){
-//        setQueue(filesInCurrentDestination.value.songs,songIndex)
+        viewModelScope.launch {
+            if(songIndex < 0 || songIndex >= filesInCurrentDestination.value.songs.size) return@launch
+            val song = songExtractor.resolveSong(filesInCurrentDestination.value.songs[songIndex].location)
+            song?.let {
+                setQueue(listOf(song))
+            }
+        }
     }
 
     fun onFileClicked(file: Directory){

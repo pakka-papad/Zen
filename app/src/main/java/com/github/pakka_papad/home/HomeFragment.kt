@@ -320,6 +320,7 @@ class HomeFragment : Fragment() {
                                                          onSongClicked = viewModel::onFileClicked,
                                                          currentSong = currentSong,
                                                          onAddToPlaylistClicked = this@HomeFragment::addToPlaylistClicked,
+                                                         onAddToQueueClicked = viewModel::addToQueue,
                                                      )
                                                 }
                                             }

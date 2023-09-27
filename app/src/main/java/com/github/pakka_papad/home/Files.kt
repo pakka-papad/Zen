@@ -35,6 +35,7 @@ fun Files(
     onSongClicked: (index: Int) -> Unit,
     currentSong: Song?,
     onAddToPlaylistClicked: (MiniSong) -> Unit,
+    onAddToQueueClicked: (MiniSong) -> Unit,
 ){
     if (contents.directories.isEmpty() && contents.songs.isEmpty()){
         FullScreenSadMessage("Nothing here")
@@ -61,9 +62,8 @@ fun Files(
                 song = song,
                 onSongClicked = { onSongClicked(index) },
                 songOptions = listOf(
-                    SongOptions.Blacklist{  },
                     SongOptions.AddToPlaylist{ onAddToPlaylistClicked(song) },
-                    SongOptions.AddToQueue{  },
+                    SongOptions.AddToQueue{ onAddToQueueClicked(song) },
                 ),
                 currentlyPlaying = (song.location == currentSong?.location)
             )

@@ -41,8 +41,11 @@ class DataManager(
 
     val querySearch by lazy { QuerySearch(daoCollection) }
 
+    val blacklistedSongLocations = HashSet<String>()
+
     init {
         cleanData()
+        buildBlacklistStore()
     }
 
     fun cleanData() {
@@ -59,10 +62,18 @@ class DataManager(
         }
     }
 
+    private fun buildBlacklistStore(){
+        scope.launch {
+            val blacklistedSongs = daoCollection.blacklistDao.getBlacklistedSongs()
+            blacklistedSongs.forEach { blacklistedSongLocations.add(it.location) }
+        }
+    }
+
     suspend fun removeFromBlacklist(data: List<BlacklistedSong>){
         data.forEach {
             Timber.d("bs: $it")
             daoCollection.blacklistDao.deleteBlacklistedSong(it)
+            blacklistedSongLocations.remove(it.location)
         }
     }
 
@@ -86,6 +97,7 @@ class DataManager(
                 artist = song.artist,
             )
         )
+        blacklistedSongLocations.add(song.location)
     }
 
     suspend fun insertPlaylistSongCrossRefs(playlistSongCrossRefs: List<PlaylistSongCrossRef>) =
@@ -100,8 +112,6 @@ class DataManager(
     fun scanForMusic() = scope.launch {
         _scanStatus.send(ScanStatus.ScanStarted)
 //        notificationManager.sendScanningNotification()
-        val blacklistedSongs = daoCollection.blacklistDao.getBlacklistedSongs()
-        val blacklistedSongLocations = blacklistedSongs.map { it.location }.toSet()
         val selection = Audio.Media.IS_MUSIC + " != 0"
         val projection = arrayOf(
             Audio.Media.DATA,
