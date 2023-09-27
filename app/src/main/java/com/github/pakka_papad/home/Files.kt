@@ -1,10 +1,14 @@
 package com.github.pakka_papad.home
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.components.FullScreenSadMessage
 import com.github.pakka_papad.R
 import com.github.pakka_papad.components.MiniSongCard
+import com.github.pakka_papad.components.more_options.FolderOptions
+import com.github.pakka_papad.components.more_options.OptionsAlertDialog
 import com.github.pakka_papad.components.more_options.SongOptions
 import com.github.pakka_papad.data.music.MiniSong
 import com.github.pakka_papad.data.music.Song
@@ -36,6 +42,7 @@ fun Files(
     currentSong: Song?,
     onAddToPlaylistClicked: (MiniSong) -> Unit,
     onAddToQueueClicked: (MiniSong) -> Unit,
+    onFolderAddToBlacklistRequest: (Directory) -> Unit,
 ){
     if (contents.directories.isEmpty() && contents.songs.isEmpty()){
         FullScreenSadMessage("Nothing here")
@@ -49,9 +56,12 @@ fun Files(
             items = contents.directories,
             key = { it.absolutePath }
         ){
-            File(
-                file = it,
+            Folder(
+                folder = it,
                 onDirectoryClicked = onDirectoryClicked,
+                options = listOf(
+                    FolderOptions.Blacklist { onFolderAddToBlacklistRequest(it) }
+                )
             )
         }
         itemsIndexed(
@@ -72,17 +82,19 @@ fun Files(
 }
 
 @Composable
-fun File(
-    file: Directory,
+fun Folder(
+    folder: Directory,
     onDirectoryClicked: (Directory) -> Unit,
+    options: List<FolderOptions>,
 ){
     val resource = painterResource(R.drawable.ic_baseline_folder_40)
     var showClickIndicator by remember { mutableStateOf(false) }
+    var showFileMenu by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                onDirectoryClicked(file)
+                onDirectoryClicked(folder)
                 showClickIndicator = true
             }
             .padding(horizontal = 10.dp, vertical = 6.dp),
@@ -95,7 +107,7 @@ fun File(
             modifier = Modifier.size(50.dp)
         )
         Text(
-            text = file.name,
+            text = folder.name,
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.titleMedium,
             maxLines = 2,
@@ -103,9 +115,36 @@ fun File(
         )
         if(showClickIndicator){
             CircularProgressIndicator(
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(26.dp),
                 strokeWidth = 2.dp,
             )
+        } else {
+            Icon(
+                imageVector = Icons.Outlined.MoreVert,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(26.dp)
+                    .clickable(
+                        onClick = {
+                            showFileMenu = true
+                        },
+                        indication = rememberRipple(
+                            bounded = false,
+                            radius = 20.dp
+                        ),
+                        interactionSource = remember { MutableInteractionSource() }
+                    ),
+                tint = MaterialTheme.colorScheme.onSurface,
+            )
         }
+    }
+    if (showFileMenu){
+        OptionsAlertDialog(
+            options = options,
+            title = folder.name,
+            onDismissRequest = {
+                showFileMenu = false
+            }
+        )
     }
 }

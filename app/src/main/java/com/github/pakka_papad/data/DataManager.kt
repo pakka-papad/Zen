@@ -59,6 +59,7 @@ class DataManager(
 
                 }
             }
+            // clean album, artist, lyricist, ...
         }
     }
 
@@ -75,6 +76,16 @@ class DataManager(
             daoCollection.blacklistDao.deleteBlacklistedSong(it)
             blacklistedSongLocations.remove(it.location)
         }
+    }
+
+    suspend fun addFolderToBlacklist(path: String){
+        daoCollection.songDao.deleteSongsWithPathPrefix(path)
+        daoCollection.blacklistedFolderDao.insertFolder(BlacklistedFolder(path))
+        // cleanup
+    }
+
+    suspend fun removeFolderFromBlacklist(folder: BlacklistedFolder){
+        daoCollection.blacklistedFolderDao.deleteFolder(folder)
     }
 
     suspend fun createPlaylist(playlistName: String) {

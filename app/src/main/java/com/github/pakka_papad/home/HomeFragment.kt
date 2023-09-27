@@ -321,6 +321,7 @@ class HomeFragment : Fragment() {
                                                          currentSong = currentSong,
                                                          onAddToPlaylistClicked = this@HomeFragment::addToPlaylistClicked,
                                                          onAddToQueueClicked = viewModel::addToQueue,
+                                                         onFolderAddToBlacklistRequest = viewModel::onFolderBlacklist
                                                      )
                                                 }
                                             }

@@ -21,5 +21,5 @@ class GetAll(
 
     fun blacklistedSongs() = daoCollection.blacklistDao.getBlacklistedSongsFlow()
 
-    fun folders() = daoCollection.folderDao.getAllFolders()
+    fun blacklistedFolders() = daoCollection.blacklistedFolderDao.getAllFolders()
 }

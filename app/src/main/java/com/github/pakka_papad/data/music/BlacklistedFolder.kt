@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.github.pakka_papad.Constants
 
-@Entity(tableName = Constants.Tables.FOLDER_TABLE)
-data class Folder(
+@Entity(tableName = Constants.Tables.BLACKLISTED_FOLDER_TABLE)
+data class BlacklistedFolder(
     @PrimaryKey val path: String,
 )

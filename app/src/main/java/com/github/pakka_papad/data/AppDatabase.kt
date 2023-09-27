@@ -17,7 +17,7 @@ import com.github.pakka_papad.data.music.*
         Composer::class,
         Lyricist::class,
         BlacklistedSong::class,
-        Folder::class
+        BlacklistedFolder::class
     ],
     version = 2, exportSchema = true,
     autoMigrations = [
@@ -44,6 +44,6 @@ abstract class AppDatabase: RoomDatabase() {
 
     abstract fun blacklistDao(): BlacklistDao
 
-    abstract fun folderDao(): FolderDao
+    abstract fun blacklistedFolderDao(): BlacklistedFolderDao
 
 }

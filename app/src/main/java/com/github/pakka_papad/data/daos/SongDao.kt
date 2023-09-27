@@ -26,6 +26,10 @@ interface SongDao {
     @Query("DELETE FROM ${Constants.Tables.SONG_TABLE}")
     suspend fun deleteAllSongs()
 
+    @Transaction
+    @Query("DELETE FROM ${Constants.Tables.SONG_TABLE} WHERE location LIKE :prefix || '%'")
+    suspend fun deleteSongsWithPathPrefix(prefix: String)
+
     @Query("SELECT * FROM ${Constants.Tables.SONG_TABLE} WHERE title LIKE '%' || :query || '%' OR " +
             "artist LIKE '%' || :query || '%' OR " +
             "albumArtist LIKE '%' || :query || '%' OR " +

@@ -74,12 +74,12 @@
             app:popEnterAnim="@anim/zen_close_enter"
             app:popExitAnim="@anim/zen_close_exit" />
         <action
-            android:id="@+id/action_settingsFragment_to_folderToScanFragment"
-            app:destination="@id/folderToScanFragment"
+            android:id="@+id/action_settingsFragment_to_blacklistedFolderFragment"
+            app:destination="@id/blacklistedFolderFragment"
             app:enterAnim="@anim/zen_open_enter"
             app:exitAnim="@anim/zen_open_exit"
             app:popEnterAnim="@anim/zen_close_enter"
-            app:popExitAnim="@anim/zen_close_exit"/>
+            app:popExitAnim="@anim/zen_close_exit" />
     </fragment>
     <fragment
         android:id="@+id/splashFragment"
@@ -138,7 +138,7 @@
         android:name="com.github.pakka_papad.whatsnew.WhatsNewFragment"
         android:label="WhatsNewFragment" />
     <fragment
-        android:id="@+id/folderToScanFragment"
-        android:name="com.github.pakka_papad.settings.folder_scan.FolderToScanFragment"
-        android:label="FolderToScan" />
+        android:id="@+id/blacklistedFolderFragment"
+        android:name="com.github.pakka_papad.settings.blacklisted_folder.BlacklistedFolderFragment"
+        android:label="BlacklistedFolderFragment" />
 </navigation>

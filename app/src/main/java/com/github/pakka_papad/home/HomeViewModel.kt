@@ -136,6 +136,17 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun onFolderBlacklist(folder: Directory){
+        viewModelScope.launch {
+            try {
+                manager.addFolderToBlacklist(folder.absolutePath)
+                showToast("Done")
+            } catch (_: Exception){
+                showToast("Some error occurred")
+            }
+        }
+    }
+
     fun onPlaylistCreate(playlistName: String) {
         viewModelScope.launch {
             manager.createPlaylist(playlistName)

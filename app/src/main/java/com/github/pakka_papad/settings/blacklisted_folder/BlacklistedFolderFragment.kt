@@ -1,25 +1,24 @@
-package com.github.pakka_papad.settings.folder_scan
+package com.github.pakka_papad.settings.blacklisted_folder
 
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -29,13 +28,12 @@ import com.github.pakka_papad.components.TopBarWithBackArrow
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.ui.theme.ZenTheme
 import dagger.hilt.android.AndroidEntryPoint
-import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class FolderToScanFragment: Fragment() {
+class BlacklistedFolderFragment: Fragment() {
 
-    private val viewModel: FolderScanViewModel by viewModels()
+    private val viewModel: BlacklistedFolderViewModel by viewModels()
 
     private lateinit var navController: NavController
 
@@ -55,12 +53,6 @@ class FolderToScanFragment: Fragment() {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 val themePreference by preferenceProvider.theme.collectAsStateWithLifecycle()
-                val getFolder = rememberLauncherForActivityResult(
-                    contract = ActivityResultContracts.StartActivityForResult(),
-                    onResult = {
-                        Timber.d("result data " + it.data?.dataString)
-                    }
-                )
                 val folders by viewModel.folders.collectAsStateWithLifecycle()
 
                 ZenTheme(themePreference) {
@@ -69,34 +61,24 @@ class FolderToScanFragment: Fragment() {
                         topBar = {
                             TopBarWithBackArrow(
                                 onBackArrowPressed = navController::popBackStack,
-                                title = "Folders to scan",
+                                title = "Blacklisted Folders",
                                 actions = {}
                             )
                         },
-                        content = {
-                            LazyColumn(
-                                contentPadding = it,
-                                content = {
-                                    items(
-                                        items = folders
-                                    ){ folder ->
-                                        Text(text = folder.path)
-                                    }
-                                }
+                        content = { paddingValues ->
+                            val insetsPadding =
+                                WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues()
+                            BlacklistedFolders(
+                                folders = folders,
+                                paddingValues = PaddingValues(
+                                    top = paddingValues.calculateTopPadding(),
+                                    start = insetsPadding.calculateStartPadding(LayoutDirection.Ltr),
+                                    end = insetsPadding.calculateEndPadding(LayoutDirection.Ltr),
+                                    bottom = insetsPadding.calculateBottomPadding()
+                                ),
+                                onBlacklistRemoveRequest = viewModel::onBlacklistRemoveRequest
                             )
                         },
-                        floatingActionButton = {
-                            FloatingActionButton(
-                                onClick = { getFolder.launch(intent) },
-                                content = {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Add,
-                                        contentDescription = "add folder button"
-                                    )
-                                }
-                            )
-                        },
-                        floatingActionButtonPosition = FabPosition.Center
                     )
                 }
             }
