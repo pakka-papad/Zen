@@ -20,4 +20,6 @@ class GetAll(
     fun genres() = daoCollection.songDao.getAllGenresWithSongCount()
 
     fun blacklistedSongs() = daoCollection.blacklistDao.getBlacklistedSongsFlow()
+
+    fun blacklistedFolders() = daoCollection.blacklistedFolderDao.getAllFolders()
 }

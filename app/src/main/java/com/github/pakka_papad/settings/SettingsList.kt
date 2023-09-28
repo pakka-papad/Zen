@@ -10,12 +10,15 @@ import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -29,10 +32,14 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.BuildConfig
 import com.github.pakka_papad.R
+import com.github.pakka_papad.Screens
 import com.github.pakka_papad.components.OutlinedBox
 import com.github.pakka_papad.data.UserPreferences
 import com.github.pakka_papad.data.UserPreferences.Accent
 import com.github.pakka_papad.data.music.ScanStatus
+import com.github.pakka_papad.nowplaying.DraggableItem
+import com.github.pakka_papad.nowplaying.dragContainer
+import com.github.pakka_papad.nowplaying.rememberDragDropState
 import com.github.pakka_papad.ui.theme.ThemePreference
 import com.github.pakka_papad.ui.theme.getSeedColor
 import timber.log.Timber
@@ -48,6 +55,11 @@ fun SettingsList(
     disabledCrashlytics: Boolean,
     onAutoReportCrashClicked: (Boolean) -> Unit,
     onWhatsNewClicked: () -> Unit,
+    onRestoreFoldersClicked: () -> Unit,
+    tabsSelection: List<Pair<Screens,Boolean>>,
+    onTabsSelectChange: (Screens, Boolean) -> Unit,
+    onTabsOrderChanged: (fromIdx: Int, toIdx: Int) -> Unit,
+    onTabsOrderConfirmed: () -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -60,13 +72,18 @@ fun SettingsList(
             LookAndFeelSettings(
                 themePreference = themePreference,
                 onPreferenceChanged = onThemePreferenceChanged,
+                tabsSelection = tabsSelection,
+                onTabsSelectChange = onTabsSelectChange,
+                onTabsOrderChanged = onTabsOrderChanged,
+                onTabsOrderConfirmed = onTabsOrderConfirmed,
             )
         }
         item {
             MusicLibrarySettings(
                 scanStatus = scanStatus,
                 onScanClicked = onScanClicked,
-                onRestoreClicked = onRestoreClicked
+                onRestoreClicked = onRestoreClicked,
+                onRestoreFoldersClicked = onRestoreFoldersClicked
             )
         }
         item {
@@ -87,6 +104,10 @@ fun SettingsList(
 private fun LookAndFeelSettings(
     themePreference: ThemePreference,
     onPreferenceChanged: (ThemePreference) -> Unit,
+    tabsSelection: List<Pair<Screens, Boolean>>,
+    onTabsSelectChange: (Screens, Boolean) -> Unit,
+    onTabsOrderChanged: (fromIdx: Int, toIdx: Int) -> Unit,
+    onTabsOrderConfirmed: () -> Unit,
 ) {
     val spacerModifier = Modifier.height(10.dp)
     OutlinedBox(
@@ -178,6 +199,39 @@ private fun LookAndFeelSettings(
                    onPreferenceChanged = onPreferenceChanged,
                    onDismissRequest = { showSelectorDialog = false }
                )
+            }
+            Spacer(spacerModifier)
+            var showRearrangeTabsDialog by remember{ mutableStateOf(false) }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Tabs arrangement",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Button(
+                    onClick = { showRearrangeTabsDialog = true },
+                    content = {
+                        Text(
+                            text = "Rearrange",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                )
+            }
+            if (showRearrangeTabsDialog){
+                RearrangeTabsDialog(
+                    tabsSelection = tabsSelection,
+                    onDismissRequest = { showRearrangeTabsDialog = false },
+                    onSelectChange = onTabsSelectChange,
+                    onTabsOrderChanged = onTabsOrderChanged,
+                    onTabsOrderConfirmed = {
+                        showRearrangeTabsDialog = false
+                        onTabsOrderConfirmed()
+                    }
+                )
             }
         }
     }
@@ -344,18 +398,123 @@ private fun ThemeSelectorDialog(
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun RearrangeTabsDialog(
+    tabsSelection: List<Pair<Screens,Boolean>>,
+    onDismissRequest: () -> Unit,
+    onSelectChange: (Screens, Boolean) -> Unit,
+    onTabsOrderChanged: (fromIdx: Int, toIdx: Int) -> Unit,
+    onTabsOrderConfirmed: () -> Unit,
+){
+    AlertDialog(
+        title = {
+            Text(
+                text = "App tabs",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+            )
+        },
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            Button(
+                onClick = onTabsOrderConfirmed
+            ) {
+                Text(
+                    text = "OK",
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+        },
+        text = {
+            val listState = rememberLazyListState()
+            val dragDropState = rememberDragDropState(
+                lazyListState = listState,
+                onMove = onTabsOrderChanged,
+            )
+            LazyColumn(
+                state = listState,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier
+                    .dragContainer(dragDropState)
+            ){
+                itemsIndexed(
+                    items = tabsSelection,
+                    key = { index, screenChoice -> screenChoice.first.ordinal }
+                ){ index, screenChoice ->
+                    DraggableItem(dragDropState, index) {
+                        SelectableMovableScreen(
+                            screen = screenChoice.first,
+                            isSelected = screenChoice.second,
+                            onSelectChange = { isSelected -> onSelectChange(screenChoice.first, isSelected) },
+                        )
+                    }
+                }
+            }
+        },
+
+    )
+}
+
+
+@Composable
+private fun SelectableMovableScreen(
+    screen: Screens,
+    isSelected: Boolean,
+    onSelectChange: (Boolean) -> Unit,
+){
+    val spaceModifier = Modifier.width(12.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.secondaryContainer),
+        verticalAlignment = Alignment.CenterVertically,
+    ){
+        Checkbox(
+            checked = isSelected,
+            onCheckedChange = onSelectChange,
+        )
+        Icon(
+            painter = painterResource(id = screen.filledIcon),
+            contentDescription = "${screen.name} screen icon",
+            modifier = Modifier.size(35.dp),
+            tint = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+        Spacer(spaceModifier)
+        Text(
+            text = screen.name,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier.weight(1f)
+        )
+        Spacer(spaceModifier)
+        Icon(
+            painter = painterResource(id = R.drawable.baseline_drag_indicator_40),
+            contentDescription = "move icon",
+            modifier = Modifier.size(35.dp),
+            tint = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+    }
+}
+
 @Composable
 private fun MusicLibrarySettings(
     scanStatus: ScanStatus,
     onScanClicked: () -> Unit,
     onRestoreClicked: () -> Unit,
+    onRestoreFoldersClicked: () -> Unit,
 ) {
     OutlinedBox(
         label = "Music library",
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 13.dp),
         modifier = Modifier.padding(10.dp)
     ) {
-        Column(Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -400,7 +559,6 @@ private fun MusicLibrarySettings(
                     }
                 )
             }
-            Spacer(Modifier.height(10.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -412,6 +570,25 @@ private fun MusicLibrarySettings(
                 )
                 Button(
                     onClick = onRestoreClicked,
+                    content = {
+                        Text(
+                            text = "Restore",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Restore blacklisted folders",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Button(
+                    onClick = onRestoreFoldersClicked,
                     content = {
                         Text(
                             text = "Restore",

@@ -43,11 +43,13 @@ class SelectPlaylistViewModel @Inject constructor(
     fun addSongsToPlaylists(songLocations: Array<String>) {
         viewModelScope.launch {
             val playlists = playlistsWithSongCount.value
+            val validSongs = songLocations.filter { !manager.blacklistedSongLocations.contains(it) }
+            val anyBlacklistedSong = songLocations.any { manager.blacklistedSongLocations.contains(it) }
             val playlistSongCrossRefs = _selectList.indices
                 .filter { _selectList[it] }
                 .map {
                     val list = ArrayList<PlaylistSongCrossRef>()
-                    for (songLocation in songLocations) {
+                    for (songLocation in validSongs) {
                         list += PlaylistSongCrossRef(playlists[it].playlistId, songLocation)
                     }
                     list.toList()
@@ -58,6 +60,10 @@ class SelectPlaylistViewModel @Inject constructor(
             } catch (e: Exception){
                 Timber.e(e)
                 Toast.makeText(context,"Some error occurred",Toast.LENGTH_SHORT).show()
+            } finally {
+                if (anyBlacklistedSong){
+                    Toast.makeText(context,"Blacklisted songs have not been added to playlist",Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

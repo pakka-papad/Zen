@@ -107,12 +107,41 @@ class ZenPreferenceProvider @Inject constructor(
         }
     }
 
+    val selectedTabs = userPreferences.data
+        .map {
+            if (it.selectedTabsCount == 0){
+                listOf(0,1,2,3,4)
+            } else {
+                it.selectedTabsList.toList()
+            }
+        }
+        .stateIn(
+            scope = coroutineScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = null
+        )
+
+    fun updateSelectedTabs(tabsList: List<Int>){
+        if (tabsList.isEmpty()) return
+        coroutineScope.launch {
+            userPreferences.updateData {
+                it.copy {
+                    selectedTabs.apply {
+                        clear()
+                        addAll(tabsList)
+                    }
+                }
+            }
+        }
+    }
+
     init {
         val initJob = coroutineScope.launch {
             launch { theme.collect { } }
             launch { isOnBoardingComplete.collect { } }
             launch { isCrashlyticsDisabled.collect { } }
             launch { playbackParams.collect { updatePlaybackParams(it.playbackSpeed,it.playbackPitch) } }
+            launch { selectedTabs.collect{  } }
         }
         coroutineScope.launch {
             delay(1.minutes)

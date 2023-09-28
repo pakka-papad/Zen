@@ -11,5 +11,6 @@ data class DaoCollection(
     val lyricistDao: LyricistDao,
     val genreDao: GenreDao,
     val playlistDao: PlaylistDao,
-    val blacklistDao: BlacklistDao
+    val blacklistDao: BlacklistDao,
+    val blacklistedFolderDao: BlacklistedFolderDao,
 )

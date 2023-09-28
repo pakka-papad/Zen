@@ -19,4 +19,13 @@ interface GenreDao {
     @Query("SELECT * FROM ${Constants.Tables.GENRE_TABLE} WHERE genre = :genreName")
     fun getGenreWithSongs(genreName: String): Flow<GenreWithSongs?>
 
+    @Query("DELETE FROM ${Constants.Tables.GENRE_TABLE} WHERE genre = :genre")
+    suspend fun deleteGenre(genre: String)
+
+    @Transaction
+    @Query("DELETE FROM ${Constants.Tables.GENRE_TABLE} WHERE genre IN " +
+            "(SELECT genre.genre as genre FROM ${Constants.Tables.GENRE_TABLE} as genre LEFT JOIN " +
+            "${Constants.Tables.SONG_TABLE} as song ON genre.genre = song.genre GROUP BY genre.genre " +
+            "HAVING COUNT(song.location) = 0)")
+    suspend fun cleanGenreTable()
 }

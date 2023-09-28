@@ -12,7 +12,8 @@ object Constants {
         const val ALBUM_ARTIST_TABLE = "album_artist_table"
         const val COMPOSER_TABLE = "composer_table"
         const val LYRICIST_TABLE = "lyricist_table"
-        const val BLACKLIST_TABLE = "blacklist_table"
+        const val BLACKLIST_TABLE = "blacklist_table" // for songs
+        const val BLACKLISTED_FOLDER_TABLE = "blacklisted_folder_table"
     }
     const val PACKAGE_NAME = "com.github.pakka_papad"
 }

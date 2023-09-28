@@ -8,6 +8,8 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.music.*
+import com.github.pakka_papad.storage_explorer.*
+import com.github.pakka_papad.storage_explorer.Directory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -19,6 +21,7 @@ class HomeViewModel @Inject constructor(
     private val context: Application,
     private val manager: DataManager,
     private val exoPlayer: ExoPlayer,
+    private val songExtractor: SongExtractor,
 ) : ViewModel() {
 
     val songs = manager.getAll.songs()
@@ -113,6 +116,7 @@ class HomeViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         exoPlayer.removeListener(exoPlayerListener)
+        explorer.removeListener(directoryChangeListener)
     }
 
     /**
@@ -127,6 +131,17 @@ class HomeViewModel @Inject constructor(
                 showToast("Done")
             } catch (e: Exception) {
                 Timber.e(e)
+                showToast("Some error occurred")
+            }
+        }
+    }
+
+    fun onFolderBlacklist(folder: Directory){
+        viewModelScope.launch {
+            try {
+                manager.addFolderToBlacklist(folder.absolutePath)
+                showToast("Done")
+            } catch (_: Exception){
                 showToast("Some error occurred")
             }
         }
@@ -188,6 +203,11 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun addToQueue(song: MiniSong) {
+        val resolvedSong = songExtractor.resolveSong(song.location) ?: return
+        addToQueue(resolvedSong)
+    }
+
     /**
      * Create and set a new queue in exoplayer.
      * Old queue is discarded.
@@ -214,4 +234,48 @@ class HomeViewModel @Inject constructor(
 
     fun onSongDrag(fromIndex: Int, toIndex: Int) = manager.moveItem(fromIndex,toIndex)
 
+
+    private val _filesInCurrentDestination = MutableStateFlow(DirectoryContents())
+    val filesInCurrentDestination = _filesInCurrentDestination.asStateFlow()
+
+    private val explorer = MusicFileExplorer(songExtractor)
+
+    private val _isExplorerAtRoot = MutableStateFlow(true)
+    val isExplorerAtRoot = _isExplorerAtRoot.asStateFlow()
+
+    private val directoryChangeListener = object : MusicFileExplorer.DirectoryChangeListener {
+        override fun onDirectoryChanged(path: String, files: DirectoryContents) {
+            _filesInCurrentDestination.update { files }
+        }
+    }
+
+    init {
+        viewModelScope.launch {
+            explorer.addListener(directoryChangeListener)
+        }
+    }
+
+    fun onFileClicked(songIndex: Int){
+        viewModelScope.launch {
+            if(songIndex < 0 || songIndex >= filesInCurrentDestination.value.songs.size) return@launch
+            val song = songExtractor.resolveSong(filesInCurrentDestination.value.songs[songIndex].location)
+            song?.let {
+                setQueue(listOf(song))
+            }
+        }
+    }
+
+    fun onFileClicked(file: Directory){
+        viewModelScope.launch(Dispatchers.Default) {
+            explorer.moveInsideDirectory(file.absolutePath)
+            _isExplorerAtRoot.update { explorer.isRoot }
+        }
+    }
+
+    fun moveToParent() {
+        viewModelScope.launch(Dispatchers.Default) {
+            explorer.moveToParent()
+            _isExplorerAtRoot.update { explorer.isRoot }
+        }
+    }
 }

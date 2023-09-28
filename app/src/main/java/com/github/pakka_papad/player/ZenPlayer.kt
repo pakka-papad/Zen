@@ -258,21 +258,25 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
 
     @Synchronized
     override fun setQueue(newQueue: List<Song>, startPlayingFromIndex: Int) {
-        exoPlayer.stop()
-        exoPlayer.clearMediaItems()
-        val mediaItems = newQueue.map {
-            MediaItem.fromUri(Uri.fromFile(File(it.location)))
+        scope.launch {
+            val mediaItems = newQueue.map {
+                MediaItem.fromUri(Uri.fromFile(File(it.location)))
+            }
+            withContext(Dispatchers.Main){
+                exoPlayer.stop()
+                exoPlayer.clearMediaItems()
+                exoPlayer.addMediaItems(mediaItems)
+                exoPlayer.prepare()
+                exoPlayer.seekTo(startPlayingFromIndex,0)
+                exoPlayer.repeatMode = dataManager.repeatMode.value.toExoPlayerRepeatMode()
+                exoPlayer.playbackParameters = preferencesProvider.playbackParams.value
+                    .toCorrectedParams()
+                    .toExoPlayerPlaybackParameters()
+                exoPlayer.play()
+            }
+            updateMediaSessionState()
+            updateMediaSessionMetadata()
         }
-        exoPlayer.addMediaItems(mediaItems)
-        exoPlayer.prepare()
-        exoPlayer.seekTo(startPlayingFromIndex,0)
-        exoPlayer.repeatMode = dataManager.repeatMode.value.toExoPlayerRepeatMode()
-        exoPlayer.playbackParameters = preferencesProvider.playbackParams.value
-            .toCorrectedParams()
-            .toExoPlayerPlaybackParameters()
-        exoPlayer.play()
-        updateMediaSessionState()
-        updateMediaSessionMetadata()
     }
 
     @Synchronized
