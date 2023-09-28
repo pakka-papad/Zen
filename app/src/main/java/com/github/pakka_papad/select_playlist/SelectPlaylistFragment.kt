@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.github.pakka_papad.components.CancelConfirmTopBar
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.ui.theme.ZenTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -56,12 +57,13 @@ class SelectPlaylistFragment: Fragment() {
                     val selectList = viewModel.selectList
                     Scaffold(
                         topBar = {
-                            SelectPlaylistTopBar(
+                            CancelConfirmTopBar(
                                 onCancelClicked = navController::popBackStack,
                                 onConfirmClicked = {
                                     viewModel.addSongsToPlaylists(args.songLocations)
                                     navController.popBackStack()
-                                }
+                                },
+                                title = "Select Playlists"
                             )
                         },
                         content = { paddingValues ->

@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import com.github.pakka_papad.formatToDate
+import com.github.pakka_papad.toMBfromB
 import com.github.pakka_papad.toMS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -60,8 +61,8 @@ class SongExtractor(
             val addedDate = cursor.getString(dateAddedIndex)
             val modifiedDate = cursor.getString(dateModifiedIndex)
             val songId = cursor.getLong(songIdIndex)
-            val title = cursor.getString(titleIndex)
-            val album = cursor.getString(albumIndex)
+            val title = cursor.getString(titleIndex).trim()
+            val album = cursor.getString(albumIndex).trim()
             resSong = getSong(
                 path = songPath,
                 size = size,
@@ -110,8 +111,8 @@ class SongExtractor(
                 val addedDate = cursor.getString(dateAddedIndex)
                 val modifiedDate = cursor.getString(dateModifiedIndex)
                 val songId = cursor.getLong(songIdIndex)
-                val title = cursor.getString(titleIndex)
-                val album = cursor.getString(albumIndex)
+                val title = cursor.getString(titleIndex).trim()
+                val album = cursor.getString(albumIndex).trim()
                 dSongs.add(scope.async {
                     getSong(
                         path = songPath,
@@ -166,7 +167,7 @@ class SongExtractor(
                 songs.add(
                     MiniSong(
                         location = songPath,
-                        title = cursor.getString(titleIndex),
+                        title = cursor.getString(titleIndex).trim(),
                         artUri = "content://media/external/audio/media/${cursor.getLong(songIdIndex)}/albumart",
                         artist = cursor.getString(artistIndex)
                     )
@@ -225,8 +226,8 @@ class SongExtractor(
                 val addedDate = cursor.getString(dateAddedIndex)
                 val modifiedDate = cursor.getString(dateModifiedIndex)
                 val songId = cursor.getLong(songIdIndex)
-                val title = cursor.getString(titleIndex)
-                val album = cursor.getString(albumIndex)
+                val title = cursor.getString(titleIndex).trim()
+                val album = cursor.getString(albumIndex).trim()
                 albumArtMap[album] = cursor.getLong(albumIdIndex)
                 dSongs.add(scope.async {
                     getSong(
@@ -277,14 +278,14 @@ class SongExtractor(
             location = path,
             title = title,
             album = album,
-            size = size,
+            size = size.toFloat().toMBfromB(),
             addedDate = addedDate.toLong().formatToDate(),
             modifiedDate = modifiedDate.toLong().formatToDate(),
-            artist = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: UNKNOWN,
-            albumArtist = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST) ?: UNKNOWN,
-            composer = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_COMPOSER) ?: UNKNOWN,
-            genre = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE) ?: UNKNOWN,
-            lyricist = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_WRITER) ?: UNKNOWN,
+            artist = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)?.trim() ?: UNKNOWN,
+            albumArtist = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST)?.trim() ?: UNKNOWN,
+            composer = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_COMPOSER)?.trim() ?: UNKNOWN,
+            genre = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE)?.trim() ?: UNKNOWN,
+            lyricist = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_WRITER)?.trim() ?: UNKNOWN,
             year = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR)?.toIntOrNull() ?: 0,
             comment = null,
             durationMillis = durationMillis,
