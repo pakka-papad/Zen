@@ -18,6 +18,10 @@ class UserPreferencesSerializer @Inject constructor() : Serializer<UserPreferenc
                     playbackSpeed = 100
                     playbackPitch = 100
                 }
+            selectedTabs.apply {
+                clear()
+                addAll(listOf(0,1,2,3,4))
+            }
         }
 
     override suspend fun readFrom(input: InputStream): UserPreferences =

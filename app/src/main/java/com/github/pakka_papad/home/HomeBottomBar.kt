@@ -17,14 +17,18 @@ fun HomeBottomBar(
     currentScreen: Screens,
     onScreenChange: (Screens) -> Unit,
     bottomBarColor: Color,
+    selectedTabs: List<Int>?
 ) {
+    if (selectedTabs == null) return
+    val screens = Screens.values()
     BottomAppBar(
         modifier = Modifier
             .background(bottomBarColor)
             .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
             .height(88.dp),
     ) {
-        Screens.values().forEach { screen ->
+        selectedTabs.filter { it >= 0 && it < screens.size }
+            .map { screens[it] }.forEach { screen ->
             NavigationBarItem(
                 selected = (currentScreen == screen),
                 onClick = {

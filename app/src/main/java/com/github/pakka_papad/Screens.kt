@@ -4,6 +4,9 @@ import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import kotlinx.parcelize.Parcelize
 
+/**
+ * !! Dot not change order of already added objects
+ */
 @Parcelize
 enum class Screens(@DrawableRes val outlinedIcon: Int, @DrawableRes val filledIcon: Int): Parcelable {
     Songs(R.drawable.ic_outline_music_note_40,R.drawable.ic_baseline_music_note_40),

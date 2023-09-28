@@ -48,6 +48,8 @@ class SettingsFragment : Fragment() {
                 val scanStatus by viewModel.scanStatus.collectAsStateWithLifecycle()
                 val isCrashlyticsDisabled by preferenceProvider.isCrashlyticsDisabled.collectAsStateWithLifecycle()
 
+                val tabsSelection by viewModel.tabsSelection.collectAsStateWithLifecycle()
+
                 val restoreClicked = remember{ {
                     if (navController.currentDestination?.id == R.id.settingsFragment){
                         navController.navigate(R.id.action_settingsFragment_to_restoreFragment)
@@ -91,7 +93,11 @@ class SettingsFragment : Fragment() {
                                 disabledCrashlytics = isCrashlyticsDisabled,
                                 onAutoReportCrashClicked = preferenceProvider::toggleCrashlytics,
                                 onWhatsNewClicked = whatsNewClicked,
-                                onRestoreFoldersClicked = onRestoreFoldersClicked
+                                onRestoreFoldersClicked = onRestoreFoldersClicked,
+                                tabsSelection = tabsSelection,
+                                onTabsSelectChange = viewModel::onTabsSelectChanged,
+                                onTabsOrderChanged = viewModel::onTabsOrderChanged,
+                                onTabsOrderConfirmed = viewModel::saveTabsOrder
                             )
                         }
                     )

@@ -108,6 +108,7 @@ class HomeFragment : Fragment() {
                 val systemUiController = rememberSystemUiController()
                 val themePreference by preferenceProvider.theme.collectAsStateWithLifecycle()
                 ZenTheme(themePreference, systemUiController) {
+                    val selectedTabs by preferenceProvider.selectedTabs.collectAsStateWithLifecycle()
                     var currentScreen by rememberSaveable { mutableStateOf(Screens.Songs) }
                     val scope = rememberCoroutineScope()
 
@@ -450,7 +451,8 @@ class HomeFragment : Fragment() {
                             HomeBottomBar(
                                 currentScreen = currentScreen,
                                 onScreenChange = updateScreen,
-                                bottomBarColor = bottomBarColor
+                                bottomBarColor = bottomBarColor,
+                                selectedTabs = selectedTabs,
                             )
                         }
                     }
