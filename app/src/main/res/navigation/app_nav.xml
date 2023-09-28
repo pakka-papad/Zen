@@ -76,10 +76,10 @@
         <action
             android:id="@+id/action_settingsFragment_to_restoreFolderFragment"
             app:destination="@id/restoreFolderFragment"
-            app:enterAnim="@anim/zen_open_enter"
-            app:exitAnim="@anim/zen_open_exit"
-            app:popEnterAnim="@anim/zen_close_enter"
-            app:popExitAnim="@anim/zen_close_exit" />
+            app:enterAnim="@anim/enter_from_bottom"
+            app:exitAnim="@anim/no_change"
+            app:popEnterAnim="@anim/no_change"
+            app:popExitAnim="@anim/exit_to_bottom"/>
     </fragment>
     <fragment
         android:id="@+id/splashFragment"
