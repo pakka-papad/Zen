@@ -11,15 +11,11 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -438,17 +434,14 @@ private fun MusicLibrarySettings(
                     text = "Restore blacklisted folders",
                     style = MaterialTheme.typography.titleMedium
                 )
-                Icon(
-                    imageVector = Icons.Outlined.KeyboardArrowRight,
-                    contentDescription = "right arrow",
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
-                        .clickable(
-                            onClick = onRestoreFoldersClicked
-                        ),
-                    tint = MaterialTheme.colorScheme.onPrimary
+                Button(
+                    onClick = onRestoreFoldersClicked,
+                    content = {
+                        Text(
+                            text = "Restore",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
                 )
             }
         }
