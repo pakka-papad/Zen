@@ -58,9 +58,9 @@ class SettingsFragment : Fragment() {
                         navController.navigate(R.id.action_settingsFragment_to_whatsNewFragment)
                     }
                 } }
-                val blacklistedFoldersClicked = remember{ {
+                val onRestoreFoldersClicked = remember{ {
                     if (navController.currentDestination?.id == R.id.settingsFragment){
-                        navController.navigate(R.id.action_settingsFragment_to_blacklistedFolderFragment)
+                        navController.navigate(R.id.action_settingsFragment_to_restoreFolderFragment)
                     }
                 } }
 
@@ -91,7 +91,7 @@ class SettingsFragment : Fragment() {
                                 disabledCrashlytics = isCrashlyticsDisabled,
                                 onAutoReportCrashClicked = preferenceProvider::toggleCrashlytics,
                                 onWhatsNewClicked = whatsNewClicked,
-                                onBlacklistedFoldersClicked = blacklistedFoldersClicked
+                                onRestoreFoldersClicked = onRestoreFoldersClicked
                             )
                         }
                     )

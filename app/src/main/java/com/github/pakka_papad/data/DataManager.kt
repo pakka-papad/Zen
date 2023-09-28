@@ -91,9 +91,13 @@ class DataManager(
         cleanData()
     }
 
-    suspend fun removeFolderFromBlacklist(folder: BlacklistedFolder){
-        daoCollection.blacklistedFolderDao.deleteFolder(folder)
-        blacklistedFolderPaths.remove(folder.path)
+    suspend fun removeFoldersFromBlacklist(folders: List<BlacklistedFolder>){
+        folders.forEach { folder ->
+            try {
+                daoCollection.blacklistedFolderDao.deleteFolder(folder)
+                blacklistedFolderPaths.remove(folder.path)
+            } catch (_: Exception){ }
+        }
     }
 
     suspend fun createPlaylist(playlistName: String) {

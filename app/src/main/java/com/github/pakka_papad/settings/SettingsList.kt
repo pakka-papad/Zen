@@ -52,7 +52,7 @@ fun SettingsList(
     disabledCrashlytics: Boolean,
     onAutoReportCrashClicked: (Boolean) -> Unit,
     onWhatsNewClicked: () -> Unit,
-    onBlacklistedFoldersClicked: () -> Unit,
+    onRestoreFoldersClicked: () -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -72,7 +72,7 @@ fun SettingsList(
                 scanStatus = scanStatus,
                 onScanClicked = onScanClicked,
                 onRestoreClicked = onRestoreClicked,
-                onBlacklistedFoldersClicked = onBlacklistedFoldersClicked
+                onRestoreFoldersClicked = onRestoreFoldersClicked
             )
         }
         item {
@@ -355,7 +355,7 @@ private fun MusicLibrarySettings(
     scanStatus: ScanStatus,
     onScanClicked: () -> Unit,
     onRestoreClicked: () -> Unit,
-    onBlacklistedFoldersClicked: () -> Unit,
+    onRestoreFoldersClicked: () -> Unit,
 ) {
     OutlinedBox(
         label = "Music library",
@@ -435,7 +435,7 @@ private fun MusicLibrarySettings(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Blacklisted folders",
+                    text = "Restore blacklisted folders",
                     style = MaterialTheme.typography.titleMedium
                 )
                 Icon(
@@ -446,7 +446,7 @@ private fun MusicLibrarySettings(
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.primary)
                         .clickable(
-                            onClick = onBlacklistedFoldersClicked
+                            onClick = onRestoreFoldersClicked
                         ),
                     tint = MaterialTheme.colorScheme.onPrimary
                 )

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,6 +20,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import com.github.pakka_papad.components.CancelConfirmTopBar
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.ui.theme.ZenTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -48,14 +50,18 @@ class RestoreFragment: Fragment() {
                 ZenTheme(theme) {
                     val songs by viewModel.blackListedSongs.collectAsStateWithLifecycle()
                     val selectList = viewModel.restoreList
+                    val restored by viewModel.restored.collectAsStateWithLifecycle()
+                    LaunchedEffect(key1 = restored){
+                        if (restored){
+                            navController.popBackStack()
+                        }
+                    }
                     Scaffold(
                         topBar = {
-                            RestoreTopBar(
+                            CancelConfirmTopBar(
                                 onCancelClicked = navController::popBackStack,
-                                onConfirmClicked = {
-                                    viewModel.restoreSongs()
-                                    navController.popBackStack()
-                                }
+                                onConfirmClicked = viewModel::restoreSongs,
+                                title = "Restore songs"
                             )
                         },
                         content = { paddingValues ->
