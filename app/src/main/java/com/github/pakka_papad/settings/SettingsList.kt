@@ -74,8 +74,11 @@ fun SettingsList(
             .fillMaxSize()
             .padding(horizontal = 10.dp),
         contentPadding = paddingValues,
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
+        item {
+            GroupTitle(title = "Look and feel")
+        }
         item {
             LookAndFeelSettings(
                 themePreference = themePreference,
@@ -87,12 +90,18 @@ fun SettingsList(
             )
         }
         item {
+            GroupTitle(title = "Music library")
+        }
+        item {
             MusicLibrarySettings(
                 scanStatus = scanStatus,
                 onScanClicked = onScanClicked,
                 onRestoreClicked = onRestoreClicked,
                 onRestoreFoldersClicked = onRestoreFoldersClicked
             )
+        }
+        item {
+            GroupTitle(title = "Report bug")
         }
         item {
             ReportBug(
@@ -106,6 +115,19 @@ fun SettingsList(
             )
         }
     }
+}
+
+@Composable
+fun GroupTitle(
+    title: String,
+){
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier
+            .padding(start = 8.dp, top = 8.dp)
+    )
 }
 
 @Composable
@@ -706,10 +728,10 @@ private fun MadeBy(
 
 private fun Modifier.group() = composed {
     this
-    .fillMaxWidth()
-    .padding(8.dp)
-    .clip(MaterialTheme.shapes.large)
-    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
+        .fillMaxWidth()
+        .padding(8.dp)
+        .clip(MaterialTheme.shapes.large)
+        .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
 }
 
 
