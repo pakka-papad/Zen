@@ -15,7 +15,10 @@ import android.widget.Toast
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.Timeline
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.analytics.PlaybackStatsListener
 import com.github.pakka_papad.*
 import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.ZenCrashReporter
@@ -27,8 +30,9 @@ import kotlinx.coroutines.*
 import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
-@AndroidEntryPoint
+@UnstableApi @AndroidEntryPoint
 class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback {
 
     @Inject
@@ -52,6 +56,20 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
 
     private val job = SupervisorJob()
     private val scope = CoroutineScope(job + Dispatchers.Default)
+
+    private val playTimeThresholdMs = 10.seconds.inWholeMilliseconds
+
+    private val playbackStatsListener = PlaybackStatsListener(false) { eventTime, playbackStats ->
+        if (playbackStats.totalPlayTimeMs < playTimeThresholdMs) return@PlaybackStatsListener
+        val window = eventTime.timeline.getWindow(eventTime.windowIndex, Timeline.Window())
+        try {
+            window.mediaItem.localConfiguration?.tag?.let {
+                dataManager.addPlayHistory(it as String)
+            }
+        } catch (_ : Exception){
+
+        }
+    }
 
     companion object {
         const val MEDIA_SESSION = "media_session"
@@ -136,6 +154,7 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
         broadcastReceiver?.startListening(this)
         mediaSession.setCallback(mediaSessionCallback)
         exoPlayer.addListener(exoPlayerListener)
+        exoPlayer.addAnalyticsListener(playbackStatsListener)
 
         startForeground(
             ZenNotificationManager.PLAYER_NOTIFICATION_ID,
@@ -181,6 +200,7 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
         exoPlayer.removeListener(exoPlayerListener)
+        exoPlayer.removeAnalyticsListener(playbackStatsListener)
         mediaSession.release()
         dataManager.stopPlayerRunning()
         broadcastReceiver?.stopListening()
@@ -260,7 +280,10 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
     override fun setQueue(newQueue: List<Song>, startPlayingFromIndex: Int) {
         scope.launch {
             val mediaItems = newQueue.map {
-                MediaItem.fromUri(Uri.fromFile(File(it.location)))
+                MediaItem.Builder().apply {
+                    setUri(Uri.fromFile(File(it.location)))
+                    setTag(it.location)
+                }.build()
             }
             withContext(Dispatchers.Main){
                 exoPlayer.stop()
@@ -281,7 +304,12 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
 
     @Synchronized
     override fun addToQueue(song: Song) {
-        exoPlayer.addMediaItem(MediaItem.fromUri(Uri.fromFile(File(song.location))))
+        exoPlayer.addMediaItem(
+            MediaItem.Builder().apply {
+                setUri(Uri.fromFile(File(song.location)))
+                setTag(song.location)
+            }.build()
+        )
     }
 
     @Synchronized

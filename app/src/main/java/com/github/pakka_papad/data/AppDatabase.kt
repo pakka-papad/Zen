@@ -3,6 +3,8 @@ package com.github.pakka_papad.data
 import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import com.github.pakka_papad.data.analytics.PlayHistory
+import com.github.pakka_papad.data.analytics.PlayHistoryDao
 import com.github.pakka_papad.data.daos.*
 import com.github.pakka_papad.data.music.*
 
@@ -17,7 +19,8 @@ import com.github.pakka_papad.data.music.*
         Composer::class,
         Lyricist::class,
         BlacklistedSong::class,
-        BlacklistedFolder::class
+        BlacklistedFolder::class,
+        PlayHistory::class,
     ],
     version = 2, exportSchema = true,
     autoMigrations = [
@@ -45,5 +48,7 @@ abstract class AppDatabase: RoomDatabase() {
     abstract fun blacklistDao(): BlacklistDao
 
     abstract fun blacklistedFolderDao(): BlacklistedFolderDao
+
+    abstract fun playHistoryDao(): PlayHistoryDao
 
 }

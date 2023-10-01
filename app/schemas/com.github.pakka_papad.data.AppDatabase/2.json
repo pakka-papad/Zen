@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "16ab723799c1216a654f545552500355",
+    "identityHash": "2659cc368591b3e2c554197b62818b60",
     "entities": [
       {
         "tableName": "song_table",
@@ -541,12 +541,51 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "play_history_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`songLocation` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, PRIMARY KEY(`songLocation`, `timestamp`), FOREIGN KEY(`songLocation`) REFERENCES `song_table`(`location`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "songLocation",
+            "columnName": "songLocation",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "songLocation",
+            "timestamp"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "song_table",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "songLocation"
+            ],
+            "referencedColumns": [
+              "location"
+            ]
+          }
+        ]
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '16ab723799c1216a654f545552500355')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2659cc368591b3e2c554197b62818b60')"
     ]
   }
 }

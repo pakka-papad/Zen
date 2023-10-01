@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Build
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
+import com.github.pakka_papad.data.analytics.PlayHistory
 import com.github.pakka_papad.data.components.*
 import com.github.pakka_papad.data.music.*
 import com.github.pakka_papad.data.notification.ZenNotificationManager
@@ -196,6 +197,7 @@ class DataManager(
     private var remIdx = 0
 
     @Synchronized
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     fun setQueue(newQueue: List<Song>, startPlayingFromIndex: Int) {
         if (newQueue.isEmpty()) return
         _queue.apply {
@@ -252,5 +254,20 @@ class DataManager(
         fun setQueue(newQueue: List<Song>, startPlayingFromIndex: Int)
         fun addToQueue(song: Song)
         fun updateNotification()
+    }
+
+    fun addPlayHistory(songLocation: String){
+        scope.launch {
+            try {
+                daoCollection.playHistoryDao.addRecord(
+                    PlayHistory(
+                        songLocation,
+                        System.currentTimeMillis()
+                    )
+                )
+            } catch (_: Exception){
+
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.github.pakka_papad.di
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
@@ -67,6 +68,7 @@ object AppModule {
                 playlistDao = db.playlistDao(),
                 blacklistDao = db.blacklistDao(),
                 blacklistedFolderDao = db.blacklistedFolderDao(),
+                playHistoryDao = db.playHistoryDao()
             ),
             scope = scope,
             songExtractor = extractor
@@ -79,6 +81,7 @@ object AppModule {
         return ZenNotificationManager(context)
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     @Singleton
     @Provides
     fun providesExoPlayer(
