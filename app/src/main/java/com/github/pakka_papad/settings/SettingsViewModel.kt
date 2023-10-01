@@ -43,10 +43,21 @@ class SettingsViewModel @Inject constructor(
 
     init {
         val selectedScreens = prefs.selectedTabs.value ?: listOf()
-        val currentSelection = Screens.values().map {
-            Pair(it, it.ordinal in selectedScreens )
+        val allScreens = Screens.values()
+        val currentSelection = arrayListOf<Pair<Screens,Boolean>>()
+        selectedScreens.forEach {
+            try {
+                currentSelection += Pair(allScreens[it],true)
+            } catch (_: Exception){
+
+            }
         }
-        _tabsSelection.update { currentSelection }
+        allScreens.forEach {
+            if (!selectedScreens.contains(it.ordinal)){
+                currentSelection += Pair(it,false)
+            }
+        }
+        _tabsSelection.update { currentSelection.toList() }
     }
 
     fun onTabsSelectChanged(screen: Screens, isSelected: Boolean){
@@ -78,6 +89,8 @@ class SettingsViewModel @Inject constructor(
                 Toast.makeText(context, "Minimum one tab selection is required", Toast.LENGTH_SHORT).show()
             } else if (order.size > 5){
                 Toast.makeText(context, "Maximum of five tab selections are allowed", Toast.LENGTH_SHORT).show()
+            } else if(!order.contains(Screens.Songs.ordinal)) {
+                Toast.makeText(context, "Songs tab cannot be removed", Toast.LENGTH_SHORT).show()
             } else {
                 prefs.updateSelectedTabs(order)
             }
