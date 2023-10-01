@@ -7,19 +7,28 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.widget.Toast
+import androidx.annotation.DrawableRes
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -33,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.BuildConfig
 import com.github.pakka_papad.R
 import com.github.pakka_papad.Screens
-import com.github.pakka_papad.components.OutlinedBox
 import com.github.pakka_papad.data.UserPreferences
 import com.github.pakka_papad.data.UserPreferences.Accent
 import com.github.pakka_papad.data.music.ScanStatus
@@ -109,131 +117,91 @@ private fun LookAndFeelSettings(
     onTabsOrderChanged: (fromIdx: Int, toIdx: Int) -> Unit,
     onTabsOrderConfirmed: () -> Unit,
 ) {
-    val spacerModifier = Modifier.height(10.dp)
-    OutlinedBox(
-        label = "Look and feel",
-        contentPadding = PaddingValues(vertical = 13.dp, horizontal = 20.dp),
-        modifier = Modifier.padding(10.dp)
-    ) {
-        Column(Modifier.fillMaxWidth()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Material You",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Switch(checked = themePreference.useMaterialYou, onCheckedChange = {
-                        onPreferenceChanged(themePreference.copy(useMaterialYou = it))
-                    })
+    val seedColor by remember(themePreference.accent){
+        derivedStateOf {
+            themePreference.accent.getSeedColor()
+        }
+    }
+    var showAccentSelector by remember { mutableStateOf(false) }
+    var showSelectorDialog by remember { mutableStateOf(false) }
+    val isSystemInDarkMode = isSystemInDarkTheme()
+    val icon by remember(themePreference.theme) { derivedStateOf {
+        when (themePreference.theme) {
+            UserPreferences.Theme.LIGHT_MODE, UserPreferences.Theme.UNRECOGNIZED -> R.drawable.baseline_light_mode_40
+            UserPreferences.Theme.DARK_MODE -> R.drawable.baseline_dark_mode_40
+            UserPreferences.Theme.USE_SYSTEM_MODE -> {
+                if (isSystemInDarkMode){
+                    R.drawable.baseline_dark_mode_40
+                } else {
+                    R.drawable.baseline_light_mode_40
                 }
-                Spacer(spacerModifier)
-            }
-            val seedColor by remember(themePreference.accent){
-                derivedStateOf {
-                    themePreference.accent.getSeedColor()
-                }
-            }
-            var showAccentSelector by remember { mutableStateOf(false) }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .alpha(if (themePreference.useMaterialYou) 0.5f else 1f),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = "Accent color",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Canvas(
-                    modifier = Modifier
-                        .size(50.dp)
-                        .clickable(
-                            enabled = (!themePreference.useMaterialYou),
-                            onClick = { showAccentSelector = true }
-                        )
-                ){
-                    drawCircle(color = seedColor)
-                }
-            }
-            if (showAccentSelector){
-                AccentSelectorDialog(
-                    themePreference = themePreference,
-                    onPreferenceChanged = onPreferenceChanged,
-                    onDismissRequest = { showAccentSelector = false }
-                )
-            }
-            Spacer(spacerModifier)
-            var showSelectorDialog by remember { mutableStateOf(false) }
-            val buttonText = when (themePreference.theme) {
-                UserPreferences.Theme.LIGHT_MODE, UserPreferences.Theme.UNRECOGNIZED -> "Light"
-                UserPreferences.Theme.DARK_MODE -> "Dark"
-                UserPreferences.Theme.USE_SYSTEM_MODE -> "System"
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "App theme",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Button(
-                    onClick = { showSelectorDialog = true },
-                    content = {
-                        Text(
-                            text = buttonText,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                )
-            }
-            if (showSelectorDialog) {
-               ThemeSelectorDialog(
-                   themePreference = themePreference,
-                   onPreferenceChanged = onPreferenceChanged,
-                   onDismissRequest = { showSelectorDialog = false }
-               )
-            }
-            Spacer(spacerModifier)
-            var showRearrangeTabsDialog by remember{ mutableStateOf(false) }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Tabs arrangement",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Button(
-                    onClick = { showRearrangeTabsDialog = true },
-                    content = {
-                        Text(
-                            text = "Rearrange",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                )
-            }
-            if (showRearrangeTabsDialog){
-                RearrangeTabsDialog(
-                    tabsSelection = tabsSelection,
-                    onDismissRequest = { showRearrangeTabsDialog = false },
-                    onSelectChange = onTabsSelectChange,
-                    onTabsOrderChanged = onTabsOrderChanged,
-                    onTabsOrderConfirmed = {
-                        showRearrangeTabsDialog = false
-                        onTabsOrderConfirmed()
-                    }
-                )
             }
         }
+    } }
+    var showRearrangeTabsDialog by remember{ mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier.group()
+    ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            Setting(
+                title = "Material You",
+                icon = R.drawable.baseline_palette_40,
+                description = "Use a theme generated from your device wallpaper",
+                isChecked = themePreference.useMaterialYou,
+                onCheckedChanged = {
+                    onPreferenceChanged(themePreference.copy(useMaterialYou = it))
+                },
+            )
+        }
+        AccentSetting(
+            onClick = {
+                if (!themePreference.useMaterialYou) {
+                    showAccentSelector = true
+                }
+            },
+            seedColor = seedColor,
+            modifier = Modifier
+                .alpha(if (themePreference.useMaterialYou) 0.5f else 1f),
+        )
+        Setting(
+            title = "Theme mode",
+            icon = icon,
+            onClick = { showSelectorDialog = true },
+            description = "Choose a theme mode"
+        )
+        Setting(
+            title = "Tabs arrangement",
+            icon = R.drawable.ic_baseline_library_music_40,
+            description = "Select and reorder the tabs shown",
+            onClick = { showRearrangeTabsDialog = true }
+        )
+    }
+    if (showAccentSelector){
+        AccentSelectorDialog(
+            themePreference = themePreference,
+            onPreferenceChanged = onPreferenceChanged,
+            onDismissRequest = { showAccentSelector = false }
+        )
+    }
+    if (showSelectorDialog) {
+        ThemeSelectorDialog(
+            themePreference = themePreference,
+            onPreferenceChanged = onPreferenceChanged,
+            onDismissRequest = { showSelectorDialog = false }
+        )
+    }
+    if (showRearrangeTabsDialog){
+        RearrangeTabsDialog(
+            tabsSelection = tabsSelection,
+            onDismissRequest = { showRearrangeTabsDialog = false },
+            onSelectChange = onTabsSelectChange,
+            onTabsOrderChanged = onTabsOrderChanged,
+            onTabsOrderConfirmed = {
+                showRearrangeTabsDialog = false
+                onTabsOrderConfirmed()
+            }
+        )
     }
 }
 
@@ -243,6 +211,7 @@ private fun AccentSelectorDialog(
     onPreferenceChanged: (ThemePreference) -> Unit,
     onDismissRequest: () -> Unit,
 ){
+    val sizeModifier = Modifier.size(50.dp)
     AlertDialog(
         title = {
             Text(
@@ -272,19 +241,28 @@ private fun AccentSelectorDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Canvas(Modifier.size(50.dp).clickable {
-                        onPreferenceChanged(themePreference.copy(accent = Accent.Default))
-                    }) {
+                    Canvas(
+                        modifier = sizeModifier
+                            .clickable {
+                                onPreferenceChanged(themePreference.copy(accent = Accent.Default))
+                            }
+                    ) {
                         drawCircle(Accent.Default.getSeedColor())
                     }
-                    Canvas(Modifier.size(50.dp).clickable {
-                        onPreferenceChanged(themePreference.copy(accent = Accent.Malibu))
-                    }) {
+                    Canvas(
+                        modifier = sizeModifier
+                            .clickable {
+                                onPreferenceChanged(themePreference.copy(accent = Accent.Malibu))
+                            }
+                    ) {
                         drawCircle(Accent.Malibu.getSeedColor())
                     }
-                    Canvas(Modifier.size(50.dp).clickable {
-                        onPreferenceChanged(themePreference.copy(accent = Accent.Melrose))
-                    }) {
+                    Canvas(
+                        modifier = sizeModifier
+                            .clickable {
+                                onPreferenceChanged(themePreference.copy(accent = Accent.Melrose))
+                            }
+                    ) {
                         drawCircle(Accent.Melrose.getSeedColor())
                     }
                 }
@@ -292,19 +270,28 @@ private fun AccentSelectorDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Canvas(Modifier.size(50.dp).clickable {
-                        onPreferenceChanged(themePreference.copy(accent = Accent.Elm))
-                    }) {
+                    Canvas(
+                        modifier = sizeModifier
+                            .clickable {
+                                onPreferenceChanged(themePreference.copy(accent = Accent.Elm))
+                            }
+                    ) {
                         drawCircle(Accent.Elm.getSeedColor())
                     }
-                    Canvas(Modifier.size(50.dp).clickable {
-                        onPreferenceChanged(themePreference.copy(accent = Accent.Magenta))
-                    }) {
+                    Canvas(
+                        modifier = sizeModifier
+                            .clickable {
+                                onPreferenceChanged(themePreference.copy(accent = Accent.Magenta))
+                            }
+                    ) {
                         drawCircle(Accent.Magenta.getSeedColor())
                     }
-                    Canvas(Modifier.size(50.dp).clickable {
-                        onPreferenceChanged(themePreference.copy(accent = Accent.JacksonsPurple))
-                    }) {
+                    Canvas(
+                        modifier = sizeModifier
+                            .clickable {
+                                onPreferenceChanged(themePreference.copy(accent = Accent.JacksonsPurple))
+                            }
+                    ) {
                         drawCircle(Accent.JacksonsPurple.getSeedColor())
                     }
                 }
@@ -493,7 +480,7 @@ private fun SelectableMovableScreen(
         Icon(
             painter = painterResource(id = R.drawable.baseline_drag_indicator_40),
             contentDescription = "move icon",
-            modifier = Modifier.size(35.dp),
+            modifier = Modifier.size(32.dp),
             tint = MaterialTheme.colorScheme.onSecondaryContainer
         )
     }
@@ -506,99 +493,56 @@ private fun MusicLibrarySettings(
     onRestoreClicked: () -> Unit,
     onRestoreFoldersClicked: () -> Unit,
 ) {
-    OutlinedBox(
-        label = "Music library",
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 13.dp),
-        modifier = Modifier.padding(10.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Rescan for music",
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Button(
-                    onClick = {
-                        if (scanStatus is ScanStatus.ScanNotRunning){
-                            onScanClicked()
-                        }
-                    },
-                    content = {
-                        when (scanStatus) {
-                            is ScanStatus.ScanNotRunning -> {
-                                Text(
-                                    text = "Scan",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                )
-                            }
-                            is ScanStatus.ScanComplete -> {
-                                Text(
-                                    text = "Done",
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                            }
-                            is ScanStatus.ScanProgress -> {
-                                var totalSongs by remember { mutableStateOf(0) }
-                                var scanProgress by remember { mutableStateOf(0f) }
-                                scanProgress = (scanStatus.parsed.toFloat()) / (scanStatus.total.toFloat())
-                                totalSongs = scanStatus.total
-                                CircularProgressIndicator(
-                                    progress = scanProgress,
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                )
-                            }
-                            else -> {}
-                        }
-                    }
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Restore blacklisted songs",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Button(
-                    onClick = onRestoreClicked,
-                    content = {
-                        Text(
-                            text = "Restore",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Restore blacklisted folders",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Button(
-                    onClick = onRestoreFoldersClicked,
-                    content = {
-                        Text(
-                            text = "Restore",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                )
+    var progress by remember { mutableStateOf(0f) }
+    LaunchedEffect(key1 = scanStatus){
+        if (scanStatus is ScanStatus.ScanComplete) {
+            progress = 1f
+        } else if (scanStatus is ScanStatus.ScanProgress){
+            progress = if (scanStatus.total == 0){
+                1f
+            } else {
+                scanStatus.parsed.toFloat()/scanStatus.total.toFloat()
             }
         }
-
+    }
+    Column(
+        modifier = Modifier
+            .group()
+            .animateContentSize(),
+    ) {
+        Setting(
+            title = "Rescan for music",
+            icon = Icons.Outlined.Search,
+            description = "Search for all the songs on this device and update the library",
+            onClick = {
+                if (scanStatus is ScanStatus.ScanNotRunning){
+                    onScanClicked()
+                }
+            },
+        )
+        if (scanStatus is ScanStatus.ScanProgress){
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth(),
+                progress = progress
+            )
+        } else if (scanStatus is ScanStatus.ScanComplete){
+            Text(
+                text = "Done",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+        Setting(
+            title = "Restore blacklisted songs",
+            icon = R.drawable.baseline_settings_backup_restore_40,
+            onClick = onRestoreClicked
+        )
+        Setting(
+            title = "Restore blacklisted folders",
+            icon = R.drawable.baseline_settings_backup_restore_40,
+            onClick = onRestoreFoldersClicked
+        )
     }
 }
 
@@ -617,63 +561,38 @@ private fun ReportBug(
     onAutoReportCrashClicked: (Boolean) -> Unit,
 ){
     val context = LocalContext.current
-    OutlinedBox(
-        label = "Report",
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 13.dp),
-        modifier = Modifier.padding(10.dp)
+    Column(
+        modifier = Modifier.group()
     ) {
-        Column(Modifier.fillMaxWidth()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Auto crash reporting",
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Switch(
-                    checked = !disabledCrashlytics,
-                    onCheckedChange = onAutoReportCrashClicked
-                )
+        Setting(
+            title = "Auto crash reporting",
+            icon = R.drawable.baseline_send_40,
+            description = "Enable this to automatically send crash reports to the developer",
+            isChecked = !disabledCrashlytics,
+            onCheckedChanged = onAutoReportCrashClicked,
+        )
+        Setting(
+            title = "Report any bugs/crashes",
+            icon = R.drawable.baseline_bug_report_40,
+            description = "Manually report any bugs or crashes you faced",
+            onClick = {
+                val intent = Intent(Intent.ACTION_SENDTO)
+                intent.apply {
+                    putExtra(Intent.EXTRA_EMAIL, arrayOf("music.zen@outlook.com"))
+                    putExtra(Intent.EXTRA_SUBJECT, "Zen Music | Bug Report")
+                    putExtra(
+                        Intent.EXTRA_TEXT,
+                        getSystemDetail() + "\n\n[Describe the bug or crash here]"
+                    )
+                    data = Uri.parse("mailto:")
+                }
+                try {
+                    context.startActivity(intent)
+                } catch (e: Exception) {
+                    Timber.e(e)
+                }
             }
-            Spacer(Modifier.height(10.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Report any bugs/crashes",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Button(
-                    onClick = {
-                        val intent = Intent(Intent.ACTION_SENDTO)
-                        intent.apply {
-                            putExtra(Intent.EXTRA_EMAIL, arrayOf("music.zen@outlook.com"))
-                            putExtra(Intent.EXTRA_SUBJECT, "Zen Music | Bug Report")
-                            putExtra(
-                                Intent.EXTRA_TEXT,
-                                getSystemDetail() + "\n\n[Describe the bug or crash here]"
-                            )
-                            data = Uri.parse("mailto:")
-                        }
-                        try {
-                            context.startActivity(intent)
-                        } catch (e: Exception) {
-                            Timber.e(e)
-                        }
-                    },
-                    content = {
-                        Text(
-                            text = "Report",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                )
-            }
-        }
+        )
     }
 }
 
@@ -782,5 +701,176 @@ private fun MadeBy(
             )
         }
         Spacer(Modifier.height(36.dp))
+    }
+}
+
+private fun Modifier.group() = composed {
+    this
+    .fillMaxWidth()
+    .padding(8.dp)
+    .clip(MaterialTheme.shapes.large)
+    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
+}
+
+
+@Composable
+private fun Setting(
+    title: String,
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+    description: String? = null,
+    onClick: (() -> Unit)? = null,
+    isChecked: Boolean? = null,
+    onCheckedChanged: ((Boolean) -> Unit)? = null,
+){
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .then(
+                if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
+            )
+            .padding(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer)
+                .padding(6.dp),
+            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ){
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+            )
+            description?.let {
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                )
+            }
+        }
+        isChecked?.let {
+            Switch(
+                checked = isChecked,
+                onCheckedChange = onCheckedChanged,
+            )
+        }
+    }
+}
+
+
+@Composable
+private fun Setting(
+    title: String,
+    @DrawableRes icon: Int,
+    modifier: Modifier = Modifier,
+    description: String? = null,
+    onClick: (() -> Unit)? = null,
+    isChecked: Boolean? = null,
+    onCheckedChanged: ((Boolean) -> Unit)? = null,
+){
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .then(
+                if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
+            )
+            .padding(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(id = icon),
+            contentDescription = null,
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer)
+                .padding(6.dp),
+            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ){
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+            )
+            description?.let {
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                )
+            }
+        }
+        isChecked?.let {
+            Switch(
+                checked = isChecked,
+                onCheckedChange = onCheckedChanged,
+            )
+        }
+    }
+}
+
+@Composable
+private fun AccentSetting(
+    onClick: () -> Unit,
+    seedColor: Color,
+    modifier: Modifier = Modifier,
+){
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.baseline_colorize_40),
+            contentDescription = null,
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer)
+                .padding(6.dp),
+            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ){
+            Text(
+                text = "Accent color",
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                text = "Choose a theme color",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            )
+        }
+        Box(
+            modifier = Modifier
+                .height(32.dp)
+                .width(52.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(color = seedColor)
+        )
     }
 }
