@@ -12,7 +12,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,7 +30,6 @@ import com.github.pakka_papad.components.SmallTopBar
 import com.github.pakka_papad.R
 import com.github.pakka_papad.Screens
 import com.github.pakka_papad.components.SortOptionChooser
-import com.github.pakka_papad.components.SortOptions
 import com.github.pakka_papad.components.getSortOptions
 
 @Composable
@@ -42,11 +41,9 @@ fun HomeTopBar(
     currentSortOrder: Map<Int,Int>,
 ) {
     var sortMenuVisible by  remember { mutableStateOf(false) }
-    var options by remember { mutableStateOf(listOf<SortOptions>()) }
-    LaunchedEffect(key1 = currentScreen){
-        sortMenuVisible = false
-        options = currentScreen.getSortOptions()
-    }
+    val options by remember(currentScreen.ordinal) { derivedStateOf {
+        currentScreen.getSortOptions()
+    } }
     SmallTopBar(
         leadingIcon = { },
         title = buildAnnotatedString {
