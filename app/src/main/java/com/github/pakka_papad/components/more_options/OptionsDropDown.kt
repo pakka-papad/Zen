@@ -20,31 +20,33 @@ fun OptionsDropDown(
     offset: DpOffset = DpOffset(0.dp, 0.dp),
 ) {
     if (options.isEmpty()) return
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = onDismissRequest,
-        offset = offset,
-    ) {
-        options.forEach { option ->
-            DropdownMenuItem(
-                onClick = {
-                    onDismissRequest()
-                    option.onClick()
-                },
-                text = {
-                    Text(
-                        text = option.text,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(option.icon),
-                        modifier = Modifier.size(24.dp),
-                        contentDescription = option.text
-                    )
-                }
-            )
+    MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = MaterialTheme.shapes.large)) {
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = onDismissRequest,
+            offset = offset,
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    onClick = {
+                        onDismissRequest()
+                        option.onClick()
+                    },
+                    text = {
+                        Text(
+                            text = option.text,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(option.icon),
+                            modifier = Modifier.size(24.dp),
+                            contentDescription = option.text
+                        )
+                    }
+                )
+            }
         }
     }
 }
