@@ -6,7 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import com.github.pakka_papad.components.SortOptions
 import com.github.pakka_papad.data.DataManager
+import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.*
 import com.github.pakka_papad.storage_explorer.*
 import com.github.pakka_papad.storage_explorer.Directory
@@ -22,10 +24,25 @@ class HomeViewModel @Inject constructor(
     private val manager: DataManager,
     private val exoPlayer: ExoPlayer,
     private val songExtractor: SongExtractor,
+    private val prefs: ZenPreferenceProvider,
 ) : ViewModel() {
 
     val songs = manager.getAll.songs()
-        .catch { exception ->
+        .combine(prefs.songSortOrder){ songs, sortOrder ->
+            when(sortOrder){
+                SortOptions.TitleASC.ordinal -> songs.sortedBy { it.title }
+                SortOptions.TitleDSC.ordinal -> songs.sortedByDescending { it.title }
+                SortOptions.AlbumASC.ordinal -> songs.sortedBy { it.album }
+                SortOptions.AlbumDSC.ordinal -> songs.sortedByDescending { it.album }
+                SortOptions.ArtistASC.ordinal -> songs.sortedBy { it.artist }
+                SortOptions.ArtistDSC.ordinal -> songs.sortedByDescending { it.artist }
+                SortOptions.YearASC.ordinal -> songs.sortedBy { it.year }
+                SortOptions.YearDSC.ordinal -> songs.sortedByDescending { it.year }
+                SortOptions.DurationASC.ordinal -> songs.sortedBy { it.durationMillis }
+                SortOptions.DurationDSC.ordinal -> songs.sortedByDescending { it.durationMillis }
+                else -> songs
+            }
+        }.catch { exception ->
             Timber.e(exception)
         }.stateIn(
             scope = viewModelScope,
@@ -34,7 +51,13 @@ class HomeViewModel @Inject constructor(
         )
 
     val albums = manager.getAll.albums()
-        .catch { exception ->
+        .combine(prefs.albumSortOrder){ albums, sortOrder ->
+            when(sortOrder){
+                SortOptions.TitleASC.ordinal -> albums.sortedBy { it.name }
+                SortOptions.TitleDSC.ordinal -> albums.sortedByDescending { it.name }
+                else -> albums
+            }
+        }.catch { exception ->
             Timber.e(exception)
         }.stateIn(
             scope = viewModelScope,
@@ -58,6 +81,14 @@ class HomeViewModel @Inject constructor(
                 Person.Composer -> manager.getAll.composers()
                 Person.Lyricist -> manager.getAll.lyricists()
             }
+        }.combine(prefs.artistSortOrder){ artists, sortOrder ->
+            when(sortOrder){
+                SortOptions.NameASC.ordinal -> artists.sortedBy { it.name }
+                SortOptions.NameDSC.ordinal -> artists.sortedByDescending { it.name }
+                SortOptions.SongsCountASC.ordinal -> artists.sortedBy { it.count }
+                SortOptions.SongsCountDSC.ordinal -> artists.sortedByDescending { it.count }
+                else -> artists
+            }
         }.catch { exception ->
             Timber.e(exception)
         }.stateIn(
@@ -67,7 +98,15 @@ class HomeViewModel @Inject constructor(
         )
 
     val playlistsWithSongCount = manager.getAll.playlists()
-        .catch { exception ->
+        .combine(prefs.playlistSortOrder){ playlists, sortOrder ->
+            when(sortOrder){
+                SortOptions.NameASC.ordinal -> playlists.sortedBy { it.playlistName }
+                SortOptions.NameDSC.ordinal -> playlists.sortedByDescending { it.playlistName }
+                SortOptions.SongsCountASC.ordinal -> playlists.sortedBy { it.count }
+                SortOptions.SongsCountDSC.ordinal -> playlists.sortedByDescending { it.count }
+                else -> playlists
+            }
+        }.catch { exception ->
             Timber.e(exception)
         }.stateIn(
             scope = viewModelScope,
@@ -76,13 +115,25 @@ class HomeViewModel @Inject constructor(
         )
 
     val genresWithSongCount = manager.getAll.genres()
-        .catch { exception ->
+        .combine(prefs.genreSortOrder){ genres, sortOrder ->
+            when(sortOrder){
+                SortOptions.NameASC.ordinal -> genres.sortedBy { it.genreName }
+                SortOptions.NameDSC.ordinal -> genres.sortedByDescending { it.genreName }
+                SortOptions.SongsCountASC.ordinal -> genres.sortedBy { it.count }
+                SortOptions.SongsCountDSC.ordinal -> genres.sortedByDescending { it.count }
+                else -> genres
+            }
+        }.catch { exception ->
             Timber.e(exception)
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = emptyList()
         )
+
+    fun saveSortOption(screen: Int, option: Int){
+        prefs.updateSortOrder(screen, option)
+    }
 
     val currentSong = manager.currentSong
 
@@ -236,7 +287,28 @@ class HomeViewModel @Inject constructor(
 
 
     private val _filesInCurrentDestination = MutableStateFlow(DirectoryContents())
-    val filesInCurrentDestination = _filesInCurrentDestination.asStateFlow()
+    val filesInCurrentDestination = _filesInCurrentDestination
+        .combine(prefs.folderSortOrder){ files, sortOrder ->
+            when(sortOrder){
+                SortOptions.NameASC.ordinal -> {
+                    DirectoryContents(
+                        directories = files.directories.sortedBy { it.name },
+                        songs = files.songs.sortedBy { it.title }
+                    )
+                }
+                SortOptions.NameDSC.ordinal -> {
+                    DirectoryContents(
+                        directories = files.directories.sortedByDescending { it.name },
+                        songs = files.songs.sortedByDescending { it.title }
+                    )
+                }
+                else -> files
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = DirectoryContents()
+        )
 
     private val explorer = MusicFileExplorer(songExtractor)
 

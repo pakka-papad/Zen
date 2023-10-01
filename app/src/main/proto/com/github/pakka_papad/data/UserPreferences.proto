@@ -28,4 +28,5 @@ message UserPreferences {
   }
   PlaybackParams playbackParams = 6;
   repeated int32 selectedTabs = 7;
+  map<int32, int32> chosenSortOrder = 8;
 }

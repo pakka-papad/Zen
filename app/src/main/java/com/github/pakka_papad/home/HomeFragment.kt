@@ -112,6 +112,8 @@ class HomeFragment : Fragment() {
                     var currentScreen by rememberSaveable { mutableStateOf(Screens.Songs) }
                     val scope = rememberCoroutineScope()
 
+                    val sortOrder by preferenceProvider.sortOrder.collectAsStateWithLifecycle()
+
                     val songs by viewModel.songs.collectAsStateWithLifecycle()
                     val allSongsListState = rememberLazyListState()
 
@@ -244,6 +246,9 @@ class HomeFragment : Fragment() {
                                 HomeTopBar(
                                     onSettingsClicked = navigateToSettings,
                                     onSearchClicked = navigateToSearch,
+                                    currentScreen = currentScreen,
+                                    onSortOptionChosen = viewModel::saveSortOption,
+                                    currentSortOrder = sortOrder,
                                 )
                             },
                             content = {
