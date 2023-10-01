@@ -26,4 +26,11 @@ sealed class CollectionActions(
             text = "Add all to playlist",
             icon = R.drawable.ic_baseline_playlist_add_40
         )
+
+    data class Sort(override val onClick: () -> Unit) :
+        CollectionActions(
+            onClick = onClick,
+            text = "Sort",
+            icon = R.drawable.ic_baseline_sort_40
+        )
 }
