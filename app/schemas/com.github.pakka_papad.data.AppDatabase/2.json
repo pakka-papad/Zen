@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "2659cc368591b3e2c554197b62818b60",
+    "identityHash": "485db92a89456b8d80b0fc5df987a4e3",
     "entities": [
       {
         "tableName": "song_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`location` TEXT NOT NULL, `title` TEXT NOT NULL, `album` TEXT NOT NULL DEFAULT 'Unknown', `size` TEXT NOT NULL, `addedDate` TEXT NOT NULL, `modifiedDate` TEXT NOT NULL, `artist` TEXT NOT NULL DEFAULT 'Unknown', `albumArtist` TEXT NOT NULL DEFAULT 'Unknown', `composer` TEXT NOT NULL DEFAULT 'Unknown', `genre` TEXT NOT NULL DEFAULT 'Unknown', `lyricist` TEXT NOT NULL DEFAULT 'Unknown', `year` INTEGER NOT NULL, `comment` TEXT, `durationMillis` INTEGER NOT NULL, `durationFormatted` TEXT NOT NULL, `bitrate` REAL NOT NULL, `sampleRate` REAL NOT NULL, `bitsPerSample` INTEGER NOT NULL, `mimeType` TEXT, `favourite` INTEGER NOT NULL, `artUri` TEXT, PRIMARY KEY(`location`), FOREIGN KEY(`album`) REFERENCES `album_table`(`name`) ON UPDATE NO ACTION ON DELETE SET DEFAULT , FOREIGN KEY(`artist`) REFERENCES `artist_table`(`name`) ON UPDATE NO ACTION ON DELETE SET DEFAULT , FOREIGN KEY(`genre`) REFERENCES `genre_table`(`genre`) ON UPDATE NO ACTION ON DELETE SET DEFAULT , FOREIGN KEY(`albumArtist`) REFERENCES `album_artist_table`(`name`) ON UPDATE NO ACTION ON DELETE SET DEFAULT , FOREIGN KEY(`lyricist`) REFERENCES `lyricist_table`(`name`) ON UPDATE NO ACTION ON DELETE SET DEFAULT , FOREIGN KEY(`composer`) REFERENCES `composer_table`(`name`) ON UPDATE NO ACTION ON DELETE SET DEFAULT )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`location` TEXT NOT NULL, `title` TEXT NOT NULL, `album` TEXT NOT NULL DEFAULT 'Unknown', `size` TEXT NOT NULL, `addedDate` TEXT NOT NULL, `modifiedDate` TEXT NOT NULL, `artist` TEXT NOT NULL DEFAULT 'Unknown', `albumArtist` TEXT NOT NULL DEFAULT 'Unknown', `composer` TEXT NOT NULL DEFAULT 'Unknown', `genre` TEXT NOT NULL DEFAULT 'Unknown', `lyricist` TEXT NOT NULL DEFAULT 'Unknown', `year` INTEGER NOT NULL, `comment` TEXT, `durationMillis` INTEGER NOT NULL, `durationFormatted` TEXT NOT NULL, `bitrate` REAL NOT NULL, `sampleRate` REAL NOT NULL, `bitsPerSample` INTEGER NOT NULL, `mimeType` TEXT, `favourite` INTEGER NOT NULL, `artUri` TEXT, `playCount` INTEGER NOT NULL DEFAULT 0, `lastPlayed` INTEGER, PRIMARY KEY(`location`), FOREIGN KEY(`album`) REFERENCES `album_table`(`name`) ON UPDATE NO ACTION ON DELETE SET DEFAULT , FOREIGN KEY(`artist`) REFERENCES `artist_table`(`name`) ON UPDATE NO ACTION ON DELETE SET DEFAULT , FOREIGN KEY(`genre`) REFERENCES `genre_table`(`genre`) ON UPDATE NO ACTION ON DELETE SET DEFAULT , FOREIGN KEY(`albumArtist`) REFERENCES `album_artist_table`(`name`) ON UPDATE NO ACTION ON DELETE SET DEFAULT , FOREIGN KEY(`lyricist`) REFERENCES `lyricist_table`(`name`) ON UPDATE NO ACTION ON DELETE SET DEFAULT , FOREIGN KEY(`composer`) REFERENCES `composer_table`(`name`) ON UPDATE NO ACTION ON DELETE SET DEFAULT )",
         "fields": [
           {
             "fieldPath": "location",
@@ -138,6 +138,19 @@
             "fieldPath": "artUri",
             "columnName": "artUri",
             "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "playCount",
+            "columnName": "playCount",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "lastPlayed",
+            "columnName": "lastPlayed",
+            "affinity": "INTEGER",
             "notNull": false
           }
         ],
@@ -585,7 +598,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2659cc368591b3e2c554197b62818b60')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '485db92a89456b8d80b0fc5df987a4e3')"
     ]
   }
 }

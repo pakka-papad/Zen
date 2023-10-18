@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Build
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
-import com.github.pakka_papad.data.analytics.PlayHistory
 import com.github.pakka_papad.data.components.*
 import com.github.pakka_papad.data.music.*
 import com.github.pakka_papad.data.notification.ZenNotificationManager
@@ -259,12 +258,7 @@ class DataManager(
     fun addPlayHistory(songLocation: String){
         scope.launch {
             try {
-                daoCollection.playHistoryDao.addRecord(
-                    PlayHistory(
-                        songLocation,
-                        System.currentTimeMillis()
-                    )
-                )
+                daoCollection.playHistoryDao.addRecord(songLocation)
             } catch (_: Exception){
 
             }

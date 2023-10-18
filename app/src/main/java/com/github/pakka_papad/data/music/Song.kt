@@ -69,6 +69,8 @@ data class Song(
     val mimeType: String? = null,
     val favourite: Boolean = false,
     val artUri: String? = null,
+    @ColumnInfo(defaultValue = "0") val playCount: Int = 0,
+    val lastPlayed: Long? = null,
 ){
     data class Metadata(
         val artist: String,
