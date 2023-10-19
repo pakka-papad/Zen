@@ -64,7 +64,7 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
         val window = eventTime.timeline.getWindow(eventTime.windowIndex, Timeline.Window())
         try {
             window.mediaItem.localConfiguration?.tag?.let {
-                dataManager.addPlayHistory(it as String)
+                dataManager.addPlayHistory(it as String, playbackStats.totalPlayTimeMs)
             }
         } catch (_ : Exception){
 

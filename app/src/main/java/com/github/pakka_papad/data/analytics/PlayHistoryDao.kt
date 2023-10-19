@@ -23,11 +23,15 @@ interface PlayHistoryDao {
     suspend fun insertRecord(record: PlayHistory)
 
     @Transaction
-    suspend fun addRecord(location: String) {
+    suspend fun addRecord(location: String, duration: Long) {
         val song = getSongFromLocation(location) ?: return
         val time = System.currentTimeMillis()
         val updatedSong = song.copy(playCount = 1 + song.playCount, lastPlayed = time)
-        val record = PlayHistory(location, time)
+        val record = PlayHistory(
+            songLocation = location,
+            timestamp = time,
+            playDuration = duration,
+        )
         updateSong(updatedSong)
         insertRecord(record)
     }

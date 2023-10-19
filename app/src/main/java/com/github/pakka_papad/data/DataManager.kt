@@ -255,10 +255,10 @@ class DataManager(
         fun updateNotification()
     }
 
-    fun addPlayHistory(songLocation: String){
+    fun addPlayHistory(songLocation: String, duration: Long){
         scope.launch {
             try {
-                daoCollection.playHistoryDao.addRecord(songLocation)
+                daoCollection.playHistoryDao.addRecord(songLocation, duration)
             } catch (_: Exception){
 
             }
