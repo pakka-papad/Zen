@@ -23,6 +23,7 @@ import com.github.pakka_papad.components.FullScreenSadMessage
 import com.github.pakka_papad.components.SongCardV1
 import com.github.pakka_papad.components.more_options.SongOptions
 import com.github.pakka_papad.data.music.Song
+import com.github.pakka_papad.formatToDate
 
 @Composable
 fun AllSongs(
@@ -142,6 +143,10 @@ fun SongInfo(
                     withStyle(spanStyle) { append(if (song.year == 0) "Unknown" else song.year.toString()) }
                     append("\n\nDuration\n")
                     withStyle(spanStyle) { append(if (song.durationMillis == 0L) "Unknown" else song.durationFormatted) }
+                    append("\n\nPlay count\n")
+                    withStyle(spanStyle) { append(song.playCount.toString()) }
+                    append("\n\nLast played on\n")
+                    withStyle(spanStyle) { append(if (song.lastPlayed == null) "Never" else song.lastPlayed.formatToDate()) }
                     append("\n\nMime type\n")
                     withStyle(spanStyle) { append(song.mimeType ?: "Unknown") }
                 },

@@ -18,7 +18,7 @@ fun Float.toMBfromB(): String{
     return "${mb.round(2)} MB"
 }
 
-val dateFormat = SimpleDateFormat("dd:MM:yyyy")
+val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
 fun Long.formatToDate(): String {
     val calender = Calendar.getInstance().apply {
