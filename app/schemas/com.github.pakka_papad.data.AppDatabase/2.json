@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "d242c0fbbfcff55febe14c01e9493feb",
+    "identityHash": "e3253979ea544495dba0fdae8f495fba",
     "entities": [
       {
         "tableName": "song_table",
@@ -590,7 +590,17 @@
             "id"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_play_history_table_songLocation",
+            "unique": false,
+            "columnNames": [
+              "songLocation"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_play_history_table_songLocation` ON `${TABLE_NAME}` (`songLocation`)"
+          }
+        ],
         "foreignKeys": [
           {
             "table": "song_table",
@@ -609,7 +619,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd242c0fbbfcff55febe14c01e9493feb')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e3253979ea544495dba0fdae8f495fba')"
     ]
   }
 }

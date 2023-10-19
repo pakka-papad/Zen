@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Zen Music</string>
+    <string name="music_control_widget_description">Music Control Widget</string>
 </resources>
