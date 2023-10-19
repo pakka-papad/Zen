@@ -1,5 +1,6 @@
 package com.github.pakka_papad.data.analytics
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
@@ -19,7 +20,7 @@ import com.github.pakka_papad.data.music.Song
 )
 data class PlayHistory(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val songLocation: String,
+    @ColumnInfo(index = true) val songLocation: String,
     val timestamp: Long,
     val playDuration: Long,
 )
