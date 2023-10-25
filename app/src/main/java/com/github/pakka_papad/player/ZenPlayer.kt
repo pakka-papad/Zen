@@ -2,6 +2,7 @@ package com.github.pakka_papad.player
 
 import android.app.NotificationManager
 import android.app.Service
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -25,6 +26,7 @@ import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.data.notification.ZenNotificationManager
+import com.github.pakka_papad.widgets.WidgetBroadcast
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import timber.log.Timber
@@ -85,6 +87,16 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
 
             try {
                 dataManager.updateCurrentSong(exoPlayer.currentMediaItemIndex)
+                dataManager.getSongAtIndex(exoPlayer.currentMediaItemIndex)?.let { song ->
+                    val broadcast = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
+                        putExtra(WidgetBroadcast.WIDGET_BROADCAST, WidgetBroadcast.SONG_CHANGED)
+                        putExtra("imageUri", song.artUri)
+                        putExtra("title", song.title)
+                        putExtra("artist", song.artist)
+                        putExtra("album", song.album)
+                    }
+                    this@ZenPlayer.applicationContext.sendBroadcast(broadcast)
+                }
             } catch (e: Exception) {
                 Timber.e(e)
             }
@@ -94,6 +106,11 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             super.onIsPlayingChanged(isPlaying)
+            val broadcast = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
+                putExtra(WidgetBroadcast.WIDGET_BROADCAST, WidgetBroadcast.IS_PLAYING_CHANGED)
+                putExtra("isPlaying", isPlaying)
+            }
+            this@ZenPlayer.applicationContext.sendBroadcast(broadcast)
             updateMediaSessionState()
             updateMediaSessionMetadata()
         }
@@ -209,6 +226,14 @@ class ZenPlayer : Service(), DataManager.Callback, ZenBroadcastReceiver.Callback
         job.cancel()
         systemNotificationManager = null
         broadcastReceiver = null
+        val broadcast = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
+            putExtra(WidgetBroadcast.WIDGET_BROADCAST, WidgetBroadcast.SONG_CHANGED)
+            putExtra("imageUri", "")
+            putExtra("title", "")
+            putExtra("artist", "")
+            putExtra("album", "")
+        }
+        applicationContext.sendBroadcast(broadcast)
     }
 
     private fun updateMediaSessionMetadata() {
