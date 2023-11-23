@@ -23,28 +23,10 @@ fun ColumnScope.Queue(
     queue: List<Song>,
     onFavouriteClicked: (Song) -> Unit,
     currentSong: Song?,
-    onDownArrowClicked: () -> Unit,
     expanded: Boolean,
     exoPlayer: ExoPlayer,
     onDrag: (fromIndex: Int, toIndex: Int) -> Unit,
 ) {
-//    Icon(
-//        imageVector = Icons.Outlined.KeyboardArrowDown,
-//        contentDescription = "down arrow icon",
-//        modifier = Modifier
-//            .background(MaterialTheme.colorScheme.secondaryContainer)
-//            .fillMaxWidth()
-//            .size(36.dp)
-//            .clickable(
-//                onClick = onDownArrowClicked,
-//                indication = rememberRipple(
-//                    bounded = true,
-//                    radius = 18.dp
-//                ),
-//                interactionSource = remember { MutableInteractionSource() }
-//            ),
-//        tint = MaterialTheme.colorScheme.onSecondaryContainer
-//    )
     val listState = rememberLazyListState()
     LaunchedEffect(key1 = currentSong, key2 = expanded) {
         delay(600)

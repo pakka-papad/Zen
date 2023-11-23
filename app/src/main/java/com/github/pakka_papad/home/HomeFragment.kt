@@ -216,9 +216,6 @@ class HomeFragment : Fragment() {
                     val expandQueueBottomSheet = remember<() -> Unit>{
                         { scope.launch { playerScaffoldState.bottomSheetState.expand() } }
                     }
-                    val collapseQueueBottomSheet = remember<() -> Unit>{
-                        { scope.launch { playerScaffoldState.bottomSheetState.hide() } }
-                    }
                     val updateScreen = remember<(Screens) -> Unit>{ {
                         if (currentScreen == it){
                             scope.launch {
@@ -270,7 +267,10 @@ class HomeFragment : Fragment() {
                                             modifier = Modifier.align(Alignment.Center)
                                         )
                                     } else {
-                                        AnimatedContent(targetState = currentScreen) { targetScreen ->
+                                        AnimatedContent(
+                                            targetState = currentScreen,
+                                            label = ""
+                                        ) { targetScreen ->
                                             when (targetScreen) {
                                                 Screens.Songs -> {
                                                     AllSongs(
@@ -427,7 +427,6 @@ class HomeFragment : Fragment() {
                                                 queue = queue,
                                                 onFavouriteClicked = viewModel::changeFavouriteValue,
                                                 currentSong = it,
-                                                onDownArrowClicked = collapseQueueBottomSheet,
                                                 expanded = playerScaffoldState.bottomSheetState.hasExpandedState,
                                                 exoPlayer = exoPlayer,
                                                 onDrag = viewModel::onSongDrag
