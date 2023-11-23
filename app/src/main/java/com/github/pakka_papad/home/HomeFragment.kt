@@ -14,9 +14,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.BottomSheetScaffold
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -181,7 +181,7 @@ class HomeFragment : Fragment() {
                         onBack = {
                             if (swipeableState.currentValue == 1){
                                 scope.launch {
-                                    if (playerScaffoldState.bottomSheetState.isExpanded) playerScaffoldState.bottomSheetState.collapse()
+                                    if (playerScaffoldState.bottomSheetState.hasExpandedState) playerScaffoldState.bottomSheetState.hide()
                                     else swipeableState.animateTo(0)
                                 }
                             } else {
@@ -217,7 +217,7 @@ class HomeFragment : Fragment() {
                         { scope.launch { playerScaffoldState.bottomSheetState.expand() } }
                     }
                     val collapseQueueBottomSheet = remember<() -> Unit>{
-                        { scope.launch { playerScaffoldState.bottomSheetState.collapse() } }
+                        { scope.launch { playerScaffoldState.bottomSheetState.hide() } }
                     }
                     val updateScreen = remember<(Screens) -> Unit>{ {
                         if (currentScreen == it){
@@ -428,7 +428,7 @@ class HomeFragment : Fragment() {
                                                 onFavouriteClicked = viewModel::changeFavouriteValue,
                                                 currentSong = it,
                                                 onDownArrowClicked = collapseQueueBottomSheet,
-                                                expanded = playerScaffoldState.bottomSheetState.isExpanded,
+                                                expanded = playerScaffoldState.bottomSheetState.hasExpandedState,
                                                 exoPlayer = exoPlayer,
                                                 onDrag = viewModel::onSongDrag
                                             )
@@ -439,9 +439,8 @@ class HomeFragment : Fragment() {
                                             bottomStart = 0.dp,
                                             bottomEnd = 0.dp
                                         ),
-                                        sheetElevation = 20.dp,
                                         sheetPeekHeight = 0.dp,
-                                        sheetGesturesEnabled = true,
+                                        sheetContainerColor = MaterialTheme.colorScheme.secondaryContainer,
                                     )
                                 }
                             },

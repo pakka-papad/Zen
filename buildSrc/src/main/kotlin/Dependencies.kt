@@ -26,7 +26,7 @@ object Versions {
     const val googleServices = "4.3.15"
     const val crashlyticsGradlePlugin = "2.9.4"
 
-    const val material3 = "1.0.1"
+    const val material3 = "1.1.2"
     const val accompanist = "0.28.0"
 
     const val junit = "4.13.2"
