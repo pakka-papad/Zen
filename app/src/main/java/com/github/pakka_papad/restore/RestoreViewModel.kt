@@ -7,9 +7,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.pakka_papad.data.DataManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -38,6 +41,9 @@ class RestoreViewModel @Inject constructor(
         _restoreList[index] = isSelected
     }
 
+    private val _restored = MutableStateFlow(false)
+    val restored = _restored.asStateFlow()
+
     fun restoreSongs(){
         viewModelScope.launch {
             val blacklist = blackListedSongs.value
@@ -50,6 +56,8 @@ class RestoreViewModel @Inject constructor(
             } catch (e: Exception){
                 Timber.e(e)
                 Toast.makeText(context,"Some error occurred",Toast.LENGTH_SHORT).show()
+            } finally {
+                _restored.update { true }
             }
         }
     }

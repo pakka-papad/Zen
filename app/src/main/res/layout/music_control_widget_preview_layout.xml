@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/music_widget_background"
+    android:orientation="horizontal"
+    android:paddingEnd="12dp">
+
+    <ImageView
+        android:id="@+id/music_control_widget_preview_image"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:paddingEnd="12dp"
+        android:src="@mipmap/ic_launcher_foreground" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/music_control_widget__preview_title_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Awesome song"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/music_control_widget__preview_artist_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Some artist"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="bottom"
+                android:src="@drawable/ic_baseline_skip_previous_40"
+                android:tint="@color/white"/>
+
+            <ImageView
+                android:id="@+id/music_control_widget__preview_play_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="bottom"
+                android:src="@drawable/ic_baseline_play_arrow_40"
+                android:foregroundTint="@color/white"
+                android:tint="@color/white" />
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="bottom"
+                android:src="@drawable/ic_baseline_skip_next_40"
+                android:foregroundTint="@color/white"
+                android:tint="@color/white" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

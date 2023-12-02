@@ -13,52 +13,52 @@ import com.github.pakka_papad.Constants
             entity = Album::class,
             parentColumns = ["name"],
             childColumns = ["album"],
-            onDelete = ForeignKey.SET_NULL,
+            onDelete = ForeignKey.SET_DEFAULT,
         ),
         ForeignKey(
             entity = Artist::class,
             parentColumns = ["name"],
             childColumns = ["artist"],
-            onDelete = ForeignKey.SET_NULL
+            onDelete = ForeignKey.SET_DEFAULT,
         ),
         ForeignKey(
             entity = Genre::class,
             parentColumns = ["genre"],
             childColumns = ["genre"],
-            onDelete = ForeignKey.SET_NULL,
+            onDelete = ForeignKey.SET_DEFAULT,
         ),
         ForeignKey(
             entity = AlbumArtist::class,
             parentColumns = ["name"],
             childColumns = ["albumArtist"],
-            onDelete = ForeignKey.SET_NULL
+            onDelete = ForeignKey.SET_DEFAULT,
         ),
         ForeignKey(
             entity = Lyricist::class,
             parentColumns = ["name"],
             childColumns = ["lyricist"],
-            onDelete = ForeignKey.SET_NULL
+            onDelete = ForeignKey.SET_DEFAULT,
         ),
         ForeignKey(
             entity = Composer::class,
             parentColumns = ["name"],
             childColumns = ["composer"],
-            onDelete = ForeignKey.SET_NULL
+            onDelete = ForeignKey.SET_DEFAULT,
         ),
     ]
 )
 data class Song(
     @PrimaryKey val location: String = "",
     val title: String,
-    @ColumnInfo(index = true) val album: String = "",
+    @ColumnInfo(index = true, defaultValue = "Unknown") val album: String = "",
     val size: String,
     val addedDate: String,
     val modifiedDate: String,
-    @ColumnInfo(index = true) val artist: String,
-    @ColumnInfo(index = true) val albumArtist: String,
-    @ColumnInfo(index = true) val composer: String,
-    @ColumnInfo(index = true) val genre: String,
-    @ColumnInfo(index = true) val lyricist: String,
+    @ColumnInfo(index = true, defaultValue = "Unknown") val artist: String,
+    @ColumnInfo(index = true, defaultValue = "Unknown") val albumArtist: String,
+    @ColumnInfo(index = true, defaultValue = "Unknown") val composer: String,
+    @ColumnInfo(index = true, defaultValue = "Unknown") val genre: String,
+    @ColumnInfo(index = true, defaultValue = "Unknown") val lyricist: String,
     val year: Int,
     val comment: String? = null,
     val durationMillis: Long,
@@ -69,6 +69,8 @@ data class Song(
     val mimeType: String? = null,
     val favourite: Boolean = false,
     val artUri: String? = null,
+    @ColumnInfo(defaultValue = "0") val playCount: Int = 0,
+    val lastPlayed: Long? = null,
 ){
     data class Metadata(
         val artist: String,

@@ -22,5 +22,17 @@
       "Added option to select repeat mode",
       "Some UI improvements"
     ]
+  },
+  {
+    "versionCode": 10200,
+    "versionName": "1.2.0",
+    "date": "2 December, 2023",
+    "changes": [
+      "Added folder tab",
+      "Added option to blacklist folder",
+      "Updated settings screen UI",
+      "Added sort option",
+      "Added basic widget (experimental)"
+    ]
   }
 ]

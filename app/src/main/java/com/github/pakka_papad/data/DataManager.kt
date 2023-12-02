@@ -1,38 +1,33 @@
 package com.github.pakka_papad.data
 
-import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
-import android.provider.MediaStore.Audio
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import com.github.pakka_papad.data.components.*
 import com.github.pakka_papad.data.music.*
 import com.github.pakka_papad.data.notification.ZenNotificationManager
-import com.github.pakka_papad.formatToDate
 import com.github.pakka_papad.nowplaying.RepeatMode
 import com.github.pakka_papad.player.ZenPlayer
-import com.github.pakka_papad.toMBfromB
-import com.github.pakka_papad.toMS
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import timber.log.Timber
 import java.io.File
-import java.io.FileNotFoundException
-import java.util.*
+import kotlin.collections.HashSet
 
 class DataManager(
     private val context: Context,
     private val notificationManager: ZenNotificationManager,
     private val daoCollection: DaoCollection,
     private val scope: CoroutineScope,
+    private val songExtractor: SongExtractor,
 ) {
 
     val getAll by lazy { GetAll(daoCollection) }
@@ -41,21 +36,43 @@ class DataManager(
 
     val querySearch by lazy { QuerySearch(daoCollection) }
 
+    val blacklistedSongLocations = HashSet<String>()
+    val blacklistedFolderPaths = HashSet<String>()
+
     init {
         cleanData()
+        buildBlacklistStore()
     }
 
     fun cleanData() {
         scope.launch {
+            val jobs = mutableListOf<Job>()
             daoCollection.songDao.getSongs().forEach {
                 try {
                     if(!File(it.location).exists()){
-                        launch { daoCollection.songDao.deleteSong(it) }
+                        jobs += launch { daoCollection.songDao.deleteSong(it) }
                     }
                 } catch (_: Exception){
 
                 }
             }
+            jobs.joinAll()
+            jobs.clear()
+            daoCollection.albumDao.cleanAlbumTable()
+            daoCollection.artistDao.cleanArtistTable()
+            daoCollection.albumArtistDao.cleanAlbumArtistTable()
+            daoCollection.composerDao.cleanComposerTable()
+            daoCollection.lyricistDao.cleanLyricistTable()
+            daoCollection.genreDao.cleanGenreTable()
+        }
+    }
+
+    private fun buildBlacklistStore(){
+        scope.launch {
+            val blacklistedSongs = daoCollection.blacklistDao.getBlacklistedSongs()
+            blacklistedSongs.forEach { blacklistedSongLocations.add(it.location) }
+            val blacklistedFolders = daoCollection.blacklistedFolderDao.getAllFolders().first()
+            blacklistedFolders.forEach { blacklistedFolderPaths.add(it.path) }
         }
     }
 
@@ -63,6 +80,23 @@ class DataManager(
         data.forEach {
             Timber.d("bs: $it")
             daoCollection.blacklistDao.deleteBlacklistedSong(it)
+            blacklistedSongLocations.remove(it.location)
+        }
+    }
+
+    suspend fun addFolderToBlacklist(path: String){
+        daoCollection.songDao.deleteSongsWithPathPrefix(path)
+        daoCollection.blacklistedFolderDao.insertFolder(BlacklistedFolder(path))
+        blacklistedFolderPaths.add(path)
+        cleanData()
+    }
+
+    suspend fun removeFoldersFromBlacklist(folders: List<BlacklistedFolder>){
+        folders.forEach { folder ->
+            try {
+                daoCollection.blacklistedFolderDao.deleteFolder(folder)
+                blacklistedFolderPaths.remove(folder.path)
+            } catch (_: Exception){ }
         }
     }
 
@@ -86,6 +120,7 @@ class DataManager(
                 artist = song.artist,
             )
         )
+        blacklistedSongLocations.add(song.location)
     }
 
     suspend fun insertPlaylistSongCrossRefs(playlistSongCrossRefs: List<PlaylistSongCrossRef>) =
@@ -99,103 +134,25 @@ class DataManager(
 
     fun scanForMusic() = scope.launch {
         _scanStatus.send(ScanStatus.ScanStarted)
-//        notificationManager.sendScanningNotification()
-        val blacklistedSongs = daoCollection.blacklistDao.getBlacklistedSongs()
-        val blacklistedSongLocations = blacklistedSongs.map { it.location }.toSet()
-        val selection = Audio.Media.IS_MUSIC + " != 0"
-        val projection = arrayOf(
-            Audio.Media.DATA,
-            Audio.Media.TITLE,
-            Audio.Media.ALBUM_ID,
-            Audio.Media.ALBUM,
-            Audio.Media.SIZE,
-            Audio.Media.DATE_ADDED,
-            Audio.Media.DATE_MODIFIED,
-            Audio.Media._ID
-        )
-        val cursor = context.contentResolver.query(
-            Audio.Media.EXTERNAL_CONTENT_URI,
-            projection,
-            selection,
-            null,
-            Audio.Media.DATE_ADDED,
-            null
-        ) ?: return@launch
-        val totalSongs = cursor.count
-        var parsedSongs = 0
-        cursor.moveToFirst()
-        val mExtractor = MetadataExtractor()
-        val dataIndex = cursor.getColumnIndex(Audio.Media.DATA)
-        val titleIndex = cursor.getColumnIndex(Audio.Media.TITLE)
-        val albumIdIndex = cursor.getColumnIndex(Audio.Media.ALBUM_ID)
-        val albumIndex = cursor.getColumnIndex(Audio.Media.ALBUM)
-        val sizeIndex = cursor.getColumnIndex(Audio.Media.SIZE)
-        val dateAddedIndex = cursor.getColumnIndex(Audio.Media.DATE_ADDED)
-        val dateModifiedIndex = cursor.getColumnIndex(Audio.Media.DATE_MODIFIED)
-        val songIdIndex = cursor.getColumnIndex(Audio.Media._ID)
-        val songCover = Uri.parse("content://media/external/audio/albumart")
-
-        val songs = ArrayList<Song>()
-        val albumArtMap = HashMap<String, String?>()
-        val artistSet = TreeSet<String>()
-        val albumArtistSet = TreeSet<String>()
-        val composerSet = TreeSet<String>()
-        val genreSet = TreeSet<String>()
-        val lyricistSet = TreeSet<String>()
-        do {
-            try {
-                val file = File(cursor.getString(dataIndex))
-                if (blacklistedSongLocations.contains(file.path)) continue
-                if (!file.exists()) throw FileNotFoundException()
-                val songMetadata = mExtractor.getSongMetadata(file.path)
-                val song = Song(
-                    location = file.path,
-                    title = cursor.getString(titleIndex),
-                    album = cursor.getString(albumIndex).trim(),
-                    size = cursor.getFloat(sizeIndex).toMBfromB(),
-                    addedDate = cursor.getString(dateAddedIndex).toLong().formatToDate(),
-                    modifiedDate = cursor.getString(dateModifiedIndex).toLong().formatToDate(),
-                    artist = songMetadata.artist.trim(),
-                    albumArtist = songMetadata.albumArtist.trim(),
-                    composer = songMetadata.composer.trim(),
-                    genre = songMetadata.genre.trim(),
-                    lyricist = songMetadata.lyricist.trim(),
-                    year = songMetadata.year,
-                    comment = songMetadata.comment,
-                    durationMillis = songMetadata.duration,
-                    durationFormatted = songMetadata.duration.toMS(),
-                    bitrate = songMetadata.bitrate,
-                    sampleRate = songMetadata.sampleRate,
-                    bitsPerSample = songMetadata.bitsPerSample,
-                    mimeType = songMetadata.mimeType,
-                    artUri = "content://media/external/audio/media/${cursor.getLong(songIdIndex)}/albumart"
-                )
-                songs.add(song)
-                artistSet.add(song.artist)
-                albumArtistSet.add(song.albumArtist)
-                composerSet.add(song.composer)
-                lyricistSet.add(song.lyricist)
-                genreSet.add(song.genre)
-                if (albumArtMap[song.album] == null) {
-                    albumArtMap[song.album] =
-                        ContentUris.withAppendedId(songCover, cursor.getLong(albumIdIndex))
-                            .toString()
-                }
-            } catch (e: Exception) {
-                Timber.e(e.message ?: e.localizedMessage ?: "FILE_DOES_NOT_EXIST")
+        val (songs, albums) = songExtractor.extract(
+            blacklistedSongLocations,
+            blacklistedFolderPaths,
+            statusListener = { parsed, total ->
+                _scanStatus.trySend(ScanStatus.ScanProgress(parsed, total))
             }
-            parsedSongs++
-            _scanStatus.send(ScanStatus.ScanProgress(parsedSongs, totalSongs))
-        } while (cursor.moveToNext())
-        cursor.close()
-        daoCollection.albumDao.insertAllAlbums(albumArtMap.entries.map { (t, u) -> Album(t, u) })
-        daoCollection.artistDao.insertAllArtists(artistSet.map { Artist(it) })
-        daoCollection.albumArtistDao.insertAllAlbumArtists(albumArtistSet.map { AlbumArtist(it) })
-        daoCollection.composerDao.insertAllComposers(composerSet.map { Composer(it) })
-        daoCollection.lyricistDao.insertAllLyricists(lyricistSet.map { Lyricist(it) })
-        daoCollection.genreDao.insertAllGenres(genreSet.map { Genre(it) })
+        )
+        val artists = songs.map { it.artist }.toSet().map { Artist(it) }
+        val albumArtists = songs.map { it.albumArtist }.toSet().map { AlbumArtist(it) }
+        val lyricists = songs.map { it.lyricist }.toSet().map { Lyricist(it) }
+        val composers = songs.map { it.composer }.toSet().map { Composer(it) }
+        val genres = songs.map { it.genre }.toSet().map { Genre(it) }
+        daoCollection.albumDao.insertAllAlbums(albums)
+        daoCollection.artistDao.insertAllArtists(artists)
+        daoCollection.albumArtistDao.insertAllAlbumArtists(albumArtists)
+        daoCollection.lyricistDao.insertAllLyricists(lyricists)
+        daoCollection.composerDao.insertAllComposers(composers)
+        daoCollection.genreDao.insertAllGenres(genres)
         daoCollection.songDao.insertAllSongs(songs)
-//        notificationManager.removeScanningNotification()
         _scanStatus.send(ScanStatus.ScanComplete)
     }
 
@@ -239,6 +196,7 @@ class DataManager(
     private var remIdx = 0
 
     @Synchronized
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     fun setQueue(newQueue: List<Song>, startPlayingFromIndex: Int) {
         if (newQueue.isEmpty()) return
         _queue.apply {
@@ -295,5 +253,15 @@ class DataManager(
         fun setQueue(newQueue: List<Song>, startPlayingFromIndex: Int)
         fun addToQueue(song: Song)
         fun updateNotification()
+    }
+
+    fun addPlayHistory(songLocation: String, duration: Long){
+        scope.launch {
+            try {
+                daoCollection.playHistoryDao.addRecord(songLocation, duration)
+            } catch (_: Exception){
+
+            }
+        }
     }
 }

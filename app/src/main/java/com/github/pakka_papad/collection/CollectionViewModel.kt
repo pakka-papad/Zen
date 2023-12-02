@@ -4,6 +4,7 @@ import android.app.Application
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.pakka_papad.components.SortOptions
 import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.music.PlaylistSongCrossRef
 import com.github.pakka_papad.data.music.Song
@@ -25,6 +26,9 @@ class CollectionViewModel @Inject constructor(
     val queue = manager.queue
 
     private val _collectionType = MutableStateFlow<CollectionType?>(null)
+
+    private val _chosenSortOrder = MutableStateFlow(SortOptions.Default.ordinal)
+    val chosenSortOrder = _chosenSortOrder.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val collectionUi = _collectionType
@@ -125,6 +129,28 @@ class CollectionViewModel @Inject constructor(
                 }
                 else -> flow { }
             }
+        }.combine(_chosenSortOrder) { ui, sortOrder ->
+            when(sortOrder){
+                SortOptions.TitleASC.ordinal -> {
+                    ui.copy(songs = ui.songs.sortedBy { it.title })
+                }
+                SortOptions.TitleDSC.ordinal -> {
+                    ui.copy(songs = ui.songs.sortedByDescending { it.title })
+                }
+                SortOptions.YearASC.ordinal -> {
+                    ui.copy(songs = ui.songs.sortedBy { it.year })
+                }
+                SortOptions.YearDSC.ordinal -> {
+                    ui.copy(songs = ui.songs.sortedByDescending { it.year })
+                }
+                SortOptions.DurationASC.ordinal -> {
+                    ui.copy(songs = ui.songs.sortedBy { it.durationMillis })
+                }
+                SortOptions.DurationDSC.ordinal -> {
+                    ui.copy(songs = ui.songs.sortedByDescending { it.durationMillis })
+                }
+                else -> ui
+            }
         }.catch { exception ->
             Timber.e(exception)
         }.stateIn(
@@ -192,6 +218,10 @@ class CollectionViewModel @Inject constructor(
                 Toast.makeText(context,"Some error occurred",Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    fun updateSortOrder(order: Int){
+        _chosenSortOrder.update { order }
     }
 
 }

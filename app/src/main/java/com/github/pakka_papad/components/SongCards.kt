@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.github.pakka_papad.components.more_options.OptionsAlertDialog
 import com.github.pakka_papad.components.more_options.SongOptions
+import com.github.pakka_papad.data.music.MiniSong
 import com.github.pakka_papad.data.music.Song
 import kotlinx.coroutines.launch
 
@@ -238,4 +239,87 @@ fun SongCardV3(
         style = MaterialTheme.typography.titleSmall,
         overflow = TextOverflow.Ellipsis
     )
+}
+
+@Composable
+fun MiniSongCard(
+    song: MiniSong,
+    onSongClicked: () -> Unit,
+    currentlyPlaying: Boolean = false,
+    songOptions: List<SongOptions>,
+) {
+    val iconModifier = Modifier.size(26.dp)
+    val spacerModifier = Modifier.width(10.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(70.dp)
+            .clickable(onClick = onSongClicked)
+            .background(if (currentlyPlaying) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface)
+            .padding(horizontal = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        AsyncImage(
+            model = song.artUri,
+            contentDescription = "song-${song.title}-art",
+            modifier = Modifier
+                .size(50.dp)
+                .clip(MaterialTheme.shapes.medium),
+            contentScale = ContentScale.Crop
+        )
+        Spacer(spacerModifier)
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = song.title,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                modifier = Modifier.fillMaxWidth(),
+                color = if (currentlyPlaying) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                text = song.artist,
+                maxLines = 1,
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.fillMaxWidth(),
+                color = if (currentlyPlaying) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        if (songOptions.isNotEmpty()) {
+            Spacer(spacerModifier)
+            var optionsVisible by remember { mutableStateOf(false) }
+            Icon(
+                imageVector = Icons.Outlined.MoreVert,
+                contentDescription = null,
+                modifier = iconModifier
+                    .clickable(
+                        onClick = {
+                            optionsVisible = true
+                        },
+                        indication = rememberRipple(
+                            bounded = false,
+                            radius = 20.dp
+                        ),
+                        interactionSource = remember { MutableInteractionSource() }
+                    ),
+                tint = if (currentlyPlaying) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+            )
+            if (optionsVisible) {
+                OptionsAlertDialog(
+                    options = songOptions,
+                    title = song.title,
+                    onDismissRequest = {
+                        optionsVisible = false
+                    }
+                )
+            }
+        }
+    }
 }

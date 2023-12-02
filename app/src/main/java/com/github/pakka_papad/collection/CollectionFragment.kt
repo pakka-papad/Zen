@@ -34,6 +34,8 @@ import androidx.palette.graphics.Palette
 import coil.compose.AsyncImage
 import com.github.pakka_papad.R
 import com.github.pakka_papad.components.FullScreenSadMessage
+import com.github.pakka_papad.components.SortOptionChooser
+import com.github.pakka_papad.components.SortOptions
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.ui.theme.ZenTheme
@@ -63,6 +65,15 @@ class CollectionFragment : Fragment() {
             navController.popBackStack()
         }
         viewModel.loadCollection(args.collectionType)
+        val sortOptions = listOf(
+            SortOptions.Default,
+            SortOptions.TitleASC,
+            SortOptions.TitleDSC,
+            SortOptions.YearASC,
+            SortOptions.YearDSC,
+            SortOptions.DurationASC,
+            SortOptions.DurationDSC,
+        )
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -82,6 +93,8 @@ class CollectionFragment : Fragment() {
                                 && songsListState.firstVisibleItemScrollOffset <= 10) 0f else 1f
                         }
                     }
+                    var showSortOptions by remember { mutableStateOf(false) }
+                    val chosenSortOrder by viewModel.chosenSortOrder.collectAsStateWithLifecycle()
                     Box {
                         LazyColumn(
                             contentPadding = insetsPadding,
@@ -183,8 +196,24 @@ class CollectionFragment : Fragment() {
                                 },
                                 CollectionActions.AddToPlaylist {
                                     addAllSongsToPlaylistClicked(collectionUi?.songs)
+                                },
+                                CollectionActions.Sort {
+                                    showSortOptions = true
                                 }
                             )
+                        )
+                    }
+                    if (showSortOptions){
+                        SortOptionChooser(
+                            options = sortOptions,
+                            selectedOption = chosenSortOrder,
+                            onOptionSelect = { option ->
+                                viewModel.updateSortOrder(option)
+                                showSortOptions = false
+                            },
+                            onChooserDismiss = {
+                                showSortOptions = false
+                            }
                         )
                     }
                 }

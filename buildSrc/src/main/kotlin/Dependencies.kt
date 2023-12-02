@@ -13,6 +13,7 @@ object Versions {
     const val androidxEspresso = "3.4.0"
     const val androidxComposeConstraintLayout = "1.0.1"
     const val androidxSplashScreen = "1.0.0-beta02"
+    const val androidxGlance = "1.0.0-beta01"
 
     const val appCompat = "1.4.2"
     const val navigation = "2.5.3"
@@ -25,7 +26,7 @@ object Versions {
     const val googleServices = "4.3.15"
     const val crashlyticsGradlePlugin = "2.9.4"
 
-    const val material3 = "1.0.1"
+    const val material3 = "1.1.2"
     const val accompanist = "0.28.0"
 
     const val junit = "4.13.2"
@@ -67,6 +68,10 @@ object Libraries {
     const val androidxComposeUiTestJunit4 = "androidx.compose.ui:ui-test-junit4:${Versions.androidxComposeUi}"
     const val androidxComposeConstraintLayout = "androidx.constraintlayout:constraintlayout-compose:${Versions.androidxComposeConstraintLayout}"
     const val androidxSplashScreen = "androidx.core:core-splashscreen:${Versions.androidxSplashScreen}"
+    const val androidxGlance = "androidx.glance:glance:${Versions.androidxGlance}"
+    const val androidxGlanceAppWidget = "androidx.glance:glance-appwidget:${Versions.androidxGlance}"
+    const val androidxGlanceMaterial = "androidx.glance:glance-material:${Versions.androidxGlance}"
+    const val androidxGlanceMaterial3 = "androidx.glance:glance-material3:${Versions.androidxGlance}"
 
     const val roomRuntime = "androidx.room:room-runtime:${Versions.room}"
     const val roomKtx = "androidx.room:room-ktx:${Versions.room}"
@@ -122,7 +127,10 @@ object AnnotationProcessors {
 }
 
 object AppVersion {
-    const val Code = 2
-    const val Name = "1.1"
+    private const val Major = 1
+    private const val Minor = 2
+    private const val Patch = 0
+    const val Code = Major*10000 + Minor*100 + Patch
+    const val Name = "$Major.$Minor.$Patch"
 }
 

@@ -14,9 +14,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.BottomSheetScaffold
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -108,8 +108,11 @@ class HomeFragment : Fragment() {
                 val systemUiController = rememberSystemUiController()
                 val themePreference by preferenceProvider.theme.collectAsStateWithLifecycle()
                 ZenTheme(themePreference, systemUiController) {
+                    val selectedTabs by preferenceProvider.selectedTabs.collectAsStateWithLifecycle()
                     var currentScreen by rememberSaveable { mutableStateOf(Screens.Songs) }
                     val scope = rememberCoroutineScope()
+
+                    val sortOrder by preferenceProvider.sortOrder.collectAsStateWithLifecycle()
 
                     val songs by viewModel.songs.collectAsStateWithLifecycle()
                     val allSongsListState = rememberLazyListState()
@@ -129,6 +132,8 @@ class HomeFragment : Fragment() {
 
                     val genresWithSongCount by viewModel.genresWithSongCount.collectAsStateWithLifecycle()
                     val allGenresListState = rememberLazyListState()
+
+                    val files by viewModel.filesInCurrentDestination.collectAsStateWithLifecycle()
 
                     val dataRetrieved by remember {
                         derivedStateOf {
@@ -169,12 +174,25 @@ class HomeFragment : Fragment() {
                     val repeatMode by viewModel.repeatMode.collectAsStateWithLifecycle()
                     val playerScaffoldState = rememberBottomSheetScaffoldState()
 
+                    val isExplorerAtRoot by viewModel.isExplorerAtRoot.collectAsStateWithLifecycle()
+
+                    val isQueueBottomSheetExpanded by remember(playerScaffoldState.bottomSheetState) {
+                        derivedStateOf {
+                            playerScaffoldState.bottomSheetState.currentValue
+                                .equals(SheetValue.Expanded)
+                        }
+                    }
+
                     BackHandler(
-                        enabled = swipeableState.currentValue == 1,
+                        enabled = (currentScreen == Screens.Folders && !isExplorerAtRoot) || swipeableState.currentValue == 1,
                         onBack = {
-                            scope.launch {
-                                if (playerScaffoldState.bottomSheetState.isExpanded) playerScaffoldState.bottomSheetState.collapse()
-                                else swipeableState.animateTo(0)
+                            if (swipeableState.currentValue == 1){
+                                scope.launch {
+                                    if (isQueueBottomSheetExpanded) playerScaffoldState.bottomSheetState.hide()
+                                    else swipeableState.animateTo(0)
+                                }
+                            } else {
+                                viewModel.moveToParent()
                             }
                         }
                     )
@@ -205,9 +223,6 @@ class HomeFragment : Fragment() {
                     val expandQueueBottomSheet = remember<() -> Unit>{
                         { scope.launch { playerScaffoldState.bottomSheetState.expand() } }
                     }
-                    val collapseQueueBottomSheet = remember<() -> Unit>{
-                        { scope.launch { playerScaffoldState.bottomSheetState.collapse() } }
-                    }
                     val updateScreen = remember<(Screens) -> Unit>{ {
                         if (currentScreen == it){
                             scope.launch {
@@ -217,6 +232,7 @@ class HomeFragment : Fragment() {
                                     Screens.Artists -> allPersonsListState.scrollToItem(0)
                                     Screens.Playlists -> allPlaylistsListState.scrollToItem(0)
                                     Screens.Genres -> allGenresListState.scrollToItem(0)
+                                    else -> {}
                                 }
                             }
                         } else {
@@ -234,6 +250,9 @@ class HomeFragment : Fragment() {
                                 HomeTopBar(
                                     onSettingsClicked = navigateToSettings,
                                     onSearchClicked = navigateToSearch,
+                                    currentScreen = currentScreen,
+                                    onSortOptionChosen = viewModel::saveSortOption,
+                                    currentSortOrder = sortOrder,
                                 )
                             },
                             content = {
@@ -242,7 +261,9 @@ class HomeFragment : Fragment() {
                                         .padding(
                                             top = it.calculateTopPadding(),
                                             bottom = if (currentSong == null) 88.dp else 146.dp,
-                                            start = windowInsets.calculateStartPadding(LayoutDirection.Ltr),
+                                            start = windowInsets.calculateStartPadding(
+                                                LayoutDirection.Ltr
+                                            ),
                                             end = windowInsets.calculateEndPadding(LayoutDirection.Ltr)
                                         )
                                         .fillMaxSize(),
@@ -253,7 +274,10 @@ class HomeFragment : Fragment() {
                                             modifier = Modifier.align(Alignment.Center)
                                         )
                                     } else {
-                                        AnimatedContent(targetState = currentScreen) { targetScreen ->
+                                        AnimatedContent(
+                                            targetState = currentScreen,
+                                            label = ""
+                                        ) { targetScreen ->
                                             when (targetScreen) {
                                                 Screens.Songs -> {
                                                     AllSongs(
@@ -302,6 +326,17 @@ class HomeFragment : Fragment() {
                                                         onGenreClicked = this@HomeFragment::navigateToCollection
                                                     )
                                                 }
+                                                Screens.Folders -> {
+                                                     Files(
+                                                         contents = files,
+                                                         onDirectoryClicked = viewModel::onFileClicked,
+                                                         onSongClicked = viewModel::onFileClicked,
+                                                         currentSong = currentSong,
+                                                         onAddToPlaylistClicked = this@HomeFragment::addToPlaylistClicked,
+                                                         onAddToQueueClicked = viewModel::addToQueue,
+                                                         onFolderAddToBlacklistRequest = viewModel::onFolderBlacklist
+                                                     )
+                                                }
                                             }
                                         }
                                     }
@@ -316,7 +351,9 @@ class HomeFragment : Fragment() {
                                         .fillMaxWidth()
                                         .background(bottomBarColor)
                                         .padding(
-                                            start = windowInsets.calculateStartPadding(LayoutDirection.Ltr),
+                                            start = windowInsets.calculateStartPadding(
+                                                LayoutDirection.Ltr
+                                            ),
                                             end = windowInsets.calculateEndPadding(LayoutDirection.Ltr),
                                         )
                                 ) {
@@ -397,8 +434,7 @@ class HomeFragment : Fragment() {
                                                 queue = queue,
                                                 onFavouriteClicked = viewModel::changeFavouriteValue,
                                                 currentSong = it,
-                                                onDownArrowClicked = collapseQueueBottomSheet,
-                                                expanded = playerScaffoldState.bottomSheetState.isExpanded,
+                                                expanded = isQueueBottomSheetExpanded,
                                                 exoPlayer = exoPlayer,
                                                 onDrag = viewModel::onSongDrag
                                             )
@@ -409,9 +445,8 @@ class HomeFragment : Fragment() {
                                             bottomStart = 0.dp,
                                             bottomEnd = 0.dp
                                         ),
-                                        sheetElevation = 20.dp,
                                         sheetPeekHeight = 0.dp,
-                                        sheetGesturesEnabled = true,
+                                        sheetContainerColor = MaterialTheme.colorScheme.secondaryContainer,
                                     )
                                 }
                             },
@@ -426,7 +461,8 @@ class HomeFragment : Fragment() {
                             HomeBottomBar(
                                 currentScreen = currentScreen,
                                 onScreenChange = updateScreen,
-                                bottomBarColor = bottomBarColor
+                                bottomBarColor = bottomBarColor,
+                                selectedTabs = selectedTabs,
                             )
                         }
                     }
@@ -518,5 +554,15 @@ class HomeFragment : Fragment() {
 
     private fun addToPlaylistClicked(song: Song){
         saveToPlaylistClicked(listOf(song))
+    }
+
+    private fun addToPlaylistClicked(song: MiniSong){
+        lifecycleScope.launch {
+            if (navController.currentDestination?.id != R.id.homeFragment) return@launch
+            navController.navigate(
+                HomeFragmentDirections
+                    .actionHomeFragmentToSelectPlaylistFragment(arrayOf(song.location))
+            )
+        }
     }
 }

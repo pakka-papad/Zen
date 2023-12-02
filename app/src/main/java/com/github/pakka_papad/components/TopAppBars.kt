@@ -6,6 +6,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -143,4 +145,51 @@ fun TopBarWithBackArrow(
     actions = actions,
     backgroundColor = backgroundColor,
     titleMaxLines = titleMaxLines,
+)
+
+
+@Composable
+fun CancelConfirmTopBar(
+    onCancelClicked: () -> Unit,
+    onConfirmClicked: () -> Unit,
+    title: String,
+) = CenterAlignedTopBar(
+    leadingIcon = {
+        Icon(
+            imageVector = Icons.Outlined.Close,
+            contentDescription = null,
+            modifier = Modifier
+                .padding(16.dp)
+                .size(30.dp)
+                .clickable(
+                    interactionSource = remember{ MutableInteractionSource() },
+                    indication = rememberRipple(
+                        bounded = false,
+                        radius = 25.dp,
+                    ),
+                    onClick = onCancelClicked
+                ),
+            tint = MaterialTheme.colorScheme.onSurface,
+        )
+    },
+    title = title,
+    actions = {
+        Icon(
+            imageVector = Icons.Outlined.Check,
+            contentDescription = null,
+            modifier = Modifier
+                .padding(16.dp)
+                .size(30.dp)
+                .clickable(
+                    interactionSource = remember{ MutableInteractionSource() },
+                    indication = rememberRipple(
+                        bounded = false,
+                        radius = 25.dp,
+                    ),
+                    onClick = onConfirmClicked
+                ),
+            tint = MaterialTheme.colorScheme.onSurface
+        )
+    },
+    titleMaxLines = 1
 )

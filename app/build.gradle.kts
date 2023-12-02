@@ -110,6 +110,11 @@ dependencies {
     implementation(Libraries.androidxComposeConstraintLayout)
     implementation(Libraries.androidxSplashScreen)
 
+    implementation(Libraries.androidxGlance)
+    implementation(Libraries.androidxGlanceAppWidget)
+    implementation(Libraries.androidxGlanceMaterial)
+    implementation(Libraries.androidxGlanceMaterial3)
+
     implementation(Libraries.androidxComposeMaterial)
     implementation(Libraries.material3)
     implementation(Libraries.material3WindowSizeClass)

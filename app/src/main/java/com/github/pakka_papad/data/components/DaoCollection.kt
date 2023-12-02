@@ -1,5 +1,6 @@
 package com.github.pakka_papad.data.components
 
+import com.github.pakka_papad.data.analytics.PlayHistoryDao
 import com.github.pakka_papad.data.daos.*
 
 data class DaoCollection(
@@ -11,5 +12,7 @@ data class DaoCollection(
     val lyricistDao: LyricistDao,
     val genreDao: GenreDao,
     val playlistDao: PlaylistDao,
-    val blacklistDao: BlacklistDao
+    val blacklistDao: BlacklistDao,
+    val blacklistedFolderDao: BlacklistedFolderDao,
+    val playHistoryDao: PlayHistoryDao,
 )

@@ -1,5 +1,6 @@
 package com.github.pakka_papad.di
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
@@ -20,6 +21,7 @@ import dagger.hilt.components.SingletonComponent
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.data.*
 import com.github.pakka_papad.data.components.DaoCollection
+import com.github.pakka_papad.data.music.SongExtractor
 import com.github.pakka_papad.data.notification.ZenNotificationManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope
@@ -49,7 +51,8 @@ object AppModule {
         @ApplicationContext context: Context,
         notificationManager: ZenNotificationManager,
         db: AppDatabase,
-        scope: CoroutineScope
+        scope: CoroutineScope,
+        extractor: SongExtractor,
     ): DataManager {
         return DataManager(
             context = context,
@@ -64,8 +67,11 @@ object AppModule {
                 genreDao = db.genreDao(),
                 playlistDao = db.playlistDao(),
                 blacklistDao = db.blacklistDao(),
+                blacklistedFolderDao = db.blacklistedFolderDao(),
+                playHistoryDao = db.playHistoryDao()
             ),
             scope = scope,
+            songExtractor = extractor
         )
     }
 
@@ -75,6 +81,7 @@ object AppModule {
         return ZenNotificationManager(context)
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     @Singleton
     @Provides
     fun providesExoPlayer(
@@ -133,6 +140,18 @@ object AppModule {
     fun providesZenCrashReporter(): ZenCrashReporter {
         return ZenCrashReporter(
             firebase = FirebaseCrashlytics.getInstance()
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun providesSongExtractor(
+        @ApplicationContext context: Context,
+    ): SongExtractor {
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        return SongExtractor(
+            scope = scope,
+            context = context,
         )
     }
 }

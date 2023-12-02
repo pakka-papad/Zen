@@ -48,6 +48,8 @@ class SettingsFragment : Fragment() {
                 val scanStatus by viewModel.scanStatus.collectAsStateWithLifecycle()
                 val isCrashlyticsDisabled by preferenceProvider.isCrashlyticsDisabled.collectAsStateWithLifecycle()
 
+                val tabsSelection by viewModel.tabsSelection.collectAsStateWithLifecycle()
+
                 val restoreClicked = remember{ {
                     if (navController.currentDestination?.id == R.id.settingsFragment){
                         navController.navigate(R.id.action_settingsFragment_to_restoreFragment)
@@ -56,6 +58,11 @@ class SettingsFragment : Fragment() {
                 val whatsNewClicked = remember{ {
                     if (navController.currentDestination?.id == R.id.settingsFragment){
                         navController.navigate(R.id.action_settingsFragment_to_whatsNewFragment)
+                    }
+                } }
+                val onRestoreFoldersClicked = remember{ {
+                    if (navController.currentDestination?.id == R.id.settingsFragment){
+                        navController.navigate(R.id.action_settingsFragment_to_restoreFolderFragment)
                     }
                 } }
 
@@ -85,7 +92,12 @@ class SettingsFragment : Fragment() {
                                 onRestoreClicked = restoreClicked,
                                 disabledCrashlytics = isCrashlyticsDisabled,
                                 onAutoReportCrashClicked = preferenceProvider::toggleCrashlytics,
-                                onWhatsNewClicked = whatsNewClicked
+                                onWhatsNewClicked = whatsNewClicked,
+                                onRestoreFoldersClicked = onRestoreFoldersClicked,
+                                tabsSelection = tabsSelection,
+                                onTabsSelectChange = viewModel::onTabsSelectChanged,
+                                onTabsOrderChanged = viewModel::onTabsOrderChanged,
+                                onTabsOrderConfirmed = viewModel::saveTabsOrder
                             )
                         }
                     )

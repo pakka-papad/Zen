@@ -1,6 +1,8 @@
 package com.github.pakka_papad.data
 
 import androidx.datastore.core.DataStore
+import com.github.pakka_papad.Screens
+import com.github.pakka_papad.components.SortOptions
 import com.github.pakka_papad.data.UserPreferences.PlaybackParams
 import com.github.pakka_papad.ui.theme.ThemePreference
 import kotlinx.coroutines.CoroutineScope
@@ -107,12 +109,98 @@ class ZenPreferenceProvider @Inject constructor(
         }
     }
 
+    val selectedTabs = userPreferences.data
+        .map {
+            if (it.selectedTabsCount == 0){
+                listOf(0,1,2,3,4)
+            } else {
+                it.selectedTabsList.toList()
+            }
+        }
+        .stateIn(
+            scope = coroutineScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = null
+        )
+
+    fun updateSelectedTabs(tabsList: List<Int>){
+        if (tabsList.isEmpty()) return
+        coroutineScope.launch {
+            userPreferences.updateData {
+                it.copy {
+                    selectedTabs.apply {
+                        clear()
+                        addAll(tabsList)
+                    }
+                }
+            }
+        }
+    }
+
+    val songSortOrder = userPreferences.data
+        .map {
+            it.getChosenSortOrderOrDefault(Screens.Songs.ordinal, SortOptions.TitleASC.ordinal)
+        }
+
+    val albumSortOrder = userPreferences.data
+        .map {
+            it.getChosenSortOrderOrDefault(Screens.Albums.ordinal, SortOptions.TitleASC.ordinal)
+        }
+
+    val artistSortOrder = userPreferences.data
+        .map {
+            it.getChosenSortOrderOrDefault(Screens.Artists.ordinal, SortOptions.NameASC.ordinal)
+        }
+
+    val playlistSortOrder = userPreferences.data
+        .map {
+            it.getChosenSortOrderOrDefault(Screens.Playlists.ordinal, SortOptions.NameASC.ordinal)
+        }
+
+    val genreSortOrder = userPreferences.data
+        .map {
+            it.getChosenSortOrderOrDefault(Screens.Genres.ordinal, SortOptions.NameASC.ordinal)
+        }
+
+    val folderSortOrder = userPreferences.data
+        .map {
+            it.getChosenSortOrderOrDefault(Screens.Folders.ordinal, SortOptions.Default.ordinal)
+        }
+
+    val sortOrder = userPreferences.data
+        .map {
+            it.chosenSortOrderMap
+        }
+        .stateIn(
+            scope = coroutineScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = mapOf(),
+        )
+
+    fun updateSortOrder(screen: Int, order: Int) {
+        coroutineScope.launch {
+            userPreferences.updateData {
+                it.copy {
+                    chosenSortOrder[screen] = order
+                }
+            }
+        }
+    }
+
     init {
         val initJob = coroutineScope.launch {
             launch { theme.collect { } }
             launch { isOnBoardingComplete.collect { } }
             launch { isCrashlyticsDisabled.collect { } }
             launch { playbackParams.collect { updatePlaybackParams(it.playbackSpeed,it.playbackPitch) } }
+            launch { selectedTabs.collect{  } }
+            launch { songSortOrder.collect {  } }
+            launch { albumSortOrder.collect {  } }
+            launch { artistSortOrder.collect {  } }
+            launch { playlistSortOrder.collect {  } }
+            launch { genreSortOrder.collect {  } }
+            launch { folderSortOrder.collect {  } }
+            launch { sortOrder.collect {  } }
         }
         coroutineScope.launch {
             delay(1.minutes)
