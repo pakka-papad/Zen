@@ -176,12 +176,19 @@ class HomeFragment : Fragment() {
 
                     val isExplorerAtRoot by viewModel.isExplorerAtRoot.collectAsStateWithLifecycle()
 
+                    val isQueueBottomSheetExpanded by remember(playerScaffoldState.bottomSheetState) {
+                        derivedStateOf {
+                            playerScaffoldState.bottomSheetState.currentValue
+                                .equals(SheetValue.Expanded)
+                        }
+                    }
+
                     BackHandler(
                         enabled = (currentScreen == Screens.Folders && !isExplorerAtRoot) || swipeableState.currentValue == 1,
                         onBack = {
                             if (swipeableState.currentValue == 1){
                                 scope.launch {
-                                    if (playerScaffoldState.bottomSheetState.hasExpandedState) playerScaffoldState.bottomSheetState.hide()
+                                    if (isQueueBottomSheetExpanded) playerScaffoldState.bottomSheetState.hide()
                                     else swipeableState.animateTo(0)
                                 }
                             } else {
@@ -427,7 +434,7 @@ class HomeFragment : Fragment() {
                                                 queue = queue,
                                                 onFavouriteClicked = viewModel::changeFavouriteValue,
                                                 currentSong = it,
-                                                expanded = playerScaffoldState.bottomSheetState.hasExpandedState,
+                                                expanded = isQueueBottomSheetExpanded,
                                                 exoPlayer = exoPlayer,
                                                 onDrag = viewModel::onSongDrag
                                             )
