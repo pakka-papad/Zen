@@ -147,11 +147,13 @@ object AppModule {
     @Provides
     fun providesSongExtractor(
         @ApplicationContext context: Context,
+        crashReporter: ZenCrashReporter,
     ): SongExtractor {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         return SongExtractor(
             scope = scope,
             context = context,
+            crashReporter = crashReporter,
         )
     }
 }
