@@ -6,9 +6,11 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.formatToDate
 import com.github.pakka_papad.toMBfromB
 import com.github.pakka_papad.toMS
+import kotlinx.coroutines.CompletionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -16,10 +18,12 @@ import kotlinx.coroutines.awaitAll
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.TreeMap
+import java.util.concurrent.atomic.AtomicInteger
 
 class SongExtractor(
     private val scope: CoroutineScope,
     private val context: Context,
+    private val crashReporter: ZenCrashReporter,
 ) {
 
     private val projection = arrayOf(
@@ -99,7 +103,7 @@ class SongExtractor(
         val dateAddedIndex = cursor.getColumnIndex(MediaStore.Audio.Media.DATE_ADDED)
         val dateModifiedIndex = cursor.getColumnIndex(MediaStore.Audio.Media.DATE_MODIFIED)
         val songIdIndex = cursor.getColumnIndex(MediaStore.Audio.Media._ID)
-        val dSongs = ArrayList<Deferred<Song>>()
+        val dSongs = ArrayList<Deferred<Song?>>()
         cursor.moveToFirst()
         do {
             try {
@@ -128,7 +132,7 @@ class SongExtractor(
 
             }
         } while (cursor.moveToNext())
-        val songs = dSongs.awaitAll()
+        val songs = dSongs.awaitAll().filterNotNull()
         cursor.close()
         return songs
     }
@@ -212,9 +216,14 @@ class SongExtractor(
         val dateAddedIndex = cursor.getColumnIndex(MediaStore.Audio.Media.DATE_ADDED)
         val dateModifiedIndex = cursor.getColumnIndex(MediaStore.Audio.Media.DATE_MODIFIED)
         val songIdIndex = cursor.getColumnIndex(MediaStore.Audio.Media._ID)
-        val dSongs = ArrayList<Deferred<Song>>()
+        val dSongs = ArrayList<Deferred<Song?>>()
         val total  = cursor.count
-        var parsed = 0
+        val parsed = AtomicInteger(0)
+        val parseCompletionHandler = object : CompletionHandler {
+            override fun invoke(cause: Throwable?) {
+                statusListener?.invoke(parsed.incrementAndGet(), total)
+            }
+        }
         cursor.moveToFirst()
         do {
             try {
@@ -229,24 +238,26 @@ class SongExtractor(
                 val title = cursor.getString(titleIndex).trim()
                 val album = cursor.getString(albumIndex).trim()
                 albumArtMap[album] = cursor.getLong(albumIdIndex)
-                dSongs.add(scope.async {
-                    getSong(
-                        path = songPath,
-                        size = size,
-                        addedDate = addedDate,
-                        modifiedDate = modifiedDate,
-                        songId = songId,
-                        title = title,
-                        album = album,
-                    )
-                })
-                parsed++
-                statusListener?.invoke(parsed, total)
+                dSongs.add(
+                    scope.async {
+                        getSong(
+                            path = songPath,
+                            size = size,
+                            addedDate = addedDate,
+                            modifiedDate = modifiedDate,
+                            songId = songId,
+                            title = title,
+                            album = album,
+                        )
+                    }.apply {
+                        invokeOnCompletion(parseCompletionHandler)
+                    }
+                )
             } catch (_: Exception){
 
             }
         } while (cursor.moveToNext())
-        val songs = dSongs.awaitAll()
+        val songs = dSongs.awaitAll().filterNotNull()
         cursor.close()
         val albums = albumArtMap.map { (t, u) -> Album(t, ContentUris.withAppendedId(songCover, u).toString()) }
         return Pair(songs,albums)
@@ -264,40 +275,52 @@ class SongExtractor(
         songId: Long,
         title: String,
         album: String,
-    ): Song {
+    ): Song? {
         val extractor = MediaMetadataRetriever()
-        extractor.setDataSource(path)
-        val durationMillis = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0
-        val sampleRate = if (Build.VERSION.SDK_INT >= 31){
-            extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_SAMPLERATE)?.toFloatOrNull() ?: 0f
-        } else 0f
-        val bitsPerSample = if (Build.VERSION.SDK_INT >= 31){
-            extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITS_PER_SAMPLE)?.toIntOrNull() ?: 0
-        } else 0
-        val song = Song(
-            location = path,
-            title = title,
-            album = album,
-            size = size.toFloat().toMBfromB(),
-            addedDate = addedDate.toLong().formatToDate(),
-            modifiedDate = modifiedDate.toLong().formatToDate(),
-            artist = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)?.trim() ?: UNKNOWN,
-            albumArtist = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST)?.trim() ?: UNKNOWN,
-            composer = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_COMPOSER)?.trim() ?: UNKNOWN,
-            genre = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE)?.trim() ?: UNKNOWN,
-            lyricist = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_WRITER)?.trim() ?: UNKNOWN,
-            year = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR)?.toIntOrNull() ?: 0,
-            comment = null,
-            durationMillis = durationMillis,
-            durationFormatted = durationMillis.toMS(),
-            bitrate = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE)?.toFloatOrNull() ?: 0f,
-            sampleRate = sampleRate,
-            bitsPerSample = bitsPerSample,
-            mimeType = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE),
-            favourite = false,
-            artUri = "content://media/external/audio/media/$songId/albumart"
-        )
-        extractor.release()
-        return song
+        var result: Song? = null
+        try {
+            extractor.setDataSource(path)
+            val durationMillis = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0
+            val sampleRate = if (Build.VERSION.SDK_INT >= 31){
+                extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_SAMPLERATE)?.toFloatOrNull() ?: 0f
+            } else 0f
+            val bitsPerSample = if (Build.VERSION.SDK_INT >= 31){
+                extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITS_PER_SAMPLE)?.toIntOrNull() ?: 0
+            } else 0
+            val song = Song(
+                location = path,
+                title = title,
+                album = album,
+                size = size.toFloat().toMBfromB(),
+                addedDate = addedDate.toLong().formatToDate(),
+                modifiedDate = modifiedDate.toLong().formatToDate(),
+                artist = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)?.trim() ?: UNKNOWN,
+                albumArtist = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST)?.trim() ?: UNKNOWN,
+                composer = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_COMPOSER)?.trim() ?: UNKNOWN,
+                genre = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE)?.trim() ?: UNKNOWN,
+                lyricist = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_WRITER)?.trim() ?: UNKNOWN,
+                year = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_YEAR)?.toIntOrNull() ?: 0,
+                comment = null,
+                durationMillis = durationMillis,
+                durationFormatted = durationMillis.toMS(),
+                bitrate = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE)?.toFloatOrNull() ?: 0f,
+                sampleRate = sampleRate,
+                bitsPerSample = bitsPerSample,
+                mimeType = extractor.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE),
+                favourite = false,
+                artUri = "content://media/external/audio/media/$songId/albumart"
+            )
+            result = song
+        } catch (e: Exception) {
+            crashReporter.logException(e)
+            result = null
+        } finally {
+            try {
+                extractor.release()
+            } catch (_: Exception) {  }
+        }
+        return result
     }
+
+
 }

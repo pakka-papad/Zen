@@ -21,6 +21,7 @@ fun Float.toMBfromB(): String{
 val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
 fun Long.formatToDate(): String {
+    if (this < 0) return ""
     val calender = Calendar.getInstance().apply {
         timeInMillis = this@formatToDate
     }
