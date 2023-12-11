@@ -10,6 +10,7 @@ import com.github.pakka_papad.components.SortOptions
 import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.*
+import com.github.pakka_papad.data.services.PlaylistService
 import com.github.pakka_papad.storage_explorer.*
 import com.github.pakka_papad.storage_explorer.Directory
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,6 +26,7 @@ class HomeViewModel @Inject constructor(
     private val exoPlayer: ExoPlayer,
     private val songExtractor: SongExtractor,
     private val prefs: ZenPreferenceProvider,
+    private val playlistService: PlaylistService,
 ) : ViewModel() {
 
     val songs = manager.getAll.songs()
@@ -97,7 +99,7 @@ class HomeViewModel @Inject constructor(
             initialValue = null
         )
 
-    val playlistsWithSongCount = manager.getAll.playlists()
+    val playlistsWithSongCount = playlistService.playlists
         .combine(prefs.playlistSortOrder){ playlists, sortOrder ->
             when(sortOrder){
                 SortOptions.NameASC.ordinal -> playlists.sortedBy { it.playlistName }
@@ -200,19 +202,14 @@ class HomeViewModel @Inject constructor(
 
     fun onPlaylistCreate(playlistName: String) {
         viewModelScope.launch {
-            manager.createPlaylist(playlistName)
+            playlistService.createPlaylist(playlistName)
         }
     }
 
     fun deletePlaylist(playlistWithSongCount: PlaylistWithSongCount) {
         viewModelScope.launch {
             try {
-                val playlist = Playlist(
-                    playlistId = playlistWithSongCount.playlistId,
-                    playlistName = playlistWithSongCount.playlistName,
-                    createdAt = playlistWithSongCount.createdAt
-                )
-                manager.deletePlaylist(playlist)
+                playlistService.deletePlaylist(playlistWithSongCount.playlistId)
                 showToast("Done")
             } catch (e: Exception) {
                 Timber.e(e)
