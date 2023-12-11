@@ -5,7 +5,8 @@ import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.pakka_papad.data.DataManager
+import com.github.pakka_papad.data.services.BlacklistService
+import com.github.pakka_papad.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,13 +20,13 @@ import javax.inject.Inject
 @HiltViewModel
 class RestoreFolderViewModel @Inject constructor(
     private val context: Application,
-    private val manager: DataManager,
+    private val blacklistService: BlacklistService,
 ): ViewModel() {
 
     private val _restoreFoldersList = mutableStateListOf<Boolean>()
     val restoreFolderList : List<Boolean> = _restoreFoldersList
 
-    val folders = manager.getAll.blacklistedFolders()
+    val folders = blacklistService.blacklistedFolders
         .onEach {
             while (_restoreFoldersList.size < it.size) _restoreFoldersList.add(false)
             while (_restoreFoldersList.size > it.size) _restoreFoldersList.removeLast()
@@ -37,26 +38,28 @@ class RestoreFolderViewModel @Inject constructor(
         )
 
     fun updateRestoreList(index: Int, isSelected: Boolean){
+        if (restored.value !is Resource.Idle) return
         if (index >= _restoreFoldersList.size) return
         _restoreFoldersList[index] = isSelected
     }
 
-    private val _restored = MutableStateFlow(false)
+    private val _restored = MutableStateFlow<Resource<Unit>>(Resource.Idle())
     val restored = _restored.asStateFlow()
 
     fun restoreFolders(){
         viewModelScope.launch {
+            _restored.update { Resource.Loading() }
             val allFolders = folders.value
             val toRestore = _restoreFoldersList.indices
                 .filter { _restoreFoldersList[it] }
                 .map { allFolders[it] }
             try {
-                manager.removeFoldersFromBlacklist(toRestore)
+                blacklistService.whitelistFolder(toRestore)
                 showToast("Done. Rescan to see all the songs")
+                _restored.update { Resource.Success(Unit) }
             } catch (_ : Exception){
                 showToast("Some error occurred")
-            } finally {
-                _restored.update { true }
+                _restored.update { Resource.Error("") }
             }
         }
     }

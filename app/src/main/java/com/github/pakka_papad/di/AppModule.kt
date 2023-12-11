@@ -23,6 +23,8 @@ import com.github.pakka_papad.data.*
 import com.github.pakka_papad.data.components.DaoCollection
 import com.github.pakka_papad.data.music.SongExtractor
 import com.github.pakka_papad.data.notification.ZenNotificationManager
+import com.github.pakka_papad.data.services.BlacklistService
+import com.github.pakka_papad.data.services.BlacklistServiceImpl
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -154,6 +156,24 @@ object AppModule {
             scope = scope,
             context = context,
             crashReporter = crashReporter,
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun providesBlacklistService(
+        db: AppDatabase
+    ): BlacklistService {
+        return BlacklistServiceImpl(
+            blacklistDao = db.blacklistDao(),
+            blacklistedFolderDao = db.blacklistedFolderDao(),
+            songDao = db.songDao(),
+            albumDao = db.albumDao(),
+            artistDao = db.artistDao(),
+            albumArtistDao = db.albumArtistDao(),
+            composerDao = db.composerDao(),
+            lyricistDao = db.lyricistDao(),
+            genreDao = db.genreDao(),
         )
     }
 }
