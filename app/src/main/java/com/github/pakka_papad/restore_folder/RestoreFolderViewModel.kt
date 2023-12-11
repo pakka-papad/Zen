@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.pakka_papad.R
 import com.github.pakka_papad.data.services.BlacklistService
 import com.github.pakka_papad.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -55,10 +56,10 @@ class RestoreFolderViewModel @Inject constructor(
                 .map { allFolders[it] }
             try {
                 blacklistService.whitelistFolder(toRestore)
-                showToast("Done. Rescan to see all the songs")
+                showToast(context.getString(R.string.done_rescan_to_see_all_the_restored_songs))
                 _restored.update { Resource.Success(Unit) }
             } catch (_ : Exception){
-                showToast("Some error occurred")
+                showToast(context.getString(R.string.some_error_occurred))
                 _restored.update { Resource.Error("") }
             }
         }
