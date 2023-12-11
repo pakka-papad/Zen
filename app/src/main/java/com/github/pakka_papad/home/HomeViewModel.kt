@@ -322,13 +322,13 @@ class HomeViewModel @Inject constructor(
     }
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             explorer.addListener(directoryChangeListener)
         }
     }
 
     fun onFileClicked(songIndex: Int){
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             if(songIndex < 0 || songIndex >= filesInCurrentDestination.value.songs.size) return@launch
             val song = songExtractor.resolveSong(filesInCurrentDestination.value.songs[songIndex].location)
             song?.let {
@@ -338,14 +338,14 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onFileClicked(file: Directory){
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.IO) {
             explorer.moveInsideDirectory(file.absolutePath)
             _isExplorerAtRoot.update { explorer.isRoot }
         }
     }
 
     fun moveToParent() {
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.IO) {
             explorer.moveToParent()
             _isExplorerAtRoot.update { explorer.isRoot }
         }
