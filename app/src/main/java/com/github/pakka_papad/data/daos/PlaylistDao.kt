@@ -14,6 +14,9 @@ interface PlaylistDao {
     @Delete(entity = Playlist::class)
     suspend fun deletePlaylist(playlist: Playlist)
 
+    @Query("DELETE FROM ${Constants.Tables.PLAYLIST_TABLE} WHERE playlistId = :playlistId")
+    suspend fun deletePlaylist(playlistId: Long)
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertPlaylistSongCrossRef(playlistSongCrossRefs: List<PlaylistSongCrossRef>)
 
