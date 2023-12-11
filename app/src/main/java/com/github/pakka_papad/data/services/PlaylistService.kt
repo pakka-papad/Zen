@@ -4,10 +4,13 @@ import com.github.pakka_papad.data.daos.PlaylistDao
 import com.github.pakka_papad.data.music.PlaylistExceptId
 import com.github.pakka_papad.data.music.PlaylistSongCrossRef
 import com.github.pakka_papad.data.music.PlaylistWithSongCount
+import com.github.pakka_papad.data.music.PlaylistWithSongs
 import kotlinx.coroutines.flow.Flow
 
 interface PlaylistService {
     val playlists: Flow<List<PlaylistWithSongCount>>
+
+    fun getPlaylistWithSongsById(playlistId: Long): Flow<PlaylistWithSongs?>
 
     suspend fun createPlaylist(name: String): Boolean
     suspend fun deletePlaylist(playlistId: Long)
@@ -21,6 +24,10 @@ class PlaylistServiceImpl(
 ): PlaylistService {
     override val playlists: Flow<List<PlaylistWithSongCount>>
         = playlistDao.getAllPlaylistWithSongCount()
+
+    override fun getPlaylistWithSongsById(playlistId: Long): Flow<PlaylistWithSongs?> {
+        return playlistDao.getPlaylistWithSongs(playlistId)
+    }
 
     override suspend fun createPlaylist(name: String): Boolean {
         if (name.isBlank()) return false

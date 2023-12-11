@@ -4,10 +4,11 @@ import android.app.Application
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.pakka_papad.R
 import com.github.pakka_papad.components.SortOptions
 import com.github.pakka_papad.data.DataManager
-import com.github.pakka_papad.data.music.PlaylistSongCrossRef
 import com.github.pakka_papad.data.music.Song
+import com.github.pakka_papad.data.services.PlaylistService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -20,6 +21,7 @@ import javax.inject.Inject
 class CollectionViewModel @Inject constructor(
     private val context: Application,
     private val manager: DataManager,
+    private val playlistService: PlaylistService,
 ) : ViewModel() {
 
     val currentSong = manager.currentSong
@@ -59,7 +61,7 @@ class CollectionViewModel @Inject constructor(
                     }
                 }
                 CollectionType.PlaylistType -> {
-                    manager.findCollection.getPlaylistWithSongsById(type.id.toLong()).map {
+                    playlistService.getPlaylistWithSongsById(type.id.toLong()).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
@@ -210,18 +212,21 @@ class CollectionViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val playlistId = _collectionType.value?.id?.toLong() ?: throw IllegalArgumentException()
-                val playlistSongCrossRef = PlaylistSongCrossRef(playlistId,song.location)
-                manager.deletePlaylistSongCrossRef(playlistSongCrossRef)
-                Toast.makeText(context,"Removed",Toast.LENGTH_SHORT).show()
+                playlistService.removeSongsFromPlaylist(listOf(song.location), playlistId)
+                showToast(context.getString(R.string.done))
             } catch (e: Exception){
                 Timber.e(e)
-                Toast.makeText(context,"Some error occurred",Toast.LENGTH_SHORT).show()
+                showToast(context.getString(R.string.some_error_occurred))
             }
         }
     }
 
     fun updateSortOrder(order: Int){
         _chosenSortOrder.update { order }
+    }
+
+    private fun showToast(message: String){
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
 }
