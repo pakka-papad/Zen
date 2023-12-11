@@ -33,6 +33,13 @@
                 android:value="" />
         </activity>
 
+        <activity
+            android:name=".CrashActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Zen">
+        </activity>
+
         <service
             android:name=".player.ZenPlayer"
             android:foregroundServiceType="mediaPlayback" />
