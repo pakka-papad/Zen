@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import timber.log.Timber
 import java.io.File
-import kotlin.collections.HashSet
 
 class DataManager(
     private val context: Context,
@@ -36,12 +35,8 @@ class DataManager(
 
     val querySearch by lazy { QuerySearch(daoCollection) }
 
-    val blacklistedSongLocations = HashSet<String>()
-    val blacklistedFolderPaths = HashSet<String>()
-
     init {
         cleanData()
-        buildBlacklistStore()
     }
 
     fun cleanData() {
@@ -67,27 +62,18 @@ class DataManager(
         }
     }
 
-    private fun buildBlacklistStore(){
-        scope.launch {
-            val blacklistedSongs = daoCollection.blacklistDao.getBlacklistedSongs()
-            blacklistedSongs.forEach { blacklistedSongLocations.add(it.location) }
-            val blacklistedFolders = daoCollection.blacklistedFolderDao.getAllFolders().first()
-            blacklistedFolders.forEach { blacklistedFolderPaths.add(it.path) }
-        }
-    }
-
     suspend fun removeFromBlacklist(data: List<BlacklistedSong>){
         data.forEach {
             Timber.d("bs: $it")
             daoCollection.blacklistDao.deleteBlacklistedSong(it)
-            blacklistedSongLocations.remove(it.location)
+//            blacklistedSongLocations.remove(it.location)
         }
     }
 
     suspend fun addFolderToBlacklist(path: String){
         daoCollection.songDao.deleteSongsWithPathPrefix(path)
         daoCollection.blacklistedFolderDao.insertFolder(BlacklistedFolder(path))
-        blacklistedFolderPaths.add(path)
+//        blacklistedFolderPaths.add(path)
         cleanData()
     }
 
@@ -95,7 +81,7 @@ class DataManager(
         folders.forEach { folder ->
             try {
                 daoCollection.blacklistedFolderDao.deleteFolder(folder)
-                blacklistedFolderPaths.remove(folder.path)
+//                blacklistedFolderPaths.remove(folder.path)
             } catch (_: Exception){ }
         }
     }
@@ -120,7 +106,7 @@ class DataManager(
                 artist = song.artist,
             )
         )
-        blacklistedSongLocations.add(song.location)
+//        blacklistedSongLocations.add(song.location)
     }
 
     suspend fun insertPlaylistSongCrossRefs(playlistSongCrossRefs: List<PlaylistSongCrossRef>) =
@@ -134,6 +120,15 @@ class DataManager(
 
     fun scanForMusic() = scope.launch {
         _scanStatus.send(ScanStatus.ScanStarted)
+        val blacklistedSongLocations = daoCollection.blacklistDao
+            .getBlacklistedSongs()
+            .map { it.location }
+            .toHashSet()
+        val blacklistedFolderPaths = daoCollection.blacklistedFolderDao
+            .getAllFolders()
+            .first()
+            .map { it.path }
+            .toHashSet()
         val (songs, albums) = songExtractor.extract(
             blacklistedSongLocations,
             blacklistedFolderPaths,
