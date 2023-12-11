@@ -172,7 +172,9 @@ class HomeFragment : Fragment() {
                     val queue = viewModel.queue
                     val playbackParams by  preferenceProvider.playbackParams.collectAsStateWithLifecycle()
                     val repeatMode by viewModel.repeatMode.collectAsStateWithLifecycle()
-                    val playerScaffoldState = rememberBottomSheetScaffoldState()
+                    val playerScaffoldState = rememberBottomSheetScaffoldState(
+                        bottomSheetState = rememberStandardBottomSheetState(skipHiddenState = false)
+                    )
 
                     val isExplorerAtRoot by viewModel.isExplorerAtRoot.collectAsStateWithLifecycle()
 
