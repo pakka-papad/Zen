@@ -43,6 +43,8 @@ object Versions {
     const val coilCompose = "2.2.2"
     const val palette = "1.0.0"
     const val lottie = "5.2.0"
+
+    const val crashActivity = "2.4.0"
 }
 
 object Plugins {
@@ -113,6 +115,8 @@ object Libraries {
     const val coilCompose = "io.coil-kt:coil-compose:${Versions.coilCompose}"
     const val palette = "androidx.palette:palette-ktx:${Versions.palette}"
     const val lottie = "com.airbnb.android:lottie-compose:${Versions.lottie}"
+
+    const val crashActivity = "cat.ereza:customactivityoncrash:${Versions.crashActivity}"
 }
 
 object Api {

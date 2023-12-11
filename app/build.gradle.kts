@@ -155,6 +155,8 @@ dependencies {
     implementation(Libraries.coilCompose)
     implementation(Libraries.palette)
     implementation(Libraries.lottie)
+
+    implementation(Libraries.crashActivity)
 }
 
 protobuf {
