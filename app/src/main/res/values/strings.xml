@@ -3,4 +3,6 @@
     <string name="music_control_widget_description">Music Control Widget</string>
     <string name="done_rescan_to_see_all_the_restored_songs">Done. Rescan to see all the restored songs</string>
     <string name="some_error_occurred">Some error occurred</string>
+    <string name="done">Done</string>
+    <string name="blacklisted_songs_have_not_been_added_to_playlist">Blacklisted songs have not been added to playlist</string>
 </resources>

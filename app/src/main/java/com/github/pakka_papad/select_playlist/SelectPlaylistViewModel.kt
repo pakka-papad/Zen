@@ -5,12 +5,18 @@ import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.pakka_papad.data.DataManager
-import com.github.pakka_papad.data.music.PlaylistSongCrossRef
+import com.github.pakka_papad.R
+import com.github.pakka_papad.data.services.BlacklistService
+import com.github.pakka_papad.data.services.PlaylistService
+import com.github.pakka_papad.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -18,14 +24,15 @@ import javax.inject.Inject
 @HiltViewModel
 class SelectPlaylistViewModel @Inject constructor(
     private val context: Application,
-    private val manager: DataManager,
+    private val blacklistService: BlacklistService,
+    private val playlistService: PlaylistService,
 ) : ViewModel() {
 
 
     private val _selectList = mutableStateListOf<Boolean>()
     val selectList: List<Boolean> = _selectList
 
-    val playlistsWithSongCount = manager.getAll.playlists()
+    val playlistsWithSongCount = playlistService.playlists
         .onEach {
             while (_selectList.size < it.size) _selectList.add(false)
             while (_selectList.size > it.size) _selectList.removeLast()
@@ -40,31 +47,44 @@ class SelectPlaylistViewModel @Inject constructor(
         _selectList[index] = !_selectList[index]
     }
 
+    private val _insertState = MutableStateFlow<Resource<Unit>>(Resource.Idle())
+    val insertState = _insertState.asStateFlow()
+
     fun addSongsToPlaylists(songLocations: Array<String>) {
         viewModelScope.launch {
+            _insertState.update { Resource.Loading() }
             val playlists = playlistsWithSongCount.value
-            val validSongs = songLocations.filter { !manager.blacklistedSongLocations.contains(it) }
-            val anyBlacklistedSong = songLocations.any { manager.blacklistedSongLocations.contains(it) }
-            val playlistSongCrossRefs = _selectList.indices
-                .filter { _selectList[it] }
-                .map {
-                    val list = ArrayList<PlaylistSongCrossRef>()
-                    for (songLocation in validSongs) {
-                        list += PlaylistSongCrossRef(playlists[it].playlistId, songLocation)
-                    }
-                    list.toList()
-                }
-            try {
-                manager.insertPlaylistSongCrossRefs(playlistSongCrossRefs.flatten())
-                Toast.makeText(context,"Done",Toast.LENGTH_SHORT).show()
-            } catch (e: Exception){
-                Timber.e(e)
-                Toast.makeText(context,"Some error occurred",Toast.LENGTH_SHORT).show()
-            } finally {
-                if (anyBlacklistedSong){
-                    Toast.makeText(context,"Blacklisted songs have not been added to playlist",Toast.LENGTH_SHORT).show()
+            val blacklistedSongs = blacklistService.blacklistedSongs
+                .first()
+                .map { it.location }
+                .toSet()
+            val validSongs = songLocations.filter { blacklistedSongs.contains(it) }
+            val anyBlacklistedSong = songLocations.any { blacklistedSongs.contains(it) }
+            var error = false
+            selectList.forEachIndexed { index, isSelected ->
+                if (!isSelected) return@forEachIndexed
+                try {
+                    val playlist = playlists[index]
+                    playlistService.addSongsToPlaylist(validSongs, playlist.playlistId)
+                } catch (e: Exception){
+                    Timber.e(e)
+                    error = true
                 }
             }
+            if (!error){
+                 showToast(context.getString(R.string.done))
+                _insertState.update { Resource.Success(Unit) }
+            } else {
+                showToast(context.getString(R.string.some_error_occurred))
+                _insertState.update { Resource.Error("") }
+            }
+            if (anyBlacklistedSong){
+                showToast(context.getString(R.string.blacklisted_songs_have_not_been_added_to_playlist))
+            }
         }
+    }
+
+    private fun showToast(message: String){
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 }
