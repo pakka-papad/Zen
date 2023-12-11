@@ -43,6 +43,7 @@ class SelectPlaylistViewModel @Inject constructor(
         )
 
     fun toggleSelectAtIndex(index: Int) {
+        if (insertState.value !is Resource.Idle) return
         if (index >= _selectList.size) return
         _selectList[index] = !_selectList[index]
     }
@@ -58,7 +59,7 @@ class SelectPlaylistViewModel @Inject constructor(
                 .first()
                 .map { it.location }
                 .toSet()
-            val validSongs = songLocations.filter { blacklistedSongs.contains(it) }
+            val validSongs = songLocations.filter { !blacklistedSongs.contains(it) }
             val anyBlacklistedSong = songLocations.any { blacklistedSongs.contains(it) }
             var error = false
             selectList.forEachIndexed { index, isSelected ->
