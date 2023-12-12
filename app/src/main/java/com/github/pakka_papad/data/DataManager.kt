@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
-import timber.log.Timber
 import java.io.File
 
 class DataManager(
@@ -28,10 +27,6 @@ class DataManager(
     private val scope: CoroutineScope,
     private val songExtractor: SongExtractor,
 ) {
-
-    val getAll by lazy { GetAll(daoCollection) }
-
-    val findCollection by lazy { FindCollection(daoCollection) }
 
     val querySearch by lazy { QuerySearch(daoCollection) }
 
@@ -61,59 +56,6 @@ class DataManager(
             daoCollection.genreDao.cleanGenreTable()
         }
     }
-
-    suspend fun removeFromBlacklist(data: List<BlacklistedSong>){
-        data.forEach {
-            Timber.d("bs: $it")
-            daoCollection.blacklistDao.deleteBlacklistedSong(it)
-//            blacklistedSongLocations.remove(it.location)
-        }
-    }
-
-    suspend fun addFolderToBlacklist(path: String){
-        daoCollection.songDao.deleteSongsWithPathPrefix(path)
-        daoCollection.blacklistedFolderDao.insertFolder(BlacklistedFolder(path))
-//        blacklistedFolderPaths.add(path)
-        cleanData()
-    }
-
-    suspend fun removeFoldersFromBlacklist(folders: List<BlacklistedFolder>){
-        folders.forEach { folder ->
-            try {
-                daoCollection.blacklistedFolderDao.deleteFolder(folder)
-//                blacklistedFolderPaths.remove(folder.path)
-            } catch (_: Exception){ }
-        }
-    }
-
-    suspend fun createPlaylist(playlistName: String) {
-        if (playlistName.trim().isEmpty()) return
-        val playlist = PlaylistExceptId(
-            playlistName = playlistName.trim(),
-            createdAt = System.currentTimeMillis()
-        )
-        daoCollection.playlistDao.insertPlaylist(playlist)
-        showToast("Playlist $playlistName created")
-    }
-
-    suspend fun deletePlaylist(playlist: Playlist) = daoCollection.playlistDao.deletePlaylist(playlist)
-    suspend fun deleteSong(song: Song) {
-        daoCollection.songDao.deleteSong(song)
-        daoCollection.blacklistDao.addSong(
-            BlacklistedSong(
-                location = song.location,
-                title = song.title,
-                artist = song.artist,
-            )
-        )
-//        blacklistedSongLocations.add(song.location)
-    }
-
-    suspend fun insertPlaylistSongCrossRefs(playlistSongCrossRefs: List<PlaylistSongCrossRef>) =
-        daoCollection.playlistDao.insertPlaylistSongCrossRef(playlistSongCrossRefs)
-
-    suspend fun deletePlaylistSongCrossRef(playlistSongCrossRef: PlaylistSongCrossRef) =
-        daoCollection.playlistDao.deletePlaylistSongCrossRef(playlistSongCrossRef)
 
     private val _scanStatus = Channel<ScanStatus>(onBufferOverflow = BufferOverflow.DROP_OLDEST)
     val scanStatus = _scanStatus.receiveAsFlow()
@@ -149,10 +91,6 @@ class DataManager(
         daoCollection.genreDao.insertAllGenres(genres)
         daoCollection.songDao.insertAllSongs(songs)
         _scanStatus.send(ScanStatus.ScanComplete)
-    }
-
-    private fun showToast(message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
     private var callback: Callback? = null
