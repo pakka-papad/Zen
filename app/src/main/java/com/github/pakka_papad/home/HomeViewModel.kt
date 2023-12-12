@@ -10,6 +10,7 @@ import com.github.pakka_papad.components.SortOptions
 import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.*
+import com.github.pakka_papad.data.services.BlacklistService
 import com.github.pakka_papad.data.services.PlaylistService
 import com.github.pakka_papad.storage_explorer.*
 import com.github.pakka_papad.storage_explorer.Directory
@@ -27,6 +28,7 @@ class HomeViewModel @Inject constructor(
     private val songExtractor: SongExtractor,
     private val prefs: ZenPreferenceProvider,
     private val playlistService: PlaylistService,
+    private val blacklistService: BlacklistService,
 ) : ViewModel() {
 
     val songs = manager.getAll.songs()
@@ -180,7 +182,7 @@ class HomeViewModel @Inject constructor(
     fun onSongBlacklist(song: Song) {
         viewModelScope.launch {
             try {
-                manager.deleteSong(song)
+                blacklistService.blacklistSong(listOf(song))
                 showToast("Done")
             } catch (e: Exception) {
                 Timber.e(e)
@@ -192,7 +194,7 @@ class HomeViewModel @Inject constructor(
     fun onFolderBlacklist(folder: Directory){
         viewModelScope.launch {
             try {
-                manager.addFolderToBlacklist(folder.absolutePath)
+                blacklistService.blacklistFolder(listOf(folder.absolutePath))
                 showToast("Done")
             } catch (_: Exception){
                 showToast("Some error occurred")
