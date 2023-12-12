@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
@@ -77,6 +78,11 @@ class SelectPlaylistFragment: Fragment() {
                         }
                         navController.popBackStack()
                     }
+
+                    BackHandler(
+                        enabled = insertState is Resource.Loading,
+                        onBack = {  }
+                    )
 
                     Scaffold(
                         topBar = {

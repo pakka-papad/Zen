@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -72,6 +73,11 @@ class RestoreFolderFragment: Fragment() {
                     }
                     navController.popBackStack()
                 }
+
+                BackHandler(
+                    enabled = restoreState is Resource.Loading,
+                    onBack = {  }
+                )
 
                 ZenTheme(themePreference) {
 
