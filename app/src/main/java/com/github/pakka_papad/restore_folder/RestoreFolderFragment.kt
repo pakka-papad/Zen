@@ -1,6 +1,5 @@
 package com.github.pakka_papad.restore_folder
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,8 +9,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -21,8 +23,10 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import com.github.pakka_papad.R
 import com.github.pakka_papad.components.BlockingProgressIndicator
 import com.github.pakka_papad.components.CancelConfirmTopBar
+import com.github.pakka_papad.components.Snackbar
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.ui.theme.ZenTheme
 import com.github.pakka_papad.util.Resource
@@ -45,8 +49,6 @@ class RestoreFolderFragment: Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         navController = findNavController()
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-        intent.addCategory(Intent.CATEGORY_DEFAULT)
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -54,9 +56,20 @@ class RestoreFolderFragment: Fragment() {
                 val folders by viewModel.folders.collectAsStateWithLifecycle()
                 val selectList = viewModel.restoreFolderList
 
+                val snackbarHostState = remember { SnackbarHostState() }
+
                 val restoreState by viewModel.restored.collectAsStateWithLifecycle()
                 LaunchedEffect(key1 = restoreState){
                     if (restoreState is Resource.Idle || restoreState is Resource.Loading) return@LaunchedEffect
+                    if (restoreState is Resource.Success){
+                        snackbarHostState.showSnackbar(
+                            message = getString(R.string.done_rescan_to_see_all_the_restored_songs),
+                        )
+                    } else {
+                        restoreState.message?.let {
+                            snackbarHostState.showSnackbar(message = it)
+                        }
+                    }
                     navController.popBackStack()
                 }
 
@@ -65,7 +78,11 @@ class RestoreFolderFragment: Fragment() {
                     Scaffold(
                         topBar = {
                             CancelConfirmTopBar(
-                                onCancelClicked = navController::popBackStack,
+                                onCancelClicked = {
+                                    if (restoreState is Resource.Idle){
+                                        navController.popBackStack()
+                                    }
+                                },
                                 onConfirmClicked = viewModel::restoreFolders,
                                 title = "Restore folders"
                             )
@@ -91,6 +108,14 @@ class RestoreFolderFragment: Fragment() {
                                 }
                             }
                         },
+                        snackbarHost = {
+                            SnackbarHost(
+                                hostState = snackbarHostState,
+                                snackbar = {
+                                    Snackbar(it)
+                                }
+                            )
+                        }
                     )
                 }
             }

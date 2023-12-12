@@ -1,7 +1,6 @@
 package com.github.pakka_papad.restore_folder
 
 import android.app.Application
-import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -48,6 +47,7 @@ class RestoreFolderViewModel @Inject constructor(
     val restored = _restored.asStateFlow()
 
     fun restoreFolders(){
+        if (restored.value !is Resource.Idle) return
         viewModelScope.launch {
             _restored.update { Resource.Loading() }
             val allFolders = folders.value
@@ -56,16 +56,10 @@ class RestoreFolderViewModel @Inject constructor(
                 .map { allFolders[it] }
             try {
                 blacklistService.whitelistFolders(toRestore)
-                showToast(context.getString(R.string.done_rescan_to_see_all_the_restored_songs))
                 _restored.update { Resource.Success(Unit) }
             } catch (_ : Exception){
-                showToast(context.getString(R.string.some_error_occurred))
-                _restored.update { Resource.Error("") }
+                _restored.update { Resource.Error(context.getString(R.string.some_error_occurred)) }
             }
         }
-    }
-
-    private fun showToast(message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 }
