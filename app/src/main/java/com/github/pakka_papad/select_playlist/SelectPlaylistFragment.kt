@@ -7,8 +7,11 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -21,6 +24,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.github.pakka_papad.components.BlockingProgressIndicator
 import com.github.pakka_papad.components.CancelConfirmTopBar
+import com.github.pakka_papad.components.Snackbar
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.ui.theme.ZenTheme
 import com.github.pakka_papad.util.Resource
@@ -56,17 +60,32 @@ class SelectPlaylistFragment: Fragment() {
                     val playlists by viewModel.playlistsWithSongCount.collectAsStateWithLifecycle()
                     val selectList = viewModel.selectList
 
+                    val snackbarHostState = remember { SnackbarHostState() }
+
                     val insertState by viewModel.insertState.collectAsStateWithLifecycle()
 
                     LaunchedEffect(key1 = insertState){
                         if (insertState is Resource.Idle || insertState is Resource.Loading) return@LaunchedEffect
+                        if (insertState is Resource.Success){
+                            insertState.data?.let {
+                                snackbarHostState.showSnackbar(message = it)
+                            }
+                        } else {
+                            insertState.message?.let {
+                                snackbarHostState.showSnackbar(message = it)
+                            }
+                        }
                         navController.popBackStack()
                     }
 
                     Scaffold(
                         topBar = {
                             CancelConfirmTopBar(
-                                onCancelClicked = navController::popBackStack,
+                                onCancelClicked = {
+                                    if (insertState is Resource.Idle){
+                                        navController.popBackStack()
+                                    }
+                                },
                                 onConfirmClicked = {
                                     viewModel.addSongsToPlaylists(args.songLocations)
                                 },
@@ -93,6 +112,14 @@ class SelectPlaylistFragment: Fragment() {
                                     }
                                 }
                             }
+                        },
+                        snackbarHost = {
+                            SnackbarHost(
+                                hostState = snackbarHostState,
+                                snackbar = {
+                                    Snackbar(it)
+                                }
+                            )
                         }
                     )
                 }

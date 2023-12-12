@@ -1,7 +1,6 @@
 package com.github.pakka_papad.select_playlist
 
 import android.app.Application
-import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -48,10 +47,11 @@ class SelectPlaylistViewModel @Inject constructor(
         _selectList[index] = !_selectList[index]
     }
 
-    private val _insertState = MutableStateFlow<Resource<Unit>>(Resource.Idle())
+    private val _insertState = MutableStateFlow<Resource<String>>(Resource.Idle())
     val insertState = _insertState.asStateFlow()
 
     fun addSongsToPlaylists(songLocations: Array<String>) {
+        if (insertState.value !is Resource.Idle) return
         viewModelScope.launch {
             _insertState.update { Resource.Loading() }
             val playlists = playlistsWithSongCount.value
@@ -67,25 +67,24 @@ class SelectPlaylistViewModel @Inject constructor(
                 try {
                     val playlist = playlists[index]
                     playlistService.addSongsToPlaylist(validSongs, playlist.playlistId)
-                } catch (e: Exception){
+                } catch (e: Exception) {
                     Timber.e(e)
                     error = true
                 }
             }
-            if (!error){
-                 showToast(context.getString(R.string.done))
-                _insertState.update { Resource.Success(Unit) }
+            if (!error) {
+                _insertState.update {
+                    Resource.Success(
+                        context.getString(R.string.done) + if (anyBlacklistedSong) {
+                            ". " + context.getString(R.string.blacklisted_songs_have_not_been_added_to_playlist)
+                        } else {
+                            ""
+                        }
+                    )
+                }
             } else {
-                showToast(context.getString(R.string.some_error_occurred))
-                _insertState.update { Resource.Error("") }
-            }
-            if (anyBlacklistedSong){
-                showToast(context.getString(R.string.blacklisted_songs_have_not_been_added_to_playlist))
+                _insertState.update { Resource.Error(context.getString(R.string.some_error_occurred)) }
             }
         }
-    }
-
-    private fun showToast(message: String){
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 }
