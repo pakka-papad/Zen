@@ -1,7 +1,6 @@
 package com.github.pakka_papad.restore
 
 import android.app.Application
-import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -48,6 +47,7 @@ class RestoreViewModel @Inject constructor(
     val restoreState = _restoreState.asStateFlow()
 
     fun restoreSongs(){
+        if (restoreState.value !is Resource.Idle) return
         viewModelScope.launch {
             _restoreState.update { Resource.Loading() }
             val blacklist = blackListedSongs.value
@@ -56,17 +56,11 @@ class RestoreViewModel @Inject constructor(
                 .map { blacklist[it] }
             try {
                 blacklistService.whitelistSongs(toRestore)
-                showToast(context.getString(R.string.done_rescan_to_see_all_the_restored_songs))
                 _restoreState.update { Resource.Success(Unit) }
             } catch (e: Exception){
                 Timber.e(e)
-                showToast(context.getString(R.string.some_error_occurred))
-                _restoreState.update { Resource.Error("") }
+                _restoreState.update { Resource.Error(context.getString(R.string.some_error_occurred)) }
             }
         }
-    }
-
-    private fun showToast(message: String){
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 }
