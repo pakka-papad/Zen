@@ -18,11 +18,11 @@ interface BlacklistService {
     val blacklistedSongs: Flow<List<BlacklistedSong>>
     val blacklistedFolders: Flow<List<BlacklistedFolder>>
 
-    suspend fun blacklistSong(songs: List<Song>)
-    suspend fun whitelistSong(blacklistedSongs: List<BlacklistedSong>)
+    suspend fun blacklistSongs(songs: List<Song>)
+    suspend fun whitelistSongs(blacklistedSongs: List<BlacklistedSong>)
 
-    suspend fun blacklistFolder(folderPaths: List<String>)
-    suspend fun whitelistFolder(folders: List<BlacklistedFolder>)
+    suspend fun blacklistFolders(folderPaths: List<String>)
+    suspend fun whitelistFolders(folders: List<BlacklistedFolder>)
 }
 
 class BlacklistServiceImpl(
@@ -43,7 +43,7 @@ class BlacklistServiceImpl(
     override val blacklistedFolders: Flow<List<BlacklistedFolder>>
          = blacklistedFolderDao.getAllFolders()
 
-    override suspend fun blacklistSong(songs: List<Song>) {
+    override suspend fun blacklistSongs(songs: List<Song>) {
         songs.forEach { song ->
             songDao.deleteSong(song)
             blacklistDao.addSong(
@@ -56,13 +56,13 @@ class BlacklistServiceImpl(
         }
     }
 
-    override suspend fun whitelistSong(blacklistedSongs: List<BlacklistedSong>) {
+    override suspend fun whitelistSongs(blacklistedSongs: List<BlacklistedSong>) {
         blacklistedSongs.forEach { blacklistedSong ->
             blacklistDao.deleteBlacklistedSong(blacklistedSong)
         }
     }
 
-    override suspend fun blacklistFolder(folderPaths: List<String>) {
+    override suspend fun blacklistFolders(folderPaths: List<String>) {
         folderPaths.forEach { folderPath ->
             songDao.deleteSongsWithPathPrefix(folderPath)
             blacklistedFolderDao.insertFolder(BlacklistedFolder(folderPath))
@@ -79,7 +79,7 @@ class BlacklistServiceImpl(
         genreDao.cleanGenreTable()
     }
 
-    override suspend fun whitelistFolder(folders: List<BlacklistedFolder>) {
+    override suspend fun whitelistFolders(folders: List<BlacklistedFolder>) {
         folders.forEach { folder ->
             blacklistedFolderDao.deleteFolder(folder)
         }

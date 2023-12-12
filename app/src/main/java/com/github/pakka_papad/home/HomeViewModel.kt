@@ -182,7 +182,7 @@ class HomeViewModel @Inject constructor(
     fun onSongBlacklist(song: Song) {
         viewModelScope.launch {
             try {
-                blacklistService.blacklistSong(listOf(song))
+                blacklistService.blacklistSongs(listOf(song))
                 showToast("Done")
             } catch (e: Exception) {
                 Timber.e(e)
@@ -194,7 +194,7 @@ class HomeViewModel @Inject constructor(
     fun onFolderBlacklist(folder: Directory){
         viewModelScope.launch {
             try {
-                blacklistService.blacklistFolder(listOf(folder.absolutePath))
+                blacklistService.blacklistFolders(listOf(folder.absolutePath))
                 showToast("Done")
             } catch (_: Exception){
                 showToast("Some error occurred")

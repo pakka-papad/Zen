@@ -9,7 +9,6 @@ import com.github.pakka_papad.R
 import com.github.pakka_papad.data.services.BlacklistService
 import com.github.pakka_papad.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -51,13 +50,12 @@ class RestoreViewModel @Inject constructor(
     fun restoreSongs(){
         viewModelScope.launch {
             _restoreState.update { Resource.Loading() }
-            delay(5000)
             val blacklist = blackListedSongs.value
             val toRestore = _restoreList.indices
                 .filter { _restoreList[it] }
                 .map { blacklist[it] }
             try {
-                blacklistService.whitelistSong(toRestore)
+                blacklistService.whitelistSongs(toRestore)
                 showToast(context.getString(R.string.done_rescan_to_see_all_the_restored_songs))
                 _restoreState.update { Resource.Success(Unit) }
             } catch (e: Exception){

@@ -55,7 +55,7 @@ class RestoreFolderViewModel @Inject constructor(
                 .filter { _restoreFoldersList[it] }
                 .map { allFolders[it] }
             try {
-                blacklistService.whitelistFolder(toRestore)
+                blacklistService.whitelistFolders(toRestore)
                 showToast(context.getString(R.string.done_rescan_to_see_all_the_restored_songs))
                 _restored.update { Resource.Success(Unit) }
             } catch (_ : Exception){
