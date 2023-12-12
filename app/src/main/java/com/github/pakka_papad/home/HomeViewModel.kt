@@ -12,6 +12,7 @@ import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.*
 import com.github.pakka_papad.data.services.BlacklistService
 import com.github.pakka_papad.data.services.PlaylistService
+import com.github.pakka_papad.data.services.SongService
 import com.github.pakka_papad.storage_explorer.*
 import com.github.pakka_papad.storage_explorer.Directory
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,9 +30,10 @@ class HomeViewModel @Inject constructor(
     private val prefs: ZenPreferenceProvider,
     private val playlistService: PlaylistService,
     private val blacklistService: BlacklistService,
+    private val songService: SongService,
 ) : ViewModel() {
 
-    val songs = manager.getAll.songs()
+    val songs = songService.songs
         .combine(prefs.songSortOrder){ songs, sortOrder ->
             when(sortOrder){
                 SortOptions.TitleASC.ordinal -> songs.sortedBy { it.title }
@@ -54,7 +56,7 @@ class HomeViewModel @Inject constructor(
             initialValue = null
         )
 
-    val albums = manager.getAll.albums()
+    val albums = songService.albums
         .combine(prefs.albumSortOrder){ albums, sortOrder ->
             when(sortOrder){
                 SortOptions.TitleASC.ordinal -> albums.sortedBy { it.name }
@@ -80,10 +82,10 @@ class HomeViewModel @Inject constructor(
     val personsWithSongCount = _selectedPerson
         .flatMapLatest {
             when (it) {
-                Person.Artist -> manager.getAll.artists()
-                Person.AlbumArtist -> manager.getAll.albumArtists()
-                Person.Composer -> manager.getAll.composers()
-                Person.Lyricist -> manager.getAll.lyricists()
+                Person.Artist -> songService.artists
+                Person.AlbumArtist -> songService.albumArtists
+                Person.Composer -> songService.composers
+                Person.Lyricist -> songService.lyricists
             }
         }.combine(prefs.artistSortOrder){ artists, sortOrder ->
             when(sortOrder){
@@ -118,7 +120,7 @@ class HomeViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    val genresWithSongCount = manager.getAll.genres()
+    val genresWithSongCount = songService.genres
         .combine(prefs.genreSortOrder){ genres, sortOrder ->
             when(sortOrder){
                 SortOptions.NameASC.ordinal -> genres.sortedBy { it.genreName }

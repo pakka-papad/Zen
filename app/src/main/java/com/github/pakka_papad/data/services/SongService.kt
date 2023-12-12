@@ -27,7 +27,7 @@ interface SongService {
     val albums: Flow<List<Album>>
     val artists: Flow<List<ArtistWithSongCount>>
     val albumArtists: Flow<List<AlbumArtistWithSongCount>>
-    val composer: Flow<List<ComposerWithSongCount>>
+    val composers: Flow<List<ComposerWithSongCount>>
     val lyricists: Flow<List<LyricistWithSongCount>>
     val genres: Flow<List<GenreWithSongCount>>
 
@@ -62,7 +62,7 @@ class SongServiceImpl(
     override val albumArtists: Flow<List<AlbumArtistWithSongCount>>
         = songDao.getAllAlbumArtistsWithSongCount()
 
-    override val composer: Flow<List<ComposerWithSongCount>>
+    override val composers: Flow<List<ComposerWithSongCount>>
         = songDao.getAllComposersWithSongCount()
 
     override val lyricists: Flow<List<LyricistWithSongCount>>
