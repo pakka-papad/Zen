@@ -9,6 +9,7 @@ import com.github.pakka_papad.components.SortOptions
 import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.data.services.PlaylistService
+import com.github.pakka_papad.data.services.SongService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -22,6 +23,7 @@ class CollectionViewModel @Inject constructor(
     private val context: Application,
     private val manager: DataManager,
     private val playlistService: PlaylistService,
+    private val songService: SongService,
 ) : ViewModel() {
 
     val currentSong = manager.currentSong
@@ -37,7 +39,7 @@ class CollectionViewModel @Inject constructor(
         .flatMapLatest { type ->
             when (type?.type) {
                 CollectionType.AlbumType -> {
-                    manager.findCollection.getAlbumWithSongsByName(type.id).map {
+                    songService.getAlbumWithSongsByName(type.id).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
@@ -49,7 +51,7 @@ class CollectionViewModel @Inject constructor(
                     }
                 }
                 CollectionType.ArtistType -> {
-                    manager.findCollection.getArtistWithSongsByName(type.id).map {
+                    songService.getArtistWithSongsByName(type.id).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
@@ -73,7 +75,7 @@ class CollectionViewModel @Inject constructor(
                     }
                 }
                 CollectionType.AlbumArtistType -> {
-                    manager.findCollection.getAlbumArtistWithSings(type.id).map {
+                    songService.getAlbumArtistWithSongsByName(type.id).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
@@ -85,7 +87,7 @@ class CollectionViewModel @Inject constructor(
                     }
                 }
                 CollectionType.ComposerType -> {
-                    manager.findCollection.getComposerWithSongs(type.id).map {
+                    songService.getComposerWithSongsByName(type.id).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
@@ -97,7 +99,7 @@ class CollectionViewModel @Inject constructor(
                     }
                 }
                 CollectionType.LyricistType -> {
-                    manager.findCollection.getLyricistWithSongs(type.id).map {
+                    songService.getLyricistWithSongsByName(type.id).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
@@ -109,7 +111,7 @@ class CollectionViewModel @Inject constructor(
                     }
                 }
                 CollectionType.GenreType -> {
-                    manager.findCollection.getGenreWithSongs(type.id).map {
+                    songService.getGenreWithSongsByName(type.id).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
@@ -121,7 +123,7 @@ class CollectionViewModel @Inject constructor(
                     }
                 }
                 CollectionType.FavouritesType -> {
-                    manager.findCollection.getFavourites().map {
+                    songService.getFavouriteSongs().map {
                         CollectionUi(
                             songs = it,
                             topBarTitle = "Favourites",

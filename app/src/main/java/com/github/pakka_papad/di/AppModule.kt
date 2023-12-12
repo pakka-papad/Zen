@@ -27,6 +27,8 @@ import com.github.pakka_papad.data.services.BlacklistService
 import com.github.pakka_papad.data.services.BlacklistServiceImpl
 import com.github.pakka_papad.data.services.PlaylistService
 import com.github.pakka_papad.data.services.PlaylistServiceImpl
+import com.github.pakka_papad.data.services.SongService
+import com.github.pakka_papad.data.services.SongServiceImpl
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -186,6 +188,22 @@ object AppModule {
     ): PlaylistService {
         return PlaylistServiceImpl(
             playlistDao = db.playlistDao(),
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun providesSongService(
+        db: AppDatabase
+    ): SongService {
+        return SongServiceImpl(
+            songDao = db.songDao(),
+            albumDao = db.albumDao(),
+            artistDao = db.artistDao(),
+            albumArtistDao = db.albumArtistDao(),
+            composerDao = db.composerDao(),
+            lyricistDao = db.lyricistDao(),
+            genreDao = db.genreDao(),
         )
     }
 }
