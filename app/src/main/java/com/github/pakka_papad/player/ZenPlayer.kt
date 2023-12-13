@@ -26,6 +26,7 @@ import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.data.notification.ZenNotificationManager
+import com.github.pakka_papad.data.services.AnalyticsService
 import com.github.pakka_papad.data.services.QueueService
 import com.github.pakka_papad.data.services.SongService
 import com.github.pakka_papad.widgets.WidgetBroadcast
@@ -54,6 +55,9 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
     lateinit var songService: SongService
 
     @Inject
+    lateinit var analyticsService: AnalyticsService
+
+    @Inject
     lateinit var exoPlayer: ExoPlayer
 
     @Inject
@@ -76,7 +80,8 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
         val window = eventTime.timeline.getWindow(eventTime.windowIndex, Timeline.Window())
         try {
             window.mediaItem.localConfiguration?.tag?.let {
-                dataManager.addPlayHistory(it as String, playbackStats.totalPlayTimeMs)
+//                dataManager.addPlayHistory(it as String, playbackStats.totalPlayTimeMs)
+                analyticsService.logSongPlay(it as String, playbackStats.totalPlayTimeMs)
             }
         } catch (_ : Exception){
 

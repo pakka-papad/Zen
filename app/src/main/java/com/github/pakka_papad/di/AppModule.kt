@@ -23,6 +23,8 @@ import com.github.pakka_papad.data.*
 import com.github.pakka_papad.data.components.DaoCollection
 import com.github.pakka_papad.data.music.SongExtractor
 import com.github.pakka_papad.data.notification.ZenNotificationManager
+import com.github.pakka_papad.data.services.AnalyticsService
+import com.github.pakka_papad.data.services.AnalyticsServiceImpl
 import com.github.pakka_papad.data.services.BlacklistService
 import com.github.pakka_papad.data.services.BlacklistServiceImpl
 import com.github.pakka_papad.data.services.PlayerService
@@ -36,6 +38,7 @@ import com.github.pakka_papad.data.services.SongServiceImpl
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import javax.inject.Singleton
 
@@ -224,6 +227,17 @@ object AppModule {
     ): PlayerService {
         return PlayerServiceImpl(
             context = context
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun providesAnalyticsService(
+        db: AppDatabase,
+    ): AnalyticsService {
+        return AnalyticsServiceImpl(
+            playHistoryDao = db.playHistoryDao(),
+            scope = CoroutineScope(Job() + Dispatchers.IO)
         )
     }
 }
