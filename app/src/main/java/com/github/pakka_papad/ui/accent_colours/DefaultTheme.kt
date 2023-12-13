@@ -1,4 +1,4 @@
-package com.github.pakka_papad.ui.accent_colours.default
+package com.github.pakka_papad.ui.accent_colours
 
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme

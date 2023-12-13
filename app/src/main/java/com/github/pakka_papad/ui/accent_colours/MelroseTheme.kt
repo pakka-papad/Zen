@@ -1,4 +1,4 @@
-package com.github.pakka_papad.ui.accent_colours.melrose
+package com.github.pakka_papad.ui.accent_colours
 
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme

@@ -3,24 +3,24 @@ package com.github.pakka_papad.ui.theme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 import com.github.pakka_papad.data.UserPreferences
-import com.github.pakka_papad.ui.accent_colours.default.DefaultDarkColors
-import com.github.pakka_papad.ui.accent_colours.default.DefaultLightColors
-import com.github.pakka_papad.ui.accent_colours.default.default_seed
-import com.github.pakka_papad.ui.accent_colours.elm.ElmDarkColors
-import com.github.pakka_papad.ui.accent_colours.elm.ElmLightColors
-import com.github.pakka_papad.ui.accent_colours.elm.elm_seed
-import com.github.pakka_papad.ui.accent_colours.jacksons_purple.JacksonsPurpleDarkColors
-import com.github.pakka_papad.ui.accent_colours.jacksons_purple.JacksonsPurpleLightColors
-import com.github.pakka_papad.ui.accent_colours.jacksons_purple.jacksons_purple_seed
-import com.github.pakka_papad.ui.accent_colours.magenta.MagentaDarkColors
-import com.github.pakka_papad.ui.accent_colours.magenta.MagentaLightColors
-import com.github.pakka_papad.ui.accent_colours.magenta.magenta_seed
-import com.github.pakka_papad.ui.accent_colours.malibu.MalibuDarkColors
-import com.github.pakka_papad.ui.accent_colours.malibu.MalibuLightColors
-import com.github.pakka_papad.ui.accent_colours.malibu.malibu_seed
-import com.github.pakka_papad.ui.accent_colours.melrose.MelroseDarkColors
-import com.github.pakka_papad.ui.accent_colours.melrose.MelroseLightColors
-import com.github.pakka_papad.ui.accent_colours.melrose.melrose_seed
+import com.github.pakka_papad.ui.accent_colours.DefaultDarkColors
+import com.github.pakka_papad.ui.accent_colours.DefaultLightColors
+import com.github.pakka_papad.ui.accent_colours.default_seed
+import com.github.pakka_papad.ui.accent_colours.ElmDarkColors
+import com.github.pakka_papad.ui.accent_colours.ElmLightColors
+import com.github.pakka_papad.ui.accent_colours.elm_seed
+import com.github.pakka_papad.ui.accent_colours.JacksonsPurpleDarkColors
+import com.github.pakka_papad.ui.accent_colours.JacksonsPurpleLightColors
+import com.github.pakka_papad.ui.accent_colours.jacksons_purple_seed
+import com.github.pakka_papad.ui.accent_colours.MagentaDarkColors
+import com.github.pakka_papad.ui.accent_colours.MagentaLightColors
+import com.github.pakka_papad.ui.accent_colours.magenta_seed
+import com.github.pakka_papad.ui.accent_colours.MalibuDarkColors
+import com.github.pakka_papad.ui.accent_colours.MalibuLightColors
+import com.github.pakka_papad.ui.accent_colours.malibu_seed
+import com.github.pakka_papad.ui.accent_colours.MelroseDarkColors
+import com.github.pakka_papad.ui.accent_colours.MelroseLightColors
+import com.github.pakka_papad.ui.accent_colours.melrose_seed
 
 data class ThemePreference(
     val useMaterialYou: Boolean = false,
