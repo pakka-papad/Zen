@@ -477,9 +477,9 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
         val currentSong = queueService.getSongAtIndex(exoPlayer.currentMediaItemIndex) ?: return
         val updatedSong = currentSong.copy(favourite = !currentSong.favourite)
         scope.launch {
+            onUpdateCurrentSong()
             queueService.update(updatedSong)
             songService.updateSong(updatedSong)
-            onUpdateCurrentSong()
         }
     }
 
