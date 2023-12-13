@@ -169,7 +169,7 @@ class HomeFragment : Fragment() {
                     }
                     val windowInsets = WindowInsets.systemBars.asPaddingValues()
 
-                    val queue = viewModel.queue
+                    val queue by viewModel.queue.collectAsStateWithLifecycle()
                     val playbackParams by  preferenceProvider.playbackParams.collectAsStateWithLifecycle()
                     val repeatMode by viewModel.repeatMode.collectAsStateWithLifecycle()
                     val playerScaffoldState = rememberBottomSheetScaffoldState(

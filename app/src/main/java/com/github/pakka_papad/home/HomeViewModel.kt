@@ -7,11 +7,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.github.pakka_papad.components.SortOptions
-import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.*
 import com.github.pakka_papad.data.services.BlacklistService
+import com.github.pakka_papad.data.services.PlayerService
 import com.github.pakka_papad.data.services.PlaylistService
+import com.github.pakka_papad.data.services.QueueService
 import com.github.pakka_papad.data.services.SongService
 import com.github.pakka_papad.storage_explorer.*
 import com.github.pakka_papad.storage_explorer.Directory
@@ -24,13 +25,14 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val context: Application,
-    private val manager: DataManager,
     private val exoPlayer: ExoPlayer,
     private val songExtractor: SongExtractor,
     private val prefs: ZenPreferenceProvider,
     private val playlistService: PlaylistService,
     private val blacklistService: BlacklistService,
     private val songService: SongService,
+    private val queueService: QueueService,
+    private val playerService: PlayerService,
 ) : ViewModel() {
 
     val songs = songService.songs
@@ -141,14 +143,14 @@ class HomeViewModel @Inject constructor(
         prefs.updateSortOrder(screen, option)
     }
 
-    val currentSong = manager.currentSong
+    val currentSong = queueService.currentSong as StateFlow
 
-    val queue = manager.queue
+    val queue = queueService.queue as StateFlow
 
-    val repeatMode = manager.repeatMode
+    val repeatMode = queueService.repeatMode as StateFlow
 
     fun toggleRepeatMode(){
-        manager.updateRepeatMode(repeatMode.value.next())
+        queueService.updateRepeatMode(repeatMode.value.next())
     }
 
     private val _currentSongPlaying = MutableStateFlow<Boolean?>(null)
@@ -226,31 +228,16 @@ class HomeViewModel @Inject constructor(
      * Adds a song to the end of queue
      */
     fun addToQueue(song: Song) {
-        if (queue.isEmpty()) {
-            manager.setQueue(listOf(song), 0)
+        if (queue.value.isEmpty()) {
+//            manager.setQueue(listOf(song), 0)
+            queueService.setQueue(listOf(song),0)
+            playerService.startServiceIfNotRunning(listOf(song), 0)
         } else {
-            val result = manager.addToQueue(song)
+            val result = queueService.append(song)
             if (result) {
                 showToast("Added ${song.title} to queue")
             } else {
                 showToast("Song already in queue")
-            }
-        }
-    }
-
-    /**
-     * Adds a list of songs to the end queue
-     */
-    fun addToQueue(songs: List<Song>) {
-        if (queue.isEmpty()) {
-            manager.setQueue(songs, 0)
-        } else {
-            var result = false
-            songs.forEach { result = result or manager.addToQueue(it) }
-            if (result) {
-                showToast("Done")
-            } else {
-                showToast("Songs already in queue")
             }
         }
     }
@@ -269,7 +256,9 @@ class HomeViewModel @Inject constructor(
      */
     fun setQueue(songs: List<Song>?, startPlayingFromIndex: Int = 0) {
         if (songs == null) return
-        manager.setQueue(songs, startPlayingFromIndex)
+//        manager.setQueue(songs, startPlayingFromIndex)
+        queueService.setQueue(songs, startPlayingFromIndex)
+        playerService.startServiceIfNotRunning(songs, startPlayingFromIndex)
         showToast("Playing")
     }
 
@@ -280,11 +269,13 @@ class HomeViewModel @Inject constructor(
         if (song == null) return
         val updatedSong = song.copy(favourite = !song.favourite)
         viewModelScope.launch(Dispatchers.IO) {
-            manager.updateSong(updatedSong)
+//            manager.updateSong(updatedSong)
+            queueService.update(updatedSong)
+            songService.updateSong(updatedSong)
         }
     }
 
-    fun onSongDrag(fromIndex: Int, toIndex: Int) = manager.moveItem(fromIndex,toIndex)
+    fun onSongDrag(fromIndex: Int, toIndex: Int) = queueService.moveSong(fromIndex, toIndex)
 
 
     private val _filesInCurrentDestination = MutableStateFlow(DirectoryContents())

@@ -1,10 +1,12 @@
 package com.github.pakka_papad.data.services
 
 import com.github.pakka_papad.data.music.Song
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.channels.Channel
+import com.github.pakka_papad.nowplaying.RepeatMode
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import java.util.TreeSet
 
 interface QueueService {
@@ -20,9 +22,18 @@ interface QueueService {
     fun clearQueue()
     fun setQueue(songs: List<Song>, startPlayingFromPosition: Int)
 
+    fun getSongAtIndex(index: Int): Song?
+
+    fun setCurrentSong(currentSongIndex: Int)
+
+    val repeatMode: Flow<RepeatMode>
+
+    fun updateRepeatMode(mode: RepeatMode)
+
     interface Listener {
         fun onAppend(song: Song)
         fun onAppend(songs: List<Song>)
+        fun onUpdateCurrentSong()
         fun onMove(from: Int, to: Int)
         fun onClear()
         fun onSetQueue(songs: List<Song>, startPlayingFromPosition: Int)
@@ -36,79 +47,99 @@ interface QueueService {
 
 class QueueServiceImpl() : QueueService {
 
-    private val queueChannel = Channel<List<Song>>(
-        capacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-    )
-
-    private val currentSongChannel = Channel<Song?>(
-        capacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-    )
-
-    private val _queue = ArrayList<Song>()
+    private val mutableQueue = ArrayList<Song>()
     private val locations = TreeSet<String>()
 
-    override val queue: Flow<List<Song>> = queueChannel.receiveAsFlow()
+    private val _queue = MutableStateFlow<List<Song>>(emptyList())
+    override val queue: StateFlow<List<Song>> = _queue.asStateFlow()
 
-    override val currentSong: Flow<Song?> = currentSongChannel.receiveAsFlow()
+    private val _currentSong = MutableStateFlow<Song?>(null)
+    override val currentSong: StateFlow<Song?> = _currentSong.asStateFlow()
 
     override fun append(song: Song): Boolean {
         if (locations.contains(song.location)) return false
         locations.add(song.location)
-        _queue.add(song)
-        queueChannel.trySend(_queue.toList())
+        mutableQueue.add(song)
+        _queue.update { mutableQueue.toList() }
         callbacks.forEach { it.onAppend(song) }
         return true
     }
 
     override fun append(songs: List<Song>): Boolean {
-        if (songs.any { locations.contains(it.location) }) return false
-        songs.forEach {
-            _queue.add(it)
+        val songsNotInQueue = songs.filter { !locations.contains(it.location) }
+        if (songsNotInQueue.isEmpty()) return false
+        songsNotInQueue.forEach {
+            mutableQueue.add(it)
             locations.add(it.location)
         }
-        queueChannel.trySend(_queue.toList())
+        _queue.update { mutableQueue.toList() }
         callbacks.forEach { it.onAppend(songs) }
         return true
     }
 
     override fun update(song: Song): Boolean {
         if (!locations.contains(song.location)) return false
-        val idx = _queue.indexOfFirst { it.location == song.location }
+        val idx = mutableQueue.indexOfFirst { it.location == song.location }
         if (idx == -1) return false
-        _queue[idx] = song
-        queueChannel.trySend(_queue.toList())
+        mutableQueue[idx] = song
+        _queue.update { mutableQueue.toList() }
+        if (song.location == _currentSong.value?.location){
+            _currentSong.update { song }
+            callbacks.forEach { it.onUpdateCurrentSong() }
+        }
         return true
     }
 
     override fun moveSong(initialPosition: Int, finalPosition: Int): Boolean {
-        if (initialPosition < 0 || initialPosition >= _queue.size) return false
-        if (finalPosition < 0 || finalPosition >= _queue.size) return false
+        if (initialPosition < 0 || initialPosition >= mutableQueue.size) return false
+        if (finalPosition < 0 || finalPosition >= mutableQueue.size) return false
         if (initialPosition == finalPosition) return false
-        _queue.apply {
+        mutableQueue.apply {
             add(finalPosition, removeAt(initialPosition))
         }
-        queueChannel.trySend(_queue.toList())
+        _queue.update { mutableQueue.toList() }
         callbacks.forEach { it.onMove(initialPosition, finalPosition) }
         return true
     }
 
     override fun clearQueue() {
-        _queue.clear()
-        queueChannel.trySend(_queue.toList())
-        currentSongChannel.trySend(null)
+        mutableQueue.clear()
+        _queue.update { mutableQueue.toList() }
+        _currentSong.update { null }
+        locations.clear()
         callbacks.forEach { it.onClear() }
     }
 
     override fun setQueue(songs: List<Song>, startPlayingFromPosition: Int) {
-        require(songs.isNotEmpty())
-        _queue.clear()
-        _queue.addAll(songs)
-        queueChannel.trySend(_queue.toList())
+        if(songs.isEmpty()) return
+        mutableQueue.apply {
+            clear()
+            addAll(songs)
+        }
+        _queue.update { mutableQueue.toList() }
         val idx = if (startPlayingFromPosition >= songs.size || startPlayingFromPosition < 0) 0
             else startPlayingFromPosition
+        _currentSong.update { mutableQueue[idx] }
+        locations.clear()
+        songs.forEach { locations.add(it.location) }
         callbacks.forEach { it.onSetQueue(songs, idx) }
+    }
+
+    override fun getSongAtIndex(index: Int): Song? {
+        if (index < 0 || index >= mutableQueue.size) return null
+        return mutableQueue[index]
+    }
+
+    override fun setCurrentSong(currentSongIndex: Int) {
+        if (currentSongIndex < 0 || currentSongIndex >= mutableQueue.size) return
+        _currentSong.update { mutableQueue[currentSongIndex] }
+    }
+
+    private val _repeatMode = MutableStateFlow(RepeatMode.NO_REPEAT)
+    override val repeatMode: StateFlow<RepeatMode> = _repeatMode.asStateFlow()
+
+    override fun updateRepeatMode(mode: RepeatMode) {
+        _repeatMode.update { mode }
     }
 
     override val callbacks = ArrayList<QueueService.Listener>()

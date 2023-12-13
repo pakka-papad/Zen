@@ -1,6 +1,6 @@
 package com.github.pakka_papad.data.services
 
-import android.app.Application
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.github.pakka_papad.data.music.Song
@@ -11,7 +11,7 @@ interface PlayerService {
 }
 
 class PlayerServiceImpl(
-    private val context: Application,
+    private val context: Context,
 ): PlayerService {
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)

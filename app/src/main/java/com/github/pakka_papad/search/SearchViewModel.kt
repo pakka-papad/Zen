@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.music.Song
+import com.github.pakka_papad.data.services.PlayerService
+import com.github.pakka_papad.data.services.QueueService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import timber.log.Timber
@@ -15,6 +17,8 @@ import javax.inject.Inject
 class SearchViewModel @Inject constructor(
     private val context: Application,
     private val manager: DataManager,
+    private val playerService: PlayerService,
+    private val queueService: QueueService,
 ) : ViewModel() {
 
     private val _query = MutableStateFlow("")
@@ -62,7 +66,9 @@ class SearchViewModel @Inject constructor(
 
     fun setQueue(songs: List<Song>?, startPlayingFromIndex: Int = 0) {
         if (songs == null) return
-        manager.setQueue(songs, startPlayingFromIndex)
+//        manager.setQueue(songs, startPlayingFromIndex)
+        queueService.setQueue(songs, startPlayingFromIndex)
+        playerService.startServiceIfNotRunning(songs, startPlayingFromIndex)
         Toast.makeText(context, "Playing", Toast.LENGTH_SHORT).show()
     }
 

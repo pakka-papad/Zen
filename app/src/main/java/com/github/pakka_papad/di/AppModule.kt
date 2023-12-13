@@ -25,8 +25,12 @@ import com.github.pakka_papad.data.music.SongExtractor
 import com.github.pakka_papad.data.notification.ZenNotificationManager
 import com.github.pakka_papad.data.services.BlacklistService
 import com.github.pakka_papad.data.services.BlacklistServiceImpl
+import com.github.pakka_papad.data.services.PlayerService
+import com.github.pakka_papad.data.services.PlayerServiceImpl
 import com.github.pakka_papad.data.services.PlaylistService
 import com.github.pakka_papad.data.services.PlaylistServiceImpl
+import com.github.pakka_papad.data.services.QueueService
+import com.github.pakka_papad.data.services.QueueServiceImpl
 import com.github.pakka_papad.data.services.SongService
 import com.github.pakka_papad.data.services.SongServiceImpl
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -204,6 +208,22 @@ object AppModule {
             composerDao = db.composerDao(),
             lyricistDao = db.lyricistDao(),
             genreDao = db.genreDao(),
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun providesQueueService(): QueueService {
+        return QueueServiceImpl()
+    }
+
+    @Singleton
+    @Provides
+    fun providesPlayerService(
+        @ApplicationContext context: Context
+    ): PlayerService {
+        return PlayerServiceImpl(
+            context = context
         )
     }
 }

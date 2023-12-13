@@ -6,9 +6,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.pakka_papad.R
 import com.github.pakka_papad.components.SortOptions
-import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.music.Song
+import com.github.pakka_papad.data.services.PlayerService
 import com.github.pakka_papad.data.services.PlaylistService
+import com.github.pakka_papad.data.services.QueueService
 import com.github.pakka_papad.data.services.SongService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -21,13 +22,20 @@ import javax.inject.Inject
 @HiltViewModel
 class CollectionViewModel @Inject constructor(
     private val context: Application,
-    private val manager: DataManager,
     private val playlistService: PlaylistService,
     private val songService: SongService,
+    private val playerService: PlayerService,
+    private val queueService: QueueService,
 ) : ViewModel() {
 
-    val currentSong = manager.currentSong
-    val queue = manager.queue
+    val currentSong = queueService.currentSong
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = null,
+        )
+
+    private val queue = queueService.queue as StateFlow
 
     private val _collectionType = MutableStateFlow<CollectionType?>(null)
 
@@ -171,15 +179,19 @@ class CollectionViewModel @Inject constructor(
 
     fun setQueue(songs: List<Song>?, startPlayingFromIndex: Int = 0) {
         if (songs == null) return
-        manager.setQueue(songs, startPlayingFromIndex)
+//        manager.setQueue(songs, startPlayingFromIndex)
+        queueService.setQueue(songs, startPlayingFromIndex)
+        playerService.startServiceIfNotRunning(songs, startPlayingFromIndex)
         Toast.makeText(context,"Playing",Toast.LENGTH_SHORT).show()
     }
 
     fun addToQueue(song: Song) {
-        if (queue.isEmpty()) {
-            manager.setQueue(listOf(song), 0)
+        if (queue.value.isEmpty()) {
+//            manager.setQueue(listOf(song), 0)
+            queueService.setQueue(listOf(song), 0)
+            playerService.startServiceIfNotRunning(listOf(song), 0)
         } else {
-            val result = manager.addToQueue(song)
+            val result = queueService.append(song)
             Toast.makeText(
                 context,
                 if (result) "Added ${song.title} to queue" else "Song already in queue",
@@ -189,11 +201,12 @@ class CollectionViewModel @Inject constructor(
     }
 
     fun addToQueue(songs: List<Song>) {
-        if (queue.isEmpty()) {
-            manager.setQueue(songs, 0)
+        if (queue.value.isEmpty()) {
+//            manager.setQueue(songs, 0)
+            queueService.setQueue(songs, 0)
+            playerService.startServiceIfNotRunning(songs, 0)
         } else {
-            var result = false
-            songs.forEach { result = result or manager.addToQueue(it) }
+            val result = queueService.append(songs)
             Toast.makeText(
                 context,
                 if (result) "Done" else "Song already in queue",
@@ -206,7 +219,9 @@ class CollectionViewModel @Inject constructor(
         if (song == null) return
         val updatedSong = song.copy(favourite = !song.favourite)
         viewModelScope.launch(Dispatchers.IO) {
-            manager.updateSong(updatedSong)
+//            manager.updateSong(updatedSong)
+            queueService.update(updatedSong)
+            songService.updateSong(updatedSong)
         }
     }
 

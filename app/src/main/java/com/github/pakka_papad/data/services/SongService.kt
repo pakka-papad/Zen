@@ -39,6 +39,8 @@ interface SongService {
     fun getGenreWithSongsByName(genre: String): Flow<GenreWithSongs?>
 
     fun getFavouriteSongs(): Flow<List<Song>>
+
+    suspend fun updateSong(song: Song)
 }
 
 class SongServiceImpl(
@@ -97,5 +99,9 @@ class SongServiceImpl(
 
     override fun getFavouriteSongs(): Flow<List<Song>> {
         return songDao.getAllFavourites()
+    }
+
+    override suspend fun updateSong(song: Song) {
+        songDao.updateSong(song)
     }
 }
