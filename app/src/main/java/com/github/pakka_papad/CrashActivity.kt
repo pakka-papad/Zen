@@ -31,9 +31,7 @@ import cat.ereza.customactivityoncrash.CustomActivityOnCrash
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.github.pakka_papad.data.UserPreferences
-import com.github.pakka_papad.ui.theme.ThemePreference
-import com.github.pakka_papad.ui.theme.ZenTheme
+import com.github.pakka_papad.ui.theme.DefaultTheme
 
 class CrashActivity : AppCompatActivity() {
 
@@ -50,13 +48,7 @@ class CrashActivity : AppCompatActivity() {
 
         setContent {
             val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.bug))
-            ZenTheme(
-                themePreference = ThemePreference(
-                    useMaterialYou = true,
-                    theme = UserPreferences.Theme.USE_SYSTEM_MODE,
-                    accent = UserPreferences.Accent.Elm,
-                )
-            ) {
+            DefaultTheme {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()

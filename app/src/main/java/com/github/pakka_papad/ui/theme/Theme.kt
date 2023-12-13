@@ -10,27 +10,19 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.github.pakka_papad.data.UserPreferences
-import com.github.pakka_papad.ui.accent_colours.default.DefaultDarkColors
-import com.github.pakka_papad.ui.accent_colours.default.DefaultLightColors
 import com.google.accompanist.systemuicontroller.SystemUiController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 
 @Composable
 fun DefaultTheme(content: @Composable () -> Unit) {
-    val isSystemInDarkTheme = isSystemInDarkTheme()
-    val systemUiController = rememberSystemUiController()
-    DisposableEffect(key1 = isSystemInDarkTheme) {
-        systemUiController.setSystemBarsColor(
-            color = Color.Transparent,
-            darkIcons = !isSystemInDarkTheme
-        )
-        onDispose { }
-    }
-    MaterialTheme(
-        colorScheme = if (isSystemInDarkTheme) DefaultDarkColors else DefaultLightColors,
-        typography = ZenTypography,
-        content = content
+    ZenTheme(
+        themePreference = ThemePreference(
+            useMaterialYou = true,
+            theme = UserPreferences.Theme.USE_SYSTEM_MODE,
+            accent = UserPreferences.Accent.Elm,
+        ),
+        content = content,
     )
 }
 
