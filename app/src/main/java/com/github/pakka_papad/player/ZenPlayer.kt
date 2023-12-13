@@ -182,6 +182,7 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
         systemNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 //        dataManager.setPlayerRunning(this)
         isRunning.set(true)
+        queueService.addListener(this)
         if (intent == null) Toast.makeText(this, "null intent", Toast.LENGTH_SHORT).show()
         intent?.let {
             val locations = it.getStringArrayExtra("locations") ?: return@let
@@ -253,6 +254,7 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
 //        dataManager.stopPlayerRunning()
         isRunning.set(false)
         queueService.clearQueue()
+        queueService.removeListener(this)
         broadcastReceiver?.stopListening()
         systemNotificationManager?.cancel(ZenNotificationManager.PLAYER_NOTIFICATION_ID)
         scope.cancel()

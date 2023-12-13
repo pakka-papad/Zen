@@ -78,15 +78,18 @@ class QueueServiceImpl() : QueueService {
     }
 
     override fun update(song: Song): Boolean {
-        if (!locations.contains(song.location)) return false
-        val idx = mutableQueue.indexOfFirst { it.location == song.location }
-        if (idx == -1) return false
-        mutableQueue[idx] = song
-        _queue.update { mutableQueue.toList() }
         if (song.location == _currentSong.value?.location){
             _currentSong.update { song }
             callbacks.forEach { it.onUpdateCurrentSong() }
         }
+        if (!locations.contains(song.location)) return false
+        for (idx in mutableQueue.indices){
+            if (mutableQueue[idx].location == song.location){
+                mutableQueue[idx] = song
+                break
+            }
+        }
+        _queue.update { mutableQueue.toList() }
         return true
     }
 
