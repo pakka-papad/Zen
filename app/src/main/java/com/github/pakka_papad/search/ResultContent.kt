@@ -40,6 +40,7 @@ fun TextCard(
 
 @Composable
 fun ResultContent(
+    contentPadding: PaddingValues,
     searchResult: SearchResult,
     showGrid: Boolean,
     searchType: SearchType,
@@ -56,8 +57,7 @@ fun ResultContent(
         columns = if (showGrid) GridCells.Adaptive(150.dp) else GridCells.Fixed(1),
         modifier = Modifier
             .fillMaxSize(),
-        contentPadding = WindowInsets.systemBars.only(
-            WindowInsetsSides.Bottom).asPaddingValues(),
+        contentPadding = contentPadding,
     ) {
         when(searchType){
             SearchType.Songs -> {

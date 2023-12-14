@@ -1,15 +1,17 @@
 package com.github.pakka_papad.search
 
 import android.app.Application
-import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.pakka_papad.R
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.data.services.PlayerService
 import com.github.pakka_papad.data.services.QueueService
 import com.github.pakka_papad.data.services.SearchService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -52,6 +54,9 @@ class SearchViewModel @Inject constructor(
             initialValue = SearchResult()
         )
 
+    private val _message = MutableStateFlow("")
+    val message = _message.asStateFlow()
+
     fun clearQueryText() {
         _query.update { "" }
     }
@@ -66,10 +71,16 @@ class SearchViewModel @Inject constructor(
 
     fun setQueue(songs: List<Song>?, startPlayingFromIndex: Int = 0) {
         if (songs == null) return
-//        manager.setQueue(songs, startPlayingFromIndex)
         queueService.setQueue(songs, startPlayingFromIndex)
         playerService.startServiceIfNotRunning(songs, startPlayingFromIndex)
-        Toast.makeText(context, "Playing", Toast.LENGTH_SHORT).show()
+        showMessage(context.getString(R.string.playing))
     }
 
+    private fun showMessage(message: String){
+        viewModelScope.launch {
+            _message.update { message }
+            delay(3500)
+            _message.update { "" }
+        }
+    }
 }
