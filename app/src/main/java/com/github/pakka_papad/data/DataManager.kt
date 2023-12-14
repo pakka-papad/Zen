@@ -1,9 +1,15 @@
 package com.github.pakka_papad.data
 
-import android.content.Context
-import com.github.pakka_papad.data.components.*
+import com.github.pakka_papad.data.daos.AlbumArtistDao
+import com.github.pakka_papad.data.daos.AlbumDao
+import com.github.pakka_papad.data.daos.ArtistDao
+import com.github.pakka_papad.data.daos.BlacklistDao
+import com.github.pakka_papad.data.daos.BlacklistedFolderDao
+import com.github.pakka_papad.data.daos.ComposerDao
+import com.github.pakka_papad.data.daos.GenreDao
+import com.github.pakka_papad.data.daos.LyricistDao
+import com.github.pakka_papad.data.daos.SongDao
 import com.github.pakka_papad.data.music.*
-import com.github.pakka_papad.data.notification.ZenNotificationManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
@@ -12,15 +18,18 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import java.io.File
 
 class DataManager(
-    private val context: Context,
-    private val notificationManager: ZenNotificationManager,
-    private val daoCollection: DaoCollection,
+    private val songDao: SongDao,
+    private val albumDao: AlbumDao,
+    private val artistDao: ArtistDao,
+    private val albumArtistDao: AlbumArtistDao,
+    private val composerDao: ComposerDao,
+    private val lyricistDao: LyricistDao,
+    private val genreDao: GenreDao,
+    private val blacklistDao: BlacklistDao,
+    private val blacklistedFolderDao: BlacklistedFolderDao,
     private val scope: CoroutineScope,
     private val songExtractor: SongExtractor,
 ) {
-
-    val querySearch by lazy { QuerySearch(daoCollection) }
-
     init {
         cleanData()
     }
@@ -28,10 +37,10 @@ class DataManager(
     fun cleanData() {
         scope.launch {
             val jobs = mutableListOf<Job>()
-            daoCollection.songDao.getSongs().forEach {
+            songDao.getSongs().forEach {
                 try {
                     if(!File(it.location).exists()){
-                        jobs += launch { daoCollection.songDao.deleteSong(it) }
+                        jobs += launch { songDao.deleteSong(it) }
                     }
                 } catch (_: Exception){
 
@@ -39,12 +48,12 @@ class DataManager(
             }
             jobs.joinAll()
             jobs.clear()
-            daoCollection.albumDao.cleanAlbumTable()
-            daoCollection.artistDao.cleanArtistTable()
-            daoCollection.albumArtistDao.cleanAlbumArtistTable()
-            daoCollection.composerDao.cleanComposerTable()
-            daoCollection.lyricistDao.cleanLyricistTable()
-            daoCollection.genreDao.cleanGenreTable()
+            albumDao.cleanAlbumTable()
+            artistDao.cleanArtistTable()
+            albumArtistDao.cleanAlbumArtistTable()
+            composerDao.cleanComposerTable()
+            lyricistDao.cleanLyricistTable()
+            genreDao.cleanGenreTable()
         }
     }
 
@@ -53,11 +62,11 @@ class DataManager(
 
     fun scanForMusic() = scope.launch {
         _scanStatus.send(ScanStatus.ScanStarted)
-        val blacklistedSongLocations = daoCollection.blacklistDao
+        val blacklistedSongLocations = blacklistDao
             .getBlacklistedSongs()
             .map { it.location }
             .toHashSet()
-        val blacklistedFolderPaths = daoCollection.blacklistedFolderDao
+        val blacklistedFolderPaths = blacklistedFolderDao
             .getAllFolders()
             .first()
             .map { it.path }
@@ -74,13 +83,13 @@ class DataManager(
         val lyricists = songs.map { it.lyricist }.toSet().map { Lyricist(it) }
         val composers = songs.map { it.composer }.toSet().map { Composer(it) }
         val genres = songs.map { it.genre }.toSet().map { Genre(it) }
-        daoCollection.albumDao.insertAllAlbums(albums)
-        daoCollection.artistDao.insertAllArtists(artists)
-        daoCollection.albumArtistDao.insertAllAlbumArtists(albumArtists)
-        daoCollection.lyricistDao.insertAllLyricists(lyricists)
-        daoCollection.composerDao.insertAllComposers(composers)
-        daoCollection.genreDao.insertAllGenres(genres)
-        daoCollection.songDao.insertAllSongs(songs)
+        albumDao.insertAllAlbums(albums)
+        artistDao.insertAllArtists(artists)
+        albumArtistDao.insertAllAlbumArtists(albumArtists)
+        lyricistDao.insertAllLyricists(lyricists)
+        composerDao.insertAllComposers(composers)
+        genreDao.insertAllGenres(genres)
+        songDao.insertAllSongs(songs)
         _scanStatus.send(ScanStatus.ScanComplete)
     }
 }

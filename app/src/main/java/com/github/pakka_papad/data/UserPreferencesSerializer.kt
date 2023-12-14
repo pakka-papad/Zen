@@ -1,5 +1,6 @@
 package com.github.pakka_papad.data
 
+import android.os.Build
 import androidx.datastore.core.Serializer
 import com.github.pakka_papad.Screens
 import com.github.pakka_papad.components.SortOptions
@@ -10,7 +11,7 @@ import javax.inject.Inject
 class UserPreferencesSerializer @Inject constructor() : Serializer<UserPreferences> {
     override val defaultValue: UserPreferences
         get() = UserPreferences.getDefaultInstance().copy {
-            useMaterialYouTheme = false
+            useMaterialYouTheme = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             chosenTheme = UserPreferences.Theme.DARK_MODE
             chosenAccent = UserPreferences.Accent.Elm
             onBoardingComplete = false
