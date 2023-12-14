@@ -5,4 +5,7 @@
     <string name="some_error_occurred">Some error occurred</string>
     <string name="done">Done</string>
     <string name="blacklisted_songs_have_not_been_added_to_playlist">Blacklisted songs have not been added to playlist</string>
+    <string name="song_already_in_queue">Song already in queue</string>
+    <string name="playing">Playing</string>
+    <string name="added_to_queue">Added %1$s to queue</string>
 </resources>

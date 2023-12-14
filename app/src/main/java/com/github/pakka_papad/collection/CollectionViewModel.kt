@@ -1,7 +1,6 @@
 package com.github.pakka_papad.collection
 
 import android.app.Application
-import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.pakka_papad.R
@@ -14,6 +13,7 @@ import com.github.pakka_papad.data.services.SongService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -35,6 +35,9 @@ class CollectionViewModel @Inject constructor(
 
     private val _chosenSortOrder = MutableStateFlow(SortOptions.Default.ordinal)
     val chosenSortOrder = _chosenSortOrder.asStateFlow()
+
+    private val _message = MutableStateFlow("")
+    val message = _message.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val collectionUi = _collectionType
@@ -173,39 +176,31 @@ class CollectionViewModel @Inject constructor(
 
     fun setQueue(songs: List<Song>?, startPlayingFromIndex: Int = 0) {
         if (songs == null) return
-//        manager.setQueue(songs, startPlayingFromIndex)
         queueService.setQueue(songs, startPlayingFromIndex)
         playerService.startServiceIfNotRunning(songs, startPlayingFromIndex)
-        Toast.makeText(context,"Playing",Toast.LENGTH_SHORT).show()
+        showMessage(context.getString(R.string.playing))
     }
 
     fun addToQueue(song: Song) {
         if (queue.value.isEmpty()) {
-//            manager.setQueue(listOf(song), 0)
             queueService.setQueue(listOf(song), 0)
             playerService.startServiceIfNotRunning(listOf(song), 0)
         } else {
             val result = queueService.append(song)
-            Toast.makeText(
-                context,
-                if (result) "Added ${song.title} to queue" else "Song already in queue",
-                Toast.LENGTH_SHORT
-            ).show()
+            showMessage(
+                if (result) context.getString(R.string.added_to_queue, song.title)
+                else context.getString(R.string.song_already_in_queue)
+            )
         }
     }
 
     fun addToQueue(songs: List<Song>) {
         if (queue.value.isEmpty()) {
-//            manager.setQueue(songs, 0)
             queueService.setQueue(songs, 0)
             playerService.startServiceIfNotRunning(songs, 0)
         } else {
             val result = queueService.append(songs)
-            Toast.makeText(
-                context,
-                if (result) "Done" else "Song already in queue",
-                Toast.LENGTH_SHORT
-            ).show()
+            showMessage(context.getString(if (result) R.string.done else R.string.song_already_in_queue))
         }
     }
 
@@ -213,7 +208,6 @@ class CollectionViewModel @Inject constructor(
         if (song == null) return
         val updatedSong = song.copy(favourite = !song.favourite)
         viewModelScope.launch(Dispatchers.IO) {
-//            manager.updateSong(updatedSong)
             queueService.update(updatedSong)
             songService.updateSong(updatedSong)
         }
@@ -224,10 +218,10 @@ class CollectionViewModel @Inject constructor(
             try {
                 val playlistId = _collectionType.value?.id?.toLong() ?: throw IllegalArgumentException()
                 playlistService.removeSongsFromPlaylist(listOf(song.location), playlistId)
-                showToast(context.getString(R.string.done))
+                showMessage(context.getString(R.string.done))
             } catch (e: Exception){
                 Timber.e(e)
-                showToast(context.getString(R.string.some_error_occurred))
+                showMessage(context.getString(R.string.some_error_occurred))
             }
         }
     }
@@ -236,8 +230,11 @@ class CollectionViewModel @Inject constructor(
         _chosenSortOrder.update { order }
     }
 
-    private fun showToast(message: String){
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    private fun showMessage(message: String){
+        viewModelScope.launch {
+            _message.update { message }
+            delay(3500)
+            _message.update { "" }
+        }
     }
-
 }
