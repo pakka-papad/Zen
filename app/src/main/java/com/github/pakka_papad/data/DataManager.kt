@@ -1,23 +1,14 @@
 package com.github.pakka_papad.data
 
 import android.content.Context
-import android.content.Intent
-import android.os.Build
-import android.widget.Toast
-import androidx.compose.runtime.mutableStateListOf
 import com.github.pakka_papad.data.components.*
 import com.github.pakka_papad.data.music.*
 import com.github.pakka_papad.data.notification.ZenNotificationManager
-import com.github.pakka_papad.nowplaying.RepeatMode
-import com.github.pakka_papad.player.ZenPlayer
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.update
 import java.io.File
 
 class DataManager(
@@ -91,110 +82,5 @@ class DataManager(
         daoCollection.genreDao.insertAllGenres(genres)
         daoCollection.songDao.insertAllSongs(songs)
         _scanStatus.send(ScanStatus.ScanComplete)
-    }
-
-    private var callback: Callback? = null
-
-    private val _queue = mutableStateListOf<Song>()
-    val queue: List<Song> = _queue
-
-    private val _currentSong = MutableStateFlow<Song?>(null)
-    val currentSong = _currentSong.asStateFlow()
-
-    fun moveItem(fromIndex: Int, toIndex: Int) {
-        _queue.apply { add(toIndex, removeAt(fromIndex)) }
-    }
-
-    suspend fun updateSong(song: Song) {
-        if (_currentSong.value?.location == song.location) {
-            _currentSong.update { song }
-            callback?.updateNotification()
-        }
-        for (idx in _queue.indices) {
-            if (_queue[idx].location == song.location) {
-                _queue[idx] = song
-                break
-            }
-        }
-        daoCollection.songDao.updateSong(song)
-    }
-
-    private val _repeatMode = MutableStateFlow<RepeatMode>(RepeatMode.NO_REPEAT)
-    val repeatMode = _repeatMode.asStateFlow()
-
-    fun updateRepeatMode(newRepeatMode: RepeatMode){
-        _repeatMode.update { newRepeatMode }
-    }
-
-    private var remIdx = 0
-
-    @Synchronized
-    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-    fun setQueue(newQueue: List<Song>, startPlayingFromIndex: Int) {
-        if (newQueue.isEmpty()) return
-        _queue.apply {
-            clear()
-            addAll(newQueue)
-        }
-        _currentSong.value = newQueue[startPlayingFromIndex]
-        if (callback == null) {
-            val intent = Intent(context, ZenPlayer::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
-            } else {
-                context.startService(intent)
-            }
-            remIdx = startPlayingFromIndex
-        } else {
-            callback?.setQueue(newQueue, startPlayingFromIndex)
-        }
-    }
-
-    /**
-     * Returns true if added to queue else returns false if already in queue
-     */
-    @Synchronized
-    fun addToQueue(song: Song): Boolean {
-        if (_queue.any { it.location == song.location }) return false
-        _queue.add(song)
-        callback?.addToQueue(song)
-        return true
-    }
-
-    fun setPlayerRunning(callback: Callback) {
-        this.callback = callback
-        this.callback?.setQueue(_queue, remIdx)
-    }
-
-    fun updateCurrentSong(currentSongIndex: Int) {
-        if (currentSongIndex < 0 || currentSongIndex >= _queue.size) return
-        _currentSong.update { _queue[currentSongIndex] }
-    }
-
-    fun getSongAtIndex(index: Int): Song? {
-        if (index < 0 || index >= _queue.size) return null
-        return _queue[index]
-    }
-
-    fun stopPlayerRunning() {
-        this.callback = null
-        _currentSong.update { null }
-        _queue.clear()
-    }
-
-    interface Callback {
-        fun setQueue(newQueue: List<Song>, startPlayingFromIndex: Int)
-        fun addToQueue(song: Song)
-        fun updateNotification()
-    }
-
-    fun addPlayHistory(songLocation: String, duration: Long){
-        scope.launch {
-            try {
-                daoCollection.playHistoryDao.addRecord(songLocation, duration)
-            } catch (_: Exception){
-
-            }
-        }
     }
 }

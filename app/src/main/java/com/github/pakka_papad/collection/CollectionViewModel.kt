@@ -28,13 +28,7 @@ class CollectionViewModel @Inject constructor(
     private val queueService: QueueService,
 ) : ViewModel() {
 
-    val currentSong = queueService.currentSong
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = null,
-        )
-
+    val currentSong = queueService.currentSong as StateFlow
     private val queue = queueService.queue as StateFlow
 
     private val _collectionType = MutableStateFlow<CollectionType?>(null)
