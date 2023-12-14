@@ -4,10 +4,10 @@ import android.app.Application
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.data.services.PlayerService
 import com.github.pakka_papad.data.services.QueueService
+import com.github.pakka_papad.data.services.SearchService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import timber.log.Timber
@@ -16,9 +16,9 @@ import javax.inject.Inject
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val context: Application,
-    private val manager: DataManager,
     private val playerService: PlayerService,
     private val queueService: QueueService,
+    private val searchService: SearchService,
 ) : ViewModel() {
 
     private val _query = MutableStateFlow("")
@@ -34,14 +34,14 @@ class SearchViewModel @Inject constructor(
                 SearchResult()
             } else {
                 when (type) {
-                    SearchType.Songs -> SearchResult(songs = manager.querySearch.searchSongs(trimmedQuery))
-                    SearchType.Albums -> SearchResult(albums = manager.querySearch.searchAlbums(trimmedQuery))
-                    SearchType.Artists -> SearchResult(artists = manager.querySearch.searchArtists(trimmedQuery))
-                    SearchType.AlbumArtists -> SearchResult(albumArtists = manager.querySearch.searchAlbumArtists(trimmedQuery))
-                    SearchType.Composers -> SearchResult(composers = manager.querySearch.searchComposers(trimmedQuery))
-                    SearchType.Lyricists -> SearchResult(lyricists = manager.querySearch.searchLyricists(trimmedQuery))
-                    SearchType.Genres -> SearchResult(genres = manager.querySearch.searchGenres(trimmedQuery))
-                    SearchType.Playlists -> SearchResult(playlists = manager.querySearch.searchPlaylists(trimmedQuery))
+                    SearchType.Songs -> SearchResult(songs = searchService.searchSongs(trimmedQuery))
+                    SearchType.Albums -> SearchResult(albums = searchService.searchAlbums(trimmedQuery))
+                    SearchType.Artists -> SearchResult(artists = searchService.searchArtists(trimmedQuery))
+                    SearchType.AlbumArtists -> SearchResult(albumArtists = searchService.searchAlbumArtists(trimmedQuery))
+                    SearchType.Composers -> SearchResult(composers = searchService.searchComposers(trimmedQuery))
+                    SearchType.Lyricists -> SearchResult(lyricists = searchService.searchLyricists(trimmedQuery))
+                    SearchType.Genres -> SearchResult(genres = searchService.searchGenres(trimmedQuery))
+                    SearchType.Playlists -> SearchResult(playlists = searchService.searchPlaylists(trimmedQuery))
                 }
             }
         }.catch { exception ->

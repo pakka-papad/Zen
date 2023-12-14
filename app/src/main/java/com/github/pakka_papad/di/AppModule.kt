@@ -33,6 +33,8 @@ import com.github.pakka_papad.data.services.PlaylistService
 import com.github.pakka_papad.data.services.PlaylistServiceImpl
 import com.github.pakka_papad.data.services.QueueService
 import com.github.pakka_papad.data.services.QueueServiceImpl
+import com.github.pakka_papad.data.services.SearchService
+import com.github.pakka_papad.data.services.SearchServiceImpl
 import com.github.pakka_papad.data.services.SongService
 import com.github.pakka_papad.data.services.SongServiceImpl
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -108,8 +110,8 @@ object AppModule {
             setUsage(USAGE_MEDIA)
         }.build()
         return ExoPlayer.Builder(context).apply {
-            setMediaSourceFactory(DefaultMediaSourceFactory(context,extractorsFactory))
-            setAudioAttributes(audioAttributes,true)
+            setMediaSourceFactory(DefaultMediaSourceFactory(context, extractorsFactory))
+            setAudioAttributes(audioAttributes, true)
             setHandleAudioBecomingNoisy(true)
         }.build()
     }
@@ -238,6 +240,23 @@ object AppModule {
         return AnalyticsServiceImpl(
             playHistoryDao = db.playHistoryDao(),
             scope = CoroutineScope(Job() + Dispatchers.IO)
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun providesSearchService(
+        db: AppDatabase,
+    ): SearchService {
+        return SearchServiceImpl(
+            songDao = db.songDao(),
+            albumDao = db.albumDao(),
+            artistDao = db.artistDao(),
+            albumArtistDao = db.albumArtistDao(),
+            composerDao = db.composerDao(),
+            lyricistDao = db.lyricistDao(),
+            genreDao = db.genreDao(),
+            playlistDao = db.playlistDao()
         )
     }
 }
