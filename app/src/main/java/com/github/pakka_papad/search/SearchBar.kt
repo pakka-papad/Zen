@@ -18,9 +18,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.github.pakka_papad.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,7 +53,7 @@ fun SearchBar(
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Outlined.ArrowBack,
-                    contentDescription = null,
+                    contentDescription = stringResource(R.string.back_button),
                     modifier = Modifier
                         .size(48.dp)
                         .padding(9.dp)
@@ -68,7 +70,9 @@ fun SearchBar(
             trailingIcon = {
                 Icon(
                     imageVector = if (query.isEmpty()) Icons.Outlined.Search else Icons.Outlined.Close,
-                    contentDescription = null,
+                    contentDescription = stringResource(
+                        if (query.isEmpty()) R.string.search_icon else R.string.clear_button
+                    ),
                     modifier = Modifier
                         .size(48.dp)
                         .padding(9.dp)
@@ -84,7 +88,7 @@ fun SearchBar(
             },
             placeholder = {
                 Text(
-                    text = "Search for songs, albums, artists, playlists...",
+                    text = stringResource(R.string.search_for_songs_albums_artists_playlists),
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis

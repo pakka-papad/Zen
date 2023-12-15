@@ -133,7 +133,7 @@ object AnnotationProcessors {
 object AppVersion {
     private const val Major = 1
     private const val Minor = 2
-    private const val Patch = 1
+    private const val Patch = 2
     const val Code = Major*10000 + Minor*100 + Patch
     const val Name = "$Major.$Minor.$Patch"
 }

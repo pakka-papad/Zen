@@ -77,7 +77,7 @@ fun SettingsList(
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         item {
-            GroupTitle(title = "Look and feel")
+            GroupTitle(title = stringResource(R.string.look_and_feel))
         }
         item {
             LookAndFeelSettings(
@@ -90,7 +90,7 @@ fun SettingsList(
             )
         }
         item {
-            GroupTitle(title = "Music library")
+            GroupTitle(title = stringResource(R.string.music_library))
         }
         item {
             MusicLibrarySettings(
@@ -101,7 +101,7 @@ fun SettingsList(
             )
         }
         item {
-            GroupTitle(title = "Report bug")
+            GroupTitle(title = stringResource(R.string.report_bug))
         }
         item {
             ReportBug(
@@ -169,7 +169,7 @@ private fun LookAndFeelSettings(
             Setting(
                 title = "Material You",
                 icon = R.drawable.baseline_palette_40,
-                description = "Use a theme generated from your device wallpaper",
+                description = stringResource(R.string.use_a_theme_generated_from_your_device_wallpaper),
                 isChecked = themePreference.useMaterialYou,
                 onCheckedChanged = {
                     onPreferenceChanged(themePreference.copy(useMaterialYou = it))
@@ -187,15 +187,15 @@ private fun LookAndFeelSettings(
                 .alpha(if (themePreference.useMaterialYou) 0.5f else 1f),
         )
         Setting(
-            title = "Theme mode",
+            title = stringResource(R.string.theme_mode),
             icon = icon,
             onClick = { showSelectorDialog = true },
-            description = "Choose a theme mode"
+            description = stringResource(R.string.choose_a_theme_mode)
         )
         Setting(
-            title = "Tabs arrangement",
+            title = stringResource(R.string.tabs_arrangement),
             icon = R.drawable.ic_baseline_library_music_40,
-            description = "Select and reorder the tabs shown",
+            description = stringResource(R.string.select_and_reorder_the_tabs_shown),
             onClick = { showRearrangeTabsDialog = true }
         )
     }
@@ -237,7 +237,7 @@ private fun AccentSelectorDialog(
     AlertDialog(
         title = {
             Text(
-                text = "Accent color",
+                text = stringResource(R.string.accent_color),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
@@ -249,7 +249,7 @@ private fun AccentSelectorDialog(
                 onClick = onDismissRequest
             ) {
                 Text(
-                    text = "OK",
+                    text = stringResource(R.string.save),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -331,7 +331,7 @@ private fun ThemeSelectorDialog(
     AlertDialog(
         title = {
             Text(
-                text = "App theme",
+                text = stringResource(R.string.theme_mode),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
@@ -343,7 +343,7 @@ private fun ThemeSelectorDialog(
                 onClick = onDismissRequest
             ) {
                 Text(
-                    text = "OK",
+                    text = stringResource(R.string.save),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -366,7 +366,7 @@ private fun ThemeSelectorDialog(
                         }
                     )
                     Text(
-                        text = "Light mode",
+                        text = stringResource(R.string.light_mode),
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
@@ -382,7 +382,7 @@ private fun ThemeSelectorDialog(
                         }
                     )
                     Text(
-                        text = "Dark mode",
+                        text = stringResource(R.string.dark_mode),
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
@@ -398,7 +398,7 @@ private fun ThemeSelectorDialog(
                         }
                     )
                     Text(
-                        text = "System mode",
+                        text = stringResource(R.string.system_mode),
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
@@ -419,7 +419,7 @@ private fun RearrangeTabsDialog(
     AlertDialog(
         title = {
             Text(
-                text = "App tabs",
+                text = stringResource(R.string.app_tabs),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
@@ -431,7 +431,7 @@ private fun RearrangeTabsDialog(
                 onClick = onTabsOrderConfirmed
             ) {
                 Text(
-                    text = "OK",
+                    text = stringResource(R.string.save),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -487,7 +487,7 @@ private fun SelectableMovableScreen(
         )
         Icon(
             painter = painterResource(id = screen.filledIcon),
-            contentDescription = "${screen.name} screen icon",
+            contentDescription = stringResource(R.string.screen_icon, screen.name),
             modifier = Modifier.size(35.dp),
             tint = MaterialTheme.colorScheme.onSecondaryContainer
         )
@@ -501,7 +501,7 @@ private fun SelectableMovableScreen(
         Spacer(spaceModifier)
         Icon(
             painter = painterResource(id = R.drawable.baseline_drag_indicator_40),
-            contentDescription = "move icon",
+            contentDescription = stringResource(R.string.drag_icon),
             modifier = Modifier.size(32.dp),
             tint = MaterialTheme.colorScheme.onSecondaryContainer
         )
@@ -533,9 +533,9 @@ private fun MusicLibrarySettings(
             .animateContentSize(),
     ) {
         Setting(
-            title = "Rescan for music",
+            title = stringResource(R.string.rescan_for_music),
             icon = Icons.Outlined.Search,
-            description = "Search for all the songs on this device and update the library",
+            description = stringResource(R.string.search_for_all_the_songs_on_this_device_and_update_the_library),
             onClick = {
                 if (scanStatus is ScanStatus.ScanNotRunning){
                     onScanClicked()
@@ -549,19 +549,19 @@ private fun MusicLibrarySettings(
             )
         } else if (scanStatus is ScanStatus.ScanComplete){
             Text(
-                text = "Done",
+                text = stringResource(R.string.done),
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
         Setting(
-            title = "Restore blacklisted songs",
+            title = stringResource(R.string.restore_blacklisted_songs),
             icon = R.drawable.baseline_settings_backup_restore_40,
             onClick = onRestoreClicked
         )
         Setting(
-            title = "Restore blacklisted folders",
+            title = stringResource(R.string.restore_blacklisted_folders),
             icon = R.drawable.baseline_settings_backup_restore_40,
             onClick = onRestoreFoldersClicked
         )
@@ -587,16 +587,16 @@ private fun ReportBug(
         modifier = Modifier.group()
     ) {
         Setting(
-            title = "Auto crash reporting",
+            title = stringResource(R.string.auto_crash_reporting),
             icon = R.drawable.baseline_send_40,
-            description = "Enable this to automatically send crash reports to the developer",
+            description = stringResource(R.string.enable_this_to_automatically_send_crash_reports_to_the_developer),
             isChecked = !disabledCrashlytics,
             onCheckedChanged = onAutoReportCrashClicked,
         )
         Setting(
-            title = "Report any bugs/crashes",
+            title = stringResource(R.string.report_any_bugs_crashes),
             icon = R.drawable.baseline_bug_report_40,
-            description = "Manually report any bugs or crashes you faced",
+            description = stringResource(R.string.manually_report_any_bugs_or_crashes_you_faced),
             onClick = {
                 val intent = Intent(Intent.ACTION_SENDTO)
                 intent.apply {
@@ -604,7 +604,7 @@ private fun ReportBug(
                     putExtra(Intent.EXTRA_SUBJECT, "Zen Music | Bug Report")
                     putExtra(
                         Intent.EXTRA_TEXT,
-                        getSystemDetail() + "\n\n[Describe the bug or crash here]"
+                        getSystemDetail() + "\n\n[${context.getString(R.string.describe_the_bug_or_crash_here)}]\n"
                     )
                     data = Uri.parse("mailto:")
                 }
@@ -636,14 +636,14 @@ private fun MadeBy(
         Text(
             text = buildAnnotatedString {
                 withStyle(semiTransparentSpanStyle) {
-                    append("App version ")
+                    append("${stringResource(R.string.app_version)} ")
                 }
                 append(appVersion)
             },
             style = MaterialTheme.typography.titleSmall,
         )
         Text(
-            text = "Check what's new!",
+            text = stringResource(R.string.check_what_s_new),
             modifier = Modifier
                 .alpha(0.5f)
                 .clickable(onClick = onWhatsNewClicked),
@@ -653,7 +653,7 @@ private fun MadeBy(
         Text(
             text = buildAnnotatedString {
                 withStyle(semiTransparentSpanStyle) {
-                    append("Made by ")
+                    append("${stringResource(R.string.made_by)} ")
                 }
                 append("Sumit Bera")
             },
@@ -757,7 +757,7 @@ private fun Setting(
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = null,
+            contentDescription = stringResource(R.string.setting_icon, title),
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
@@ -814,7 +814,7 @@ private fun Setting(
     ) {
         Icon(
             painter = painterResource(id = icon),
-            contentDescription = null,
+            contentDescription = stringResource(R.string.setting_icon, title),
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
@@ -878,11 +878,11 @@ private fun AccentSetting(
                 .weight(1f)
         ){
             Text(
-                text = "Accent color",
+                text = stringResource(R.string.accent_color),
                 style = MaterialTheme.typography.titleMedium,
             )
             Text(
-                text = "Choose a theme color",
+                text = stringResource(R.string.choose_an_accent_color),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             )

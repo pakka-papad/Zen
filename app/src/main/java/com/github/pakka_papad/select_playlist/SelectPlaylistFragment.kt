@@ -17,12 +17,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.github.pakka_papad.R
 import com.github.pakka_papad.components.BlockingProgressIndicator
 import com.github.pakka_papad.components.CancelConfirmTopBar
 import com.github.pakka_papad.components.Snackbar
@@ -95,7 +97,7 @@ class SelectPlaylistFragment: Fragment() {
                                 onConfirmClicked = {
                                     viewModel.addSongsToPlaylists(args.songLocations)
                                 },
-                                title = "Select Playlists"
+                                title = stringResource(R.string.select_playlists)
                             )
                         },
                         content = { paddingValues ->

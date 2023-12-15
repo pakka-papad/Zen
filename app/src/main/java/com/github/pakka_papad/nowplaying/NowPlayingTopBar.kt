@@ -12,8 +12,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import com.github.pakka_papad.R
 import com.github.pakka_papad.components.TopBarWithBackArrow
 import com.github.pakka_papad.components.more_options.OptionsDropDown
 
@@ -29,7 +31,7 @@ fun NowPlayingTopBar(
         var dropDownMenuExpanded by remember { mutableStateOf(false) }
         Icon(
             imageVector = Icons.Outlined.MoreVert,
-            contentDescription = null,
+            contentDescription = stringResource(R.string.more_menu_button),
             modifier = Modifier
                 .padding(16.dp)
                 .size(30.dp)

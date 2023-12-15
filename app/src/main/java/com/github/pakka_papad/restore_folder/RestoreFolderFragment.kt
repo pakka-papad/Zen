@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -90,7 +91,7 @@ class RestoreFolderFragment: Fragment() {
                                     }
                                 },
                                 onConfirmClicked = viewModel::restoreFolders,
-                                title = "Restore folders"
+                                title = stringResource(R.string.restore_folders)
                             )
                         },
                         content = { paddingValues ->

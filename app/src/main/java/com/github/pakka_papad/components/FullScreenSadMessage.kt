@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.R
@@ -28,12 +29,12 @@ fun FullScreenSadMessage(
     content = {
         Icon(
             modifier = Modifier
-                .weight(1f,false)
-                .aspectRatio(1f,false)
+                .weight(1f, false)
+                .aspectRatio(1f, false)
                 .fillMaxSize()
                 .padding(24.dp),
             painter = painterResource(R.drawable.ic_baseline_sentiment_very_dissatisfied_40),
-            contentDescription = "sad-face",
+            contentDescription = stringResource(R.string.sad_face_image),
             tint = MaterialTheme.colorScheme.onSurface
         )
         message?.let {

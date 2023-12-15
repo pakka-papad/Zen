@@ -23,10 +23,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.github.pakka_papad.R
 import com.github.pakka_papad.components.more_options.OptionsAlertDialog
 import com.github.pakka_papad.components.more_options.SongOptions
 import com.github.pakka_papad.data.music.MiniSong
@@ -58,7 +60,7 @@ private fun SongCardBase(
     ) {
         AsyncImage(
             model = song.artUri,
-            contentDescription = "song-${song.title}-art",
+            contentDescription = stringResource(R.string.song_image),
             modifier = Modifier
                 .size(50.dp)
                 .clip(MaterialTheme.shapes.medium),
@@ -93,7 +95,7 @@ private fun SongCardBase(
         val favouriteButtonScale = remember { Animatable(1f) }
         Icon(
             imageVector = if (song.favourite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-            contentDescription = null,
+            contentDescription = stringResource(R.string.favourite_button),
             modifier = iconModifier
                 .scale(favouriteButtonScale.value)
                 .clickable(
@@ -136,7 +138,7 @@ private fun SongCardBase(
             var optionsVisible by remember { mutableStateOf(false) }
             Icon(
                 imageVector = Icons.Outlined.MoreVert,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.more_menu_button),
                 modifier = iconModifier
                     .clickable(
                         onClick = {
@@ -215,7 +217,7 @@ fun SongCardV3(
 ) {
     AsyncImage(
         model = song.artUri,
-        contentDescription = "song-album-art",
+        contentDescription = stringResource(R.string.song_image),
         modifier = Modifier
             .aspectRatio(1f)
             .fillMaxWidth()
@@ -261,7 +263,7 @@ fun MiniSongCard(
     ) {
         AsyncImage(
             model = song.artUri,
-            contentDescription = "song-${song.title}-art",
+            contentDescription = stringResource(R.string.song_image),
             modifier = Modifier
                 .size(50.dp)
                 .clip(MaterialTheme.shapes.medium),
@@ -297,7 +299,7 @@ fun MiniSongCard(
             var optionsVisible by remember { mutableStateOf(false) }
             Icon(
                 imageVector = Icons.Outlined.MoreVert,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.more_menu_button),
                 modifier = iconModifier
                     .clickable(
                         onClick = {

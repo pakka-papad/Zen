@@ -15,9 +15,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.github.pakka_papad.R
 import com.github.pakka_papad.components.FullScreenSadMessage
 import com.github.pakka_papad.components.more_options.GenreOptions
 import com.github.pakka_papad.components.more_options.OptionsAlertDialog
@@ -31,7 +34,7 @@ fun Genres(
 ) {
     if (genresWithSongCount.isEmpty()) {
         FullScreenSadMessage(
-            message = "Nothing found"
+            message = stringResource(R.string.nothing_found)
         )
         return
     }
@@ -82,7 +85,11 @@ fun GenreCard(
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = "${genreWithSongCount.count} ${if (genreWithSongCount.count == 1) "song" else "songs"}",
+                text = pluralStringResource(
+                    id = R.plurals.song_count,
+                    count = genreWithSongCount.count,
+                    genreWithSongCount.count
+                ),
                 maxLines = 1,
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.fillMaxWidth(),
@@ -93,7 +100,7 @@ fun GenreCard(
             var optionsVisible by remember { mutableStateOf(false) }
             Icon(
                 imageVector = Icons.Outlined.MoreVert,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.more_menu_button),
                 modifier = Modifier
                     .size(26.dp)
                     .clickable(

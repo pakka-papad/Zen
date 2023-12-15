@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -38,7 +39,7 @@ fun MiniPlayer(
     ) {
         AsyncImage(
             model = song.artUri,
-            contentDescription = null,
+            contentDescription = stringResource(R.string.song_image),
             modifier = Modifier
                 .size(56.dp)
                 .padding(8.dp)
@@ -60,7 +61,9 @@ fun MiniPlayer(
             painter = painterResource(
                 if (showPlayButton) R.drawable.ic_baseline_play_arrow_40 else R.drawable.ic_baseline_pause_40
             ),
-            contentDescription = null,
+            contentDescription = stringResource(
+                if (showPlayButton) R.string.play_button else R.string.pause_button
+            ),
             modifier = Modifier
                 .size(56.dp)
                 .padding(6.dp)

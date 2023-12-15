@@ -21,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.components.FullScreenSadMessage
@@ -45,7 +46,7 @@ fun Files(
     onFolderAddToBlacklistRequest: (Directory) -> Unit,
 ){
     if (contents.directories.isEmpty() && contents.songs.isEmpty()){
-        FullScreenSadMessage("Nothing here")
+        FullScreenSadMessage(stringResource(R.string.nothing_here))
         return
     }
     LazyColumn(
@@ -103,7 +104,7 @@ fun Folder(
     ) {
         Icon(
             painter = resource,
-            contentDescription = null,
+            contentDescription = stringResource(R.string.folder_icon),
             modifier = Modifier.size(50.dp)
         )
         Text(
@@ -121,7 +122,7 @@ fun Folder(
         } else {
             Icon(
                 imageVector = Icons.Outlined.MoreVert,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.more_menu_button),
                 modifier = Modifier
                     .size(26.dp)
                     .clickable(

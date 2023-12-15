@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -148,7 +149,7 @@ private fun AlbumArt(
 ) {
     AsyncImage(
         model = song.artUri,
-        contentDescription = null,
+        contentDescription = stringResource(R.string.song_image),
         modifier = modifier
             .aspectRatio(1f)
             .shadow(
@@ -252,7 +253,7 @@ private fun LikeButton(
     val favouriteButtonScale = remember { Animatable(1f) }
     Image(
         imageVector = if (song.favourite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-        contentDescription = "like button",
+        contentDescription = stringResource(R.string.favourite_button),
         modifier = modifier
             .size(50.dp)
             .scale(favouriteButtonScale.value)
@@ -296,7 +297,7 @@ private fun PreviousButton(
     modifier: Modifier = Modifier,
 ) = Image(
     painter = painterResource(R.drawable.ic_baseline_skip_previous_40),
-    contentDescription = "previous button",
+    contentDescription = stringResource(R.string.previous_button),
     modifier = modifier
         .size(70.dp)
         .clip(RoundedCornerShape(35.dp))
@@ -320,7 +321,9 @@ private fun PausePlayButton(
     painter = painterResource(
         if (showPlayButton) R.drawable.ic_baseline_play_arrow_40 else R.drawable.ic_baseline_pause_40
     ),
-    contentDescription = "play/pause button",
+    contentDescription = stringResource(
+        if (showPlayButton) R.string.play_button else R.string.pause_button
+    ),
     modifier = modifier
         .size(70.dp)
         .clip(CircleShape)
@@ -344,7 +347,7 @@ private fun NextButton(
     modifier: Modifier = Modifier,
 ) = Image(
     painter = painterResource(R.drawable.ic_baseline_skip_next_40),
-    contentDescription = "next button",
+    contentDescription = stringResource(R.string.next_button),
     modifier = modifier
         .size(70.dp)
         .clip(RoundedCornerShape(35.dp))
@@ -365,7 +368,7 @@ private fun QueueButton(
     modifier: Modifier = Modifier,
 ) = Image(
     painter = painterResource(R.drawable.ic_baseline_queue_music_40),
-    contentDescription = "queue button",
+    contentDescription = stringResource(R.string.queue_button),
     modifier = modifier
         .size(50.dp)
         .clickable(
@@ -428,8 +431,10 @@ fun PlaybackSpeedAndPitchController(
     var showDialog by remember { mutableStateOf(false) }
     Icon(
         painter = painterResource(R.drawable.baseline_speed_24),
-        contentDescription = "speed and pitch controller",
-        modifier = Modifier.size(30.dp).clickable { showDialog = true },
+        contentDescription = stringResource(R.string.speed_and_pitch_controller),
+        modifier = Modifier
+            .size(30.dp)
+            .clickable { showDialog = true },
         tint = MaterialTheme.colorScheme.onSurface
     )
     if (showDialog) {
@@ -447,7 +452,7 @@ fun PlaybackSpeedAndPitchController(
                         )
                     },
                     content = {
-                        Text(text = "Ok")
+                        Text(text = stringResource(R.string.save))
                     }
                 )
             },
@@ -455,7 +460,7 @@ fun PlaybackSpeedAndPitchController(
                 OutlinedButton(
                     onClick = { showDialog = false },
                     content = {
-                        Text(text = "Cancel")
+                        Text(text = stringResource(R.string.cancel))
                     }
                 )
             },
@@ -466,14 +471,14 @@ fun PlaybackSpeedAndPitchController(
                         modifier = Modifier.fillMaxWidth()
                     ){
                         Text(
-                            text = "Speed: ${newSpeed}x",
+                            text = stringResource(R.string.speed_x, newSpeed),
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.alignByBaseline()
                         )
                         TextButton(
                             onClick = { newSpeed = 1f },
                             content = {
-                                Text(text = "Reset")
+                                Text(text = stringResource(R.string.reset))
                             },
                             modifier = Modifier.alignByBaseline()
                         )
@@ -489,14 +494,14 @@ fun PlaybackSpeedAndPitchController(
                         modifier = Modifier.fillMaxWidth(),
                     ){
                         Text(
-                            text = "Pitch: ${newPitch}x",
+                            text = stringResource(R.string.pitch_x, newPitch),
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.alignByBaseline()
                         )
                         TextButton(
                             onClick = { newPitch = 1f },
                             content = {
-                                Text(text = "Reset")
+                                Text(text = stringResource(R.string.reset))
                             },
                             modifier = Modifier.alignByBaseline()
                         )
@@ -520,7 +525,7 @@ fun RepeatModeController(
 ) {
     Icon(
         painter = painterResource(currentRepeatMode.iconResource),
-        contentDescription = "repeat mode",
+        contentDescription = stringResource(R.string.repeat_mode_button),
         modifier = Modifier
             .size(30.dp)
             .clickable(

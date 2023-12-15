@@ -16,9 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import com.github.pakka_papad.R
 import com.github.pakka_papad.components.more_options.OptionsDropDown
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,11 +46,14 @@ fun CollectionTopBar(
             navigationIcon = {
                 Icon(
                     imageVector = Icons.Outlined.ArrowBack,
-                    contentDescription = "back arrow",
+                    contentDescription = stringResource(R.string.back_button),
                     modifier = Modifier
                         .padding(6.dp)
                         .size(40.dp)
-                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f), CircleShape)
+                        .background(
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                            CircleShape
+                        )
                         .padding(5.dp)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
@@ -86,7 +91,7 @@ private fun CollectionTopBarActions(
     var dropDownMenuExpanded by remember { mutableStateOf(false) }
     Icon(
         imageVector = Icons.Outlined.MoreVert,
-        contentDescription = null,
+        contentDescription = stringResource(R.string.more_menu_button),
         modifier = Modifier
             .padding(6.dp)
             .size(40.dp)

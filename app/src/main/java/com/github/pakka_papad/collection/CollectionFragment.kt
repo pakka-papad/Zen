@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -149,7 +150,7 @@ class CollectionFragment : Fragment() {
                                 } else if (collectionUi?.songs?.isEmpty() == true) {
                                     item {
                                         FullScreenSadMessage(
-                                            message = "No songs found",
+                                            message = stringResource(R.string.no_songs_found),
                                         )
                                     }
                                 } else {

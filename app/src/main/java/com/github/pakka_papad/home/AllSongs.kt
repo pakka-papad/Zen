@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -19,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.window.DialogProperties
+import com.github.pakka_papad.R
 import com.github.pakka_papad.components.FullScreenSadMessage
 import com.github.pakka_papad.components.SongCardV1
 import com.github.pakka_papad.components.more_options.SongOptions
@@ -41,7 +43,7 @@ fun AllSongs(
     if (songs == null) return
     if (songs.isEmpty()) {
         FullScreenSadMessage(
-            message = "No songs found on this device",
+            message = stringResource(R.string.no_songs_found_on_this_device),
             paddingValues = WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues()
         )
     } else {
@@ -110,7 +112,7 @@ fun SongInfo(
                 onClick = onDismissRequest,
             ) {
                 Text(
-                    text = "Close",
+                    text = stringResource(R.string.close),
                     style = MaterialTheme.typography.bodyLarge,
                 )
             }
@@ -123,32 +125,32 @@ fun SongInfo(
             val scrollState = rememberScrollState()
             Text(
                 text = buildAnnotatedString {
-                    append("Location\n")
+                    append("${stringResource(R.string.location)}\n")
                     withStyle(spanStyle) { append(song.location) }
-                    append("\n\nSize\n")
+                    append("\n\n${stringResource(R.string.size)}\n")
                     withStyle(spanStyle) { append(song.size) }
-                    append("\n\nAlbum\n")
+                    append("\n\n${stringResource(R.string.album)}\n")
                     withStyle(spanStyle) { append(song.album) }
-                    append("\n\nArtist\n")
+                    append("\n\n${stringResource(R.string.artist)}\n")
                     withStyle(spanStyle) { append(song.artist) }
-                    append("\n\nAlbum artist\n")
+                    append("\n\n${stringResource(R.string.album_artist)}\n")
                     withStyle(spanStyle) { append(song.albumArtist) }
-                    append("\n\nComposer\n")
+                    append("\n\n${stringResource(R.string.composer)}\n")
                     withStyle(spanStyle) { append(song.composer) }
-                    append("\n\nLyricist\n")
+                    append("\n\n${stringResource(R.string.lyricist)}\n")
                     withStyle(spanStyle) { append(song.lyricist) }
-                    append("\n\nGenre\n")
+                    append("\n\n${stringResource(R.string.genre)}\n")
                     withStyle(spanStyle) { append(song.genre) }
-                    append("\n\nYear\n")
-                    withStyle(spanStyle) { append(if (song.year == 0) "Unknown" else song.year.toString()) }
-                    append("\n\nDuration\n")
-                    withStyle(spanStyle) { append(if (song.durationMillis == 0L) "Unknown" else song.durationFormatted) }
-                    append("\n\nPlay count\n")
+                    append("\n\n${stringResource(R.string.year)}\n")
+                    withStyle(spanStyle) { append(if (song.year == 0) stringResource(R.string.unknown) else song.year.toString()) }
+                    append("\n\n${stringResource(R.string.duration)}\n")
+                    withStyle(spanStyle) { append(if (song.durationMillis == 0L) stringResource(R.string.unknown) else song.durationFormatted) }
+                    append("\n\n${stringResource(R.string.play_count)}\n")
                     withStyle(spanStyle) { append(song.playCount.toString()) }
-                    append("\n\nLast played on\n")
-                    withStyle(spanStyle) { append(if (song.lastPlayed == null) "Never" else song.lastPlayed.formatToDate()) }
-                    append("\n\nMime type\n")
-                    withStyle(spanStyle) { append(song.mimeType ?: "Unknown") }
+                    append("\n\n${stringResource(R.string.last_played_on)}\n")
+                    withStyle(spanStyle) { append(if (song.lastPlayed == null) stringResource(R.string.never) else song.lastPlayed.formatToDate()) }
+                    append("\n\n${stringResource(R.string.mime_type)}\n")
+                    withStyle(spanStyle) { append(song.mimeType ?: stringResource(R.string.unknown)) }
                 },
                 modifier = Modifier
                     .verticalScroll(scrollState)

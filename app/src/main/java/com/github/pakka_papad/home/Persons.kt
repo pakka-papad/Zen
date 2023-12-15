@@ -14,9 +14,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.github.pakka_papad.R
 import com.github.pakka_papad.components.FullScreenSadMessage
 import com.github.pakka_papad.components.more_options.OptionsAlertDialog
 import com.github.pakka_papad.components.more_options.PersonOptions
@@ -33,7 +36,7 @@ fun Persons(
     if (personsWithSongCount == null) return
     if (personsWithSongCount.isEmpty()) {
         FullScreenSadMessage(
-            message = "No artists found",
+            message = stringResource(R.string.no_artists_found),
             paddingValues = WindowInsets.systemBars.only(WindowInsetsSides.Bottom)
                 .asPaddingValues(),
         )
@@ -93,7 +96,11 @@ fun PersonCard(
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                text = "${personWithSongCount.count} ${if (personWithSongCount.count == 1) "song" else "songs"}",
+                text = pluralStringResource(
+                    id = R.plurals.song_count,
+                    count = personWithSongCount.count,
+                    personWithSongCount.count
+                ),
                 maxLines = 1,
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.fillMaxWidth(),
@@ -104,7 +111,7 @@ fun PersonCard(
             var optionsVisible by remember { mutableStateOf(false) }
             Icon(
                 imageVector = Icons.Outlined.MoreVert,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.more_menu_button),
                 modifier = Modifier
                     .size(26.dp)
                     .clickable(

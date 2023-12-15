@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.R
@@ -57,7 +58,6 @@ fun Playlists(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreatePlaylistCard(
     onPlaylistCreate: (String) -> Unit,
@@ -85,12 +85,12 @@ fun CreatePlaylistCard(
             Icon(
                 painter = painterResource(R.drawable.ic_baseline_favorite_24),
                 modifier = iconModifier,
-                contentDescription = "create-new-playlist"
+                contentDescription = stringResource(R.string.favourite_button)
             )
             if (configuration.screenWidthDp > 340){
                 Spacer(spacerModifier)
                 Text(
-                    text = "Favourites",
+                    text = stringResource(R.string.favourites),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onPrimary,
                     maxLines = 1,
@@ -107,12 +107,12 @@ fun CreatePlaylistCard(
             Icon(
                 painter = painterResource(R.drawable.ic_baseline_playlist_add_40),
                 modifier = iconModifier,
-                contentDescription = "create-new-playlist"
+                contentDescription = stringResource(R.string.create_playlist_button)
             )
             if (configuration.screenWidthDp > 340) {
                 Spacer(spacerModifier)
                 Text(
-                    text = "New Playlist",
+                    text = stringResource(R.string.new_playlist),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onPrimary,
                     maxLines = 1,
@@ -133,7 +133,7 @@ fun CreatePlaylistCard(
                     }
                 ) {
                     Text(
-                        text = "Create",
+                        text = stringResource(R.string.create),
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
@@ -146,14 +146,14 @@ fun CreatePlaylistCard(
                     }
                 ) {
                     Text(
-                        text = "Cancel",
+                        text = stringResource(R.string.cancel),
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
             },
             title = {
                 Text(
-                    text = "Create playlist"
+                    text = stringResource(R.string.create_playlist)
                 )
             },
             text = {
@@ -163,7 +163,7 @@ fun CreatePlaylistCard(
                         playlistName = it
                     },
                     label = {
-                        Text(text = "Playlist name")
+                        Text(text = stringResource(R.string.playlist_name))
                     },
                     textStyle = MaterialTheme.typography.bodyLarge,
                     singleLine = true,
