@@ -14,6 +14,7 @@ plugins {
     id("com.google.protobuf") version "0.8.19"
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+    id("dev.shreyaspatil.compose-compiler-report-generator") version "1.1.0"
 }
 
 android {
