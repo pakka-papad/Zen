@@ -3,6 +3,7 @@ package com.github.pakka_papad
 import android.app.Application
 import android.graphics.Bitmap
 import cat.ereza.customactivityoncrash.config.CaocConfig
+import cat.ereza.customactivityoncrash.config.CaocConfig.BACKGROUND_MODE_SILENT
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import com.google.firebase.FirebaseApp
@@ -24,6 +25,7 @@ class ZenApp: Application(), ImageLoaderFactory {
         CaocConfig.Builder.create().apply {
             restartActivity(MainActivity::class.java)
             errorActivity(CrashActivity::class.java)
+            backgroundMode(BACKGROUND_MODE_SILENT)
             apply()
         }
     }
