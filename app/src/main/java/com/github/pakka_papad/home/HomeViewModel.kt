@@ -1,11 +1,11 @@
 package com.github.pakka_papad.home
 
 import android.app.Application
-import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import com.github.pakka_papad.R
 import com.github.pakka_papad.components.SortOptions
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.*
@@ -168,8 +168,15 @@ class HomeViewModel @Inject constructor(
         exoPlayer.addListener(exoPlayerListener)
     }
 
-    private fun showToast(message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    private val _message = MutableStateFlow("")
+    val message = _message.asStateFlow()
+
+    private fun showMessage(message: String){
+        viewModelScope.launch {
+            _message.update { message }
+            delay(3500)
+            _message.update { "" }
+        }
     }
 
     override fun onCleared() {
@@ -187,10 +194,10 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 blacklistService.blacklistSongs(listOf(song))
-                showToast("Done")
+                showMessage(context.getString(R.string.done))
             } catch (e: Exception) {
                 Timber.e(e)
-                showToast("Some error occurred")
+                showMessage(context.getString(R.string.some_error_occurred))
             }
         }
     }
@@ -199,9 +206,9 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 blacklistService.blacklistFolders(listOf(folder.absolutePath))
-                showToast("Done")
+                showMessage(context.getString(R.string.done))
             } catch (_: Exception){
-                showToast("Some error occurred")
+                showMessage(context.getString(R.string.some_error_occurred))
             }
         }
     }
@@ -216,10 +223,10 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 playlistService.deletePlaylist(playlistWithSongCount.playlistId)
-                showToast("Done")
+                showMessage(context.getString(R.string.done))
             } catch (e: Exception) {
                 Timber.e(e)
-                showToast("Some error occurred")
+                showMessage(context.getString(R.string.some_error_occurred))
             }
         }
     }
@@ -235,9 +242,9 @@ class HomeViewModel @Inject constructor(
         } else {
             val result = queueService.append(song)
             if (result) {
-                showToast("Added ${song.title} to queue")
+                showMessage(context.getString(R.string.added_to_queue, song.title))
             } else {
-                showToast("Song already in queue")
+                showMessage(context.getString(R.string.song_already_in_queue))
             }
         }
     }
@@ -259,7 +266,7 @@ class HomeViewModel @Inject constructor(
 //        manager.setQueue(songs, startPlayingFromIndex)
         queueService.setQueue(songs, startPlayingFromIndex)
         playerService.startServiceIfNotRunning(songs, startPlayingFromIndex)
-        showToast("Playing")
+        showMessage(context.getString(R.string.playing))
     }
 
     /**
