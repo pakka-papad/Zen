@@ -1,0 +1,65 @@
+{
+  ConstraintSets: {
+    start: {
+      homeScreen: {
+        width: 'parent',
+        height: 'spread',
+        alpha: 1,
+        top: ['parent','top'],
+        bottom: ['nowPlayingScreen', 'top']
+      },
+      nowPlayingScreen: {
+        width: 'parent',
+        height: 56,
+        alpha: 1,
+        bottom: ['bottomBar', 'top']
+      },
+      bottomBar: {
+        width: 'parent',
+        height: 90,
+        alpha: 1,
+        translationY: 0,
+        bottom: ['parent', 'bottom']
+      }
+    },
+    end: {
+      homeScreen: {
+        width: 'parent',
+        height: 1,
+        alpha: 0,
+        top: ['parent','top'],
+        bottom: ['nowPlayingScreen', 'top']
+      },
+      nowPlayingScreen: {
+        width: 'parent',
+        height: 'parent',
+        alpha: 1,
+        bottom: ['parent', 'bottom'],
+        top: ['parent', 'top'],
+      },
+      bottomBar: {
+        width: 'parent',
+        height: 90,
+        alpha: 1,
+        translationY: 100,
+        top: ['parent', 'bottom']
+      }
+    }
+  },
+  Transitions: {
+    default: {
+      from: 'start',
+      to: 'end',
+      pathMotionArc: 'startVertical',
+      duration: 350,
+      onSwipe: {
+        anchor: 'nowPlayingScreen',
+        maxVelocity: 5,
+        maxAccel: 3,
+        direction: 'end',
+        side: 'start',
+        mode: 'velocity',
+      }
+    }
+  }
+}
