@@ -12,7 +12,7 @@ fun Snackbar(
     M3Snackbar(
         snackbarData = snackbarData,
         shape = MaterialTheme.shapes.medium,
-        containerColor = MaterialTheme.colorScheme.primaryContainer,
-        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
     )
 }
