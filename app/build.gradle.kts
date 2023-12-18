@@ -61,6 +61,7 @@ android {
     buildTypes {
         debug {
             versionNameSuffix = "-debug"
+            applicationIdSuffix = ".debug"
             resValue("string","app_version_name",AppVersion.Name+versionNameSuffix)
         }
         release {
@@ -77,6 +78,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             versionNameSuffix = "-ir"
+            applicationIdSuffix = ".ir"
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -147,6 +149,7 @@ dependencies {
 
     testImplementation(Libraries.junit)
     androidTestImplementation(Libraries.androidxJunit)
+    androidTestImplementation(Libraries.androidxTestKtx)
     androidTestImplementation(Libraries.androidxEspresso)
 
     debugImplementation(Libraries.leakcanary)
@@ -175,6 +178,9 @@ dependencies {
     implementation(Libraries.lottie)
 
     implementation(Libraries.crashActivity)
+
+    testImplementation(Libraries.mockitoKotlin)
+    testImplementation(Libraries.mockk)
 }
 
 protobuf {

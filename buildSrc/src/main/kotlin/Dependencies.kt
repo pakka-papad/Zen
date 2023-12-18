@@ -45,6 +45,10 @@ object Versions {
     const val lottie = "5.2.0"
 
     const val crashActivity = "2.4.0"
+
+    const val androidxTest = "1.5.0"
+    const val mockitoKotlin = "5.2.1"
+    const val mockk = "1.13.8"
 }
 
 object Plugins {
@@ -117,6 +121,10 @@ object Libraries {
     const val lottie = "com.airbnb.android:lottie-compose:${Versions.lottie}"
 
     const val crashActivity = "cat.ereza:customactivityoncrash:${Versions.crashActivity}"
+
+    const val androidxTestKtx = "androidx.test:core-ktx:${Versions.androidxTest}"
+    const val mockitoKotlin = "org.mockito.kotlin:mockito-kotlin:${Versions.mockitoKotlin}"
+    const val mockk = "io.mockk:mockk:${Versions.mockk}"
 }
 
 object Api {
