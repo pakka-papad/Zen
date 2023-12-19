@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 interface BlacklistedFolderDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertFolder(vararg folder: BlacklistedFolder)
+    suspend fun insertFolder(folder: BlacklistedFolder)
 
     @Query("SELECT * FROM ${Constants.Tables.BLACKLISTED_FOLDER_TABLE}")
     fun getAllFolders(): Flow<List<BlacklistedFolder>>
