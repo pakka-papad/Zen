@@ -11,8 +11,8 @@ interface PlaylistDao {
     @Insert(entity = Playlist::class)
     suspend fun insertPlaylist(playlist: PlaylistExceptId): Long
 
-    @Delete(entity = Playlist::class)
-    suspend fun deletePlaylist(playlist: Playlist)
+//    @Delete(entity = Playlist::class)
+//    suspend fun deletePlaylist(playlist: Playlist)
 
     @Query("DELETE FROM ${Constants.Tables.PLAYLIST_TABLE} WHERE playlistId = :playlistId")
     suspend fun deletePlaylist(playlistId: Long)
