@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import org.jetbrains.annotations.VisibleForTesting
 import java.util.TreeSet
 
 interface QueueService {
@@ -39,21 +40,24 @@ interface QueueService {
         fun onSetQueue(songs: List<Song>, startPlayingFromPosition: Int)
     }
 
-    val callbacks: List<Listener>
-
     fun addListener(listener: Listener)
     fun removeListener(listener: Listener)
 }
 
 class QueueServiceImpl() : QueueService {
 
-    private val mutableQueue = ArrayList<Song>()
-    private val locations = TreeSet<String>()
+    @VisibleForTesting
+    internal val mutableQueue = ArrayList<Song>()
 
-    private val _queue = MutableStateFlow<List<Song>>(emptyList())
+    @VisibleForTesting
+    internal val locations = TreeSet<String>()
+
+    @VisibleForTesting
+    internal val _queue = MutableStateFlow<List<Song>>(emptyList())
     override val queue: StateFlow<List<Song>> = _queue.asStateFlow()
 
-    private val _currentSong = MutableStateFlow<Song?>(null)
+    @VisibleForTesting
+    internal val _currentSong = MutableStateFlow<Song?>(null)
     override val currentSong: StateFlow<Song?> = _currentSong.asStateFlow()
 
     override fun append(song: Song): Boolean {
@@ -145,7 +149,7 @@ class QueueServiceImpl() : QueueService {
         _repeatMode.update { mode }
     }
 
-    override val callbacks = ArrayList<QueueService.Listener>()
+    private val callbacks = ArrayList<QueueService.Listener>()
 
     override fun addListener(listener: QueueService.Listener) {
         callbacks.add(listener)
