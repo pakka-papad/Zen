@@ -1,12 +1,12 @@
 package com.github.pakka_papad.select_playlist
 
-import android.app.Application
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.pakka_papad.R
 import com.github.pakka_papad.data.services.BlacklistService
 import com.github.pakka_papad.data.services.PlaylistService
+import com.github.pakka_papad.util.MessageStore
 import com.github.pakka_papad.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +22,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SelectPlaylistViewModel @Inject constructor(
-    private val context: Application,
+    private val messageStore: MessageStore,
     private val blacklistService: BlacklistService,
     private val playlistService: PlaylistService,
 ) : ViewModel() {
@@ -56,7 +56,7 @@ class SelectPlaylistViewModel @Inject constructor(
             _insertState.update { Resource.Loading() }
             val playlists = playlistsWithSongCount.value
             val blacklistedSongs = blacklistService.blacklistedSongs
-                .first()
+                .first().asSequence()
                 .map { it.location }
                 .toSet()
             val validSongs = songLocations.filter { !blacklistedSongs.contains(it) }
@@ -75,15 +75,15 @@ class SelectPlaylistViewModel @Inject constructor(
             if (!error) {
                 _insertState.update {
                     Resource.Success(
-                        context.getString(R.string.done) + if (anyBlacklistedSong) {
-                            ". " + context.getString(R.string.blacklisted_songs_have_not_been_added_to_playlist)
+                        messageStore.getString(R.string.done) + if (anyBlacklistedSong) {
+                            ". " + messageStore.getString(R.string.blacklisted_songs_have_not_been_added_to_playlist)
                         } else {
                             ""
                         }
                     )
                 }
             } else {
-                _insertState.update { Resource.Error(context.getString(R.string.some_error_occurred)) }
+                _insertState.update { Resource.Error(messageStore.getString(R.string.some_error_occurred)) }
             }
         }
     }
