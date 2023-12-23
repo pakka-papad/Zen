@@ -1,11 +1,11 @@
 package com.github.pakka_papad.restore
 
-import android.app.Application
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.pakka_papad.R
 import com.github.pakka_papad.data.services.BlacklistService
+import com.github.pakka_papad.util.MessageStore
 import com.github.pakka_papad.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,12 +15,13 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.annotations.VisibleForTesting
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class RestoreViewModel @Inject constructor(
-    private val context: Application,
+    private val messageStore: MessageStore,
     private val blacklistService: BlacklistService,
 ) : ViewModel() {
 
@@ -43,7 +44,8 @@ class RestoreViewModel @Inject constructor(
         _restoreList[index] = isSelected
     }
 
-    private val _restoreState = MutableStateFlow<Resource<Unit>>(Resource.Idle())
+    @VisibleForTesting
+    internal val _restoreState = MutableStateFlow<Resource<Unit>>(Resource.Idle())
     val restoreState = _restoreState.asStateFlow()
 
     fun restoreSongs(){
@@ -59,7 +61,7 @@ class RestoreViewModel @Inject constructor(
                 _restoreState.update { Resource.Success(Unit) }
             } catch (e: Exception){
                 Timber.e(e)
-                _restoreState.update { Resource.Error(context.getString(R.string.some_error_occurred)) }
+                _restoreState.update { Resource.Error(messageStore.getString(R.string.some_error_occurred)) }
             }
         }
     }
