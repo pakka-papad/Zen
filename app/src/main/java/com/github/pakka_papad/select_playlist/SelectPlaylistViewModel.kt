@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.annotations.VisibleForTesting
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -47,7 +48,8 @@ class SelectPlaylistViewModel @Inject constructor(
         _selectList[index] = !_selectList[index]
     }
 
-    private val _insertState = MutableStateFlow<Resource<String>>(Resource.Idle())
+    @VisibleForTesting
+    internal val _insertState = MutableStateFlow<Resource<String>>(Resource.Idle())
     val insertState = _insertState.asStateFlow()
 
     fun addSongsToPlaylists(songLocations: Array<String>) {
