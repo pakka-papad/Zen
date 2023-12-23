@@ -2,7 +2,6 @@ package com.github.pakka_papad.data.services
 
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.nowplaying.RepeatMode
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,9 +10,9 @@ import org.jetbrains.annotations.VisibleForTesting
 import java.util.TreeSet
 
 interface QueueService {
-    val queue: Flow<List<Song>>
+    val queue: StateFlow<List<Song>>
 
-    val currentSong: Flow<Song?>
+    val currentSong: StateFlow<Song?>
 
     fun append(song: Song): Boolean
     fun append(songs: List<Song>): Boolean
@@ -27,7 +26,7 @@ interface QueueService {
 
     fun setCurrentSong(currentSongIndex: Int)
 
-    val repeatMode: Flow<RepeatMode>
+    val repeatMode: StateFlow<RepeatMode>
 
     fun updateRepeatMode(mode: RepeatMode)
 

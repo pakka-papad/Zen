@@ -1,8 +1,8 @@
 package com.github.pakka_papad.collection
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.pakka_papad.Constants
 import com.github.pakka_papad.R
 import com.github.pakka_papad.components.SortOptions
 import com.github.pakka_papad.data.music.Song
@@ -10,6 +10,7 @@ import com.github.pakka_papad.data.services.PlayerService
 import com.github.pakka_papad.data.services.PlaylistService
 import com.github.pakka_papad.data.services.QueueService
 import com.github.pakka_papad.data.services.SongService
+import com.github.pakka_papad.util.MessageStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,15 +22,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CollectionViewModel @Inject constructor(
-    private val context: Application,
+    private val messageStore: MessageStore,
     private val playlistService: PlaylistService,
     private val songService: SongService,
     private val playerService: PlayerService,
     private val queueService: QueueService,
 ) : ViewModel() {
 
-    val currentSong = queueService.currentSong as StateFlow
-    private val queue = queueService.queue as StateFlow
+    val currentSong = queueService.currentSong
+    private val queue = queueService.queue
 
     private val _collectionType = MutableStateFlow<CollectionType?>(null)
 
@@ -178,18 +179,19 @@ class CollectionViewModel @Inject constructor(
         if (songs == null) return
         queueService.setQueue(songs, startPlayingFromIndex)
         playerService.startServiceIfNotRunning(songs, startPlayingFromIndex)
-        showMessage(context.getString(R.string.playing))
+        showMessage(messageStore.getString(R.string.playing))
     }
 
     fun addToQueue(song: Song) {
+        println(queue.value)
         if (queue.value.isEmpty()) {
             queueService.setQueue(listOf(song), 0)
             playerService.startServiceIfNotRunning(listOf(song), 0)
         } else {
             val result = queueService.append(song)
             showMessage(
-                if (result) context.getString(R.string.added_to_queue, song.title)
-                else context.getString(R.string.song_already_in_queue)
+                if (result) messageStore.getString(R.string.added_to_queue, song.title)
+                else messageStore.getString(R.string.song_already_in_queue)
             )
         }
     }
@@ -200,7 +202,7 @@ class CollectionViewModel @Inject constructor(
             playerService.startServiceIfNotRunning(songs, 0)
         } else {
             val result = queueService.append(songs)
-            showMessage(context.getString(if (result) R.string.done else R.string.song_already_in_queue))
+            showMessage(messageStore.getString(if (result) R.string.done else R.string.song_already_in_queue))
         }
     }
 
@@ -218,10 +220,10 @@ class CollectionViewModel @Inject constructor(
             try {
                 val playlistId = _collectionType.value?.id?.toLong() ?: throw IllegalArgumentException()
                 playlistService.removeSongsFromPlaylist(listOf(song.location), playlistId)
-                showMessage(context.getString(R.string.done))
+                showMessage(messageStore.getString(R.string.done))
             } catch (e: Exception){
                 Timber.e(e)
-                showMessage(context.getString(R.string.some_error_occurred))
+                showMessage(messageStore.getString(R.string.some_error_occurred))
             }
         }
     }
@@ -233,7 +235,7 @@ class CollectionViewModel @Inject constructor(
     private fun showMessage(message: String){
         viewModelScope.launch {
             _message.update { message }
-            delay(3500)
+            delay(Constants.MESSAGE_DURATION)
             _message.update { "" }
         }
     }

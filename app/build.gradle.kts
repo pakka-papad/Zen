@@ -1,8 +1,9 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 import com.google.protobuf.gradle.builtins
 import com.google.protobuf.gradle.generateProtoTasks
 import com.google.protobuf.gradle.protobuf
 import com.google.protobuf.gradle.protoc
-import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id ("com.android.application")
@@ -181,6 +182,14 @@ dependencies {
 
     testImplementation(Libraries.mockk)
     testImplementation(Libraries.coroutinesTest)
+}
+
+allprojects {
+    tasks.withType<KotlinCompile>().configureEach {
+        kotlinOptions {
+            jvmTarget = JavaVersion.VERSION_11.toString()
+        }
+    }
 }
 
 protobuf {

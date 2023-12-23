@@ -13,11 +13,6 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.extractor.DefaultExtractorsFactory
 import androidx.media3.extractor.mp3.Mp3Extractor
 import androidx.room.Room
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.data.*
 import com.github.pakka_papad.data.music.SongExtractor
@@ -36,7 +31,14 @@ import com.github.pakka_papad.data.services.SearchService
 import com.github.pakka_papad.data.services.SearchServiceImpl
 import com.github.pakka_papad.data.services.SongService
 import com.github.pakka_papad.data.services.SongServiceImpl
+import com.github.pakka_papad.util.MessageStore
+import com.github.pakka_papad.util.MessageStoreImpl
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -248,6 +250,16 @@ object AppModule {
             lyricistDao = db.lyricistDao(),
             genreDao = db.genreDao(),
             playlistDao = db.playlistDao()
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun providesMessageStore(
+        @ApplicationContext context: Context,
+    ): MessageStore {
+        return MessageStoreImpl(
+            context = context,
         )
     }
 }

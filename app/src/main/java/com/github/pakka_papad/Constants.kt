@@ -17,4 +17,5 @@ object Constants {
         const val PLAY_HISTORY_TABLE = "play_history_table"
     }
     const val PACKAGE_NAME = "com.github.pakka_papad"
+    const val MESSAGE_DURATION = 3500L
 }
