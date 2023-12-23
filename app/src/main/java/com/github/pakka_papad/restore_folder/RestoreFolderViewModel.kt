@@ -1,11 +1,11 @@
 package com.github.pakka_papad.restore_folder
 
-import android.app.Application
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.pakka_papad.R
 import com.github.pakka_papad.data.services.BlacklistService
+import com.github.pakka_papad.util.MessageStore
 import com.github.pakka_papad.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,11 +15,12 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.annotations.VisibleForTesting
 import javax.inject.Inject
 
 @HiltViewModel
 class RestoreFolderViewModel @Inject constructor(
-    private val context: Application,
+    private val messageStore: MessageStore,
     private val blacklistService: BlacklistService,
 ): ViewModel() {
 
@@ -43,7 +44,8 @@ class RestoreFolderViewModel @Inject constructor(
         _restoreFoldersList[index] = isSelected
     }
 
-    private val _restored = MutableStateFlow<Resource<Unit>>(Resource.Idle())
+    @VisibleForTesting
+    internal val _restored = MutableStateFlow<Resource<Unit>>(Resource.Idle())
     val restored = _restored.asStateFlow()
 
     fun restoreFolders(){
@@ -58,7 +60,7 @@ class RestoreFolderViewModel @Inject constructor(
                 blacklistService.whitelistFolders(toRestore)
                 _restored.update { Resource.Success(Unit) }
             } catch (_ : Exception){
-                _restored.update { Resource.Error(context.getString(R.string.some_error_occurred)) }
+                _restored.update { Resource.Error(messageStore.getString(R.string.some_error_occurred)) }
             }
         }
     }
