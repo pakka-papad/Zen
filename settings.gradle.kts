@@ -13,4 +13,5 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "Zen"
-include ("app")
+include (":app")
+include(":m3utils")

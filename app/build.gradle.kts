@@ -116,6 +116,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":m3utils"))
     implementation(Libraries.androidxCore)
 
     implementation(Libraries.androidxLifecycle)
