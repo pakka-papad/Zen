@@ -1,10 +1,10 @@
 package com.github.pakka_papad.home
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import com.github.pakka_papad.Constants
 import com.github.pakka_papad.R
 import com.github.pakka_papad.components.SortOptions
 import com.github.pakka_papad.data.ZenPreferenceProvider
@@ -15,7 +15,7 @@ import com.github.pakka_papad.data.services.PlaylistService
 import com.github.pakka_papad.data.services.QueueService
 import com.github.pakka_papad.data.services.SongService
 import com.github.pakka_papad.storage_explorer.*
-import com.github.pakka_papad.storage_explorer.Directory
+import com.github.pakka_papad.util.MessageStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -24,7 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val context: Application,
+    private val messageStore: MessageStore,
     private val exoPlayer: ExoPlayer,
     private val songExtractor: SongExtractor,
     private val prefs: ZenPreferenceProvider,
@@ -143,11 +143,11 @@ class HomeViewModel @Inject constructor(
         prefs.updateSortOrder(screen, option)
     }
 
-    val currentSong = queueService.currentSong as StateFlow
+    val currentSong = queueService.currentSong
 
-    val queue = queueService.queue as StateFlow
+    val queue = queueService.queue
 
-    val repeatMode = queueService.repeatMode as StateFlow
+    val repeatMode = queueService.repeatMode
 
     fun toggleRepeatMode(){
         queueService.updateRepeatMode(repeatMode.value.next())
@@ -174,7 +174,7 @@ class HomeViewModel @Inject constructor(
     private fun showMessage(message: String){
         viewModelScope.launch {
             _message.update { message }
-            delay(3500)
+            delay(Constants.MESSAGE_DURATION)
             _message.update { "" }
         }
     }
@@ -194,10 +194,10 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 blacklistService.blacklistSongs(listOf(song))
-                showMessage(context.getString(R.string.done))
+                showMessage(messageStore.getString(R.string.done))
             } catch (e: Exception) {
                 Timber.e(e)
-                showMessage(context.getString(R.string.some_error_occurred))
+                showMessage(messageStore.getString(R.string.some_error_occurred))
             }
         }
     }
@@ -206,9 +206,9 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 blacklistService.blacklistFolders(listOf(folder.absolutePath))
-                showMessage(context.getString(R.string.done))
+                showMessage(messageStore.getString(R.string.done))
             } catch (_: Exception){
-                showMessage(context.getString(R.string.some_error_occurred))
+                showMessage(messageStore.getString(R.string.some_error_occurred))
             }
         }
     }
@@ -223,10 +223,10 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 playlistService.deletePlaylist(playlistWithSongCount.playlistId)
-                showMessage(context.getString(R.string.done))
+                showMessage(messageStore.getString(R.string.done))
             } catch (e: Exception) {
                 Timber.e(e)
-                showMessage(context.getString(R.string.some_error_occurred))
+                showMessage(messageStore.getString(R.string.some_error_occurred))
             }
         }
     }
@@ -242,9 +242,9 @@ class HomeViewModel @Inject constructor(
         } else {
             val result = queueService.append(song)
             if (result) {
-                showMessage(context.getString(R.string.added_to_queue, song.title))
+                showMessage(messageStore.getString(R.string.added_to_queue, song.title))
             } else {
-                showMessage(context.getString(R.string.song_already_in_queue))
+                showMessage(messageStore.getString(R.string.song_already_in_queue))
             }
         }
     }
@@ -266,7 +266,7 @@ class HomeViewModel @Inject constructor(
 //        manager.setQueue(songs, startPlayingFromIndex)
         queueService.setQueue(songs, startPlayingFromIndex)
         playerService.startServiceIfNotRunning(songs, startPlayingFromIndex)
-        showMessage(context.getString(R.string.playing))
+        showMessage(messageStore.getString(R.string.playing))
     }
 
     /**
