@@ -108,7 +108,7 @@ fun SmallTopBar(
                 )
             },
             actions = actions,
-            colors = TopAppBarDefaults.smallTopAppBarColors(
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = backgroundColor
             )
         )
