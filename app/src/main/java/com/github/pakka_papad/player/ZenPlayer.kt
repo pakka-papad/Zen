@@ -432,7 +432,7 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
     }
 
     override fun onMove(from: Int, to: Int) {
-
+        exoPlayer.moveMediaItem(from, to)
     }
 
     override fun onClear() {

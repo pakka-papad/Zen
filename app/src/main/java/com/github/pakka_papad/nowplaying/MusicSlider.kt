@@ -8,47 +8,48 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import androidx.media3.exoplayer.ExoPlayer
-import kotlinx.coroutines.delay
-import com.github.pakka_papad.toMS
 import com.github.pakka_papad.R
+import com.github.pakka_papad.toMS
+import kotlinx.coroutines.delay
 
 @Composable
 fun MusicSlider(
     modifier: Modifier,
-    mediaPlayer: ExoPlayer,
+    playerHelper: PlayerHelper,
+    currentSongPlaying: Boolean?,
     duration: Long,
 ) {
-    var currentValue by remember { mutableStateOf(mediaPlayer.currentPosition) }
-    var isPlaying by remember { mutableStateOf(mediaPlayer.isPlaying) }
+    var currentValue by remember { mutableStateOf(playerHelper.currentPosition.toLong()) }
 
     DisposableEffect(Unit) {
         val listener = object : Player.Listener {
-            override fun onIsPlayingChanged(isPlaying_: Boolean) {
-                isPlaying = isPlaying_
-            }
-
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 super.onMediaItemTransition(mediaItem, reason)
                 currentValue = 0L
             }
         }
-        mediaPlayer.addListener(listener)
+        playerHelper.addListener(listener)
         onDispose {
-            mediaPlayer.removeListener(listener)
+            playerHelper.removeListener(listener)
         }
     }
-    if (isPlaying) {
+    if (currentSongPlaying == true) {
         LaunchedEffect(Unit) {
             while (true) {
-                currentValue = mediaPlayer.currentPosition
+                currentValue = playerHelper.currentPosition.toLong()
                 delay(33)
             }
         }
@@ -78,7 +79,7 @@ fun MusicSlider(
                             }
 
                             override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                                mediaPlayer.seekTo(currentValue)
+                                playerHelper.seekTo(currentValue)
                             }
                         }
                     )

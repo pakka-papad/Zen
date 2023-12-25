@@ -9,15 +9,44 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,26 +61,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.media3.exoplayer.ExoPlayer
 import coil.compose.AsyncImage
 import com.github.pakka_papad.R
 import com.github.pakka_papad.data.UserPreferences.PlaybackParams
-import com.github.pakka_papad.nowplaying.RepeatMode as RepeatModeEnum
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.round
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
+import com.github.pakka_papad.nowplaying.RepeatMode as RepeatModeEnum
 
 @Composable
 fun NowPlayingScreen(
     paddingValues: PaddingValues,
     song: Song?,
+    currentSongPlaying: Boolean?,
     onPausePlayPressed: () -> Unit,
     onPreviousPressed: () -> Unit,
     onNextPressed: () -> Unit,
     songPlaying: Boolean?,
-    exoPlayer: ExoPlayer,
+    playerHelper: PlayerHelper,
     onFavouriteClicked: () -> Unit,
     onQueueClicked: () -> Unit,
     repeatMode: RepeatModeEnum,
@@ -88,7 +117,8 @@ fun NowPlayingScreen(
                 onPreviousPressed = onPreviousPressed,
                 onNextPressed = onNextPressed,
                 showPlayButton = !songPlaying,
-                exoPlayer = exoPlayer,
+                playerHelper = playerHelper,
+                currentSongPlaying = currentSongPlaying,
                 onFavouriteClicked = onFavouriteClicked,
                 onQueueClicked = onQueueClicked,
                 modifier = Modifier
@@ -127,7 +157,8 @@ fun NowPlayingScreen(
                 onPreviousPressed = onPreviousPressed,
                 onNextPressed = onNextPressed,
                 showPlayButton = !songPlaying,
-                exoPlayer = exoPlayer,
+                playerHelper = playerHelper,
+                currentSongPlaying = currentSongPlaying,
                 onFavouriteClicked = onFavouriteClicked,
                 onQueueClicked = onQueueClicked,
                 modifier = Modifier
@@ -165,11 +196,12 @@ private fun AlbumArt(
 @Composable
 private fun InfoAndControls(
     song: Song,
+    currentSongPlaying: Boolean?,
     onPausePlayPressed: () -> Unit,
     onPreviousPressed: () -> Unit,
     onNextPressed: () -> Unit,
     showPlayButton: Boolean,
-    exoPlayer: ExoPlayer,
+    playerHelper: PlayerHelper,
     onFavouriteClicked: () -> Unit,
     onQueueClicked: () -> Unit,
     modifier: Modifier = Modifier,
@@ -208,7 +240,8 @@ private fun InfoAndControls(
             modifier = Modifier
                 .weight(0.7f)
                 .padding(vertical = 0.dp, horizontal = 24.dp),
-            mediaPlayer = exoPlayer,
+            playerHelper = playerHelper,
+            currentSongPlaying = currentSongPlaying,
             duration = song.durationMillis,
         )
         Row(
