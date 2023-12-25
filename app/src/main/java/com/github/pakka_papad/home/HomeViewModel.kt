@@ -166,7 +166,7 @@ class HomeViewModel @Inject constructor(
             queue.addAll(songs)
         }
 
-        override fun onUpdateCurrentSong(updatedSong: Song, position: Int) {
+        override fun onUpdate(updatedSong: Song, position: Int) {
             if (position < 0 || position >= queue.size) return
             queue[position] = updatedSong
         }

@@ -426,9 +426,15 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
         )
     }
 
-    override fun onUpdateCurrentSong(updatedSong: Song, position: Int) {
-        updateMediaSessionState()
-        updateMediaSessionMetadata()
+    override fun onUpdate(updatedSong: Song, position: Int) {
+        scope.launch {
+            val performUpdate = withContext(Dispatchers.Main) {
+                exoPlayer.currentMediaItemIndex == position
+            }
+            if (!performUpdate) return@launch
+            updateMediaSessionState()
+            updateMediaSessionMetadata()
+        }
     }
 
     override fun onMove(from: Int, to: Int) {

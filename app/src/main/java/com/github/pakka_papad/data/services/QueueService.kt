@@ -33,7 +33,7 @@ interface QueueService {
     interface Listener {
         fun onAppend(song: Song)
         fun onAppend(songs: List<Song>)
-        fun onUpdateCurrentSong(updatedSong: Song, position: Int)
+        fun onUpdate(updatedSong: Song, position: Int)
         fun onMove(from: Int, to: Int)
         fun onClear()
         fun onSetQueue(songs: List<Song>, startPlayingFromPosition: Int)
@@ -89,9 +89,9 @@ class QueueServiceImpl() : QueueService {
         }
         if (song.location == _currentSong.value?.location){
             _currentSong.update { song }
-            if (position != -1){
-                callbacks.forEach { it.onUpdateCurrentSong(song, position) }
-            }
+        }
+        if (position != -1){
+            callbacks.forEach { it.onUpdate(song, position) }
         }
         return true
     }

@@ -56,7 +56,7 @@ class QueueServiceImplTest {
         }
         verify(exactly = 0) {
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong(any(), any())
+            callback.onUpdate(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -89,7 +89,7 @@ class QueueServiceImplTest {
         }
         verify(exactly = 0) {
             callback.onAppend(capture(slot<Song>()))
-            callback.onUpdateCurrentSong(any(), any())
+            callback.onUpdate(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -124,7 +124,7 @@ class QueueServiceImplTest {
         verify(exactly = 1) { callback.onAppend(mockSong) }
         verify(exactly = 0) {
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong(any(), any())
+            callback.onUpdate(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -156,7 +156,7 @@ class QueueServiceImplTest {
         verify(exactly = 1) { callback.onAppend(mockSongs) }
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
-            callback.onUpdateCurrentSong(any(), any())
+            callback.onUpdate(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -183,7 +183,7 @@ class QueueServiceImplTest {
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong(any(), any())
+            callback.onUpdate(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -210,10 +210,10 @@ class QueueServiceImplTest {
             service.queue
         )
         assertCollectionEquals(initialLocations, service.locations)
+        verify(exactly = 1) { callback.onUpdate(song, any()) }
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -241,7 +241,7 @@ class QueueServiceImplTest {
             service.queue
         )
         assertCollectionEquals(initialLocations, service.locations)
-        verify(exactly = 1) { callback.onUpdateCurrentSong(song, 0) }
+        verify(exactly = 1) { callback.onUpdate(song, 0) }
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
@@ -267,7 +267,7 @@ class QueueServiceImplTest {
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong(any(), any())
+            callback.onUpdate(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -291,7 +291,7 @@ class QueueServiceImplTest {
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong(any(), any())
+            callback.onUpdate(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
         }
@@ -310,7 +310,7 @@ class QueueServiceImplTest {
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong(any(), any())
+            callback.onUpdate(any(), any())
             callback.onMove(any(), any())
             callback.onSetQueue(any(), any())
         }
@@ -339,7 +339,7 @@ class QueueServiceImplTest {
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong(any(), any())
+            callback.onUpdate(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
         }
@@ -359,7 +359,7 @@ class QueueServiceImplTest {
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong(any(), any())
+            callback.onUpdate(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -379,7 +379,7 @@ class QueueServiceImplTest {
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong(any(), any())
+            callback.onUpdate(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -401,7 +401,7 @@ class QueueServiceImplTest {
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong(any(), any())
+            callback.onUpdate(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -421,7 +421,7 @@ class QueueServiceImplTest {
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong(any(), any())
+            callback.onUpdate(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -441,7 +441,7 @@ class QueueServiceImplTest {
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong(any(), any())
+            callback.onUpdate(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
