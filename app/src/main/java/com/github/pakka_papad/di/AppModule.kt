@@ -63,28 +63,6 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun providesDataManager(
-        db: AppDatabase,
-        scope: CoroutineScope,
-        extractor: SongExtractor,
-    ): DataManager {
-        return DataManager(
-            songDao = db.songDao(),
-            albumDao = db.albumDao(),
-            artistDao = db.artistDao(),
-            albumArtistDao = db.albumArtistDao(),
-            composerDao = db.composerDao(),
-            lyricistDao = db.lyricistDao(),
-            genreDao = db.genreDao(),
-            blacklistDao = db.blacklistDao(),
-            blacklistedFolderDao = db.blacklistedFolderDao(),
-            scope = scope,
-            songExtractor = extractor
-        )
-    }
-
-    @Singleton
-    @Provides
     fun providesNotificationManager(@ApplicationContext context: Context): ZenNotificationManager {
         return ZenNotificationManager(context)
     }
@@ -156,12 +134,22 @@ object AppModule {
     fun providesSongExtractor(
         @ApplicationContext context: Context,
         crashReporter: ZenCrashReporter,
+        db: AppDatabase,
     ): SongExtractor {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         return SongExtractor(
             scope = scope,
             context = context,
             crashReporter = crashReporter,
+            songDao = db.songDao(),
+            albumDao = db.albumDao(),
+            artistDao = db.artistDao(),
+            albumArtistDao = db.albumArtistDao(),
+            composerDao = db.composerDao(),
+            lyricistDao = db.lyricistDao(),
+            genreDao = db.genreDao(),
+            blacklistDao = db.blacklistDao(),
+            blacklistedFolderDao = db.blacklistedFolderDao(),
         )
     }
 

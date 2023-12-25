@@ -21,10 +21,10 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.PlaybackStatsListener
 import com.github.pakka_papad.Constants
-import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.Song
+import com.github.pakka_papad.data.music.SongExtractor
 import com.github.pakka_papad.data.notification.ZenNotificationManager
 import com.github.pakka_papad.data.services.AnalyticsService
 import com.github.pakka_papad.data.services.QueueService
@@ -54,7 +54,7 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
     lateinit var notificationManager: ZenNotificationManager
 
     @Inject
-    lateinit var dataManager: DataManager
+    lateinit var songExtractor: SongExtractor
 
     @Inject
     lateinit var queueService: QueueService
@@ -143,7 +143,7 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
             super.onPlayerError(error)
             crashReporter.logException(error)
             if (error.errorCode == PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND){
-                dataManager.cleanData()
+                songExtractor.cleanData()
 //                showToast("Could not find the song ${dataManager.currentSong.value?.title ?: ""} at the specified path")
                 onBroadcastCancel()
             }

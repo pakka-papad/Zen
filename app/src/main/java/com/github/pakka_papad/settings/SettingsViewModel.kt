@@ -5,9 +5,9 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.pakka_papad.Screens
-import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.ScanStatus
+import com.github.pakka_papad.data.music.SongExtractor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -20,11 +20,11 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val context: Application,
-    private val manager: DataManager,
+    private val songExtractor: SongExtractor,
     private val prefs: ZenPreferenceProvider
 ) : ViewModel() {
 
-    val scanStatus = manager.scanStatus
+    val scanStatus = songExtractor.scanStatus
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(
@@ -35,7 +35,7 @@ class SettingsViewModel @Inject constructor(
         )
 
     fun scanForMusic() {
-        manager.scanForMusic()
+        songExtractor.scanForMusic()
     }
 
     private val _tabsSelection = MutableStateFlow<List<Pair<Screens,Boolean>>>(listOf())
