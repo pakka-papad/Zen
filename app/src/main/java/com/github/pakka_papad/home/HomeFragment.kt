@@ -10,17 +10,44 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material.rememberSwipeableState
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalAbsoluteTonalElevation
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -44,7 +71,15 @@ import com.github.pakka_papad.collection.CollectionType
 import com.github.pakka_papad.components.BottomSheet
 import com.github.pakka_papad.components.Snackbar
 import com.github.pakka_papad.data.ZenPreferenceProvider
-import com.github.pakka_papad.data.music.*
+import com.github.pakka_papad.data.music.Album
+import com.github.pakka_papad.data.music.AlbumArtistWithSongCount
+import com.github.pakka_papad.data.music.ArtistWithSongCount
+import com.github.pakka_papad.data.music.ComposerWithSongCount
+import com.github.pakka_papad.data.music.GenreWithSongCount
+import com.github.pakka_papad.data.music.LyricistWithSongCount
+import com.github.pakka_papad.data.music.MiniSong
+import com.github.pakka_papad.data.music.PersonWithSongCount
+import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.nowplaying.NowPlayingOptions
 import com.github.pakka_papad.nowplaying.NowPlayingScreen
 import com.github.pakka_papad.nowplaying.NowPlayingTopBar
@@ -179,7 +214,7 @@ class HomeFragment : Fragment() {
                     }
                     val windowInsets = WindowInsets.systemBars.asPaddingValues()
 
-                    val queue by viewModel.queue.collectAsStateWithLifecycle()
+                    val queue = viewModel.queue
                     val playbackParams by preferenceProvider.playbackParams.collectAsStateWithLifecycle()
                     val repeatMode by viewModel.repeatMode.collectAsStateWithLifecycle()
                     val playerScaffoldState = rememberBottomSheetScaffoldState(

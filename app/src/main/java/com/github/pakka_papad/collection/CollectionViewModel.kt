@@ -183,8 +183,7 @@ class CollectionViewModel @Inject constructor(
     }
 
     fun addToQueue(song: Song) {
-        println(queue.value)
-        if (queue.value.isEmpty()) {
+        if (queue.isEmpty()) {
             queueService.setQueue(listOf(song), 0)
             playerService.startServiceIfNotRunning(listOf(song), 0)
         } else {
@@ -197,7 +196,7 @@ class CollectionViewModel @Inject constructor(
     }
 
     fun addToQueue(songs: List<Song>) {
-        if (queue.value.isEmpty()) {
+        if (queue.isEmpty()) {
             queueService.setQueue(songs, 0)
             playerService.startServiceIfNotRunning(songs, 0)
         } else {

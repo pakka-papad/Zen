@@ -20,7 +20,7 @@ import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.PlaybackStatsListener
-import com.github.pakka_papad.*
+import com.github.pakka_papad.Constants
 import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.ZenPreferenceProvider
@@ -29,10 +29,18 @@ import com.github.pakka_papad.data.notification.ZenNotificationManager
 import com.github.pakka_papad.data.services.AnalyticsService
 import com.github.pakka_papad.data.services.QueueService
 import com.github.pakka_papad.data.services.SongService
+import com.github.pakka_papad.toCorrectedParams
+import com.github.pakka_papad.toExoPlayerPlaybackParameters
 import com.github.pakka_papad.widgets.WidgetBroadcast
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
@@ -418,7 +426,7 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
         )
     }
 
-    override fun onUpdateCurrentSong() {
+    override fun onUpdateCurrentSong(updatedSong: Song, position: Int) {
         updateMediaSessionState()
         updateMediaSessionMetadata()
     }
@@ -484,7 +492,7 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
         val currentSong = queueService.getSongAtIndex(exoPlayer.currentMediaItemIndex) ?: return
         val updatedSong = currentSong.copy(favourite = !currentSong.favourite)
         scope.launch {
-            onUpdateCurrentSong()
+//            onUpdateCurrentSong()
             queueService.update(updatedSong)
             songService.updateSong(updatedSong)
         }

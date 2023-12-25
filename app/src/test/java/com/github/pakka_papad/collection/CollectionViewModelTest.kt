@@ -22,7 +22,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -48,7 +47,7 @@ class CollectionViewModelTest {
     private val artistName = "Some artist"
     private lateinit var artistWithSongs: ArtistWithSongs
     private val mockMessage = "Sample message"
-    private val queueFlow = MutableStateFlow(listOf<Song>())
+    private val queueList = mutableListOf<Song>()
 
     @Before
     fun setup() {
@@ -66,7 +65,7 @@ class CollectionViewModelTest {
         )
         every { songService.getArtistWithSongsByName(artistName) } returns flowOf(artistWithSongs)
         every { queueService.currentSong } returns MutableStateFlow(null)
-        every { queueService.queue } returns queueFlow
+        every { queueService.queue } returns queueList
         every { messageStore.getString(any()) } returns mockMessage
         every { messageStore.getString(allAny()) } returns mockMessage
         viewModel = CollectionViewModel(
@@ -165,7 +164,7 @@ class CollectionViewModelTest {
                 add(mockSong)
             }
         }
-        queueFlow.update { songs }
+        queueList.addAll(songs)
         queueService.setQueue(songs, 1)
         return songs
     }

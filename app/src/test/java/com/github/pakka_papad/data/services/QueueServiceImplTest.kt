@@ -31,14 +31,13 @@ class QueueServiceImplTest {
 
     @After
     fun close(){
-        assertEquals(service.mutableQueue, service.queue.value)
-        assertCollectionEquals(service.locations, service.queue.value.map { it.location })
+        assertCollectionEquals(service.locations, service.queue.map { it.location })
     }
 
     @Test
     fun `given empty queue verify append song`() = runTest {
         // Given
-        assertEquals(emptyList(), service.queue.value)
+        assertEquals(emptyList(), service.queue)
 
         // When
         val mockSongLocation = "storage/emulated/0/song0.mp3"
@@ -48,8 +47,8 @@ class QueueServiceImplTest {
 
         // Then
         assertTrue(result)
-        assertEquals(1, service.queue.value.size)
-        assertEquals(mockSongLocation, service.queue.value[0].location)
+        assertEquals(1, service.queue.size)
+        assertEquals(mockSongLocation, service.queue[0].location)
         assertEquals(1, service.locations.size)
         assertContains(service.locations, mockSongLocation)
         verify(exactly = 1) {
@@ -57,7 +56,7 @@ class QueueServiceImplTest {
         }
         verify(exactly = 0) {
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong()
+            callback.onUpdateCurrentSong(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -67,7 +66,7 @@ class QueueServiceImplTest {
     @Test
     fun `given empty queue verify append songs`() = runTest {
         // Given
-        assertEquals(emptyList(), service.queue.value)
+        assertEquals(emptyList(), service.queue)
 
         // When
         val mockSongLocations = mutableListOf<String>()
@@ -84,13 +83,13 @@ class QueueServiceImplTest {
 
         // Then
         assertTrue(result)
-        assertEquals(mockkSongs, service.queue.value)
+        assertEquals(mockkSongs, service.queue)
         verify(exactly = 1) {
             callback.onAppend(mockkSongs)
         }
         verify(exactly = 0) {
             callback.onAppend(capture(slot<Song>()))
-            callback.onUpdateCurrentSong()
+            callback.onUpdateCurrentSong(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -104,14 +103,13 @@ class QueueServiceImplTest {
             service.mutableQueue.add(mockSong)
             service.locations.add(mockSong.location)
         }
-        service._queue.update { service.mutableQueue.toList() }
     }
 
     @Test
     fun `given non-empty queue verify append song`() = runTest {
         // Given
         setupQueue()
-        val initialQueue = service.queue.value
+        val initialQueue = service.queue
         val initialLocations = service.locations.toList()
 
         // When
@@ -121,12 +119,12 @@ class QueueServiceImplTest {
         service.append(mockSong)
 
         // Then
-        assertEquals(initialQueue + mockSong, service.queue.value)
+        assertEquals(initialQueue + mockSong, service.queue)
         assertCollectionEquals(initialLocations + mockSongLocation, service.locations)
         verify(exactly = 1) { callback.onAppend(mockSong) }
         verify(exactly = 0) {
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong()
+            callback.onUpdateCurrentSong(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -137,7 +135,7 @@ class QueueServiceImplTest {
     fun `given non-empty queue verify append songs`() = runTest {
         // Given
         setupQueue()
-        val initialQueue = service.queue.value
+        val initialQueue = service.queue
         val initialLocations = service.locations.toList()
 
         // When
@@ -153,12 +151,12 @@ class QueueServiceImplTest {
         service.append(mockSongs)
 
         // Then
-        assertEquals(initialQueue + mockSongs, service.queue.value)
+        assertEquals(initialQueue + mockSongs, service.queue)
         assertCollectionEquals(initialLocations + mockSongLocations, service.locations)
         verify(exactly = 1) { callback.onAppend(mockSongs) }
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
-            callback.onUpdateCurrentSong()
+            callback.onUpdateCurrentSong(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -169,7 +167,7 @@ class QueueServiceImplTest {
     fun `verify update song when song is not in queue`() = runTest {
         // Given
         setupQueue()
-        val initialQueue = service.queue.value
+        val initialQueue = service.queue
         val initialLocations = service.locations.toList()
 
         // When
@@ -180,12 +178,12 @@ class QueueServiceImplTest {
 
         // Then
         assertFalse(result)
-        assertEquals(initialQueue, service.queue.value)
+        assertEquals(initialQueue, service.queue)
         assertCollectionEquals(initialLocations, service.locations)
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong()
+            callback.onUpdateCurrentSong(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -196,7 +194,7 @@ class QueueServiceImplTest {
     fun `verify update song when song is in queue`() = runTest {
         // Given
         setupQueue()
-        val iQueue = service.queue.value
+        val iQueue = service.queue
         val initialLocations = service.locations.toList()
 
         // When
@@ -209,13 +207,13 @@ class QueueServiceImplTest {
         assertTrue(result)
         assertEquals(
             listOf(song) + iQueue.slice(1 until iQueue.size),
-            service.queue.value
+            service.queue
         )
         assertCollectionEquals(initialLocations, service.locations)
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong()
+            callback.onUpdateCurrentSong(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -226,8 +224,8 @@ class QueueServiceImplTest {
     fun `verify update song when song is in queue and currently playing`() = runTest {
         // Given
         setupQueue()
-        val iQueue = service.queue.value
-        service._currentSong.update { service.queue.value[0] }
+        val iQueue = service.queue
+        service._currentSong.update { service.queue[0] }
         val initialLocations = service.locations.toList()
 
         // When
@@ -240,10 +238,10 @@ class QueueServiceImplTest {
         assertTrue(result)
         assertEquals(
             listOf(song) + iQueue.slice(1 until iQueue.size),
-            service.queue.value
+            service.queue
         )
         assertCollectionEquals(initialLocations, service.locations)
-        verify(exactly = 1) { callback.onUpdateCurrentSong() }
+        verify(exactly = 1) { callback.onUpdateCurrentSong(song, 0) }
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
@@ -257,7 +255,7 @@ class QueueServiceImplTest {
     fun `verify moveSong with invalid indices`() = runTest {
         // Given
         setupQueue()
-        val s = service.queue.value.size
+        val s = service.queue.size
         val initialLocations = service.locations.toList()
 
         // When
@@ -269,7 +267,7 @@ class QueueServiceImplTest {
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong()
+            callback.onUpdateCurrentSong(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -280,7 +278,7 @@ class QueueServiceImplTest {
     fun `verify moveSong with valid indices`() = runTest {
         // Given
         setupQueue()
-        val s = service.queue.value.size
+        val s = service.queue.size
         val initialLocations = service.locations.toList()
 
         // When
@@ -293,7 +291,7 @@ class QueueServiceImplTest {
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong()
+            callback.onUpdateCurrentSong(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
         }
@@ -312,7 +310,7 @@ class QueueServiceImplTest {
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong()
+            callback.onUpdateCurrentSong(any(), any())
             callback.onMove(any(), any())
             callback.onSetQueue(any(), any())
         }
@@ -335,13 +333,13 @@ class QueueServiceImplTest {
         service.setQueue(newQueue, 1)
 
         // Then
-        assertEquals(newQueue, service.queue.value)
+        assertEquals(newQueue, service.queue)
         assertCollectionEquals(service.locations, newQueue.map { it.location })
         verify(exactly = 1) { callback.onSetQueue(newQueue, 1) }
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong()
+            callback.onUpdateCurrentSong(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
         }
@@ -353,15 +351,15 @@ class QueueServiceImplTest {
         setupQueue()
 
         // When
-        val result = service.getSongAtIndex(service.queue.value.size-1)
+        val result = service.getSongAtIndex(service.queue.size-1)
 
         // Then
         assertNotNull(result)
-        assertContains(service.queue.value, result)
+        assertContains(service.queue, result)
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong()
+            callback.onUpdateCurrentSong(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -374,14 +372,14 @@ class QueueServiceImplTest {
         setupQueue()
 
         // When
-        val result = service.getSongAtIndex(service.queue.value.size)
+        val result = service.getSongAtIndex(service.queue.size)
 
         // Then
         assertNull(result)
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong()
+            callback.onUpdateCurrentSong(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -394,8 +392,8 @@ class QueueServiceImplTest {
         setupQueue()
 
         // When
-        val index = service.queue.value.size-1
-        val song = service.queue.value[index]
+        val index = service.queue.size-1
+        val song = service.queue[index]
         service.setCurrentSong(index)
 
         // Then
@@ -403,7 +401,7 @@ class QueueServiceImplTest {
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong()
+            callback.onUpdateCurrentSong(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -416,14 +414,14 @@ class QueueServiceImplTest {
         setupQueue()
 
         // When
-        val index = service.queue.value.size
+        val index = service.queue.size
         service.setCurrentSong(index)
 
         // Then
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong()
+            callback.onUpdateCurrentSong(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
@@ -443,7 +441,7 @@ class QueueServiceImplTest {
         verify(exactly = 0) {
             callback.onAppend(any<Song>())
             callback.onAppend(any<List<Song>>())
-            callback.onUpdateCurrentSong()
+            callback.onUpdateCurrentSong(any(), any())
             callback.onMove(any(), any())
             callback.onClear()
             callback.onSetQueue(any(), any())
