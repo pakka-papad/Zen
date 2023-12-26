@@ -269,8 +269,7 @@ private fun InfoAndControls(
         }
         MusicSlider(
             modifier = Modifier
-                .weight(0.7f)
-                .padding(vertical = 0.dp, horizontal = 24.dp),
+                .padding(24.dp),
             playerHelper = playerHelper,
             currentSongPlaying = currentSongPlaying,
             duration = song.durationMillis,
@@ -280,7 +279,6 @@ private fun InfoAndControls(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 24.dp, end = 24.dp, bottom = 24.dp, top = 12.dp)
         ) {
             LikeButton(
                 song = song,
