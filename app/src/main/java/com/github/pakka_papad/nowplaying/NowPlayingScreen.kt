@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.aspectRatio
@@ -25,7 +26,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -99,7 +99,7 @@ fun NowPlayingScreen(
 ) {
     if (song == null || songPlaying == null) return
     val configuration = LocalConfiguration.current
-    val screenHeight = max(configuration.screenHeightDp - 60, 0) // subtracting 60 for TopBarHeight
+    val screenHeight = max(configuration.screenHeightDp - 20, 0) // subtracting 20 for Scrim height
     val screenWidth = configuration.screenWidthDp
     if (configuration.orientation == ORIENTATION_LANDSCAPE) {
         Row(
@@ -111,13 +111,13 @@ fun NowPlayingScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
-            val albumArtMaxWidth = ((0.4f) * screenWidth).toInt()
-            val infoAndControlsMaxWidth = ((0.6f) * screenWidth).toInt()
+            val albumArtMaxWidth = ((0.5f) * screenWidth).toInt()
+            val infoAndControlsMaxWidth = ((0.5f) * screenWidth).toInt()
             if (albumArtMaxWidth >= 50 && screenHeight >= 50) {
                 val imageSize = min(albumArtMaxWidth, screenHeight)
                 AlbumArt(
                     song = song,
-                    modifier = Modifier.size((imageSize * 0.8f).dp),
+                    modifier = Modifier.size((imageSize * 0.9f).dp),
                 )
             }
             InfoAndControls(
@@ -154,14 +154,14 @@ fun NowPlayingScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            val albumArtMaxHeight = ((0.6f) * screenHeight).toInt()
-            val infoAndControlsMaxHeight = ((0.4f) * screenHeight).toInt()
+            val albumArtMaxHeight = ((0.5f) * screenHeight).toInt()
+            val infoAndControlsMaxHeight = ((0.5f) * screenHeight).toInt()
             if (screenWidth >= 50 && albumArtMaxHeight >= 50) {
                 val imageSize = min(screenWidth, albumArtMaxHeight)
                 AlbumArt(
                     song = song,
                     modifier = Modifier
-                        .size((imageSize * 0.8f).dp)
+                        .size((imageSize * 0.9f).dp)
                         .weight(1f),
                 )
             }
@@ -245,11 +245,11 @@ private fun InfoAndControls(
             modifier = Modifier.weight(1f)
         )
         Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 24.dp, vertical = 12.dp)
         ) {
             PlaybackSpeedAndPitchController(
                 playbackParams = playbackParams,
@@ -278,7 +278,9 @@ private fun InfoAndControls(
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.widthIn(max = 370.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 24.dp, end = 24.dp, bottom = 24.dp, top = 12.dp)
         ) {
             LikeButton(
                 song = song,
@@ -458,6 +460,7 @@ private fun SongInfo(
     modifier = modifier,
     verticalArrangement = Arrangement.Center
 ) {
+    val spacerModifier = Modifier.height(8.dp)
     Text(
         text = song.title,
         style = MaterialTheme.typography.headlineSmall,
@@ -467,6 +470,7 @@ private fun SongInfo(
         overflow = TextOverflow.Ellipsis,
         color = MaterialTheme.colorScheme.onSurface,
     )
+    Spacer(spacerModifier)
     Text(
         text = song.artist,
         style = MaterialTheme.typography.titleMedium,
@@ -475,6 +479,7 @@ private fun SongInfo(
         overflow = TextOverflow.Ellipsis,
         color = MaterialTheme.colorScheme.onSurface,
     )
+    Spacer(spacerModifier)
     Text(
         text = song.album,
         style = MaterialTheme.typography.titleMedium,
@@ -498,7 +503,11 @@ fun PlaybackSpeedAndPitchController(
         contentDescription = stringResource(R.string.speed_and_pitch_controller),
         modifier = Modifier
             .size(30.dp)
-            .clickable { showDialog = true },
+            .clickable(
+                onClick = { showDialog = true },
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(bounded = false, radius = 20.dp)
+            ),
         tint = MaterialTheme.colorScheme.onSurface
     )
     if (showDialog) {
@@ -593,7 +602,9 @@ fun RepeatModeController(
         modifier = Modifier
             .size(30.dp)
             .clickable(
-                onClick = toggleRepeatMode
+                onClick = toggleRepeatMode,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(bounded = false, radius = 20.dp),
             ),
         tint = MaterialTheme.colorScheme.onSurface
     )
@@ -609,7 +620,9 @@ private fun SaveQueue(
         modifier = Modifier
             .size(30.dp)
             .clickable(
-                onClick = onSaveQueueClicked
+                onClick = onSaveQueueClicked,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(bounded = false, radius = 20.dp),
             ),
         tint = MaterialTheme.colorScheme.onSurface
     )
@@ -629,7 +642,9 @@ private fun SleepTimerButton(
         modifier = Modifier
             .size(30.dp)
             .clickable(
-                onClick = { showTimerDialog = true }
+                onClick = { showTimerDialog = true },
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(bounded = false, radius = 20.dp),
             ),
         tint = MaterialTheme.colorScheme.onSurface
     )
