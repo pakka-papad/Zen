@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
@@ -38,10 +39,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +61,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -87,6 +91,11 @@ fun NowPlayingScreen(
     toggleRepeatMode: () -> Unit,
     playbackParams: PlaybackParams,
     updatePlaybackParams: (speed: Int, pitch: Int) -> Unit,
+    isTimerRunning: Boolean,
+    timeLeft: Int,
+    onTimerBegin: (Int) -> Unit,
+    onTimerCancel: () -> Unit,
+    onSaveQueueClicked: () -> Unit,
 ) {
     if (song == null || songPlaying == null) return
     val configuration = LocalConfiguration.current
@@ -128,6 +137,11 @@ fun NowPlayingScreen(
                 toggleRepeatMode = toggleRepeatMode,
                 playbackParams = playbackParams,
                 updatePlaybackParams = updatePlaybackParams,
+                isTimerRunning = isTimerRunning,
+                timeLeft = timeLeft,
+                onTimerBegin = onTimerBegin,
+                onTimerCancel = onTimerCancel,
+                onSaveQueueClicked = onSaveQueueClicked,
             )
         }
     } else {
@@ -168,6 +182,11 @@ fun NowPlayingScreen(
                 toggleRepeatMode = toggleRepeatMode,
                 playbackParams = playbackParams,
                 updatePlaybackParams = updatePlaybackParams,
+                isTimerRunning = isTimerRunning,
+                timeLeft = timeLeft,
+                onTimerBegin = onTimerBegin,
+                onTimerCancel = onTimerCancel,
+                onSaveQueueClicked = onSaveQueueClicked,
             )
         }
     }
@@ -209,6 +228,11 @@ private fun InfoAndControls(
     toggleRepeatMode: () -> Unit,
     playbackParams: PlaybackParams,
     updatePlaybackParams: (speed: Int, pitch: Int) -> Unit,
+    isTimerRunning: Boolean,
+    timeLeft: Int,
+    onTimerBegin: (Int) -> Unit,
+    onTimerCancel: () -> Unit,
+    onSaveQueueClicked: () -> Unit,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -231,6 +255,13 @@ private fun InfoAndControls(
                 playbackParams = playbackParams,
                 updatePlaybackParams = updatePlaybackParams
             )
+            SleepTimerButton(
+                isRunning = isTimerRunning,
+                timeLeft = timeLeft,
+                beginTimer = onTimerBegin,
+                cancelTimer = onTimerCancel,
+            )
+            SaveQueue(onSaveQueueClicked = onSaveQueueClicked)
             RepeatModeController(
                 currentRepeatMode = repeatMode,
                 toggleRepeatMode = toggleRepeatMode
@@ -566,4 +597,152 @@ fun RepeatModeController(
             ),
         tint = MaterialTheme.colorScheme.onSurface
     )
+}
+
+@Composable
+private fun SaveQueue(
+    onSaveQueueClicked: () -> Unit,
+){
+    Icon(
+        painter = painterResource(R.drawable.ic_baseline_playlist_add_40),
+        contentDescription = stringResource(R.string.repeat_mode_button),
+        modifier = Modifier
+            .size(30.dp)
+            .clickable(
+                onClick = onSaveQueueClicked
+            ),
+        tint = MaterialTheme.colorScheme.onSurface
+    )
+}
+
+@Composable
+private fun SleepTimerButton(
+    isRunning: Boolean,
+    timeLeft: Int,
+    beginTimer: (Int) -> Unit,
+    cancelTimer: () -> Unit,
+){
+    var showTimerDialog by remember { mutableStateOf(false) }
+    Icon(
+        painter = painterResource(R.drawable.outline_timer_24),
+        contentDescription = stringResource(R.string.sleep_timer_button),
+        modifier = Modifier
+            .size(30.dp)
+            .clickable(
+                onClick = { showTimerDialog = true }
+            ),
+        tint = MaterialTheme.colorScheme.onSurface
+    )
+    if (showTimerDialog) {
+        var minutes by remember { mutableStateOf<Int?>(null) }
+        var seconds by  remember { mutableStateOf<Int?>(null) }
+        val time by remember(timeLeft) { derivedStateOf {
+            val mins = timeLeft/60
+            val secs = timeLeft%60
+            val sMinutes = if (mins < 10) "0$mins" else mins.toString()
+            val sSeconds = if (secs < 10) "0$secs" else secs.toString()
+            "$sMinutes:$sSeconds"
+        } }
+        AlertDialog(
+            onDismissRequest = { showTimerDialog = false },
+            title = {
+                Text(
+                    text = stringResource(R.string.sleep_timer),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    if (isRunning) {
+                        Text(
+                            text = stringResource(R.string.stopping_in, time),
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                    } else {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OutlinedTextField(
+                                value = minutes?.toString() ?: "",
+                                onValueChange = {
+                                    if (it.length > 2) return@OutlinedTextField
+                                    minutes = try {
+                                        if (it.isEmpty()) null else it.toInt()
+                                    } catch (_: Exception) { minutes }
+                                },
+                                maxLines = 1,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                label = {
+                                    Text(text = "mm")
+                                },
+                                textStyle = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier
+                                    .width(80.dp)
+                            )
+                            Text(
+                                text = ":",
+                                modifier = Modifier
+                                    .width(12.dp),
+                                textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.ExtraBold,
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            OutlinedTextField(
+                                value = seconds?.toString() ?: "",
+                                onValueChange = {
+                                    if (it.length > 2) return@OutlinedTextField
+                                    if (it.isEmpty()) {
+                                        seconds = null
+                                        return@OutlinedTextField
+                                    }
+                                    val num = try {
+                                        it.toInt()
+                                    } catch (_: Exception) { seconds }
+                                    if (num != null && num > 59) return@OutlinedTextField
+                                    seconds = num
+                                },
+                                maxLines = 1,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                label = {
+                                    Text(text = "ss")
+                                },
+                                textStyle = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier
+                                    .width(80.dp)
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (isRunning) {
+                            cancelTimer()
+                        } else {
+                            beginTimer((minutes ?: 0)*60+(seconds ?: 0))
+                            showTimerDialog = false
+                        }
+                    },
+                    content = {
+                        Text(text = stringResource(if (isRunning) R.string.stop_timer else R.string.start_timer))
+                    }
+                )
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { showTimerDialog = false },
+                    content = {
+                        Text(text = stringResource(R.string.close))
+                    }
+                )
+            },
+        )
+    }
 }

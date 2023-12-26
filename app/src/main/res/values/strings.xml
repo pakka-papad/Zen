@@ -116,6 +116,11 @@
     <string name="made_by">Made by</string>
     <string name="choose_an_accent_color">Choose an accent color</string>
     <string name="setting_icon">%1$s setting icon</string>
+    <string name="sleep_timer">Sleep Timer</string>
+    <string name="sleep_timer_button">Sleep timer button</string>
+    <string name="stop_timer">Stop timer</string>
+    <string name="start_timer">Start timer</string>
+    <string name="stopping_in">Stopping in %1$s</string>
 
     <!-- plural strings -->
     <plurals name="song_count">

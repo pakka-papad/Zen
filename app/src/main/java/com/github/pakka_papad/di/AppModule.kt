@@ -1,7 +1,9 @@
 package com.github.pakka_papad.di
 
 import android.annotation.SuppressLint
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.dataStoreFile
@@ -29,8 +31,11 @@ import com.github.pakka_papad.data.services.QueueService
 import com.github.pakka_papad.data.services.QueueServiceImpl
 import com.github.pakka_papad.data.services.SearchService
 import com.github.pakka_papad.data.services.SearchServiceImpl
+import com.github.pakka_papad.data.services.SleepTimerService
+import com.github.pakka_papad.data.services.SleepTimerServiceImpl
 import com.github.pakka_papad.data.services.SongService
 import com.github.pakka_papad.data.services.SongServiceImpl
+import com.github.pakka_papad.player.ZenBroadcastReceiver
 import com.github.pakka_papad.util.MessageStore
 import com.github.pakka_papad.util.MessageStoreImpl
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -248,6 +253,24 @@ object AppModule {
     ): MessageStore {
         return MessageStoreImpl(
             context = context,
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun providesSleepTimerService(
+        @ApplicationContext context: Context,
+    ): SleepTimerService {
+        return SleepTimerServiceImpl(
+            scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
+            closeIntent = PendingIntent.getBroadcast(
+                context, ZenBroadcastReceiver.CANCEL_ACTION_REQUEST_CODE,
+                Intent(Constants.PACKAGE_NAME).putExtra(
+                    ZenBroadcastReceiver.AUDIO_CONTROL,
+                    ZenBroadcastReceiver.ZEN_PLAYER_CANCEL
+                ),
+                PendingIntent.FLAG_IMMUTABLE
+            )
         )
     }
 }

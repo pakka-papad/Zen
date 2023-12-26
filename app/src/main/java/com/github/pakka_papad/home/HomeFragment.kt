@@ -68,9 +68,8 @@ import com.github.pakka_papad.Screens
 import com.github.pakka_papad.components.BottomSheet
 import com.github.pakka_papad.components.Snackbar
 import com.github.pakka_papad.data.ZenPreferenceProvider
-import com.github.pakka_papad.nowplaying.NowPlayingOptions
+import com.github.pakka_papad.data.services.SleepTimerService
 import com.github.pakka_papad.nowplaying.NowPlayingScreen
-import com.github.pakka_papad.nowplaying.NowPlayingTopBar
 import com.github.pakka_papad.nowplaying.PlayerHelper
 import com.github.pakka_papad.nowplaying.Queue
 import com.github.pakka_papad.player.ZenBroadcastReceiver
@@ -88,11 +87,9 @@ class HomeFragment : Fragment() {
 
     private val viewModel: HomeViewModel by viewModels()
 
-    @Inject
-    lateinit var exoPlayer: ExoPlayer
-
-    @Inject
-    lateinit var preferenceProvider: ZenPreferenceProvider
+    @Inject lateinit var exoPlayer: ExoPlayer
+    @Inject lateinit var preferenceProvider: ZenPreferenceProvider
+    @Inject lateinit var sleepTimerService: SleepTimerService
 
     @OptIn(
         ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
@@ -163,6 +160,9 @@ class HomeFragment : Fragment() {
                     val allGenresListState = rememberLazyListState()
 
                     val files by viewModel.filesInCurrentDestination.collectAsStateWithLifecycle()
+
+                    val isSleepTimerRunning by sleepTimerService.isRunning.collectAsStateWithLifecycle()
+                    val sleepTimerLeft by sleepTimerService.timeLeft.collectAsStateWithLifecycle()
 
                     val dataRetrieved by remember {
                         derivedStateOf {
@@ -243,9 +243,6 @@ class HomeFragment : Fragment() {
                     val songScreenShuffleClicked = remember { { viewModel.shufflePlay(songs) } }
                     val miniPlayerPlayPauseClicked = remember { {
                         if (swipeableState.currentValue == 0) { pendingPausePlayIntent.send() }
-                    } }
-                    val nowPlayingBackArrowClicked = remember<() -> Unit> { {
-                        scope.launch { swipeableState.animateTo(0) }
                     } }
                     val expandQueueBottomSheet = remember<() -> Unit> {
                         { scope.launch { playerScaffoldState.bottomSheetState.expand() } }
@@ -392,9 +389,7 @@ class HomeFragment : Fragment() {
                                         .fillMaxWidth()
                                         .background(bottomBarColor)
                                         .padding(
-                                            start = windowInsets.calculateStartPadding(
-                                                LayoutDirection.Ltr
-                                            ),
+                                            start = windowInsets.calculateStartPadding(LayoutDirection.Ltr),
                                             end = windowInsets.calculateEndPadding(LayoutDirection.Ltr),
                                         )
                                 ) {
@@ -447,18 +442,6 @@ class HomeFragment : Fragment() {
                                 currentSong?.let {
                                     BottomSheetScaffold(
                                         scaffoldState = playerScaffoldState,
-                                        topBar = {
-                                            NowPlayingTopBar(
-                                                onBackArrowPressed = nowPlayingBackArrowClicked,
-                                                title = it.title,
-                                                options = listOf(
-                                                    NowPlayingOptions.SaveToPlaylist {
-                                                        if (swipeableState.currentValue == 1)
-                                                            navHelper.navigateToChoosePlaylist(queue)
-                                                    }
-                                                )
-                                            )
-                                        },
                                         content = { paddingValues ->
                                             NowPlayingScreen(
                                                 paddingValues = paddingValues,
@@ -474,7 +457,12 @@ class HomeFragment : Fragment() {
                                                 repeatMode = repeatMode,
                                                 toggleRepeatMode = viewModel::toggleRepeatMode,
                                                 playbackParams = playbackParams,
-                                                updatePlaybackParams = preferenceProvider::updatePlaybackParams
+                                                updatePlaybackParams = preferenceProvider::updatePlaybackParams,
+                                                isTimerRunning = isSleepTimerRunning,
+                                                timeLeft = sleepTimerLeft,
+                                                onTimerBegin = sleepTimerService::begin,
+                                                onTimerCancel = sleepTimerService::cancel,
+                                                onSaveQueueClicked = { navHelper.navigateToChoosePlaylist(queue) },
                                             )
                                         },
                                         sheetContent = {
