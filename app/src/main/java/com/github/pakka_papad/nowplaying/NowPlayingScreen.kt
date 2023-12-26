@@ -727,8 +727,8 @@ private fun SleepTimerButton(
                             cancelTimer()
                         } else {
                             beginTimer((minutes ?: 0)*60+(seconds ?: 0))
-                            showTimerDialog = false
                         }
+                        showTimerDialog = false
                     },
                     content = {
                         Text(text = stringResource(if (isRunning) R.string.stop_timer else R.string.start_timer))
