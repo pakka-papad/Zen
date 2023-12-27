@@ -11,11 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.media3.exoplayer.ExoPlayer
 import com.github.pakka_papad.components.SongCardV2
 import com.github.pakka_papad.data.music.Song
 import kotlinx.coroutines.delay
-import timber.log.Timber
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -24,24 +22,22 @@ fun ColumnScope.Queue(
     onFavouriteClicked: (Song) -> Unit,
     currentSong: Song?,
     expanded: Boolean,
-    exoPlayer: ExoPlayer,
+    playerHelper: PlayerHelper,
     onDrag: (fromIndex: Int, toIndex: Int) -> Unit,
 ) {
     val listState = rememberLazyListState()
     LaunchedEffect(key1 = currentSong, key2 = expanded) {
         delay(600)
         if (!expanded) {
-            listState.scrollToItem(exoPlayer.currentMediaItemIndex)
+            listState.scrollToItem(playerHelper.currentMediaItemIndex)
             return@LaunchedEffect
         }
         if (!listState.isScrollInProgress) {
-            listState.animateScrollToItem(exoPlayer.currentMediaItemIndex)
+            listState.animateScrollToItem(playerHelper.currentMediaItemIndex)
         }
     }
     val dragDropState = rememberDragDropState(listState) { fromIndex, toIndex ->
-        Timber.d("dd from:$fromIndex to:$toIndex")
         onDrag(fromIndex,toIndex)
-        exoPlayer.moveMediaItem(fromIndex,toIndex)
     }
     LazyColumn(
         modifier = Modifier
@@ -63,7 +59,7 @@ fun ColumnScope.Queue(
             DraggableItem(dragDropState, index) {
                 SongCardV2(
                     song = song,
-                    onSongClicked = { if(!isPlaying){ exoPlayer.seekTo(index,0) } },
+                    onSongClicked = { if(!isPlaying){ playerHelper.seekTo(index,0) } },
                     onFavouriteClicked = onFavouriteClicked,
                     currentlyPlaying = isPlaying,
                 )

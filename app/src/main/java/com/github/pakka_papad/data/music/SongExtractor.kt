@@ -7,14 +7,30 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import com.github.pakka_papad.data.ZenCrashReporter
+import com.github.pakka_papad.data.daos.AlbumArtistDao
+import com.github.pakka_papad.data.daos.AlbumDao
+import com.github.pakka_papad.data.daos.ArtistDao
+import com.github.pakka_papad.data.daos.BlacklistDao
+import com.github.pakka_papad.data.daos.BlacklistedFolderDao
+import com.github.pakka_papad.data.daos.ComposerDao
+import com.github.pakka_papad.data.daos.GenreDao
+import com.github.pakka_papad.data.daos.LyricistDao
+import com.github.pakka_papad.data.daos.SongDao
 import com.github.pakka_papad.formatToDate
 import com.github.pakka_papad.toMBfromB
 import com.github.pakka_papad.toMS
 import kotlinx.coroutines.CompletionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.TreeMap
@@ -24,7 +40,43 @@ class SongExtractor(
     private val scope: CoroutineScope,
     private val context: Context,
     private val crashReporter: ZenCrashReporter,
+    private val songDao: SongDao,
+    private val albumDao: AlbumDao,
+    private val artistDao: ArtistDao,
+    private val albumArtistDao: AlbumArtistDao,
+    private val composerDao: ComposerDao,
+    private val lyricistDao: LyricistDao,
+    private val genreDao: GenreDao,
+    private val blacklistDao: BlacklistDao,
+    private val blacklistedFolderDao: BlacklistedFolderDao,
 ) {
+
+    init {
+        cleanData()
+    }
+
+    fun cleanData() {
+        scope.launch {
+            val jobs = mutableListOf<Job>()
+            songDao.getSongs().forEach {
+                try {
+                    if(!File(it.location).exists()){
+                        jobs += launch { songDao.deleteSong(it) }
+                    }
+                } catch (_: Exception){
+
+                }
+            }
+            jobs.joinAll()
+            jobs.clear()
+            albumDao.cleanAlbumTable()
+            artistDao.cleanArtistTable()
+            albumArtistDao.cleanAlbumArtistTable()
+            composerDao.cleanComposerTable()
+            lyricistDao.cleanLyricistTable()
+            genreDao.cleanGenreTable()
+        }
+    }
 
     private val projection = arrayOf(
         MediaStore.Audio.Media._ID,
@@ -184,7 +236,58 @@ class SongExtractor(
         return songs
     }
 
-    suspend fun extract(
+    private val _scanStatus = Channel<ScanStatus>(onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val scanStatus = _scanStatus.receiveAsFlow()
+
+    fun scanForMusic() {
+        scope.launch {
+            _scanStatus.send(ScanStatus.ScanStarted)
+            val blacklistedSongLocations = blacklistDao
+                .getBlacklistedSongs()
+                .map { it.location }
+                .toHashSet()
+            val blacklistedFolderPaths = blacklistedFolderDao
+                .getAllFolders()
+                .first()
+                .map { it.path }
+                .toHashSet()
+            val (songs, albums) = extract(
+                blacklistedSongLocations,
+                blacklistedFolderPaths,
+                statusListener = { parsed, total ->
+                    _scanStatus.trySend(ScanStatus.ScanProgress(parsed, total))
+                }
+            )
+            val insertJobs = listOf(
+                launch {
+                    val artists = songs.map { it.artist }.toSet().map { Artist(it) }
+                    artistDao.insertAllArtists(artists)
+                },
+                launch {
+                    val albumArtists = songs.map { it.albumArtist }.toSet().map { AlbumArtist(it) }
+                    albumArtistDao.insertAllAlbumArtists(albumArtists)
+                },
+                launch {
+                    val lyricists = songs.map { it.lyricist }.toSet().map { Lyricist(it) }
+                    lyricistDao.insertAllLyricists(lyricists)
+                },
+                launch {
+                    val composers = songs.map { it.composer }.toSet().map { Composer(it) }
+                    composerDao.insertAllComposers(composers)
+                },
+                launch {
+                    val genres = songs.map { it.genre }.toSet().map { Genre(it) }
+                    genreDao.insertAllGenres(genres)
+                }
+            )
+            albumDao.insertAllAlbums(albums)
+            insertJobs.joinAll()
+            songDao.insertAllSongs(songs)
+            _scanStatus.send(ScanStatus.ScanComplete)
+        }
+    }
+
+    private suspend fun extract(
         blacklistedSongLocations: HashSet<String>,
         blacklistedFolderPaths: HashSet<String>,
         statusListener: ((parsed: Int, total: Int) -> Unit)? = null

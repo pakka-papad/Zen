@@ -1,5 +1,6 @@
 package com.github.pakka_papad.home
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.Player
@@ -145,7 +146,7 @@ class HomeViewModel @Inject constructor(
 
     val currentSong = queueService.currentSong
 
-    val queue = queueService.queue
+    val queue = mutableStateListOf<Song>()
 
     val repeatMode = queueService.repeatMode
 
@@ -155,6 +156,37 @@ class HomeViewModel @Inject constructor(
 
     private val _currentSongPlaying = MutableStateFlow<Boolean?>(null)
     val currentSongPlaying = _currentSongPlaying.asStateFlow()
+
+    private val queueServiceListener = object : QueueService.Listener {
+        override fun onAppend(song: Song) {
+            queue.add(song)
+        }
+
+        override fun onAppend(songs: List<Song>) {
+            queue.addAll(songs)
+        }
+
+        override fun onUpdate(updatedSong: Song, position: Int) {
+            if (position < 0 || position >= queue.size) return
+            queue[position] = updatedSong
+        }
+
+        override fun onMove(from: Int, to: Int) {
+            if (from < 0 || to < 0 || from >= queue.size || to >= queue.size) return
+            queue.apply { add(to, removeAt(from)) }
+        }
+
+        override fun onClear() {
+            queue.clear()
+        }
+
+        override fun onSetQueue(songs: List<Song>, startPlayingFromPosition: Int) {
+            queue.apply {
+                clear()
+                addAll(songs)
+            }
+        }
+    }
 
     private val exoPlayerListener = object : Player.Listener {
         override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -166,6 +198,8 @@ class HomeViewModel @Inject constructor(
     init {
         _currentSongPlaying.update { exoPlayer.isPlaying }
         exoPlayer.addListener(exoPlayerListener)
+        queue.addAll(queueService.queue)
+        queueService.addListener(queueServiceListener)
     }
 
     private val _message = MutableStateFlow("")
@@ -183,6 +217,7 @@ class HomeViewModel @Inject constructor(
         super.onCleared()
         exoPlayer.removeListener(exoPlayerListener)
         explorer.removeListener(directoryChangeListener)
+        queueService.removeListener(queueServiceListener)
     }
 
     /**
@@ -235,7 +270,7 @@ class HomeViewModel @Inject constructor(
      * Adds a song to the end of queue
      */
     fun addToQueue(song: Song) {
-        if (queue.value.isEmpty()) {
+        if (queue.isEmpty()) {
 //            manager.setQueue(listOf(song), 0)
             queueService.setQueue(listOf(song),0)
             playerService.startServiceIfNotRunning(listOf(song), 0)

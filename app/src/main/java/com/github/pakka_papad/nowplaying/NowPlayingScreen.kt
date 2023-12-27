@@ -9,15 +9,47 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,39 +61,45 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.media3.exoplayer.ExoPlayer
 import coil.compose.AsyncImage
 import com.github.pakka_papad.R
 import com.github.pakka_papad.data.UserPreferences.PlaybackParams
-import com.github.pakka_papad.nowplaying.RepeatMode as RepeatModeEnum
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.round
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
+import com.github.pakka_papad.nowplaying.RepeatMode as RepeatModeEnum
 
 @Composable
 fun NowPlayingScreen(
     paddingValues: PaddingValues,
     song: Song?,
+    currentSongPlaying: Boolean?,
     onPausePlayPressed: () -> Unit,
     onPreviousPressed: () -> Unit,
     onNextPressed: () -> Unit,
     songPlaying: Boolean?,
-    exoPlayer: ExoPlayer,
+    playerHelper: PlayerHelper,
     onFavouriteClicked: () -> Unit,
     onQueueClicked: () -> Unit,
     repeatMode: RepeatModeEnum,
     toggleRepeatMode: () -> Unit,
     playbackParams: PlaybackParams,
     updatePlaybackParams: (speed: Int, pitch: Int) -> Unit,
+    isTimerRunning: Boolean,
+    timeLeft: Int,
+    onTimerBegin: (Int) -> Unit,
+    onTimerCancel: () -> Unit,
+    onSaveQueueClicked: () -> Unit,
 ) {
     if (song == null || songPlaying == null) return
     val configuration = LocalConfiguration.current
-    val screenHeight = max(configuration.screenHeightDp - 60, 0) // subtracting 60 for TopBarHeight
+    val screenHeight = max(configuration.screenHeightDp - 20, 0) // subtracting 20 for Scrim height
     val screenWidth = configuration.screenWidthDp
     if (configuration.orientation == ORIENTATION_LANDSCAPE) {
         Row(
@@ -73,13 +111,13 @@ fun NowPlayingScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
-            val albumArtMaxWidth = ((0.4f) * screenWidth).toInt()
-            val infoAndControlsMaxWidth = ((0.6f) * screenWidth).toInt()
+            val albumArtMaxWidth = ((0.5f) * screenWidth).toInt()
+            val infoAndControlsMaxWidth = ((0.5f) * screenWidth).toInt()
             if (albumArtMaxWidth >= 50 && screenHeight >= 50) {
                 val imageSize = min(albumArtMaxWidth, screenHeight)
                 AlbumArt(
                     song = song,
-                    modifier = Modifier.size((imageSize * 0.8f).dp),
+                    modifier = Modifier.size((imageSize * 0.9f).dp),
                 )
             }
             InfoAndControls(
@@ -88,7 +126,8 @@ fun NowPlayingScreen(
                 onPreviousPressed = onPreviousPressed,
                 onNextPressed = onNextPressed,
                 showPlayButton = !songPlaying,
-                exoPlayer = exoPlayer,
+                playerHelper = playerHelper,
+                currentSongPlaying = currentSongPlaying,
                 onFavouriteClicked = onFavouriteClicked,
                 onQueueClicked = onQueueClicked,
                 modifier = Modifier
@@ -98,6 +137,11 @@ fun NowPlayingScreen(
                 toggleRepeatMode = toggleRepeatMode,
                 playbackParams = playbackParams,
                 updatePlaybackParams = updatePlaybackParams,
+                isTimerRunning = isTimerRunning,
+                timeLeft = timeLeft,
+                onTimerBegin = onTimerBegin,
+                onTimerCancel = onTimerCancel,
+                onSaveQueueClicked = onSaveQueueClicked,
             )
         }
     } else {
@@ -110,14 +154,14 @@ fun NowPlayingScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            val albumArtMaxHeight = ((0.6f) * screenHeight).toInt()
-            val infoAndControlsMaxHeight = ((0.4f) * screenHeight).toInt()
+            val albumArtMaxHeight = ((0.5f) * screenHeight).toInt()
+            val infoAndControlsMaxHeight = ((0.5f) * screenHeight).toInt()
             if (screenWidth >= 50 && albumArtMaxHeight >= 50) {
                 val imageSize = min(screenWidth, albumArtMaxHeight)
                 AlbumArt(
                     song = song,
                     modifier = Modifier
-                        .size((imageSize * 0.8f).dp)
+                        .size((imageSize * 0.9f).dp)
                         .weight(1f),
                 )
             }
@@ -127,7 +171,8 @@ fun NowPlayingScreen(
                 onPreviousPressed = onPreviousPressed,
                 onNextPressed = onNextPressed,
                 showPlayButton = !songPlaying,
-                exoPlayer = exoPlayer,
+                playerHelper = playerHelper,
+                currentSongPlaying = currentSongPlaying,
                 onFavouriteClicked = onFavouriteClicked,
                 onQueueClicked = onQueueClicked,
                 modifier = Modifier
@@ -137,6 +182,11 @@ fun NowPlayingScreen(
                 toggleRepeatMode = toggleRepeatMode,
                 playbackParams = playbackParams,
                 updatePlaybackParams = updatePlaybackParams,
+                isTimerRunning = isTimerRunning,
+                timeLeft = timeLeft,
+                onTimerBegin = onTimerBegin,
+                onTimerCancel = onTimerCancel,
+                onSaveQueueClicked = onSaveQueueClicked,
             )
         }
     }
@@ -165,11 +215,12 @@ private fun AlbumArt(
 @Composable
 private fun InfoAndControls(
     song: Song,
+    currentSongPlaying: Boolean?,
     onPausePlayPressed: () -> Unit,
     onPreviousPressed: () -> Unit,
     onNextPressed: () -> Unit,
     showPlayButton: Boolean,
-    exoPlayer: ExoPlayer,
+    playerHelper: PlayerHelper,
     onFavouriteClicked: () -> Unit,
     onQueueClicked: () -> Unit,
     modifier: Modifier = Modifier,
@@ -177,6 +228,11 @@ private fun InfoAndControls(
     toggleRepeatMode: () -> Unit,
     playbackParams: PlaybackParams,
     updatePlaybackParams: (speed: Int, pitch: Int) -> Unit,
+    isTimerRunning: Boolean,
+    timeLeft: Int,
+    onTimerBegin: (Int) -> Unit,
+    onTimerCancel: () -> Unit,
+    onSaveQueueClicked: () -> Unit,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -189,16 +245,23 @@ private fun InfoAndControls(
             modifier = Modifier.weight(1f)
         )
         Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 24.dp, vertical = 12.dp)
         ) {
             PlaybackSpeedAndPitchController(
                 playbackParams = playbackParams,
                 updatePlaybackParams = updatePlaybackParams
             )
+            SleepTimerButton(
+                isRunning = isTimerRunning,
+                timeLeft = timeLeft,
+                beginTimer = onTimerBegin,
+                cancelTimer = onTimerCancel,
+            )
+            SaveQueue(onSaveQueueClicked = onSaveQueueClicked)
             RepeatModeController(
                 currentRepeatMode = repeatMode,
                 toggleRepeatMode = toggleRepeatMode
@@ -206,15 +269,16 @@ private fun InfoAndControls(
         }
         MusicSlider(
             modifier = Modifier
-                .weight(0.7f)
-                .padding(vertical = 0.dp, horizontal = 24.dp),
-            mediaPlayer = exoPlayer,
+                .padding(24.dp),
+            playerHelper = playerHelper,
+            currentSongPlaying = currentSongPlaying,
             duration = song.durationMillis,
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.widthIn(max = 370.dp)
+            modifier = Modifier
+                .fillMaxWidth()
         ) {
             LikeButton(
                 song = song,
@@ -394,6 +458,7 @@ private fun SongInfo(
     modifier = modifier,
     verticalArrangement = Arrangement.Center
 ) {
+    val spacerModifier = Modifier.height(8.dp)
     Text(
         text = song.title,
         style = MaterialTheme.typography.headlineSmall,
@@ -403,6 +468,7 @@ private fun SongInfo(
         overflow = TextOverflow.Ellipsis,
         color = MaterialTheme.colorScheme.onSurface,
     )
+    Spacer(spacerModifier)
     Text(
         text = song.artist,
         style = MaterialTheme.typography.titleMedium,
@@ -411,6 +477,7 @@ private fun SongInfo(
         overflow = TextOverflow.Ellipsis,
         color = MaterialTheme.colorScheme.onSurface,
     )
+    Spacer(spacerModifier)
     Text(
         text = song.album,
         style = MaterialTheme.typography.titleMedium,
@@ -434,7 +501,11 @@ fun PlaybackSpeedAndPitchController(
         contentDescription = stringResource(R.string.speed_and_pitch_controller),
         modifier = Modifier
             .size(30.dp)
-            .clickable { showDialog = true },
+            .clickable(
+                onClick = { showDialog = true },
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(bounded = false, radius = 20.dp)
+            ),
         tint = MaterialTheme.colorScheme.onSurface
     )
     if (showDialog) {
@@ -529,8 +600,162 @@ fun RepeatModeController(
         modifier = Modifier
             .size(30.dp)
             .clickable(
-                onClick = toggleRepeatMode
+                onClick = toggleRepeatMode,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(bounded = false, radius = 20.dp),
             ),
         tint = MaterialTheme.colorScheme.onSurface
     )
+}
+
+@Composable
+private fun SaveQueue(
+    onSaveQueueClicked: () -> Unit,
+){
+    Icon(
+        painter = painterResource(R.drawable.ic_baseline_playlist_add_40),
+        contentDescription = stringResource(R.string.repeat_mode_button),
+        modifier = Modifier
+            .size(30.dp)
+            .clickable(
+                onClick = onSaveQueueClicked,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(bounded = false, radius = 20.dp),
+            ),
+        tint = MaterialTheme.colorScheme.onSurface
+    )
+}
+
+@Composable
+private fun SleepTimerButton(
+    isRunning: Boolean,
+    timeLeft: Int,
+    beginTimer: (Int) -> Unit,
+    cancelTimer: () -> Unit,
+){
+    var showTimerDialog by remember { mutableStateOf(false) }
+    Icon(
+        painter = painterResource(R.drawable.outline_timer_24),
+        contentDescription = stringResource(R.string.sleep_timer_button),
+        modifier = Modifier
+            .size(30.dp)
+            .clickable(
+                onClick = { showTimerDialog = true },
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(bounded = false, radius = 20.dp),
+            ),
+        tint = MaterialTheme.colorScheme.onSurface
+    )
+    if (showTimerDialog) {
+        var minutes by remember { mutableStateOf<Int?>(null) }
+        var seconds by  remember { mutableStateOf<Int?>(null) }
+        val time by remember(timeLeft) { derivedStateOf {
+            val mins = timeLeft/60
+            val secs = timeLeft%60
+            val sMinutes = if (mins < 10) "0$mins" else mins.toString()
+            val sSeconds = if (secs < 10) "0$secs" else secs.toString()
+            "$sMinutes:$sSeconds"
+        } }
+        AlertDialog(
+            onDismissRequest = { showTimerDialog = false },
+            title = {
+                Text(
+                    text = stringResource(R.string.sleep_timer),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    if (isRunning) {
+                        Text(
+                            text = stringResource(R.string.stopping_in, time),
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                    } else {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OutlinedTextField(
+                                value = minutes?.toString() ?: "",
+                                onValueChange = {
+                                    if (it.length > 2) return@OutlinedTextField
+                                    minutes = try {
+                                        if (it.isEmpty()) null else it.toInt()
+                                    } catch (_: Exception) { minutes }
+                                },
+                                maxLines = 1,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                label = {
+                                    Text(text = "mm")
+                                },
+                                textStyle = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier
+                                    .width(80.dp)
+                            )
+                            Text(
+                                text = ":",
+                                modifier = Modifier
+                                    .width(12.dp),
+                                textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.ExtraBold,
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            OutlinedTextField(
+                                value = seconds?.toString() ?: "",
+                                onValueChange = {
+                                    if (it.length > 2) return@OutlinedTextField
+                                    if (it.isEmpty()) {
+                                        seconds = null
+                                        return@OutlinedTextField
+                                    }
+                                    val num = try {
+                                        it.toInt()
+                                    } catch (_: Exception) { seconds }
+                                    if (num != null && num > 59) return@OutlinedTextField
+                                    seconds = num
+                                },
+                                maxLines = 1,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                label = {
+                                    Text(text = "ss")
+                                },
+                                textStyle = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier
+                                    .width(80.dp)
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (isRunning) {
+                            cancelTimer()
+                        } else {
+                            beginTimer((minutes ?: 0)*60+(seconds ?: 0))
+                        }
+                        showTimerDialog = false
+                    },
+                    content = {
+                        Text(text = stringResource(if (isRunning) R.string.stop_timer else R.string.start_timer))
+                    }
+                )
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { showTimerDialog = false },
+                    content = {
+                        Text(text = stringResource(R.string.close))
+                    }
+                )
+            },
+        )
+    }
 }

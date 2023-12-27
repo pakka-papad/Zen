@@ -10,7 +10,7 @@ import org.jetbrains.annotations.VisibleForTesting
 import java.util.TreeSet
 
 interface QueueService {
-    val queue: StateFlow<List<Song>>
+    val queue: List<Song>
 
     val currentSong: StateFlow<Song?>
 
@@ -33,7 +33,7 @@ interface QueueService {
     interface Listener {
         fun onAppend(song: Song)
         fun onAppend(songs: List<Song>)
-        fun onUpdateCurrentSong()
+        fun onUpdate(updatedSong: Song, position: Int)
         fun onMove(from: Int, to: Int)
         fun onClear()
         fun onSetQueue(songs: List<Song>, startPlayingFromPosition: Int)
@@ -51,9 +51,8 @@ class QueueServiceImpl() : QueueService {
     @VisibleForTesting
     internal val locations = TreeSet<String>()
 
-    @VisibleForTesting
-    internal val _queue = MutableStateFlow<List<Song>>(emptyList())
-    override val queue: StateFlow<List<Song>> = _queue.asStateFlow()
+    override val queue: List<Song>
+        get() = mutableQueue.toList()
 
     @VisibleForTesting
     internal val _currentSong = MutableStateFlow<Song?>(null)
@@ -63,7 +62,6 @@ class QueueServiceImpl() : QueueService {
         if (locations.contains(song.location)) return false
         locations.add(song.location)
         mutableQueue.add(song)
-        _queue.update { mutableQueue.toList() }
         callbacks.forEach { it.onAppend(song) }
         return true
     }
@@ -75,24 +73,26 @@ class QueueServiceImpl() : QueueService {
             mutableQueue.add(it)
             locations.add(it.location)
         }
-        _queue.update { mutableQueue.toList() }
         callbacks.forEach { it.onAppend(songs) }
         return true
     }
 
     override fun update(song: Song): Boolean {
-        if (song.location == _currentSong.value?.location){
-            _currentSong.update { song }
-            callbacks.forEach { it.onUpdateCurrentSong() }
-        }
         if (!locations.contains(song.location)) return false
+        var position = -1
         for (idx in mutableQueue.indices){
             if (mutableQueue[idx].location == song.location){
                 mutableQueue[idx] = song
+                position = idx
                 break
             }
         }
-        _queue.update { mutableQueue.toList() }
+        if (song.location == _currentSong.value?.location){
+            _currentSong.update { song }
+        }
+        if (position != -1){
+            callbacks.forEach { it.onUpdate(song, position) }
+        }
         return true
     }
 
@@ -103,14 +103,12 @@ class QueueServiceImpl() : QueueService {
         mutableQueue.apply {
             add(finalPosition, removeAt(initialPosition))
         }
-        _queue.update { mutableQueue.toList() }
         callbacks.forEach { it.onMove(initialPosition, finalPosition) }
         return true
     }
 
     override fun clearQueue() {
         mutableQueue.clear()
-        _queue.update { mutableQueue.toList() }
         _currentSong.update { null }
         locations.clear()
         callbacks.forEach { it.onClear() }
@@ -122,7 +120,6 @@ class QueueServiceImpl() : QueueService {
             clear()
             addAll(songs)
         }
-        _queue.update { mutableQueue.toList() }
         val idx = if (startPlayingFromPosition >= songs.size || startPlayingFromPosition < 0) 0
             else startPlayingFromPosition
         _currentSong.update { mutableQueue[idx] }
