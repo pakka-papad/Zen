@@ -19,22 +19,7 @@ import com.github.pakka_papad.Constants
 import com.github.pakka_papad.data.*
 import com.github.pakka_papad.data.music.SongExtractor
 import com.github.pakka_papad.data.notification.ZenNotificationManager
-import com.github.pakka_papad.data.services.AnalyticsService
-import com.github.pakka_papad.data.services.AnalyticsServiceImpl
-import com.github.pakka_papad.data.services.BlacklistService
-import com.github.pakka_papad.data.services.BlacklistServiceImpl
-import com.github.pakka_papad.data.services.PlayerService
-import com.github.pakka_papad.data.services.PlayerServiceImpl
-import com.github.pakka_papad.data.services.PlaylistService
-import com.github.pakka_papad.data.services.PlaylistServiceImpl
-import com.github.pakka_papad.data.services.QueueService
-import com.github.pakka_papad.data.services.QueueServiceImpl
-import com.github.pakka_papad.data.services.SearchService
-import com.github.pakka_papad.data.services.SearchServiceImpl
-import com.github.pakka_papad.data.services.SleepTimerService
-import com.github.pakka_papad.data.services.SleepTimerServiceImpl
-import com.github.pakka_papad.data.services.SongService
-import com.github.pakka_papad.data.services.SongServiceImpl
+import com.github.pakka_papad.data.services.*
 import com.github.pakka_papad.player.ZenBroadcastReceiver
 import com.github.pakka_papad.util.MessageStore
 import com.github.pakka_papad.util.MessageStoreImpl
@@ -271,6 +256,16 @@ object AppModule {
                 ),
                 PendingIntent.FLAG_IMMUTABLE
             )
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun providesThumbnailService(
+        @ApplicationContext context: Context,
+    ): ThumbnailService {
+        return ThumbnailServiceImpl(
+            context = context,
         )
     }
 }
