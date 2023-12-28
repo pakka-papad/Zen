@@ -32,6 +32,7 @@ class ThumbnailServiceImpl(
         }
         val bitmaps = imageUris.asSequence()
             .filterNotNull()
+            .distinct()
             .mapNotNull {
                 BitmapFactory.decodeStream(
                     context.contentResolver.openInputStream(it.toUri()),
@@ -102,6 +103,7 @@ class ThumbnailServiceImpl(
     private fun create(images: List<Bitmap>, imageSize: Int, parts: Int): Bitmap {
         val result = Bitmap.createBitmap(imageSize, imageSize, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(result)
+        canvas.drawARGB(0,0,0,0)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         val onePartSize = imageSize / parts
 
