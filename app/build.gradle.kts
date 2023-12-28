@@ -137,6 +137,8 @@ dependencies {
     implementation(Libraries.androidxGlanceMaterial)
     implementation(Libraries.androidxGlanceMaterial3)
 
+    implementation(Libraries.androidxWorkManager)
+
     implementation(Libraries.androidxComposeMaterial)
     implementation(Libraries.material3)
     implementation(Libraries.material3WindowSizeClass)
@@ -157,7 +159,9 @@ dependencies {
     debugImplementation(Libraries.leakcanary)
 
     implementation(Libraries.hilt)
+    implementation(Libraries.hiltWork)
     kapt(AnnotationProcessors.hiltCompiler)
+    kapt(AnnotationProcessors.hiltCompilerWork)
 
     implementation(Libraries.timber)
 
