@@ -75,7 +75,8 @@ class CollectionViewModel @Inject constructor(
                             CollectionUi(
                                 songs = it.songs,
                                 topBarTitle = it.playlist.playlistName,
-                                topBarBackgroundImageUri = it.songs.randomOrNull()?.artUri ?: ""
+                                topBarBackgroundImageUri = it.playlist.artUri ?:
+                                    it.songs.randomOrNull()?.artUri ?: ""
                             )
                         }
                     }
