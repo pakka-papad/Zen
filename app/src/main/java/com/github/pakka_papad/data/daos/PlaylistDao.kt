@@ -11,11 +11,14 @@ interface PlaylistDao {
     @Insert(entity = Playlist::class)
     suspend fun insertPlaylist(playlist: PlaylistExceptId): Long
 
-//    @Delete(entity = Playlist::class)
-//    suspend fun deletePlaylist(playlist: Playlist)
+    @Update(entity = Playlist::class)
+    suspend fun updatePlaylist(playlist: Playlist)
 
     @Query("DELETE FROM ${Constants.Tables.PLAYLIST_TABLE} WHERE playlistId = :playlistId")
     suspend fun deletePlaylist(playlistId: Long)
+
+    @Query("SELECT * FROM ${Constants.Tables.PLAYLIST_TABLE} WHERE playlistId = :playlistId")
+    suspend fun getPlaylist(playlistId: Long): Playlist?
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertPlaylistSongCrossRef(playlistSongCrossRefs: List<PlaylistSongCrossRef>)

@@ -15,6 +15,7 @@ object Constants {
         const val BLACKLIST_TABLE = "blacklist_table" // for songs
         const val BLACKLISTED_FOLDER_TABLE = "blacklisted_folder_table"
         const val PLAY_HISTORY_TABLE = "play_history_table"
+        const val THUMBNAIL_TABLE = "thumbnail_table"
     }
     const val PACKAGE_NAME = BuildConfig.APPLICATION_ID
     const val MESSAGE_DURATION = 3500L

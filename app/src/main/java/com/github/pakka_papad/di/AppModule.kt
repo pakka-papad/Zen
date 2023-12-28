@@ -168,6 +168,7 @@ object AppModule {
     ): PlaylistService {
         return PlaylistServiceImpl(
             playlistDao = db.playlistDao(),
+            thumbnailDao = db.thumbnailDao(),
         )
     }
 
@@ -263,9 +264,11 @@ object AppModule {
     @Provides
     fun providesThumbnailService(
         @ApplicationContext context: Context,
+        db: AppDatabase
     ): ThumbnailService {
         return ThumbnailServiceImpl(
             context = context,
+            thumbnailDao = db.thumbnailDao(),
         )
     }
 }

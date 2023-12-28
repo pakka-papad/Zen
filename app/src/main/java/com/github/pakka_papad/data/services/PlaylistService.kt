@@ -1,10 +1,12 @@
 package com.github.pakka_papad.data.services
 
 import com.github.pakka_papad.data.daos.PlaylistDao
+import com.github.pakka_papad.data.music.Playlist
 import com.github.pakka_papad.data.music.PlaylistExceptId
 import com.github.pakka_papad.data.music.PlaylistSongCrossRef
 import com.github.pakka_papad.data.music.PlaylistWithSongCount
 import com.github.pakka_papad.data.music.PlaylistWithSongs
+import com.github.pakka_papad.data.thumbnails.ThumbnailDao
 import kotlinx.coroutines.flow.Flow
 
 interface PlaylistService {
@@ -14,13 +16,15 @@ interface PlaylistService {
 
     suspend fun createPlaylist(name: String): Boolean
     suspend fun deletePlaylist(playlistId: Long)
+    suspend fun updatePlaylist(updatedPlaylist: Playlist)
 
     suspend fun addSongsToPlaylist(songLocations: List<String>, playlistId: Long)
     suspend fun removeSongsFromPlaylist(songLocations: List<String>, playlistId: Long)
 }
 
 class PlaylistServiceImpl(
-    private val playlistDao: PlaylistDao
+    private val playlistDao: PlaylistDao,
+    private val thumbnailDao: ThumbnailDao,
 ): PlaylistService {
     override val playlists: Flow<List<PlaylistWithSongCount>>
         = playlistDao.getAllPlaylistWithSongCount()
@@ -40,7 +44,14 @@ class PlaylistServiceImpl(
     }
 
     override suspend fun deletePlaylist(playlistId: Long) {
+        val playlist = playlistDao.getPlaylist(playlistId)
         playlistDao.deletePlaylist(playlistId)
+        if (playlist?.artUri == null) return
+        thumbnailDao.markDelete(playlist.artUri)
+    }
+
+    override suspend fun updatePlaylist(updatedPlaylist: Playlist) {
+        playlistDao.updatePlaylist(updatedPlaylist)
     }
 
     override suspend fun addSongsToPlaylist(songLocations: List<String>, playlistId: Long) {

@@ -8,14 +8,23 @@ import android.graphics.Matrix
 import android.graphics.Paint
 import androidx.core.graphics.scale
 import androidx.core.net.toUri
+import com.github.pakka_papad.data.thumbnails.Thumbnail
+import com.github.pakka_papad.data.thumbnails.ThumbnailDao
+import com.github.pakka_papad.data.thumbnails.ThumbnailWithoutId
 import java.io.File
 
 interface ThumbnailService {
-    fun createThumbnail(imageUris: List<String?>): String?
+    fun createThumbnailImage(imageUris: List<String?>): String?
+
+    suspend fun insert(thumbnail: ThumbnailWithoutId)
+    suspend fun getThumbnailByPath(location: String): Thumbnail?
+    suspend fun deleteThumbnail(thumbnail: Thumbnail)
+    suspend fun markDelete(location: String)
 }
 
 class ThumbnailServiceImpl(
     private val context: Context,
+    private val thumbnailDao: ThumbnailDao,
 ): ThumbnailService {
 
     companion object {
@@ -25,7 +34,26 @@ class ThumbnailServiceImpl(
         private const val THUMBNAIL_DIR = "thumbnails"
     }
 
-    override fun createThumbnail(imageUris: List<String?>): String? {
+    override suspend fun insert(thumbnail: ThumbnailWithoutId) {
+        thumbnailDao.insert(thumbnail)
+    }
+
+    override suspend fun getThumbnailByPath(location: String): Thumbnail? {
+        return thumbnailDao.getThumbnail(location)
+    }
+
+    override suspend fun deleteThumbnail(thumbnail: Thumbnail) {
+        thumbnailDao.delete(thumbnail)
+        val file = File(thumbnail.location)
+        if (!file.exists()) return
+        file.delete()
+    }
+
+    override suspend fun markDelete(location: String) {
+        thumbnailDao.markDelete(location)
+    }
+
+    override fun createThumbnailImage(imageUris: List<String?>): String? {
         val options = BitmapFactory.Options().apply {
             outHeight = 200
             outWidth = 200
