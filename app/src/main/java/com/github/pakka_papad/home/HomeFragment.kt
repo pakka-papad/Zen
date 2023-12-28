@@ -154,7 +154,7 @@ class HomeFragment : Fragment() {
                     val allPersonsListState = rememberLazyListState()
 
                     val playlistsWithSongCount by viewModel.playlistsWithSongCount.collectAsStateWithLifecycle()
-                    val allPlaylistsListState = rememberLazyListState()
+                    val allPlaylistsListState = rememberLazyGridState()
 
                     val genresWithSongCount by viewModel.genresWithSongCount.collectAsStateWithLifecycle()
                     val allGenresListState = rememberLazyListState()
