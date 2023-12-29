@@ -10,13 +10,12 @@ import androidx.core.graphics.scale
 import androidx.core.net.toUri
 import com.github.pakka_papad.data.thumbnails.Thumbnail
 import com.github.pakka_papad.data.thumbnails.ThumbnailDao
-import com.github.pakka_papad.data.thumbnails.ThumbnailWithoutId
 import java.io.File
 
 interface ThumbnailService {
     fun createThumbnailImage(imageUris: List<String?>): String?
 
-    suspend fun insert(thumbnail: ThumbnailWithoutId)
+    suspend fun insert(thumbnail: Thumbnail)
     suspend fun getThumbnailByPath(location: String): Thumbnail?
     suspend fun deleteThumbnail(thumbnail: Thumbnail)
     suspend fun markDelete(location: String)
@@ -34,7 +33,7 @@ class ThumbnailServiceImpl(
         private const val THUMBNAIL_DIR = "thumbnails"
     }
 
-    override suspend fun insert(thumbnail: ThumbnailWithoutId) {
+    override suspend fun insert(thumbnail: Thumbnail) {
         thumbnailDao.insert(thumbnail)
     }
 

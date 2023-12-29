@@ -12,16 +12,8 @@ import com.github.pakka_papad.Constants
     ]
 )
 data class Thumbnail(
-    @PrimaryKey(autoGenerate = true) val id: Long,
-    val location: String,
-    val lastUpdatedOn: Long,
-    val artCount: Int,
-    val deleteThis: Boolean,
-)
-
-data class ThumbnailWithoutId(
-    val location: String,
-    val lastUpdatedOn: Long,
+    @PrimaryKey val location: String,
+    val addedOn: Long,
     val artCount: Int,
     val deleteThis: Boolean,
 )

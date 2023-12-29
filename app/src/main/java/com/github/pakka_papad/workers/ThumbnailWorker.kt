@@ -9,7 +9,6 @@ import com.github.pakka_papad.data.music.PlaylistWithSongCount
 import com.github.pakka_papad.data.services.PlaylistService
 import com.github.pakka_papad.data.services.ThumbnailService
 import com.github.pakka_papad.data.thumbnails.Thumbnail
-import com.github.pakka_papad.data.thumbnails.ThumbnailWithoutId
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Job
@@ -40,7 +39,7 @@ class ThumbnailWorker @AssistedInject constructor(
     ): Boolean {
         return ( thumbnail != null &&
                 (thumbnail.artCount >= 9 || thumbnail.artCount == playlist.count) &&
-                thumbnail.lastUpdatedOn + sevenDays >= System.currentTimeMillis()
+                thumbnail.addedOn + sevenDays >= System.currentTimeMillis()
             )
     }
 
@@ -58,9 +57,9 @@ class ThumbnailWorker @AssistedInject constructor(
                     .first()?.songs ?: return@launch
                 val uri = thumbnailService
                     .createThumbnailImage(songs.map { it.artUri }) ?: return@launch
-                val newThumbnail = ThumbnailWithoutId(
+                val newThumbnail = Thumbnail(
                     location = uri,
-                    lastUpdatedOn = System.currentTimeMillis(),
+                    addedOn = System.currentTimeMillis(),
                     artCount = minOf(9, songs.size),
                     deleteThis = false
                 )

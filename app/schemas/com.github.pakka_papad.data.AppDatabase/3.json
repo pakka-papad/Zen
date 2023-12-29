@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "45d1b59c91bd360363fdae276556537a",
+    "identityHash": "4b1dcc01f92eb411ad3d2e6217a07b2f",
     "entities": [
       {
         "tableName": "song_table",
@@ -624,14 +624,8 @@
       },
       {
         "tableName": "thumbnail_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `location` TEXT NOT NULL, `lastUpdatedOn` INTEGER NOT NULL, `artCount` INTEGER NOT NULL, `deleteThis` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`location` TEXT NOT NULL, `addedOn` INTEGER NOT NULL, `artCount` INTEGER NOT NULL, `deleteThis` INTEGER NOT NULL, PRIMARY KEY(`location`))",
         "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
           {
             "fieldPath": "location",
             "columnName": "location",
@@ -639,8 +633,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "lastUpdatedOn",
-            "columnName": "lastUpdatedOn",
+            "fieldPath": "addedOn",
+            "columnName": "addedOn",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -658,9 +652,9 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": true,
+          "autoGenerate": false,
           "columnNames": [
-            "id"
+            "location"
           ]
         },
         "indices": [
@@ -680,7 +674,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '45d1b59c91bd360363fdae276556537a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4b1dcc01f92eb411ad3d2e6217a07b2f')"
     ]
   }
 }

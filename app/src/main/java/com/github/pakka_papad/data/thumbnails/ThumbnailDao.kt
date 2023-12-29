@@ -11,7 +11,7 @@ import com.github.pakka_papad.Constants
 interface ThumbnailDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE, entity = Thumbnail::class)
-    suspend fun insert(thumbnail: ThumbnailWithoutId)
+    suspend fun insert(thumbnail: Thumbnail)
 
     @Query("SELECT * FROM ${Constants.Tables.THUMBNAIL_TABLE} WHERE location = :location")
     suspend fun getThumbnail(location: String): Thumbnail?
