@@ -20,7 +20,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -29,25 +29,24 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import blend.Blend
 import com.github.pakka_papad.R
 import com.github.pakka_papad.components.PlaylistCardV2
 import com.github.pakka_papad.components.more_options.PlaylistOptions
 import com.github.pakka_papad.data.music.PlaylistWithSongCount
+import com.github.pakka_papad.ui.theme.harmonize
 
 @Composable
 fun Playlists(
@@ -97,13 +96,6 @@ fun Playlists(
 private fun FavouritesCard(
     onFavouritesClicked: () -> Unit
 ) {
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val containerColor by remember(primaryColor) {
-        derivedStateOf {
-            val res = Blend.harmonize(Color.Red.toArgb(), primaryColor.toArgb())
-            Color(res)
-        }
-    }
     Column(
         modifier = Modifier
             .widthIn(max = 200.dp)
@@ -116,10 +108,13 @@ private fun FavouritesCard(
                 .aspectRatio(ratio = 1f, matchHeightConstraintsFirst = false)
                 .fillMaxWidth()
                 .clip(MaterialTheme.shapes.medium)
-                .background(containerColor)
-                .padding(50.dp),
-            imageVector = Icons.Outlined.Favorite,
-            contentDescription = stringResource(R.string.favourite_button)
+                .background(Brush.linearGradient(
+                    colors = listOf(harmonize(Color(0xFFE90064)), harmonize(Color(0xFFFF89B8)))
+                ))
+                .padding(45.dp),
+            imageVector = Icons.Outlined.FavoriteBorder,
+            contentDescription = stringResource(R.string.favourite_button),
+            tint = MaterialTheme.colorScheme.onPrimary
         )
         Text(
             text = stringResource(R.string.favourites),
@@ -151,9 +146,12 @@ fun CreatePlaylistCard(
                 .aspectRatio(ratio = 1f, matchHeightConstraintsFirst = false)
                 .fillMaxWidth()
                 .clip(MaterialTheme.shapes.medium)
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .padding(50.dp),
-            contentDescription = stringResource(R.string.create_playlist_button)
+                .background(Brush.linearGradient(
+                    colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primaryContainer)
+                ))
+                .padding(45.dp),
+            contentDescription = stringResource(R.string.create_playlist_button),
+            tint = MaterialTheme.colorScheme.onPrimary,
         )
         Text(
             text = stringResource(R.string.new_playlist),

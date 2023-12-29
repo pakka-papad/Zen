@@ -1,15 +1,24 @@
 package com.github.pakka_papad.ui.theme
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import blend.Blend
 
 @Composable
 fun Colors(paddingValues: PaddingValues) {
@@ -63,4 +72,15 @@ fun ColorCard(
             text = colorType
         )
     }
+}
+
+@Composable
+fun harmonize(color: Color): Color {
+    val primary = MaterialTheme.colorScheme.primary
+    val res by remember(key1 = primary) { derivedStateOf {
+        Color(
+            Blend.harmonize(color.toArgb(), primary.toArgb())
+        )
+    } }
+    return res
 }
