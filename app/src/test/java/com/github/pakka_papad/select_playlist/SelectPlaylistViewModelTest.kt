@@ -49,6 +49,7 @@ class SelectPlaylistViewModelTest {
                         playlistName = "Playlist $it",
                         createdAt = 0L,
                         count = 1,
+                        artUri = "art$it"
                     )
                 )
             }
