@@ -19,6 +19,7 @@ interface ThumbnailService {
     suspend fun getThumbnailByPath(location: String): Thumbnail?
     suspend fun deleteThumbnail(thumbnail: Thumbnail)
     suspend fun markDelete(location: String)
+    suspend fun getPendingDeletions(): List<Thumbnail>
 }
 
 class ThumbnailServiceImpl(
@@ -50,6 +51,10 @@ class ThumbnailServiceImpl(
 
     override suspend fun markDelete(location: String) {
         thumbnailDao.markDelete(location)
+    }
+
+    override suspend fun getPendingDeletions(): List<Thumbnail> {
+        return thumbnailDao.getPendingDeletions()
     }
 
     override fun createThumbnailImage(imageUris: List<String?>): String? {

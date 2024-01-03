@@ -21,4 +21,7 @@ interface ThumbnailDao {
 
     @Query("UPDATE ${Constants.Tables.THUMBNAIL_TABLE} SET deleteThis = 1 WHERE location = :location")
     suspend fun markDelete(location: String)
+
+    @Query("SELECT * FROM ${Constants.Tables.THUMBNAIL_TABLE} WHERE deleteThis = 1")
+    suspend fun getPendingDeletions(): List<Thumbnail>
 }

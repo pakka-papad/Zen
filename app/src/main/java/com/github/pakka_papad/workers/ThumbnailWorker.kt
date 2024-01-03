@@ -28,6 +28,7 @@ class ThumbnailWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         createPlaylistThumbnails()
+        deletePlaylistThumbnails()
         return Result.success()
     }
 
@@ -81,4 +82,10 @@ class ThumbnailWorker @AssistedInject constructor(
         jobs.joinAll()
     }
 
+    private suspend fun deletePlaylistThumbnails() = coroutineScope {
+        thumbnailService.getPendingDeletions()
+            .forEach {
+                thumbnailService.deleteThumbnail(it)
+            }
+    }
 }
