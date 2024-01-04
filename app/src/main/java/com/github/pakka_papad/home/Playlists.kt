@@ -51,6 +51,7 @@ import com.github.pakka_papad.components.more_options.PlaylistOptions
 import com.github.pakka_papad.data.UserPreferences
 import com.github.pakka_papad.data.music.PlaylistWithSongCount
 import com.github.pakka_papad.ui.theme.LocalThemePreference
+import com.github.pakka_papad.ui.theme.harmonize
 import scheme.Scheme
 
 @Composable
@@ -127,7 +128,8 @@ private fun FavouritesCard(
                 .background(
                     Brush.linearGradient(
                         colors = listOf(
-                            Color(scheme.primary), Color(scheme.primaryContainer)
+                            harmonize(Color(scheme.primary)),
+                            harmonize(Color(scheme.primaryContainer))
                         )
                     )
                 )
@@ -166,9 +168,14 @@ fun CreatePlaylistCard(
                 .aspectRatio(ratio = 1f, matchHeightConstraintsFirst = false)
                 .fillMaxWidth()
                 .clip(MaterialTheme.shapes.medium)
-                .background(Brush.linearGradient(
-                    colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primaryContainer)
-                ))
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.primaryContainer
+                        )
+                    )
+                )
                 .padding(45.dp),
             contentDescription = stringResource(R.string.create_playlist_button),
             tint = MaterialTheme.colorScheme.onPrimary,
