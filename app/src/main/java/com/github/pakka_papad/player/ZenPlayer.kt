@@ -28,6 +28,7 @@ import com.github.pakka_papad.data.music.SongExtractor
 import com.github.pakka_papad.data.notification.ZenNotificationManager
 import com.github.pakka_papad.data.services.AnalyticsService
 import com.github.pakka_papad.data.services.QueueService
+import com.github.pakka_papad.data.services.SleepTimerService
 import com.github.pakka_papad.data.services.SongService
 import com.github.pakka_papad.toCorrectedParams
 import com.github.pakka_papad.toExoPlayerPlaybackParameters
@@ -50,29 +51,15 @@ import kotlin.time.Duration.Companion.seconds
 @UnstableApi @AndroidEntryPoint
 class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callback {
 
-    @Inject
-    lateinit var notificationManager: ZenNotificationManager
-
-    @Inject
-    lateinit var songExtractor: SongExtractor
-
-    @Inject
-    lateinit var queueService: QueueService
-
-    @Inject
-    lateinit var songService: SongService
-
-    @Inject
-    lateinit var analyticsService: AnalyticsService
-
-    @Inject
-    lateinit var exoPlayer: ExoPlayer
-
-    @Inject
-    lateinit var crashReporter: ZenCrashReporter
-
-    @Inject
-    lateinit var preferencesProvider: ZenPreferenceProvider
+    @Inject lateinit var notificationManager: ZenNotificationManager
+    @Inject lateinit var songExtractor: SongExtractor
+    @Inject lateinit var queueService: QueueService
+    @Inject lateinit var songService: SongService
+    @Inject lateinit var sleepTimerService: SleepTimerService
+    @Inject lateinit var analyticsService: AnalyticsService
+    @Inject lateinit var exoPlayer: ExoPlayer
+    @Inject lateinit var crashReporter: ZenCrashReporter
+    @Inject lateinit var preferencesProvider: ZenPreferenceProvider
 
     private var broadcastReceiver: ZenBroadcastReceiver? = null
 
@@ -88,7 +75,6 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
         val window = eventTime.timeline.getWindow(eventTime.windowIndex, Timeline.Window())
         try {
             window.mediaItem.localConfiguration?.tag?.let {
-//                dataManager.addPlayHistory(it as String, playbackStats.totalPlayTimeMs)
                 analyticsService.logSongPlay(it as String, playbackStats.totalPlayTimeMs)
             }
         } catch (_ : Exception){
@@ -144,7 +130,6 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
             crashReporter.logException(error)
             if (error.errorCode == PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND){
                 songExtractor.cleanData()
-//                showToast("Could not find the song ${dataManager.currentSong.value?.title ?: ""} at the specified path")
                 onBroadcastCancel()
             }
         }
@@ -188,7 +173,6 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
         broadcastReceiver = ZenBroadcastReceiver()
         mediaSession = MediaSessionCompat(this, MEDIA_SESSION)
         systemNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-//        dataManager.setPlayerRunning(this)
         isRunning.set(true)
         queueService.addListener(this)
         if (intent == null) Toast.makeText(this, "null intent", Toast.LENGTH_SHORT).show()
@@ -253,16 +237,16 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
     }
 
     private fun stopService() {
-        unregisterReceiver(broadcastReceiver)
+        isRunning.set(false)
+        queueService.clearQueue()
+        queueService.removeListener(this)
+        sleepTimerService.cancel()
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
         exoPlayer.removeListener(exoPlayerListener)
         exoPlayer.removeAnalyticsListener(playbackStatsListener)
+        unregisterReceiver(broadcastReceiver)
         mediaSession.release()
-//        dataManager.stopPlayerRunning()
-        isRunning.set(false)
-        queueService.clearQueue()
-        queueService.removeListener(this)
         broadcastReceiver?.stopListening()
         systemNotificationManager?.cancel(ZenNotificationManager.PLAYER_NOTIFICATION_ID)
         scope.cancel()
@@ -343,48 +327,6 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
             }
         }
     }
-
-//    @Synchronized
-//    override fun setQueue(newQueue: List<Song>, startPlayingFromIndex: Int) {
-//        scope.launch {
-//            val mediaItems = newQueue.map {
-//                MediaItem.Builder().apply {
-//                    setUri(Uri.fromFile(File(it.location)))
-//                    setTag(it.location)
-//                }.build()
-//            }
-//            withContext(Dispatchers.Main){
-//                exoPlayer.stop()
-//                exoPlayer.clearMediaItems()
-//                exoPlayer.addMediaItems(mediaItems)
-//                exoPlayer.prepare()
-//                exoPlayer.seekTo(startPlayingFromIndex,0)
-//                exoPlayer.repeatMode = dataManager.repeatMode.value.toExoPlayerRepeatMode()
-//                exoPlayer.playbackParameters = preferencesProvider.playbackParams.value
-//                    .toCorrectedParams()
-//                    .toExoPlayerPlaybackParameters()
-//                exoPlayer.play()
-//            }
-//            updateMediaSessionState()
-//            updateMediaSessionMetadata()
-//        }
-//    }
-//
-//    @Synchronized
-//    override fun addToQueue(song: Song) {
-//        exoPlayer.addMediaItem(
-//            MediaItem.Builder().apply {
-//                setUri(Uri.fromFile(File(song.location)))
-//                setTag(song.location)
-//            }.build()
-//        )
-//    }
-//
-//    @Synchronized
-//    override fun updateNotification() {
-//        updateMediaSessionState()
-//        updateMediaSessionMetadata()
-//    }
 
     private fun setQueue(mediaItems: List<MediaItem>, startPosition: Int){
         scope.launch {
