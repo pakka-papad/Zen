@@ -75,11 +75,10 @@ fun ColorCard(
 }
 
 @Composable
-fun harmonize(color: Color): Color {
-    val primary = MaterialTheme.colorScheme.primary
-    val res by remember(key1 = primary) { derivedStateOf {
+fun harmonize(from: Color, to: Color = MaterialTheme.colorScheme.primary): Color {
+    val res by remember(key1 = to) { derivedStateOf {
         Color(
-            Blend.harmonize(color.toArgb(), primary.toArgb())
+            Blend.harmonize(from.toArgb(), to.toArgb())
         )
     } }
     return res

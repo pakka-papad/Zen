@@ -6,7 +6,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.github.pakka_papad.data.UserPreferences
@@ -58,6 +60,12 @@ fun ZenTheme(
     MaterialTheme(
         colorScheme = colourScheme,
         typography = ZenTypography,
-        content = content
+        content = {
+            CompositionLocalProvider(LocalThemePreference provides themePreference) {
+                content()
+            }
+        }
     )
 }
+
+val LocalThemePreference = compositionLocalOf { ThemePreference() }

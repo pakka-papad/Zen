@@ -3,6 +3,7 @@ package com.github.pakka_papad.home
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -29,6 +30,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -45,8 +48,10 @@ import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.R
 import com.github.pakka_papad.components.PlaylistCardV2
 import com.github.pakka_papad.components.more_options.PlaylistOptions
+import com.github.pakka_papad.data.UserPreferences
 import com.github.pakka_papad.data.music.PlaylistWithSongCount
-import com.github.pakka_papad.ui.theme.harmonize
+import com.github.pakka_papad.ui.theme.LocalThemePreference
+import scheme.Scheme
 
 @Composable
 fun Playlists(
@@ -96,6 +101,17 @@ fun Playlists(
 private fun FavouritesCard(
     onFavouritesClicked: () -> Unit
 ) {
+    val themePreference = LocalThemePreference.current
+    val isSystemDark = isSystemInDarkTheme()
+    val scheme by remember(themePreference) { derivedStateOf {
+        val isDark = when(themePreference.theme){
+            UserPreferences.Theme.LIGHT_MODE, UserPreferences.Theme.UNRECOGNIZED -> false
+            UserPreferences.Theme.DARK_MODE -> true
+            UserPreferences.Theme.USE_SYSTEM_MODE -> isSystemDark
+        }
+        if (isDark) Scheme.dark(Color(0xFFE90064).toArgb())
+        else Scheme.light(Color(0xFFE90064).toArgb())
+    } }
     Column(
         modifier = Modifier
             .widthIn(max = 200.dp)
@@ -108,13 +124,17 @@ private fun FavouritesCard(
                 .aspectRatio(ratio = 1f, matchHeightConstraintsFirst = false)
                 .fillMaxWidth()
                 .clip(MaterialTheme.shapes.medium)
-                .background(Brush.linearGradient(
-                    colors = listOf(harmonize(Color(0xFFE90064)), harmonize(Color(0xFFFF89B8)))
-                ))
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            Color(scheme.primary), Color(scheme.primaryContainer)
+                        )
+                    )
+                )
                 .padding(45.dp),
             imageVector = Icons.Outlined.FavoriteBorder,
             contentDescription = stringResource(R.string.favourite_button),
-            tint = MaterialTheme.colorScheme.onPrimary
+            tint = Color(scheme.onPrimary)
         )
         Text(
             text = stringResource(R.string.favourites),
