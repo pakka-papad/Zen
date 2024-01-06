@@ -22,6 +22,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import com.github.pakka_papad.R
+import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.toMS
 import kotlinx.coroutines.delay
 
@@ -30,6 +31,7 @@ fun MusicSlider(
     modifier: Modifier,
     playerHelper: PlayerHelper,
     currentSongPlaying: Boolean?,
+    song: Song, // to update slider when song is changed in paused state
     duration: Long,
 ) {
     var currentValue by remember { mutableStateOf(playerHelper.currentPosition.toLong()) }
@@ -53,6 +55,8 @@ fun MusicSlider(
                 delay(33)
             }
         }
+    } else {
+        currentValue = playerHelper.currentPosition.toLong()
     }
     val primaryColor = MaterialTheme.colorScheme.primary
     Column(

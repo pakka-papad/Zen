@@ -273,6 +273,7 @@ private fun InfoAndControls(
             playerHelper = playerHelper,
             currentSongPlaying = currentSongPlaying,
             duration = song.durationMillis,
+            song = song,
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
