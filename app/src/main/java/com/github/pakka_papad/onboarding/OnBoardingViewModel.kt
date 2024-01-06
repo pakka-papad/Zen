@@ -1,10 +1,9 @@
 package com.github.pakka_papad.onboarding
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.music.ScanStatus
+import com.github.pakka_papad.data.music.SongExtractor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -12,11 +11,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class OnBoardingViewModel @Inject constructor(
-    private val context: Application,
-    private val manager: DataManager,
+    private val songExtractor: SongExtractor,
 ) : ViewModel() {
 
-    val scanStatus = manager.scanStatus
+    val scanStatus = songExtractor.scanStatus
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(
@@ -27,7 +25,7 @@ class OnBoardingViewModel @Inject constructor(
         )
 
     fun scanForMusic() {
-        manager.scanForMusic()
+        songExtractor.scanForMusic()
     }
 
 }

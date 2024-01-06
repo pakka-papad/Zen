@@ -1,6 +1,6 @@
 object Versions {
     const val kotlin = "1.8.0"
-    const val coroutines = "1.6.1"
+    const val coroutines = "1.7.1"
 
     const val androidxComposeUi = "1.3.3"
     const val androidxComposeCompiler = "1.4.1"
@@ -14,6 +14,7 @@ object Versions {
     const val androidxComposeConstraintLayout = "1.0.1"
     const val androidxSplashScreen = "1.0.0-beta02"
     const val androidxGlance = "1.0.0-beta01"
+    const val androidxWorkManager = "2.8.1"
 
     const val appCompat = "1.4.2"
     const val navigation = "2.5.3"
@@ -34,6 +35,7 @@ object Versions {
     const val leakcanary = "2.9.1"
 
     const val hilt = "2.38.1"
+    const val hiltWork = "1.0.0"
 
     const val timber = "5.0.1"
 
@@ -43,6 +45,11 @@ object Versions {
     const val coilCompose = "2.2.2"
     const val palette = "1.0.0"
     const val lottie = "5.2.0"
+
+    const val crashActivity = "2.4.0"
+
+    const val androidxTest = "1.5.0"
+    const val mockk = "1.13.8"
 }
 
 object Plugins {
@@ -54,6 +61,8 @@ object Plugins {
 }
 
 object Libraries {
+    const val coroutinesTest = "org.jetbrains.kotlinx:kotlinx-coroutines-test:${Versions.coroutines}"
+
     const val androidxCore = "androidx.core:core-ktx:${Versions.androidxCore}"
 
     const val androidxLifecycle = "androidx.lifecycle:lifecycle-runtime-ktx:${Versions.androidxLifecycle}"
@@ -72,6 +81,7 @@ object Libraries {
     const val androidxGlanceAppWidget = "androidx.glance:glance-appwidget:${Versions.androidxGlance}"
     const val androidxGlanceMaterial = "androidx.glance:glance-material:${Versions.androidxGlance}"
     const val androidxGlanceMaterial3 = "androidx.glance:glance-material3:${Versions.androidxGlance}"
+    const val androidxWorkManager = "androidx.work:work-runtime-ktx:${Versions.androidxWorkManager}"
 
     const val roomRuntime = "androidx.room:room-runtime:${Versions.room}"
     const val roomKtx = "androidx.room:room-ktx:${Versions.room}"
@@ -102,6 +112,7 @@ object Libraries {
     const val leakcanary = "com.squareup.leakcanary:leakcanary-android:${Versions.leakcanary}"
 
     const val hilt = "com.google.dagger:hilt-android:${Versions.hilt}"
+    const val hiltWork = "androidx.hilt:hilt-work:${Versions.hiltWork}"
 
     const val timber = "com.jakewharton.timber:timber:${Versions.timber}"
 
@@ -113,6 +124,11 @@ object Libraries {
     const val coilCompose = "io.coil-kt:coil-compose:${Versions.coilCompose}"
     const val palette = "androidx.palette:palette-ktx:${Versions.palette}"
     const val lottie = "com.airbnb.android:lottie-compose:${Versions.lottie}"
+
+    const val crashActivity = "cat.ereza:customactivityoncrash:${Versions.crashActivity}"
+
+    const val androidxTestKtx = "androidx.test:core-ktx:${Versions.androidxTest}"
+    const val mockk = "io.mockk:mockk:${Versions.mockk}"
 }
 
 object Api {
@@ -123,13 +139,14 @@ object Api {
 
 object AnnotationProcessors {
     const val hiltCompiler = "com.google.dagger:hilt-android-compiler:${Versions.hilt}"
+    const val hiltCompilerWork = "androidx.hilt:hilt-compiler:${Versions.hiltWork}"
     const val roomCompiler = "androidx.room:room-compiler:${Versions.room}"
 }
 
 object AppVersion {
     private const val Major = 1
     private const val Minor = 2
-    private const val Patch = 1
+    private const val Patch = 2
     const val Code = Major*10000 + Minor*100 + Patch
     const val Name = "$Major.$Minor.$Patch"
 }

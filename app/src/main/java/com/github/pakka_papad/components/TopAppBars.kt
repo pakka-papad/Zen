@@ -15,9 +15,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.github.pakka_papad.R
 
 @Composable
 private fun BaseTopBar(
@@ -106,7 +108,7 @@ fun SmallTopBar(
                 )
             },
             actions = actions,
-            colors = TopAppBarDefaults.smallTopAppBarColors(
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = backgroundColor
             )
         )
@@ -126,7 +128,7 @@ fun TopBarWithBackArrow(
     leadingIcon = {
         Icon(
             imageVector = Icons.Outlined.ArrowBack,
-            contentDescription = null,
+            contentDescription = stringResource(R.string.back_button),
             modifier = Modifier
                 .padding(16.dp)
                 .size(30.dp)
@@ -157,12 +159,12 @@ fun CancelConfirmTopBar(
     leadingIcon = {
         Icon(
             imageVector = Icons.Outlined.Close,
-            contentDescription = null,
+            contentDescription = stringResource(R.string.close_button),
             modifier = Modifier
                 .padding(16.dp)
                 .size(30.dp)
                 .clickable(
-                    interactionSource = remember{ MutableInteractionSource() },
+                    interactionSource = remember { MutableInteractionSource() },
                     indication = rememberRipple(
                         bounded = false,
                         radius = 25.dp,
@@ -176,12 +178,12 @@ fun CancelConfirmTopBar(
     actions = {
         Icon(
             imageVector = Icons.Outlined.Check,
-            contentDescription = null,
+            contentDescription = stringResource(R.string.check_button),
             modifier = Modifier
                 .padding(16.dp)
                 .size(30.dp)
                 .clickable(
-                    interactionSource = remember{ MutableInteractionSource() },
+                    interactionSource = remember { MutableInteractionSource() },
                     indication = rememberRipple(
                         bounded = false,
                         radius = 25.dp,

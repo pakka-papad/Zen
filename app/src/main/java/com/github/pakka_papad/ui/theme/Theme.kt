@@ -6,31 +6,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.github.pakka_papad.data.UserPreferences
-import com.github.pakka_papad.ui.accent_colours.default.DefaultDarkColors
-import com.github.pakka_papad.ui.accent_colours.default.DefaultLightColors
 import com.google.accompanist.systemuicontroller.SystemUiController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 
 @Composable
 fun DefaultTheme(content: @Composable () -> Unit) {
-    val isSystemInDarkTheme = isSystemInDarkTheme()
-    val systemUiController = rememberSystemUiController()
-    DisposableEffect(key1 = isSystemInDarkTheme) {
-        systemUiController.setSystemBarsColor(
-            color = Color.Transparent,
-            darkIcons = !isSystemInDarkTheme
-        )
-        onDispose { }
-    }
-    MaterialTheme(
-        colorScheme = if (isSystemInDarkTheme) DefaultDarkColors else DefaultLightColors,
-        typography = ZenTypography,
-        content = content
+    ZenTheme(
+        themePreference = ThemePreference(
+            useMaterialYou = true,
+            theme = UserPreferences.Theme.USE_SYSTEM_MODE,
+            accent = UserPreferences.Accent.Elm,
+        ),
+        content = content,
     )
 }
 
@@ -66,6 +60,12 @@ fun ZenTheme(
     MaterialTheme(
         colorScheme = colourScheme,
         typography = ZenTypography,
-        content = content
+        content = {
+            CompositionLocalProvider(LocalThemePreference provides themePreference) {
+                content()
+            }
+        }
     )
 }
+
+val LocalThemePreference = compositionLocalOf { ThemePreference() }

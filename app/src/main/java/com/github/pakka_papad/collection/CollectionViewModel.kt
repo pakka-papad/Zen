@@ -1,16 +1,20 @@
 package com.github.pakka_papad.collection
 
-import android.app.Application
-import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.pakka_papad.Constants
+import com.github.pakka_papad.R
 import com.github.pakka_papad.components.SortOptions
-import com.github.pakka_papad.data.DataManager
-import com.github.pakka_papad.data.music.PlaylistSongCrossRef
 import com.github.pakka_papad.data.music.Song
+import com.github.pakka_papad.data.services.PlayerService
+import com.github.pakka_papad.data.services.PlaylistService
+import com.github.pakka_papad.data.services.QueueService
+import com.github.pakka_papad.data.services.SongService
+import com.github.pakka_papad.util.MessageStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -18,24 +22,30 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CollectionViewModel @Inject constructor(
-    private val context: Application,
-    private val manager: DataManager,
+    private val messageStore: MessageStore,
+    private val playlistService: PlaylistService,
+    private val songService: SongService,
+    private val playerService: PlayerService,
+    private val queueService: QueueService,
 ) : ViewModel() {
 
-    val currentSong = manager.currentSong
-    val queue = manager.queue
+    val currentSong = queueService.currentSong
+    private val queue = queueService.queue
 
     private val _collectionType = MutableStateFlow<CollectionType?>(null)
 
     private val _chosenSortOrder = MutableStateFlow(SortOptions.Default.ordinal)
     val chosenSortOrder = _chosenSortOrder.asStateFlow()
 
+    private val _message = MutableStateFlow("")
+    val message = _message.asStateFlow()
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val collectionUi = _collectionType
         .flatMapLatest { type ->
             when (type?.type) {
                 CollectionType.AlbumType -> {
-                    manager.findCollection.getAlbumWithSongsByName(type.id).map {
+                    songService.getAlbumWithSongsByName(type.id).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
@@ -47,7 +57,7 @@ class CollectionViewModel @Inject constructor(
                     }
                 }
                 CollectionType.ArtistType -> {
-                    manager.findCollection.getArtistWithSongsByName(type.id).map {
+                    songService.getArtistWithSongsByName(type.id).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
@@ -59,19 +69,20 @@ class CollectionViewModel @Inject constructor(
                     }
                 }
                 CollectionType.PlaylistType -> {
-                    manager.findCollection.getPlaylistWithSongsById(type.id.toLong()).map {
+                    playlistService.getPlaylistWithSongsById(type.id.toLong()).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
                                 songs = it.songs,
                                 topBarTitle = it.playlist.playlistName,
-                                topBarBackgroundImageUri = it.songs.randomOrNull()?.artUri ?: ""
+                                topBarBackgroundImageUri = it.playlist.artUri ?:
+                                    it.songs.randomOrNull()?.artUri ?: ""
                             )
                         }
                     }
                 }
                 CollectionType.AlbumArtistType -> {
-                    manager.findCollection.getAlbumArtistWithSings(type.id).map {
+                    songService.getAlbumArtistWithSongsByName(type.id).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
@@ -83,7 +94,7 @@ class CollectionViewModel @Inject constructor(
                     }
                 }
                 CollectionType.ComposerType -> {
-                    manager.findCollection.getComposerWithSongs(type.id).map {
+                    songService.getComposerWithSongsByName(type.id).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
@@ -95,7 +106,7 @@ class CollectionViewModel @Inject constructor(
                     }
                 }
                 CollectionType.LyricistType -> {
-                    manager.findCollection.getLyricistWithSongs(type.id).map {
+                    songService.getLyricistWithSongsByName(type.id).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
@@ -107,7 +118,7 @@ class CollectionViewModel @Inject constructor(
                     }
                 }
                 CollectionType.GenreType -> {
-                    manager.findCollection.getGenreWithSongs(type.id).map {
+                    songService.getGenreWithSongsByName(type.id).map {
                         if (it == null) CollectionUi()
                         else {
                             CollectionUi(
@@ -119,7 +130,7 @@ class CollectionViewModel @Inject constructor(
                     }
                 }
                 CollectionType.FavouritesType -> {
-                    manager.findCollection.getFavourites().map {
+                    songService.getFavouriteSongs().map {
                         CollectionUi(
                             songs = it,
                             topBarTitle = "Favourites",
@@ -167,34 +178,31 @@ class CollectionViewModel @Inject constructor(
 
     fun setQueue(songs: List<Song>?, startPlayingFromIndex: Int = 0) {
         if (songs == null) return
-        manager.setQueue(songs, startPlayingFromIndex)
-        Toast.makeText(context,"Playing",Toast.LENGTH_SHORT).show()
+        queueService.setQueue(songs, startPlayingFromIndex)
+        playerService.startServiceIfNotRunning(songs, startPlayingFromIndex)
+        showMessage(messageStore.getString(R.string.playing))
     }
 
     fun addToQueue(song: Song) {
         if (queue.isEmpty()) {
-            manager.setQueue(listOf(song), 0)
+            queueService.setQueue(listOf(song), 0)
+            playerService.startServiceIfNotRunning(listOf(song), 0)
         } else {
-            val result = manager.addToQueue(song)
-            Toast.makeText(
-                context,
-                if (result) "Added ${song.title} to queue" else "Song already in queue",
-                Toast.LENGTH_SHORT
-            ).show()
+            val result = queueService.append(song)
+            showMessage(
+                if (result) messageStore.getString(R.string.added_to_queue, song.title)
+                else messageStore.getString(R.string.song_already_in_queue)
+            )
         }
     }
 
     fun addToQueue(songs: List<Song>) {
         if (queue.isEmpty()) {
-            manager.setQueue(songs, 0)
+            queueService.setQueue(songs, 0)
+            playerService.startServiceIfNotRunning(songs, 0)
         } else {
-            var result = false
-            songs.forEach { result = result or manager.addToQueue(it) }
-            Toast.makeText(
-                context,
-                if (result) "Done" else "Song already in queue",
-                Toast.LENGTH_SHORT
-            ).show()
+            val result = queueService.append(songs)
+            showMessage(messageStore.getString(if (result) R.string.done else R.string.song_already_in_queue))
         }
     }
 
@@ -202,7 +210,8 @@ class CollectionViewModel @Inject constructor(
         if (song == null) return
         val updatedSong = song.copy(favourite = !song.favourite)
         viewModelScope.launch(Dispatchers.IO) {
-            manager.updateSong(updatedSong)
+            queueService.update(updatedSong)
+            songService.updateSong(updatedSong)
         }
     }
 
@@ -210,12 +219,11 @@ class CollectionViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val playlistId = _collectionType.value?.id?.toLong() ?: throw IllegalArgumentException()
-                val playlistSongCrossRef = PlaylistSongCrossRef(playlistId,song.location)
-                manager.deletePlaylistSongCrossRef(playlistSongCrossRef)
-                Toast.makeText(context,"Removed",Toast.LENGTH_SHORT).show()
+                playlistService.removeSongsFromPlaylist(listOf(song.location), playlistId)
+                showMessage(messageStore.getString(R.string.done))
             } catch (e: Exception){
                 Timber.e(e)
-                Toast.makeText(context,"Some error occurred",Toast.LENGTH_SHORT).show()
+                showMessage(messageStore.getString(R.string.some_error_occurred))
             }
         }
     }
@@ -224,4 +232,11 @@ class CollectionViewModel @Inject constructor(
         _chosenSortOrder.update { order }
     }
 
+    private fun showMessage(message: String){
+        viewModelScope.launch {
+            _message.update { message }
+            delay(Constants.MESSAGE_DURATION)
+            _message.update { "" }
+        }
+    }
 }

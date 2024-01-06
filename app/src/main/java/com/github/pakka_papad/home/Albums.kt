@@ -12,9 +12,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.github.pakka_papad.R
 import com.github.pakka_papad.components.FullScreenSadMessage
 import com.github.pakka_papad.data.music.Album
 
@@ -27,7 +29,7 @@ fun Albums(
     if (albums == null) return
     if (albums.isEmpty()) {
         FullScreenSadMessage(
-            message = "Oops! No albums found",
+            message = stringResource(R.string.oops_no_albums_found),
             paddingValues = WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues(),
         )
     } else {
@@ -66,7 +68,7 @@ fun AlbumCard(
     ) {
         AsyncImage(
             model = album.albumArtUri,
-            contentDescription = null,
+            contentDescription = stringResource(R.string.album_art),
             modifier = Modifier
                 .aspectRatio(ratio = 1f, matchHeightConstraintsFirst = false)
                 .fillMaxWidth()

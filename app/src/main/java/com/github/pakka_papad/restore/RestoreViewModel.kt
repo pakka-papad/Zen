@@ -1,11 +1,12 @@
 package com.github.pakka_papad.restore
 
-import android.app.Application
-import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.pakka_papad.data.DataManager
+import com.github.pakka_papad.R
+import com.github.pakka_papad.data.services.BlacklistService
+import com.github.pakka_papad.util.MessageStore
+import com.github.pakka_papad.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,19 +15,20 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.annotations.VisibleForTesting
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class RestoreViewModel @Inject constructor(
-    private val context: Application,
-    private val manager: DataManager
+    private val messageStore: MessageStore,
+    private val blacklistService: BlacklistService,
 ) : ViewModel() {
 
     private val _restoreList = mutableStateListOf<Boolean>()
     val restoreList : List<Boolean> = _restoreList
 
-    val blackListedSongs = manager.getAll.blacklistedSongs()
+    val blackListedSongs = blacklistService.blacklistedSongs
         .onEach {
             while (_restoreList.size < it.size) _restoreList.add(false)
             while (_restoreList.size > it.size) _restoreList.removeLast()
@@ -37,27 +39,29 @@ class RestoreViewModel @Inject constructor(
         )
 
     fun updateRestoreList(index: Int, isSelected: Boolean){
+        if (restoreState.value !is Resource.Idle) return
         if (index >= _restoreList.size) return
         _restoreList[index] = isSelected
     }
 
-    private val _restored = MutableStateFlow(false)
-    val restored = _restored.asStateFlow()
+    @VisibleForTesting
+    internal val _restoreState = MutableStateFlow<Resource<Unit>>(Resource.Idle())
+    val restoreState = _restoreState.asStateFlow()
 
     fun restoreSongs(){
+        if (restoreState.value !is Resource.Idle) return
         viewModelScope.launch {
+            _restoreState.update { Resource.Loading() }
             val blacklist = blackListedSongs.value
             val toRestore = _restoreList.indices
                 .filter { _restoreList[it] }
                 .map { blacklist[it] }
             try {
-                manager.removeFromBlacklist(toRestore)
-                Toast.makeText(context,"Rescan to see all the restored songs",Toast.LENGTH_SHORT).show()
+                blacklistService.whitelistSongs(toRestore)
+                _restoreState.update { Resource.Success(Unit) }
             } catch (e: Exception){
                 Timber.e(e)
-                Toast.makeText(context,"Some error occurred",Toast.LENGTH_SHORT).show()
-            } finally {
-                _restored.update { true }
+                _restoreState.update { Resource.Error(messageStore.getString(R.string.some_error_occurred)) }
             }
         }
     }

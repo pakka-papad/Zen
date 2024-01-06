@@ -1,17 +1,22 @@
 package com.github.pakka_papad.home
 
-import android.app.Application
-import android.widget.Toast
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import com.github.pakka_papad.Constants
+import com.github.pakka_papad.R
 import com.github.pakka_papad.components.SortOptions
-import com.github.pakka_papad.data.DataManager
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.*
+import com.github.pakka_papad.data.services.BlacklistService
+import com.github.pakka_papad.data.services.PlayerService
+import com.github.pakka_papad.data.services.PlaylistService
+import com.github.pakka_papad.data.services.QueueService
+import com.github.pakka_papad.data.services.SongService
 import com.github.pakka_papad.storage_explorer.*
-import com.github.pakka_papad.storage_explorer.Directory
+import com.github.pakka_papad.util.MessageStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -20,14 +25,18 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val context: Application,
-    private val manager: DataManager,
+    private val messageStore: MessageStore,
     private val exoPlayer: ExoPlayer,
     private val songExtractor: SongExtractor,
     private val prefs: ZenPreferenceProvider,
+    private val playlistService: PlaylistService,
+    private val blacklistService: BlacklistService,
+    private val songService: SongService,
+    private val queueService: QueueService,
+    private val playerService: PlayerService,
 ) : ViewModel() {
 
-    val songs = manager.getAll.songs()
+    val songs = songService.songs
         .combine(prefs.songSortOrder){ songs, sortOrder ->
             when(sortOrder){
                 SortOptions.TitleASC.ordinal -> songs.sortedBy { it.title }
@@ -50,7 +59,7 @@ class HomeViewModel @Inject constructor(
             initialValue = null
         )
 
-    val albums = manager.getAll.albums()
+    val albums = songService.albums
         .combine(prefs.albumSortOrder){ albums, sortOrder ->
             when(sortOrder){
                 SortOptions.TitleASC.ordinal -> albums.sortedBy { it.name }
@@ -76,10 +85,10 @@ class HomeViewModel @Inject constructor(
     val personsWithSongCount = _selectedPerson
         .flatMapLatest {
             when (it) {
-                Person.Artist -> manager.getAll.artists()
-                Person.AlbumArtist -> manager.getAll.albumArtists()
-                Person.Composer -> manager.getAll.composers()
-                Person.Lyricist -> manager.getAll.lyricists()
+                Person.Artist -> songService.artists
+                Person.AlbumArtist -> songService.albumArtists
+                Person.Composer -> songService.composers
+                Person.Lyricist -> songService.lyricists
             }
         }.combine(prefs.artistSortOrder){ artists, sortOrder ->
             when(sortOrder){
@@ -97,7 +106,7 @@ class HomeViewModel @Inject constructor(
             initialValue = null
         )
 
-    val playlistsWithSongCount = manager.getAll.playlists()
+    val playlistsWithSongCount = playlistService.playlists
         .combine(prefs.playlistSortOrder){ playlists, sortOrder ->
             when(sortOrder){
                 SortOptions.NameASC.ordinal -> playlists.sortedBy { it.playlistName }
@@ -114,7 +123,7 @@ class HomeViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    val genresWithSongCount = manager.getAll.genres()
+    val genresWithSongCount = songService.genres
         .combine(prefs.genreSortOrder){ genres, sortOrder ->
             when(sortOrder){
                 SortOptions.NameASC.ordinal -> genres.sortedBy { it.genreName }
@@ -135,18 +144,49 @@ class HomeViewModel @Inject constructor(
         prefs.updateSortOrder(screen, option)
     }
 
-    val currentSong = manager.currentSong
+    val currentSong = queueService.currentSong
 
-    val queue = manager.queue
+    val queue = mutableStateListOf<Song>()
 
-    val repeatMode = manager.repeatMode
+    val repeatMode = queueService.repeatMode
 
     fun toggleRepeatMode(){
-        manager.updateRepeatMode(repeatMode.value.next())
+        queueService.updateRepeatMode(repeatMode.value.next())
     }
 
     private val _currentSongPlaying = MutableStateFlow<Boolean?>(null)
     val currentSongPlaying = _currentSongPlaying.asStateFlow()
+
+    private val queueServiceListener = object : QueueService.Listener {
+        override fun onAppend(song: Song) {
+            queue.add(song)
+        }
+
+        override fun onAppend(songs: List<Song>) {
+            queue.addAll(songs)
+        }
+
+        override fun onUpdate(updatedSong: Song, position: Int) {
+            if (position < 0 || position >= queue.size) return
+            queue[position] = updatedSong
+        }
+
+        override fun onMove(from: Int, to: Int) {
+            if (from < 0 || to < 0 || from >= queue.size || to >= queue.size) return
+            queue.apply { add(to, removeAt(from)) }
+        }
+
+        override fun onClear() {
+            queue.clear()
+        }
+
+        override fun onSetQueue(songs: List<Song>, startPlayingFromPosition: Int) {
+            queue.apply {
+                clear()
+                addAll(songs)
+            }
+        }
+    }
 
     private val exoPlayerListener = object : Player.Listener {
         override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -158,16 +198,26 @@ class HomeViewModel @Inject constructor(
     init {
         _currentSongPlaying.update { exoPlayer.isPlaying }
         exoPlayer.addListener(exoPlayerListener)
+        queue.addAll(queueService.queue)
+        queueService.addListener(queueServiceListener)
     }
 
-    private fun showToast(message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    private val _message = MutableStateFlow("")
+    val message = _message.asStateFlow()
+
+    private fun showMessage(message: String){
+        viewModelScope.launch {
+            _message.update { message }
+            delay(Constants.MESSAGE_DURATION)
+            _message.update { "" }
+        }
     }
 
     override fun onCleared() {
         super.onCleared()
         exoPlayer.removeListener(exoPlayerListener)
         explorer.removeListener(directoryChangeListener)
+        queueService.removeListener(queueServiceListener)
     }
 
     /**
@@ -178,11 +228,11 @@ class HomeViewModel @Inject constructor(
     fun onSongBlacklist(song: Song) {
         viewModelScope.launch {
             try {
-                manager.deleteSong(song)
-                showToast("Done")
+                blacklistService.blacklistSongs(listOf(song))
+                showMessage(messageStore.getString(R.string.done))
             } catch (e: Exception) {
                 Timber.e(e)
-                showToast("Some error occurred")
+                showMessage(messageStore.getString(R.string.some_error_occurred))
             }
         }
     }
@@ -190,33 +240,28 @@ class HomeViewModel @Inject constructor(
     fun onFolderBlacklist(folder: Directory){
         viewModelScope.launch {
             try {
-                manager.addFolderToBlacklist(folder.absolutePath)
-                showToast("Done")
+                blacklistService.blacklistFolders(listOf(folder.absolutePath))
+                showMessage(messageStore.getString(R.string.done))
             } catch (_: Exception){
-                showToast("Some error occurred")
+                showMessage(messageStore.getString(R.string.some_error_occurred))
             }
         }
     }
 
     fun onPlaylistCreate(playlistName: String) {
         viewModelScope.launch {
-            manager.createPlaylist(playlistName)
+            playlistService.createPlaylist(playlistName)
         }
     }
 
     fun deletePlaylist(playlistWithSongCount: PlaylistWithSongCount) {
         viewModelScope.launch {
             try {
-                val playlist = Playlist(
-                    playlistId = playlistWithSongCount.playlistId,
-                    playlistName = playlistWithSongCount.playlistName,
-                    createdAt = playlistWithSongCount.createdAt
-                )
-                manager.deletePlaylist(playlist)
-                showToast("Done")
+                playlistService.deletePlaylist(playlistWithSongCount.playlistId)
+                showMessage(messageStore.getString(R.string.done))
             } catch (e: Exception) {
                 Timber.e(e)
-                showToast("Some error occurred")
+                showMessage(messageStore.getString(R.string.some_error_occurred))
             }
         }
     }
@@ -226,30 +271,15 @@ class HomeViewModel @Inject constructor(
      */
     fun addToQueue(song: Song) {
         if (queue.isEmpty()) {
-            manager.setQueue(listOf(song), 0)
+//            manager.setQueue(listOf(song), 0)
+            queueService.setQueue(listOf(song),0)
+            playerService.startServiceIfNotRunning(listOf(song), 0)
         } else {
-            val result = manager.addToQueue(song)
+            val result = queueService.append(song)
             if (result) {
-                showToast("Added ${song.title} to queue")
+                showMessage(messageStore.getString(R.string.added_to_queue, song.title))
             } else {
-                showToast("Song already in queue")
-            }
-        }
-    }
-
-    /**
-     * Adds a list of songs to the end queue
-     */
-    fun addToQueue(songs: List<Song>) {
-        if (queue.isEmpty()) {
-            manager.setQueue(songs, 0)
-        } else {
-            var result = false
-            songs.forEach { result = result or manager.addToQueue(it) }
-            if (result) {
-                showToast("Done")
-            } else {
-                showToast("Songs already in queue")
+                showMessage(messageStore.getString(R.string.song_already_in_queue))
             }
         }
     }
@@ -268,8 +298,10 @@ class HomeViewModel @Inject constructor(
      */
     fun setQueue(songs: List<Song>?, startPlayingFromIndex: Int = 0) {
         if (songs == null) return
-        manager.setQueue(songs, startPlayingFromIndex)
-        showToast("Playing")
+//        manager.setQueue(songs, startPlayingFromIndex)
+        queueService.setQueue(songs, startPlayingFromIndex)
+        playerService.startServiceIfNotRunning(songs, startPlayingFromIndex)
+        showMessage(messageStore.getString(R.string.playing))
     }
 
     /**
@@ -279,11 +311,13 @@ class HomeViewModel @Inject constructor(
         if (song == null) return
         val updatedSong = song.copy(favourite = !song.favourite)
         viewModelScope.launch(Dispatchers.IO) {
-            manager.updateSong(updatedSong)
+//            manager.updateSong(updatedSong)
+            queueService.update(updatedSong)
+            songService.updateSong(updatedSong)
         }
     }
 
-    fun onSongDrag(fromIndex: Int, toIndex: Int) = manager.moveItem(fromIndex,toIndex)
+    fun onSongDrag(fromIndex: Int, toIndex: Int) = queueService.moveSong(fromIndex, toIndex)
 
 
     private val _filesInCurrentDestination = MutableStateFlow(DirectoryContents())
@@ -322,13 +356,13 @@ class HomeViewModel @Inject constructor(
     }
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             explorer.addListener(directoryChangeListener)
         }
     }
 
     fun onFileClicked(songIndex: Int){
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             if(songIndex < 0 || songIndex >= filesInCurrentDestination.value.songs.size) return@launch
             val song = songExtractor.resolveSong(filesInCurrentDestination.value.songs[songIndex].location)
             song?.let {
@@ -338,14 +372,14 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onFileClicked(file: Directory){
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.IO) {
             explorer.moveInsideDirectory(file.absolutePath)
             _isExplorerAtRoot.update { explorer.isRoot }
         }
     }
 
     fun moveToParent() {
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.IO) {
             explorer.moveToParent()
             _isExplorerAtRoot.update { explorer.isRoot }
         }

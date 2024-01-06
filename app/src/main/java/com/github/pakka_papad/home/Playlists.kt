@@ -1,50 +1,91 @@
 package com.github.pakka_papad.home
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.R
-import com.github.pakka_papad.components.PlaylistCard
+import com.github.pakka_papad.components.PlaylistCardV2
 import com.github.pakka_papad.components.more_options.PlaylistOptions
+import com.github.pakka_papad.data.UserPreferences
 import com.github.pakka_papad.data.music.PlaylistWithSongCount
+import com.github.pakka_papad.ui.theme.LocalThemePreference
+import com.github.pakka_papad.ui.theme.harmonize
+import scheme.Scheme
 
 @Composable
 fun Playlists(
     playlistsWithSongCount: List<PlaylistWithSongCount>?,
     onPlaylistClicked: (Long) -> Unit,
-    listState: LazyListState,
+    listState: LazyGridState,
     onPlaylistCreate: (String) -> Unit,
     onFavouritesClicked: () -> Unit,
     onDeletePlaylistClicked: (PlaylistWithSongCount) -> Unit,
 ) {
     if (playlistsWithSongCount == null) return
-    LazyColumn(
+    LazyVerticalGrid(
         modifier = Modifier
             .fillMaxSize(),
         state = listState,
+        columns = GridCells.Adaptive(150.dp),
         contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Bottom).asPaddingValues(),
     ) {
         item {
             CreatePlaylistCard(
                 onPlaylistCreate = onPlaylistCreate,
-                onFavouritesClicked = onFavouritesClicked
+            )
+        }
+        item {
+            FavouritesCard(
+                onFavouritesClicked = onFavouritesClicked,
             )
         }
         items(
             items = playlistsWithSongCount,
             key = { it.playlistId }
         ) { playlist ->
-            PlaylistCard(
+            PlaylistCardV2(
                 playlistWithSongCount = playlist,
                 onPlaylistClicked = onPlaylistClicked,
                 options = listOf(
@@ -57,69 +98,96 @@ fun Playlists(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FavouritesCard(
+    onFavouritesClicked: () -> Unit
+) {
+    val themePreference = LocalThemePreference.current
+    val isSystemDark = isSystemInDarkTheme()
+    val scheme by remember(themePreference) { derivedStateOf {
+        val isDark = when(themePreference.theme){
+            UserPreferences.Theme.LIGHT_MODE, UserPreferences.Theme.UNRECOGNIZED -> false
+            UserPreferences.Theme.DARK_MODE -> true
+            UserPreferences.Theme.USE_SYSTEM_MODE -> isSystemDark
+        }
+        if (isDark) Scheme.dark(Color(0xFFE90064).toArgb())
+        else Scheme.light(Color(0xFFE90064).toArgb())
+    } }
+    Column(
+        modifier = Modifier
+            .widthIn(max = 200.dp)
+            .clickable(onClick = onFavouritesClicked)
+            .padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Icon(
+            modifier = Modifier
+                .aspectRatio(ratio = 1f, matchHeightConstraintsFirst = false)
+                .fillMaxWidth()
+                .clip(MaterialTheme.shapes.medium)
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            harmonize(Color(scheme.primary)),
+                            harmonize(Color(scheme.primaryContainer))
+                        )
+                    )
+                )
+                .padding(45.dp),
+            imageVector = Icons.Outlined.FavoriteBorder,
+            contentDescription = stringResource(R.string.favourite_button),
+            tint = Color(scheme.onPrimary)
+        )
+        Text(
+            text = stringResource(R.string.favourites),
+            style = MaterialTheme.typography.titleMedium,
+            maxLines = 1,
+            modifier = Modifier.fillMaxWidth(),
+            fontWeight = FontWeight.Bold,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
 @Composable
 fun CreatePlaylistCard(
     onPlaylistCreate: (String) -> Unit,
-    onFavouritesClicked: () -> Unit,
 ) {
     var isDialogVisible by remember { mutableStateOf(false) }
     var playlistName by remember { mutableStateOf("") }
-    val spacerModifier = Modifier.width(8.dp)
-    val iconModifier = Modifier.size(24.dp)
-    val configuration = LocalConfiguration.current
-    Row(
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(70.dp)
-            .padding(horizontal = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .widthIn(max = 200.dp)
+            .clickable(onClick = { isDialogVisible = true })
+            .padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Button(
-            onClick = onFavouritesClicked,
+        Icon(
+            painter = painterResource(R.drawable.ic_baseline_playlist_add_40),
             modifier = Modifier
-                .weight(1f),
-            shape = MaterialTheme.shapes.large
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_baseline_favorite_24),
-                modifier = iconModifier,
-                contentDescription = "create-new-playlist"
-            )
-            if (configuration.screenWidthDp > 340){
-                Spacer(spacerModifier)
-                Text(
-                    text = "Favourites",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                .aspectRatio(ratio = 1f, matchHeightConstraintsFirst = false)
+                .fillMaxWidth()
+                .clip(MaterialTheme.shapes.medium)
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.primaryContainer
+                        )
+                    )
                 )
-            }
-        }
-        Button(
-            onClick = { isDialogVisible = true },
-            modifier = Modifier
-                .weight(1f),
-            shape = MaterialTheme.shapes.large
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_baseline_playlist_add_40),
-                modifier = iconModifier,
-                contentDescription = "create-new-playlist"
-            )
-            if (configuration.screenWidthDp > 340) {
-                Spacer(spacerModifier)
-                Text(
-                    text = "New Playlist",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
+                .padding(45.dp),
+            contentDescription = stringResource(R.string.create_playlist_button),
+            tint = MaterialTheme.colorScheme.onPrimary,
+        )
+        Text(
+            text = stringResource(R.string.new_playlist),
+            style = MaterialTheme.typography.titleMedium,
+            maxLines = 1,
+            modifier = Modifier.fillMaxWidth(),
+            fontWeight = FontWeight.Bold,
+            overflow = TextOverflow.Ellipsis
+        )
     }
     AnimatedVisibility (isDialogVisible) {
         AlertDialog(
@@ -133,7 +201,7 @@ fun CreatePlaylistCard(
                     }
                 ) {
                     Text(
-                        text = "Create",
+                        text = stringResource(R.string.create),
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
@@ -146,14 +214,14 @@ fun CreatePlaylistCard(
                     }
                 ) {
                     Text(
-                        text = "Cancel",
+                        text = stringResource(R.string.cancel),
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
             },
             title = {
                 Text(
-                    text = "Create playlist"
+                    text = stringResource(R.string.create_playlist)
                 )
             },
             text = {
@@ -163,7 +231,7 @@ fun CreatePlaylistCard(
                         playlistName = it
                     },
                     label = {
-                        Text(text = "Playlist name")
+                        Text(text = stringResource(R.string.playlist_name))
                     },
                     textStyle = MaterialTheme.typography.bodyLarge,
                     singleLine = true,

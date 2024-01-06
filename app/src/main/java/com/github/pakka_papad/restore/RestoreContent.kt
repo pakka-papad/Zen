@@ -16,14 +16,12 @@ import com.github.pakka_papad.data.music.BlacklistedSong
 fun RestoreContent(
     songs: List<BlacklistedSong>,
     selectList: List<Boolean>,
-    paddingValues: PaddingValues,
     onSelectChanged: (index: Int, isSelected: Boolean) -> Unit,
 ){
     if (songs.size != selectList.size) return
     LazyColumn(
         modifier = Modifier
             .fillMaxSize(),
-        contentPadding = paddingValues,
     ) {
         itemsIndexed(
             items = songs,

@@ -8,8 +8,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.github.pakka_papad.R
 import com.github.pakka_papad.data.music.ScanStatus
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
@@ -84,7 +86,7 @@ fun PageIndicator(
                     .align(Alignment.CenterStart)
             ){
                 Text(
-                    text = "Back",
+                    text = stringResource(R.string.back),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onPrimary,
                 )
@@ -120,7 +122,7 @@ fun PageIndicator(
             enabled = nextEnabled
         ){
             Text(
-                text = if(pageCount-1 == currentPage) "Finish" else "Next",
+                text = if(pageCount-1 == currentPage) stringResource(R.string.finish) else stringResource(R.string.next),
                 style = MaterialTheme.typography.titleMedium,
                 color = if (nextEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
             )

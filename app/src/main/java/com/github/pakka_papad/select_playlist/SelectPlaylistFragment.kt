@@ -4,25 +4,33 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.github.pakka_papad.R
+import com.github.pakka_papad.components.BlockingProgressIndicator
 import com.github.pakka_papad.components.CancelConfirmTopBar
+import com.github.pakka_papad.components.Snackbar
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.ui.theme.ZenTheme
+import com.github.pakka_papad.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -38,7 +46,6 @@ class SelectPlaylistFragment: Fragment() {
     @Inject
     lateinit var preferenceProvider: ZenPreferenceProvider
 
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -55,42 +62,72 @@ class SelectPlaylistFragment: Fragment() {
                 ZenTheme(theme) {
                     val playlists by viewModel.playlistsWithSongCount.collectAsStateWithLifecycle()
                     val selectList = viewModel.selectList
+
+                    val snackbarHostState = remember { SnackbarHostState() }
+
+                    val insertState by viewModel.insertState.collectAsStateWithLifecycle()
+
+                    LaunchedEffect(key1 = insertState){
+                        if (insertState is Resource.Idle || insertState is Resource.Loading) return@LaunchedEffect
+                        if (insertState is Resource.Success){
+                            insertState.data?.let {
+                                snackbarHostState.showSnackbar(message = it)
+                            }
+                        } else {
+                            insertState.message?.let {
+                                snackbarHostState.showSnackbar(message = it)
+                            }
+                        }
+                        navController.popBackStack()
+                    }
+
+                    BackHandler(
+                        enabled = insertState is Resource.Loading,
+                        onBack = {  }
+                    )
+
                     Scaffold(
                         topBar = {
                             CancelConfirmTopBar(
-                                onCancelClicked = navController::popBackStack,
+                                onCancelClicked = {
+                                    if (insertState is Resource.Idle){
+                                        navController.popBackStack()
+                                    }
+                                },
                                 onConfirmClicked = {
                                     viewModel.addSongsToPlaylists(args.songLocations)
-                                    navController.popBackStack()
                                 },
-                                title = "Select Playlists"
+                                title = stringResource(R.string.select_playlists)
                             )
                         },
                         content = { paddingValues ->
-                            val insetsPadding =
-                                WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues()
-                            if (selectList.size != playlists.size) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(paddingValues),
-                                    contentAlignment = Alignment.Center
-                                ){
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(paddingValues),
+                                contentAlignment = Alignment.Center
+                            ){
+                                if (selectList.size != playlists.size){
                                     CircularProgressIndicator()
+                                } else {
+                                    SelectPlaylistContent(
+                                        playlists = playlists,
+                                        selectList = selectList,
+                                        onSelectChanged = viewModel::toggleSelectAtIndex
+                                    )
+                                    if (insertState is Resource.Loading){
+                                        BlockingProgressIndicator()
+                                    }
                                 }
-                            } else {
-                                SelectPlaylistContent(
-                                    playlists = playlists,
-                                    selectList = selectList,
-                                    paddingValues = PaddingValues(
-                                        top = paddingValues.calculateTopPadding(),
-                                        start = insetsPadding.calculateStartPadding(LayoutDirection.Ltr),
-                                        end = insetsPadding.calculateEndPadding(LayoutDirection.Ltr),
-                                        bottom = insetsPadding.calculateBottomPadding()
-                                    ),
-                                    onSelectChanged = viewModel::toggleSelectAtIndex
-                                )
                             }
+                        },
+                        snackbarHost = {
+                            SnackbarHost(
+                                hostState = snackbarHostState,
+                                snackbar = {
+                                    Snackbar(it)
+                                }
+                            )
                         }
                     )
                 }

@@ -14,7 +14,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import com.github.pakka_papad.R
 import com.github.pakka_papad.Screens
 
 /**
@@ -87,7 +89,7 @@ fun SortOptionChooser(
         onDismissRequest = onChooserDismiss,
         title = {
             Text(
-                text = "Sort",
+                text = stringResource(R.string.sort),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -97,7 +99,7 @@ fun SortOptionChooser(
                 onClick = onChooserDismiss,
             ) {
                 Text(
-                    text = "Close",
+                    text = stringResource(R.string.close),
                     style = MaterialTheme.typography.bodyLarge,
                 )
             }

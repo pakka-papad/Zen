@@ -5,12 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -34,7 +34,6 @@ class SettingsFragment : Fragment() {
     @Inject
     lateinit var preferenceProvider: ZenPreferenceProvider
 
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -71,7 +70,7 @@ class SettingsFragment : Fragment() {
                         topBar = {
                             TopBarWithBackArrow(
                                 onBackArrowPressed = navController::popBackStack,
-                                title = "Settings",
+                                title = stringResource(R.string.settings),
                                 actions = { }
                             )
                         },

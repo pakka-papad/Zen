@@ -1,20 +1,33 @@
 package com.github.pakka_papad.search
 
-import android.app.Application
-import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.pakka_papad.data.DataManager
+import com.github.pakka_papad.Constants
+import com.github.pakka_papad.R
 import com.github.pakka_papad.data.music.Song
+import com.github.pakka_papad.data.services.PlayerService
+import com.github.pakka_papad.data.services.QueueService
+import com.github.pakka_papad.data.services.SearchService
+import com.github.pakka_papad.util.MessageStore
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val context: Application,
-    private val manager: DataManager,
+    private val messageStore: MessageStore,
+    private val playerService: PlayerService,
+    private val queueService: QueueService,
+    private val searchService: SearchService,
 ) : ViewModel() {
 
     private val _query = MutableStateFlow("")
@@ -30,14 +43,14 @@ class SearchViewModel @Inject constructor(
                 SearchResult()
             } else {
                 when (type) {
-                    SearchType.Songs -> SearchResult(songs = manager.querySearch.searchSongs(trimmedQuery))
-                    SearchType.Albums -> SearchResult(albums = manager.querySearch.searchAlbums(trimmedQuery))
-                    SearchType.Artists -> SearchResult(artists = manager.querySearch.searchArtists(trimmedQuery))
-                    SearchType.AlbumArtists -> SearchResult(albumArtists = manager.querySearch.searchAlbumArtists(trimmedQuery))
-                    SearchType.Composers -> SearchResult(composers = manager.querySearch.searchComposers(trimmedQuery))
-                    SearchType.Lyricists -> SearchResult(lyricists = manager.querySearch.searchLyricists(trimmedQuery))
-                    SearchType.Genres -> SearchResult(genres = manager.querySearch.searchGenres(trimmedQuery))
-                    SearchType.Playlists -> SearchResult(playlists = manager.querySearch.searchPlaylists(trimmedQuery))
+                    SearchType.Songs -> SearchResult(songs = searchService.searchSongs(trimmedQuery))
+                    SearchType.Albums -> SearchResult(albums = searchService.searchAlbums(trimmedQuery))
+                    SearchType.Artists -> SearchResult(artists = searchService.searchArtists(trimmedQuery))
+                    SearchType.AlbumArtists -> SearchResult(albumArtists = searchService.searchAlbumArtists(trimmedQuery))
+                    SearchType.Composers -> SearchResult(composers = searchService.searchComposers(trimmedQuery))
+                    SearchType.Lyricists -> SearchResult(lyricists = searchService.searchLyricists(trimmedQuery))
+                    SearchType.Genres -> SearchResult(genres = searchService.searchGenres(trimmedQuery))
+                    SearchType.Playlists -> SearchResult(playlists = searchService.searchPlaylists(trimmedQuery))
                 }
             }
         }.catch { exception ->
@@ -47,6 +60,9 @@ class SearchViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = SearchResult()
         )
+
+    private val _message = MutableStateFlow("")
+    val message = _message.asStateFlow()
 
     fun clearQueryText() {
         _query.update { "" }
@@ -62,8 +78,16 @@ class SearchViewModel @Inject constructor(
 
     fun setQueue(songs: List<Song>?, startPlayingFromIndex: Int = 0) {
         if (songs == null) return
-        manager.setQueue(songs, startPlayingFromIndex)
-        Toast.makeText(context, "Playing", Toast.LENGTH_SHORT).show()
+        queueService.setQueue(songs, startPlayingFromIndex)
+        playerService.startServiceIfNotRunning(songs, startPlayingFromIndex)
+        showMessage(messageStore.getString(R.string.playing))
     }
 
+    private fun showMessage(message: String){
+        viewModelScope.launch {
+            _message.update { message }
+            delay(Constants.MESSAGE_DURATION)
+            _message.update { "" }
+        }
+    }
 }

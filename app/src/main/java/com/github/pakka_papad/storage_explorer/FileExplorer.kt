@@ -9,8 +9,8 @@ class MusicFileExplorer(
     private val songExtractor: SongExtractor
 ) {
 
-    val root = Environment.getExternalStorageDirectory().absolutePath
-    var currentPath = root
+    private val root = Environment.getExternalStorageDirectory().absolutePath
+    private var currentPath = root
 
     val isRoot: Boolean
         get() {

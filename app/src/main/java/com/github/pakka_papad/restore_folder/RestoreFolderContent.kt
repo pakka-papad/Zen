@@ -1,6 +1,5 @@
 package com.github.pakka_papad.restore_folder
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -15,12 +14,10 @@ import com.github.pakka_papad.data.music.BlacklistedFolder
 fun RestoreFoldersContent(
     folders: List<BlacklistedFolder>,
     selectList: List<Boolean>,
-    paddingValues: PaddingValues,
     onSelectChanged: (index: Int, isSelected: Boolean) -> Unit,
 ) {
     if (folders.size != selectList.size) return
     LazyColumn(
-        contentPadding = paddingValues,
         modifier = Modifier
             .fillMaxSize(),
     ) {

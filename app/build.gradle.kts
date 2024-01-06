@@ -1,8 +1,9 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 import com.google.protobuf.gradle.builtins
 import com.google.protobuf.gradle.generateProtoTasks
 import com.google.protobuf.gradle.protobuf
 import com.google.protobuf.gradle.protoc
-import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id ("com.android.application")
@@ -14,6 +15,7 @@ plugins {
     id("com.google.protobuf") version "0.8.19"
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+    id("dev.shreyaspatil.compose-compiler-report-generator") version "1.1.0"
 }
 
 android {
@@ -23,6 +25,12 @@ android {
             storePassword = gradleLocalProperties(rootDir)["STORE_PASSWORD"] as String
             keyAlias = gradleLocalProperties(rootDir)["KEY_ALIAS"] as String
             keyPassword = gradleLocalProperties(rootDir)["KEY_PASSWORD"] as String
+        }
+        create("ir"){
+            storeFile = gradleLocalProperties(rootDir)["IR_STORE_FILE"]?.let { file(it) }
+            storePassword = gradleLocalProperties(rootDir)["IR_STORE_PASSWORD"] as String
+            keyAlias = gradleLocalProperties(rootDir)["IR_KEY_ALIAS"] as String
+            keyPassword = gradleLocalProperties(rootDir)["IR_KEY_PASSWORD"] as String
         }
     }
     namespace = "com.github.pakka_papad"
@@ -54,6 +62,7 @@ android {
     buildTypes {
         debug {
             versionNameSuffix = "-debug"
+            applicationIdSuffix = ".debug"
             resValue("string","app_version_name",AppVersion.Name+versionNameSuffix)
         }
         release {
@@ -66,15 +75,27 @@ android {
             signingConfig = signingConfigs.findByName("prod")
             resValue("string","app_version_name",AppVersion.Name)
         }
+        create("internalRelease") {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            versionNameSuffix = "-ir"
+            applicationIdSuffix = ".ir"
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.findByName("ir")
+            resValue("string","app_version_name",AppVersion.Name+versionNameSuffix)
+        }
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 
     buildFeatures {
@@ -95,6 +116,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":m3utils"))
     implementation(Libraries.androidxCore)
 
     implementation(Libraries.androidxLifecycle)
@@ -115,6 +137,8 @@ dependencies {
     implementation(Libraries.androidxGlanceMaterial)
     implementation(Libraries.androidxGlanceMaterial3)
 
+    implementation(Libraries.androidxWorkManager)
+
     implementation(Libraries.androidxComposeMaterial)
     implementation(Libraries.material3)
     implementation(Libraries.material3WindowSizeClass)
@@ -129,12 +153,15 @@ dependencies {
 
     testImplementation(Libraries.junit)
     androidTestImplementation(Libraries.androidxJunit)
+    androidTestImplementation(Libraries.androidxTestKtx)
     androidTestImplementation(Libraries.androidxEspresso)
 
     debugImplementation(Libraries.leakcanary)
 
     implementation(Libraries.hilt)
+    implementation(Libraries.hiltWork)
     kapt(AnnotationProcessors.hiltCompiler)
+    kapt(AnnotationProcessors.hiltCompilerWork)
 
     implementation(Libraries.timber)
 
@@ -155,6 +182,19 @@ dependencies {
     implementation(Libraries.coilCompose)
     implementation(Libraries.palette)
     implementation(Libraries.lottie)
+
+    implementation(Libraries.crashActivity)
+
+    testImplementation(Libraries.mockk)
+    testImplementation(Libraries.coroutinesTest)
+}
+
+allprojects {
+    tasks.withType<KotlinCompile>().configureEach {
+        kotlinOptions {
+            jvmTarget = JavaVersion.VERSION_11.toString()
+        }
+    }
 }
 
 protobuf {

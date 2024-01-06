@@ -1,6 +1,5 @@
 package com.github.pakka_papad.select_playlist
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -13,13 +12,11 @@ import com.github.pakka_papad.data.music.PlaylistWithSongCount
 fun SelectPlaylistContent(
     playlists: List<PlaylistWithSongCount>,
     selectList: List<Boolean>,
-    paddingValues: PaddingValues,
     onSelectChanged: (index: Int) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize(),
-        contentPadding = paddingValues,
     ) {
         itemsIndexed(
             items = playlists,

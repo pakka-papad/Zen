@@ -10,17 +10,44 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material.rememberSwipeableState
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalAbsoluteTonalElevation
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -31,22 +58,19 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.github.pakka_papad.Constants
-import com.github.pakka_papad.R
 import com.github.pakka_papad.Screens
-import com.github.pakka_papad.collection.CollectionType
 import com.github.pakka_papad.components.BottomSheet
+import com.github.pakka_papad.components.Snackbar
 import com.github.pakka_papad.data.ZenPreferenceProvider
-import com.github.pakka_papad.data.music.*
-import com.github.pakka_papad.nowplaying.NowPlayingOptions
+import com.github.pakka_papad.data.services.SleepTimerService
 import com.github.pakka_papad.nowplaying.NowPlayingScreen
-import com.github.pakka_papad.nowplaying.NowPlayingTopBar
+import com.github.pakka_papad.nowplaying.PlayerHelper
 import com.github.pakka_papad.nowplaying.Queue
 import com.github.pakka_papad.player.ZenBroadcastReceiver
 import com.github.pakka_papad.ui.theme.ZenTheme
@@ -63,13 +87,12 @@ class HomeFragment : Fragment() {
 
     private val viewModel: HomeViewModel by viewModels()
 
-    @Inject
-    lateinit var exoPlayer: ExoPlayer
+    @Inject lateinit var exoPlayer: ExoPlayer
+    @Inject lateinit var preferenceProvider: ZenPreferenceProvider
+    @Inject lateinit var sleepTimerService: SleepTimerService
 
-    @Inject
-    lateinit var preferenceProvider: ZenPreferenceProvider
-
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
+    @OptIn(
+        ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
         ExperimentalMaterialApi::class
     )
     override fun onCreateView(
@@ -102,6 +125,9 @@ class HomeFragment : Fragment() {
             ),
             PendingIntent.FLAG_IMMUTABLE
         )
+
+        val navHelper = HomeNavHelper(navController, lifecycle)
+        val playerHelper = PlayerHelper(exoPlayer)
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -128,12 +154,15 @@ class HomeFragment : Fragment() {
                     val allPersonsListState = rememberLazyListState()
 
                     val playlistsWithSongCount by viewModel.playlistsWithSongCount.collectAsStateWithLifecycle()
-                    val allPlaylistsListState = rememberLazyListState()
+                    val allPlaylistsListState = rememberLazyGridState()
 
                     val genresWithSongCount by viewModel.genresWithSongCount.collectAsStateWithLifecycle()
                     val allGenresListState = rememberLazyListState()
 
                     val files by viewModel.filesInCurrentDestination.collectAsStateWithLifecycle()
+
+                    val isSleepTimerRunning by sleepTimerService.isRunning.collectAsStateWithLifecycle()
+                    val sleepTimerLeft by sleepTimerService.timeLeft.collectAsStateWithLifecycle()
 
                     val dataRetrieved by remember {
                         derivedStateOf {
@@ -151,28 +180,38 @@ class HomeFragment : Fragment() {
                         swipeableState.animateTo(0)
                     }
 
+                    val snackbarHostState = remember { SnackbarHostState() }
+
+                    val message by viewModel.message.collectAsStateWithLifecycle()
+                    LaunchedEffect(key1 = message){
+                        if (message.isEmpty()) return@LaunchedEffect
+                        snackbarHostState.showSnackbar(message)
+                    }
+
                     val bottomBarYOffset by remember {
                         derivedStateOf {
-                            val progress = if (swipeableState.progress.from == 0){
+                            val progress = if (swipeableState.progress.from == 0) {
                                 // at 0 or moving away from 0
                                 if (swipeableState.progress.to == 0) 1f
-                                else if (swipeableState.progress.fraction < 0.25f) 1f-swipeableState.progress.fraction*4
+                                else if (swipeableState.progress.fraction < 0.25f) 1f - swipeableState.progress.fraction * 4
                                 else 0f
                             } else {
                                 // at 1 or moving away from 1
                                 if (swipeableState.progress.to == 1) 0f
-                                else if (swipeableState.progress.fraction > 0.75f) 1f-(1f-swipeableState.progress.fraction)*4
+                                else if (swipeableState.progress.fraction > 0.75f) 1f - (1f - swipeableState.progress.fraction) * 4
                                 else 0f
                             }
-                            500*(1f-progress)
+                            500 * (1f - progress)
                         }
                     }
                     val windowInsets = WindowInsets.systemBars.asPaddingValues()
 
                     val queue = viewModel.queue
-                    val playbackParams by  preferenceProvider.playbackParams.collectAsStateWithLifecycle()
+                    val playbackParams by preferenceProvider.playbackParams.collectAsStateWithLifecycle()
                     val repeatMode by viewModel.repeatMode.collectAsStateWithLifecycle()
-                    val playerScaffoldState = rememberBottomSheetScaffoldState()
+                    val playerScaffoldState = rememberBottomSheetScaffoldState(
+                        bottomSheetState = rememberStandardBottomSheetState(skipHiddenState = false)
+                    )
 
                     val isExplorerAtRoot by viewModel.isExplorerAtRoot.collectAsStateWithLifecycle()
 
@@ -186,7 +225,7 @@ class HomeFragment : Fragment() {
                     BackHandler(
                         enabled = (currentScreen == Screens.Folders && !isExplorerAtRoot) || swipeableState.currentValue == 1,
                         onBack = {
-                            if (swipeableState.currentValue == 1){
+                            if (swipeableState.currentValue == 1) {
                                 scope.launch {
                                     if (isQueueBottomSheetExpanded) playerScaffoldState.bottomSheetState.hide()
                                     else swipeableState.animateTo(0)
@@ -197,36 +236,21 @@ class HomeFragment : Fragment() {
                         }
                     )
 
-                    val navigateToSettings = remember{ {
-                        if (navController.currentDestination?.id == R.id.homeFragment){
-                            navController.navigate(R.id.action_homeFragment_to_settingsFragment)
-                        }
-                    } }
-                    val navigateToSearch = remember{ {
-                        if(navController.currentDestination?.id == R.id.homeFragment){
-                            navController.navigate(R.id.action_homeFragment_to_searchFragment)
-                        }
-                    } }
-                    val songScreenSongClicked = remember{
-                        { index: Int -> viewModel.setQueue(songs,index) }
+                    val songScreenSongClicked = remember {
+                        { index: Int -> viewModel.setQueue(songs, index) }
                     }
-                    val songScreenPlayAllClicked = remember{ { viewModel.setQueue(songs) } }
-                    val songScreenShuffleClicked = remember{ { viewModel.shufflePlay(songs) } }
-                    val miniPlayerPlayPauseClicked = remember{ {
-                        if (swipeableState.currentValue == 0){
-                            pendingPausePlayIntent.send()
-                        }
+                    val songScreenPlayAllClicked = remember { { viewModel.setQueue(songs) } }
+                    val songScreenShuffleClicked = remember { { viewModel.shufflePlay(songs) } }
+                    val miniPlayerPlayPauseClicked = remember { {
+                        if (swipeableState.currentValue == 0) { pendingPausePlayIntent.send() }
                     } }
-                    val nowPlayingBackArrowClicked = remember<() -> Unit>{ {
-                        scope.launch { swipeableState.animateTo(0) }
-                    } }
-                    val expandQueueBottomSheet = remember<() -> Unit>{
+                    val expandQueueBottomSheet = remember<() -> Unit> {
                         { scope.launch { playerScaffoldState.bottomSheetState.expand() } }
                     }
-                    val updateScreen = remember<(Screens) -> Unit>{ {
-                        if (currentScreen == it){
+                    val updateScreen = remember<(Screens) -> Unit> { {
+                        if (currentScreen == it) {
                             scope.launch {
-                                when(it){
+                                when (it) {
                                     Screens.Songs -> allSongsListState.scrollToItem(0)
                                     Screens.Albums -> allAlbumsGridState.scrollToItem(0)
                                     Screens.Artists -> allPersonsListState.scrollToItem(0)
@@ -240,16 +264,25 @@ class HomeFragment : Fragment() {
                         }
                     } }
 
+                    val homeScreenBottomPadding by remember(currentSong) {
+                        derivedStateOf {
+                            if (currentSong == null) 88.dp else 146.dp
+                        }
+                    }
+
                     Box(
                         modifier = Modifier
-                            .fillMaxSize(),
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surface),
                         contentAlignment = Alignment.BottomCenter
-                    ){
+                    ) {
                         Scaffold(
+                            modifier = Modifier
+                                .padding(bottom = homeScreenBottomPadding),
                             topBar = {
                                 HomeTopBar(
-                                    onSettingsClicked = navigateToSettings,
-                                    onSearchClicked = navigateToSearch,
+                                    onSettingsClicked = navHelper::navigateToSettings,
+                                    onSearchClicked = navHelper::navigateToSearch,
                                     currentScreen = currentScreen,
                                     onSortOptionChosen = viewModel::saveSortOption,
                                     currentSortOrder = sortOrder,
@@ -260,7 +293,6 @@ class HomeFragment : Fragment() {
                                     modifier = Modifier
                                         .padding(
                                             top = it.calculateTopPadding(),
-                                            bottom = if (currentSong == null) 88.dp else 146.dp,
                                             start = windowInsets.calculateStartPadding(
                                                 LayoutDirection.Ltr
                                             ),
@@ -289,7 +321,7 @@ class HomeFragment : Fragment() {
                                                         onAddToQueueClicked = viewModel::addToQueue,
                                                         onPlayAllClicked = songScreenPlayAllClicked,
                                                         onShuffleClicked = songScreenShuffleClicked,
-                                                        onAddToPlaylistsClicked = this@HomeFragment::addToPlaylistClicked,
+                                                        onAddToPlaylistsClicked = navHelper::navigateToChoosePlaylist,
                                                         onBlacklistClicked = viewModel::onSongBlacklist
                                                     )
                                                 }
@@ -297,13 +329,13 @@ class HomeFragment : Fragment() {
                                                     Albums(
                                                         albums = albums,
                                                         gridState = allAlbumsGridState,
-                                                        onAlbumClicked = this@HomeFragment::navigateToCollection
+                                                        onAlbumClicked = navHelper::navigateToViewDetails
                                                     )
                                                 }
                                                 Screens.Artists -> {
                                                     Persons(
                                                         personsWithSongCount = personsWithSongCount,
-                                                        onPersonClicked = this@HomeFragment::navigateToCollection,
+                                                        onPersonClicked = navHelper::navigateToViewDetails,
                                                         listState = allPersonsListState,
                                                         selectedPerson = selectedPerson,
                                                         onPersonSelect = viewModel::onPersonSelect
@@ -312,10 +344,10 @@ class HomeFragment : Fragment() {
                                                 Screens.Playlists -> {
                                                     Playlists(
                                                         playlistsWithSongCount = playlistsWithSongCount,
-                                                        onPlaylistClicked = this@HomeFragment::navigateToCollection,
+                                                        onPlaylistClicked = navHelper::navigateToViewDetails,
                                                         listState = allPlaylistsListState,
                                                         onPlaylistCreate = viewModel::onPlaylistCreate,
-                                                        onFavouritesClicked = this@HomeFragment::navigateToCollection,
+                                                        onFavouritesClicked = navHelper::navigateToViewDetails,
                                                         onDeletePlaylistClicked = viewModel::deletePlaylist,
                                                     )
                                                 }
@@ -323,37 +355,41 @@ class HomeFragment : Fragment() {
                                                     Genres(
                                                         genresWithSongCount = genresWithSongCount,
                                                         listState = allGenresListState,
-                                                        onGenreClicked = this@HomeFragment::navigateToCollection
+                                                        onGenreClicked = navHelper::navigateToViewDetails
                                                     )
                                                 }
                                                 Screens.Folders -> {
-                                                     Files(
-                                                         contents = files,
-                                                         onDirectoryClicked = viewModel::onFileClicked,
-                                                         onSongClicked = viewModel::onFileClicked,
-                                                         currentSong = currentSong,
-                                                         onAddToPlaylistClicked = this@HomeFragment::addToPlaylistClicked,
-                                                         onAddToQueueClicked = viewModel::addToQueue,
-                                                         onFolderAddToBlacklistRequest = viewModel::onFolderBlacklist
-                                                     )
+                                                    Files(
+                                                        contents = files,
+                                                        onDirectoryClicked = viewModel::onFileClicked,
+                                                        onSongClicked = viewModel::onFileClicked,
+                                                        currentSong = currentSong,
+                                                        onAddToPlaylistClicked = navHelper::navigateToChoosePlaylist,
+                                                        onAddToQueueClicked = viewModel::addToQueue,
+                                                        onFolderAddToBlacklistRequest = viewModel::onFolderBlacklist
+                                                    )
                                                 }
                                             }
                                         }
                                     }
                                 }
                             },
+                            snackbarHost = {
+                                SnackbarHost(
+                                    hostState = snackbarHostState,
+                                    snackbar = { Snackbar(it) }
+                                )
+                            }
                         )
                         BottomSheet(
-                            peekHeight = ( if(currentSong == null) 88.dp else 146.dp) + windowInsets.calculateBottomPadding(),
+                            peekHeight = homeScreenBottomPadding + windowInsets.calculateBottomPadding(),
                             peekContent = {
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .background(bottomBarColor)
                                         .padding(
-                                            start = windowInsets.calculateStartPadding(
-                                                LayoutDirection.Ltr
-                                            ),
+                                            start = windowInsets.calculateStartPadding(LayoutDirection.Ltr),
                                             end = windowInsets.calculateEndPadding(LayoutDirection.Ltr),
                                         )
                                 ) {
@@ -369,22 +405,27 @@ class HomeFragment : Fragment() {
                                     var progress by remember { mutableStateOf(0f) }
 
                                     DisposableEffect(Unit) {
-                                        progress = exoPlayer.currentPosition.toFloat() / exoPlayer.duration.toFloat()
+                                        progress =
+                                            playerHelper.currentPosition/ playerHelper.duration
                                         val listener = object : Player.Listener {
-                                            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                                            override fun onMediaItemTransition(
+                                                mediaItem: MediaItem?,
+                                                reason: Int
+                                            ) {
                                                 super.onMediaItemTransition(mediaItem, reason)
                                                 progress = 0f
                                             }
                                         }
-                                        exoPlayer.addListener(listener)
+                                        playerHelper.addListener(listener)
                                         onDispose {
-                                            exoPlayer.removeListener(listener)
+                                            playerHelper.removeListener(listener)
                                         }
                                     }
                                     if (songPlaying == true && swipeableState.currentValue == 0) {
                                         LaunchedEffect(Unit) {
                                             while (true) {
-                                                progress = exoPlayer.currentPosition.toFloat() / exoPlayer.duration.toFloat()
+                                                progress =
+                                                    playerHelper.currentPosition / playerHelper.duration
                                                 delay(40)
                                             }
                                         }
@@ -401,17 +442,6 @@ class HomeFragment : Fragment() {
                                 currentSong?.let {
                                     BottomSheetScaffold(
                                         scaffoldState = playerScaffoldState,
-                                        topBar = {
-                                            NowPlayingTopBar(
-                                                onBackArrowPressed = nowPlayingBackArrowClicked,
-                                                title = it.title,
-                                                options = listOf(
-                                                    NowPlayingOptions.SaveToPlaylist {
-                                                        if(swipeableState.currentValue == 1) saveToPlaylistClicked(queue)
-                                                    }
-                                                )
-                                            )
-                                        },
                                         content = { paddingValues ->
                                             NowPlayingScreen(
                                                 paddingValues = paddingValues,
@@ -420,13 +450,19 @@ class HomeFragment : Fragment() {
                                                 onPreviousPressed = pendingPreviousIntent::send,
                                                 onNextPressed = pendingNextIntent::send,
                                                 songPlaying = songPlaying,
-                                                exoPlayer = exoPlayer,
+                                                playerHelper = playerHelper,
+                                                currentSongPlaying = songPlaying,
                                                 onFavouriteClicked = viewModel::changeFavouriteValue,
                                                 onQueueClicked = expandQueueBottomSheet,
                                                 repeatMode = repeatMode,
                                                 toggleRepeatMode = viewModel::toggleRepeatMode,
                                                 playbackParams = playbackParams,
-                                                updatePlaybackParams = preferenceProvider::updatePlaybackParams
+                                                updatePlaybackParams = preferenceProvider::updatePlaybackParams,
+                                                isTimerRunning = isSleepTimerRunning,
+                                                timeLeft = sleepTimerLeft,
+                                                onTimerBegin = sleepTimerService::begin,
+                                                onTimerCancel = sleepTimerService::cancel,
+                                                onSaveQueueClicked = { navHelper.navigateToChoosePlaylist(queue) },
                                             )
                                         },
                                         sheetContent = {
@@ -435,7 +471,7 @@ class HomeFragment : Fragment() {
                                                 onFavouriteClicked = viewModel::changeFavouriteValue,
                                                 currentSong = it,
                                                 expanded = isQueueBottomSheetExpanded,
-                                                exoPlayer = exoPlayer,
+                                                playerHelper = playerHelper,
                                                 onDrag = viewModel::onSongDrag
                                             )
                                         },
@@ -457,7 +493,7 @@ class HomeFragment : Fragment() {
                                 .graphicsLayer {
                                     translationY = bottomBarYOffset
                                 }
-                        ){
+                        ) {
                             HomeBottomBar(
                                 currentScreen = currentScreen,
                                 onScreenChange = updateScreen,
@@ -468,101 +504,6 @@ class HomeFragment : Fragment() {
                     }
                 }
             }
-        }
-    }
-
-    private fun navigateToCollection(album: Album){
-        if (navController.currentDestination?.id != R.id.homeFragment) return
-        navController.navigate(
-            HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                CollectionType(CollectionType.AlbumType,album.name)
-            )
-        )
-    }
-
-    private fun navigateToCollection(personWithSongCount: PersonWithSongCount) {
-        if (navController.currentDestination?.id != R.id.homeFragment) return
-        when(personWithSongCount){
-            is ArtistWithSongCount -> {
-                navController.navigate(
-                    HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                        CollectionType(CollectionType.ArtistType,personWithSongCount.name)
-                    )
-                )
-            }
-            is AlbumArtistWithSongCount -> {
-                navController.navigate(
-                    HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                        CollectionType(CollectionType.AlbumArtistType,personWithSongCount.name)
-                    )
-                )
-            }
-            is ComposerWithSongCount -> {
-                navController.navigate(
-                    HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                        CollectionType(CollectionType.ComposerType,personWithSongCount.name)
-                    )
-                )
-            }
-            is LyricistWithSongCount -> {
-                navController.navigate(
-                    HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                        CollectionType(CollectionType.LyricistType,personWithSongCount.name)
-                    )
-                )
-            }
-        }
-    }
-
-    private fun navigateToCollection(playlistId: Long){
-        if (navController.currentDestination?.id != R.id.homeFragment) return
-        navController.navigate(
-            HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                CollectionType(CollectionType.PlaylistType,playlistId.toString())
-            )
-        )
-    }
-
-    private fun navigateToCollection(genreWithSongCount: GenreWithSongCount){
-        if (navController.currentDestination?.id != R.id.homeFragment) return
-        navController.navigate(
-            HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                CollectionType(CollectionType.GenreType,genreWithSongCount.genreName)
-            )
-        )
-    }
-
-    private fun navigateToCollection(){
-        if (navController.currentDestination?.id != R.id.homeFragment) return
-        navController.navigate(
-            HomeFragmentDirections.actionHomeFragmentToCollectionFragment(
-                CollectionType(CollectionType.FavouritesType)
-            )
-        )
-    }
-
-    private fun saveToPlaylistClicked(queue: List<Song>){
-        lifecycleScope.launch {
-            val songLocations = queue.map { it.location }
-            if (navController.currentDestination?.id != R.id.homeFragment) return@launch
-            navController.navigate(
-                HomeFragmentDirections
-                    .actionHomeFragmentToSelectPlaylistFragment(songLocations.toTypedArray())
-            )
-        }
-    }
-
-    private fun addToPlaylistClicked(song: Song){
-        saveToPlaylistClicked(listOf(song))
-    }
-
-    private fun addToPlaylistClicked(song: MiniSong){
-        lifecycleScope.launch {
-            if (navController.currentDestination?.id != R.id.homeFragment) return@launch
-            navController.navigate(
-                HomeFragmentDirections
-                    .actionHomeFragmentToSelectPlaylistFragment(arrayOf(song.location))
-            )
         }
     }
 }
