@@ -34,5 +34,15 @@
       "Added sort option",
       "Added basic widget (experimental)"
     ]
+  },
+  {
+    "versionCode": 102002,
+    "versionName": "1.2.2",
+    "date": "6 January, 2024",
+    "changes": [
+      "Added sleep timer",
+      "Updated player screen UI",
+      "Updated playlist tab UI"
+    ]
   }
 ]
