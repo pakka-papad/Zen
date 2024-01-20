@@ -15,7 +15,7 @@ import kotlin.time.Duration.Companion.minutes
 class ZenPreferenceProvider @Inject constructor(
     private val userPreferences: DataStore<UserPreferences>,
     private val coroutineScope: CoroutineScope,
-    private val crashReporter: ZenCrashReporter,
+    //private val crashReporter: ZenCrashReporter,
 ) {
 
     val theme = userPreferences.data
@@ -73,7 +73,7 @@ class ZenPreferenceProvider @Inject constructor(
 
     fun toggleCrashlytics(autoReportCrash: Boolean) {
         coroutineScope.launch {
-            crashReporter.sendCrashData(autoReportCrash)
+            //crashReporter.sendCrashData(autoReportCrash)
             userPreferences.updateData {
                 it.copy {
                     crashlyticsDisabled = !autoReportCrash

@@ -21,7 +21,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.PlaybackStatsListener
 import com.github.pakka_papad.Constants
-import com.github.pakka_papad.data.ZenCrashReporter
+//import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.data.music.SongExtractor
@@ -58,7 +58,7 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
     @Inject lateinit var sleepTimerService: SleepTimerService
     @Inject lateinit var analyticsService: AnalyticsService
     @Inject lateinit var exoPlayer: ExoPlayer
-    @Inject lateinit var crashReporter: ZenCrashReporter
+    //@Inject lateinit var crashReporter: ZenCrashReporter
     @Inject lateinit var preferencesProvider: ZenPreferenceProvider
 
     private var broadcastReceiver: ZenBroadcastReceiver? = null
@@ -127,7 +127,7 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
 
         override fun onPlayerError(error: PlaybackException) {
             super.onPlayerError(error)
-            crashReporter.logException(error)
+            //crashReporter.logException(error)
             if (error.errorCode == PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND){
                 songExtractor.cleanData()
                 onBroadcastCancel()
@@ -136,7 +136,7 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
 
         override fun onPlayerErrorChanged(error: PlaybackException?) {
             super.onPlayerErrorChanged(error)
-            crashReporter.logException(error)
+           // crashReporter.logException(error)
         }
     }
 

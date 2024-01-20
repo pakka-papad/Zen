@@ -3,7 +3,7 @@ buildscript {
         classpath(Plugins.hilt)
         classpath(Plugins.kotlin)
         classpath(Plugins.navSafeArgs)
-        classpath(Plugins.googleServices)
+        //classpath(Plugins.googleServices)
         classpath(Plugins.crashlytics)
     }
 }

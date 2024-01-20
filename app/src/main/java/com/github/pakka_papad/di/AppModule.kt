@@ -23,7 +23,7 @@ import com.github.pakka_papad.data.services.*
 import com.github.pakka_papad.player.ZenBroadcastReceiver
 import com.github.pakka_papad.util.MessageStore
 import com.github.pakka_papad.util.MessageStoreImpl
-import com.google.firebase.crashlytics.FirebaseCrashlytics
+//import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -102,35 +102,28 @@ object AppModule {
     fun providesZenPreferencesDatastore(
         userPreferences: DataStore<UserPreferences>,
         coroutineScope: CoroutineScope,
-        crashReporter: ZenCrashReporter,
+        //crashReporter: ZenCrashReporter,
     ): ZenPreferenceProvider {
         return ZenPreferenceProvider(
             userPreferences = userPreferences,
             coroutineScope = coroutineScope,
-            crashReporter = crashReporter,
+            //crashReporter = crashReporter,
         )
     }
 
-    @Singleton
-    @Provides
-    fun providesZenCrashReporter(): ZenCrashReporter {
-        return ZenCrashReporter(
-            firebase = FirebaseCrashlytics.getInstance()
-        )
-    }
 
     @Singleton
     @Provides
     fun providesSongExtractor(
         @ApplicationContext context: Context,
-        crashReporter: ZenCrashReporter,
+        //crashReporter: ZenCrashReporter,
         db: AppDatabase,
     ): SongExtractor {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         return SongExtractor(
             scope = scope,
             context = context,
-            crashReporter = crashReporter,
+            //crashReporter = crashReporter,
             songDao = db.songDao(),
             albumDao = db.albumDao(),
             artistDao = db.artistDao(),

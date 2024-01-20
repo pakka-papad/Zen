@@ -13,8 +13,8 @@ plugins {
     id("androidx.navigation.safeargs.kotlin")
     id("kotlin-parcelize")
     id("com.google.protobuf") version "0.8.19"
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
+    //id("com.google.gms.google-services")
+    //id("com.google.firebase.crashlytics")
     id("dev.shreyaspatil.compose-compiler-report-generator") version "1.1.0"
 }
 
@@ -26,15 +26,16 @@ android {
             keyAlias = gradleLocalProperties(rootDir)["KEY_ALIAS"] as String
             keyPassword = gradleLocalProperties(rootDir)["KEY_PASSWORD"] as String
         }
-        create("ir"){
+        /*create("ir"){
             storeFile = gradleLocalProperties(rootDir)["IR_STORE_FILE"]?.let { file(it) }
             storePassword = gradleLocalProperties(rootDir)["IR_STORE_PASSWORD"] as String
             keyAlias = gradleLocalProperties(rootDir)["IR_KEY_ALIAS"] as String
             keyPassword = gradleLocalProperties(rootDir)["IR_KEY_PASSWORD"] as String
-        }
+        }*/
     }
+
     namespace = "com.github.pakka_papad"
-    compileSdk = Api.compileSdk
+    compileSdk = 33
 
     defaultConfig {
         applicationId = "com.github.pakka_papad"
@@ -84,7 +85,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.findByName("ir")
+            signingConfig = signingConfigs.findByName("prod")
             resValue("string","app_version_name",AppVersion.Name+versionNameSuffix)
         }
     }
@@ -156,7 +157,7 @@ dependencies {
     androidTestImplementation(Libraries.androidxTestKtx)
     androidTestImplementation(Libraries.androidxEspresso)
 
-    debugImplementation(Libraries.leakcanary)
+    //debugImplementation(Libraries.leakcanary)
 
     implementation(Libraries.hilt)
     implementation(Libraries.hiltWork)
@@ -171,8 +172,8 @@ dependencies {
     implementation(Libraries.datastore)
     implementation(Libraries.kotlinLite)
 
-    implementation(platform(Libraries.firebaseBom))
-    implementation(Libraries.firebaseCrashlytics)
+    //implementation(platform(Libraries.firebaseBom))
+    //implementation(Libraries.firebaseCrashlytics)
 
     implementation(Libraries.exoPlayer)
     implementation(Libraries.media3ExoPlayer)
@@ -183,7 +184,7 @@ dependencies {
     implementation(Libraries.palette)
     implementation(Libraries.lottie)
 
-    implementation(Libraries.crashActivity)
+    //implementation(Libraries.crashActivity)
 
     testImplementation(Libraries.mockk)
     testImplementation(Libraries.coroutinesTest)

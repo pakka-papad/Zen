@@ -6,7 +6,7 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import com.github.pakka_papad.data.ZenCrashReporter
+//import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.daos.AlbumArtistDao
 import com.github.pakka_papad.data.daos.AlbumDao
 import com.github.pakka_papad.data.daos.ArtistDao
@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger
 class SongExtractor(
     private val scope: CoroutineScope,
     private val context: Context,
-    private val crashReporter: ZenCrashReporter,
+    //private val crashReporter: ZenCrashReporter,
     private val songDao: SongDao,
     private val albumDao: AlbumDao,
     private val artistDao: ArtistDao,
@@ -415,7 +415,7 @@ class SongExtractor(
             )
             result = song
         } catch (e: Exception) {
-            crashReporter.logException(e)
+            //crashReporter.logException(e)
             result = null
         } finally {
             try {
