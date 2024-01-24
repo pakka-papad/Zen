@@ -21,12 +21,7 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@mipmap/ic_launcher_background" />
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:src="@mipmap/ic_launcher_foreground" />
+            android:src="@mipmap/ic_launcher" />
     </androidx.cardview.widget.CardView>
 
     <ProgressBar
