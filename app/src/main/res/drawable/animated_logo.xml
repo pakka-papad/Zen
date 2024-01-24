@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_launcher_foreground">
+
+    <target
+        android:animation="@animator/logo_animator"
+        android:name="animation_group" />
+
+</animated-vector>

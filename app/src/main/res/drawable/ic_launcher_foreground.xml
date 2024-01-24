@@ -3,7 +3,9 @@
     android:height="108dp"
     android:viewportWidth="466"
     android:viewportHeight="466">
-  <group android:scaleX="0.8"
+  <group
+      android:name="animation_group"
+      android:scaleX="0.8"
       android:scaleY="0.8"
       android:translateX="46.6"
       android:translateY="46.6">
