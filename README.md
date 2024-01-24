@@ -1,16 +1,21 @@
+<img src="screenshots/banner.png" style="width: 100vw; border-radius: 70px;">
+
 <p align="center">
-    <img src="app/src/main/res/ic_launcher-playstore.png" height="128">
+    <img src="app/src/main/res/ic_launcher-playstore.png" height="128" style="border-radius: 70px;">
     <h1 align="center">Zen Music Player</h1>
 </p>
+
+<h3 style="width: 100vw; text-align: center;">
+    Material You Themed music player for android
+</h3>
+
 <h3>
     <a href='https://play.google.com/store/apps/details?id=com.github.pakka_papad&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>
         <img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' height="80"/>
     </a>     
 </h3>
-<img src="screenshots/banner.png" style="width: 100vw;">
-<h3>
-    Material You Themed music player for android
-</h3>
+
+
 <h3>Screenshots</h3>
 <h4>Light</h4>
 <div style="display: flex; width: 100vw; flex-wrap: wrap; justify-content: space-around;">
@@ -93,6 +98,15 @@
     <a href="https://exoplayer.dev/">ExoPlayer</a> for handling media playing
   </li>
   <li>
+    <a href="https://firebase.google.com/docs/crashlytics">Firebase Crashlytics</a> for fetching app crash data
+  </li>
+  <li>
+    <a href="https://github.com/Ereza/CustomActivityOnCrash">Custom Activity On Crash</a> for showing custom screen on app crashes
+  </li>
+  <li>
+    <a href="https://mockk.io/">Mockk</a> for mocking classes in testing
+  </li>
+  <li>
     Jetpack
       <ul>
         <li>
@@ -112,6 +126,9 @@
         </li>
         <li>
           <a href="https://developer.android.com/guide/navigation/navigation-getting-started">Navigation Component</a> - Implement navigation in app 
+        </li>
+        <li>
+          <a href="https://developer.android.com/topic/libraries/architecture/workmanager">Work Manager</a> - Performing background tasks
         </li>
       </ul>
   </li>
