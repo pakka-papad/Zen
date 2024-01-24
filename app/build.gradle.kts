@@ -97,7 +97,7 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
-        dataBinding = true
+        buildConfig = true
     }
 
     composeOptions {
