@@ -10,6 +10,7 @@
 /.idea/deploymentTargetDropDown.xml
 /.idea/kotlinc.xml
 /.idea/misc.xml
+/.idea
 /buildSrc/build
 .DS_Store
 /build
