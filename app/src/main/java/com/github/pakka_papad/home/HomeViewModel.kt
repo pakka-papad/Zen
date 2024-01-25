@@ -9,17 +9,32 @@ import com.github.pakka_papad.Constants
 import com.github.pakka_papad.R
 import com.github.pakka_papad.components.SortOptions
 import com.github.pakka_papad.data.ZenPreferenceProvider
-import com.github.pakka_papad.data.music.*
+import com.github.pakka_papad.data.music.MiniSong
+import com.github.pakka_papad.data.music.PlaylistWithSongCount
+import com.github.pakka_papad.data.music.Song
+import com.github.pakka_papad.data.music.SongExtractor
 import com.github.pakka_papad.data.services.BlacklistService
 import com.github.pakka_papad.data.services.PlayerService
 import com.github.pakka_papad.data.services.PlaylistService
 import com.github.pakka_papad.data.services.QueueService
 import com.github.pakka_papad.data.services.SongService
-import com.github.pakka_papad.storage_explorer.*
+import com.github.pakka_papad.storage_explorer.Directory
+import com.github.pakka_papad.storage_explorer.DirectoryContents
+import com.github.pakka_papad.storage_explorer.MusicFileExplorer
 import com.github.pakka_papad.util.MessageStore
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -272,8 +287,10 @@ class HomeViewModel @Inject constructor(
     fun addToQueue(song: Song) {
         if (queue.isEmpty()) {
 //            manager.setQueue(listOf(song), 0)
-            queueService.setQueue(listOf(song),0)
-            playerService.startServiceIfNotRunning(listOf(song), 0)
+//            queueService.setQueue(listOf(song),0)
+            viewModelScope.launch {
+                playerService.startServiceIfNotRunning(listOf(song), 0)
+            }
         } else {
             val result = queueService.append(song)
             if (result) {
@@ -299,8 +316,10 @@ class HomeViewModel @Inject constructor(
     fun setQueue(songs: List<Song>?, startPlayingFromIndex: Int = 0) {
         if (songs == null) return
 //        manager.setQueue(songs, startPlayingFromIndex)
-        queueService.setQueue(songs, startPlayingFromIndex)
-        playerService.startServiceIfNotRunning(songs, startPlayingFromIndex)
+//        queueService.setQueue(songs, startPlayingFromIndex)
+        viewModelScope.launch {
+            playerService.startServiceIfNotRunning(songs, startPlayingFromIndex)
+        }
         showMessage(messageStore.getString(R.string.playing))
     }
 

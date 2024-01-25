@@ -170,10 +170,11 @@ dependencies {
     implementation(platform(Libraries.firebaseBom))
     implementation(Libraries.firebaseCrashlytics)
 
-    implementation(Libraries.exoPlayer)
+//    implementation(Libraries.exoPlayer)
     implementation(Libraries.media3ExoPlayer)
-    implementation(Libraries.media3Transformer)
-    implementation(Libraries.exoPlayerUi)
+    implementation(Libraries.media3Session)
+//    implementation(Libraries.media3Transformer)
+//    implementation(Libraries.exoPlayerUi)
 
     implementation(Libraries.coilCompose)
     implementation(Libraries.palette)

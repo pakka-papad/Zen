@@ -15,7 +15,16 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -178,15 +187,19 @@ class CollectionViewModel @Inject constructor(
 
     fun setQueue(songs: List<Song>?, startPlayingFromIndex: Int = 0) {
         if (songs == null) return
-        queueService.setQueue(songs, startPlayingFromIndex)
-        playerService.startServiceIfNotRunning(songs, startPlayingFromIndex)
+//        queueService.setQueue(songs, startPlayingFromIndex)
+        viewModelScope.launch {
+            playerService.startServiceIfNotRunning(songs, startPlayingFromIndex)
+        }
         showMessage(messageStore.getString(R.string.playing))
     }
 
     fun addToQueue(song: Song) {
         if (queue.isEmpty()) {
-            queueService.setQueue(listOf(song), 0)
-            playerService.startServiceIfNotRunning(listOf(song), 0)
+//            queueService.setQueue(listOf(song), 0)
+            viewModelScope.launch {
+                playerService.startServiceIfNotRunning(listOf(song), 0)
+            }
         } else {
             val result = queueService.append(song)
             showMessage(
@@ -198,8 +211,10 @@ class CollectionViewModel @Inject constructor(
 
     fun addToQueue(songs: List<Song>) {
         if (queue.isEmpty()) {
-            queueService.setQueue(songs, 0)
-            playerService.startServiceIfNotRunning(songs, 0)
+//            queueService.setQueue(songs, 0)
+            viewModelScope.launch {
+                playerService.startServiceIfNotRunning(songs, 0)
+            }
         } else {
             val result = queueService.append(songs)
             showMessage(messageStore.getString(if (result) R.string.done else R.string.song_already_in_queue))

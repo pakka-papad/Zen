@@ -1,29 +1,52 @@
 package com.github.pakka_papad.data.services
 
+import android.annotation.SuppressLint
+import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
-import android.os.Build
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
+import androidx.work.await
+import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.player.ZenPlayer
+import com.github.pakka_papad.player.toMediaItem
+import com.github.pakka_papad.toCorrectedParams
+import com.github.pakka_papad.toExoPlayerPlaybackParameters
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 
 interface PlayerService {
-    fun startServiceIfNotRunning(songs: List<Song>, startPlayingFromPosition: Int)
+    suspend fun startServiceIfNotRunning(songs: List<Song>, startPlayingFromPosition: Int)
 }
 
 class PlayerServiceImpl(
     private val context: Context,
+    private val queueService: QueueService,
+    private val preferenceProvider: ZenPreferenceProvider,
 ): PlayerService {
 
+    @SuppressLint("RestrictedApi")
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-    override fun startServiceIfNotRunning(songs: List<Song>, startPlayingFromPosition: Int) {
+    override suspend fun startServiceIfNotRunning(songs: List<Song>, startPlayingFromPosition: Int) {
+        queueService.setQueue(songs, startPlayingFromPosition)
         if (ZenPlayer.isRunning.get()) return
-        val intent = Intent(context, ZenPlayer::class.java)
-        intent.putExtra("locations", songs.map { it.location }.toTypedArray())
-        intent.putExtra("startPosition", startPlayingFromPosition)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(intent)
-        } else {
-            context.startService(intent)
+        MediaController.Builder(
+            context,
+            SessionToken(context, ComponentName(context, ZenPlayer::class.java))
+        ).buildAsync().await().apply {
+            withContext(Dispatchers.Main) {
+                stop()
+                clearMediaItems()
+                addMediaItems(songs.map(Song::toMediaItem))
+                prepare()
+                seekTo(startPlayingFromPosition, 0)
+                repeatMode = queueService.repeatMode.first().toExoPlayerRepeatMode()
+                playbackParameters = preferenceProvider.playbackParams.value
+                    .toCorrectedParams()
+                    .toExoPlayerPlaybackParameters()
+                play()
+            }
         }
     }
 }

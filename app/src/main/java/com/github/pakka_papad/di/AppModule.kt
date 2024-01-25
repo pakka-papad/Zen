@@ -197,10 +197,14 @@ object AppModule {
     @Singleton
     @Provides
     fun providesPlayerService(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
+        queueService: QueueService,
+        preferenceProvider: ZenPreferenceProvider,
     ): PlayerService {
         return PlayerServiceImpl(
-            context = context
+            context = context,
+            queueService = queueService,
+            preferenceProvider = preferenceProvider,
         )
     }
 

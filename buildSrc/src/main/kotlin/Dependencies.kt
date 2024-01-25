@@ -40,7 +40,7 @@ object Versions {
     const val timber = "5.0.1"
 
     const val exoPlayer = "2.18.1"
-    const val media3 = "1.0.0-beta02"
+    const val media3 = "1.2.1"
 
     const val coilCompose = "2.2.2"
     const val palette = "1.0.0"
@@ -119,6 +119,7 @@ object Libraries {
     const val exoPlayer = "com.google.android.exoplayer:exoplayer:${Versions.exoPlayer}"
     const val media3ExoPlayer = "androidx.media3:media3-exoplayer:${Versions.media3}"
     const val media3Transformer = "androidx.media3:media3-transformer:${Versions.media3}"
+    const val media3Session = "androidx.media3:media3-session:${Versions.media3}"
     const val exoPlayerUi = "com.google.android.exoplayer:exoplayer-ui:${Versions.exoPlayer}"
 
     const val coilCompose = "io.coil-kt:coil-compose:${Versions.coilCompose}"

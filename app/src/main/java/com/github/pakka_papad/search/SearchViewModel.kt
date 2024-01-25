@@ -78,8 +78,10 @@ class SearchViewModel @Inject constructor(
 
     fun setQueue(songs: List<Song>?, startPlayingFromIndex: Int = 0) {
         if (songs == null) return
-        queueService.setQueue(songs, startPlayingFromIndex)
-        playerService.startServiceIfNotRunning(songs, startPlayingFromIndex)
+//        queueService.setQueue(songs, startPlayingFromIndex)
+        viewModelScope.launch {
+            playerService.startServiceIfNotRunning(songs, startPlayingFromIndex)
+        }
         showMessage(messageStore.getString(R.string.playing))
     }
 

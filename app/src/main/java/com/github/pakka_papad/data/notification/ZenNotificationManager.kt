@@ -7,11 +7,13 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.support.v4.media.session.MediaSessionCompat
+import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.IconCompat
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.session.MediaSession
+import androidx.media3.session.MediaStyleNotificationHelper
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.MainActivity
 import com.github.pakka_papad.R
@@ -165,14 +167,14 @@ class ZenNotificationManager(
         PendingIntent.FLAG_IMMUTABLE
     )
 
+    @OptIn(UnstableApi::class)
     fun getPlayerNotification(
-        session: MediaSessionCompat,
+        session: MediaSession,
         showPlayButton: Boolean,
         isLiked: Boolean,
     ): Notification {
-        val mediaStyle = androidx.media.app.NotificationCompat.MediaStyle()
+        val mediaStyle = MediaStyleNotificationHelper.MediaStyle(session)
             .setShowActionsInCompactView(1,2,3)
-            .setMediaSession(session.sessionToken)
         return NotificationCompat.Builder(context, PLAYER_SERVICE).apply {
             setSmallIcon(R.mipmap.ic_notification)
             setContentTitle("Now Playing")
