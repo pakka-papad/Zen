@@ -1,7 +1,6 @@
 package com.github.pakka_papad
 
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -21,10 +20,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen().apply {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
-                setKeepOnScreenCondition { preferencesProvider.isOnBoardingComplete.value == null }
-            } else {
-                setKeepOnScreenCondition { false }
+            setKeepOnScreenCondition {
+                preferencesProvider.isOnBoardingComplete.value == null
             }
         }
         binding = ActivityMainBinding.inflate(layoutInflater)
