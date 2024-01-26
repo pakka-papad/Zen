@@ -229,6 +229,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
             removeAnalyticsListener(playbackStatsListener)
             removeListener(exoPlayerListener)
         }
+        mediaSession.release()
         broadcastReceiver?.let { unregisterReceiver(it) }
         broadcastReceiver?.stopListening()
         systemNotificationManager?.cancel(ZenNotificationManager.PLAYER_NOTIFICATION_ID)
@@ -236,15 +237,6 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
         job.cancel()
         systemNotificationManager = null
         broadcastReceiver = null
-        Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
-            putExtra(WidgetBroadcast.WIDGET_BROADCAST, WidgetBroadcast.SONG_CHANGED)
-            putExtra("imageUri", "")
-            putExtra("title", "")
-            putExtra("artist", "")
-            putExtra("album", "")
-        }.also {
-            applicationContext.sendBroadcast(it)
-        }
     }
 
     private fun updateNotification() {
@@ -373,12 +365,23 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
      * This stops the service and onDestroy is called
      */
     override fun onBroadcastCancel() {
-        // Deprecated in api level 33
-//        stopForeground(true)
         Timber.d("onBroadcastCancel()")
-        // https://github.com/androidx/media/issues/389#issuecomment-1546611545
-        mediaSession.release()
-        stopSelf()
+        /**
+         * To close the media session, first call mediaSession.release followed by stopSelf()
+         * See issue: https://github.com/androidx/media/issues/389#issuecomment-1546611545
+         */
+//        mediaSession.release()
+//        stopSelf()
+
+        /**
+         * Not releasing media session on cancel click
+         * Instead we pause the player and remove the notification
+         */
+        exoPlayer.pause()
+        scope.launch {
+            delay(100)
+            systemNotificationManager?.cancel(ZenNotificationManager.PLAYER_NOTIFICATION_ID)
+        }
     }
 
 }
