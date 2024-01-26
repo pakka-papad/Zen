@@ -1,5 +1,6 @@
 package com.github.pakka_papad.player
 
+import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.appwidget.AppWidgetManager
 import android.content.Context
@@ -7,6 +8,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.core.net.toUri
@@ -95,6 +97,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
 
     private lateinit var mediaSession: MediaSession
 
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate() {
         super.onCreate()
         broadcastReceiver = ZenBroadcastReceiver()
@@ -104,7 +107,11 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
         queueService.addListener(this)
 
         IntentFilter(Constants.PACKAGE_NAME).also {
-            registerReceiver(broadcastReceiver, it)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(broadcastReceiver, it, RECEIVER_NOT_EXPORTED)
+            } else {
+                registerReceiver(broadcastReceiver, it)
+            }
         }
         broadcastReceiver?.startListening(this)
         exoPlayer.addListener(exoPlayerListener)
@@ -134,11 +141,12 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
                 actionFactory: MediaNotification.ActionFactory,
                 onNotificationChangedCallback: MediaNotification.Provider.Callback
             ): MediaNotification {
+                Timber.d("MediaNotification.Provider.createNotification()")
                 return MediaNotification(
                     ZenNotificationManager.PLAYER_NOTIFICATION_ID,
                     notificationManager.getPlayerNotification(
                         session = mediaSession,
-                        showPlayButton = false,
+                        showPlayButton = !mediaSession.player.isPlaying,
                         isLiked = queueService.getSongAtIndex(exoPlayer.currentMediaItemIndex)
                             ?.favourite ?: false
                     )
@@ -150,7 +158,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
                 action: String,
                 extras: Bundle
             ): Boolean {
-                return false
+                return true
             }
         })
     }
@@ -174,7 +182,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
             } catch (e: Exception) {
                 Timber.e(e)
             }
-            updateNotification()
+//            updateNotification()
         }
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -184,7 +192,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
                 putExtra("isPlaying", isPlaying)
             }
             this@ZenPlayer.applicationContext.sendBroadcast(broadcast)
-            updateNotification()
+//            updateNotification()
         }
 
         override fun onPlayerError(error: PlaybackException) {
@@ -204,6 +212,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
 
     override fun onDestroy() {
         super.onDestroy()
+        Timber.d("onDestroy")
         stopService()
     }
 
@@ -213,29 +222,33 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
 
     private fun stopService() {
         isRunning.set(false)
-        queueService.clearQueue()
-        queueService.removeListener(this)
+        with(queueService) {
+            clearQueue()
+            removeListener(this@ZenPlayer)
+        }
         sleepTimerService.cancel()
-        exoPlayer.stop()
-        exoPlayer.clearMediaItems()
-        exoPlayer.removeListener(exoPlayerListener)
-        exoPlayer.removeAnalyticsListener(playbackStatsListener)
+        with(exoPlayer) {
+            stop()
+            clearMediaItems()
+            removeAnalyticsListener(playbackStatsListener)
+            removeListener(exoPlayerListener)
+        }
         broadcastReceiver?.let { unregisterReceiver(it) }
-        mediaSession.release()
         broadcastReceiver?.stopListening()
         systemNotificationManager?.cancel(ZenNotificationManager.PLAYER_NOTIFICATION_ID)
         scope.cancel()
         job.cancel()
         systemNotificationManager = null
         broadcastReceiver = null
-        val broadcast = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
+        Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
             putExtra(WidgetBroadcast.WIDGET_BROADCAST, WidgetBroadcast.SONG_CHANGED)
             putExtra("imageUri", "")
             putExtra("title", "")
             putExtra("artist", "")
             putExtra("album", "")
+        }.also {
+            applicationContext.sendBroadcast(it)
         }
-        applicationContext.sendBroadcast(broadcast)
     }
 
     private fun updateNotification() {
@@ -270,7 +283,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
                     .toExoPlayerPlaybackParameters()
                 exoPlayer.play()
             }
-            updateNotification()
+//            updateNotification()
         }
     }
 
@@ -312,6 +325,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
      * Player.Listener onIsPlayingChanged gets called.
      */
     override fun onBroadcastPausePlay() {
+        Timber.d("onBroadcastPausePlay()")
         if (exoPlayer.isPlaying) exoPlayer.pause() else exoPlayer.play()
     }
 
@@ -321,6 +335,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
      * Player.Listener onMediaItemTransition gets called.
      */
     override fun onBroadcastNext() {
+        Timber.d("onBroadcastNext()")
         if (!exoPlayer.hasNextMediaItem()) {
             showToast("No next song in queue")
             return
@@ -334,6 +349,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
      * Player.Listener onMediaItemTransition gets called.
      */
     override fun onBroadcastPrevious() {
+        Timber.d("onBroadcastPrevious()")
         if (!exoPlayer.hasPreviousMediaItem()) {
             showToast("No previous song in queue")
             return
@@ -347,10 +363,10 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
      * DataManager then calls updateNotification of DataManager.Callback
      */
     override fun onBroadcastLike() {
+        Timber.d("onBroadcastLike()")
         val currentSong = queueService.getSongAtIndex(exoPlayer.currentMediaItemIndex) ?: return
         val updatedSong = currentSong.copy(favourite = !currentSong.favourite)
         scope.launch {
-//            onUpdateCurrentSong()
             queueService.update(updatedSong)
             songService.updateSong(updatedSong)
         }
@@ -363,6 +379,9 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
     override fun onBroadcastCancel() {
         // Deprecated in api level 33
 //        stopForeground(true)
+        Timber.d("onBroadcastCancel()")
+        // https://github.com/androidx/media/issues/389#issuecomment-1546611545
+        mediaSession.release()
         stopSelf()
     }
 
