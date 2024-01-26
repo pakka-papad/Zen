@@ -6,7 +6,6 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -130,9 +129,6 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
                 withContext(Dispatchers.Main) { exoPlayer.repeatMode = it.toExoPlayerRepeatMode() }
             }
         }
-
-        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        audioManager.isSpeakerphoneOn = true
 
         setMediaNotificationProvider(object : MediaNotification.Provider {
             override fun createNotification(
