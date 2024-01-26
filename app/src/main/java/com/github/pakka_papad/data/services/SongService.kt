@@ -41,6 +41,7 @@ interface SongService {
     fun getFavouriteSongs(): Flow<List<Song>>
 
     suspend fun updateSong(song: Song)
+    suspend fun getSongsFromLocations(locations: List<String>): List<Song>
 }
 
 class SongServiceImpl(
@@ -103,5 +104,9 @@ class SongServiceImpl(
 
     override suspend fun updateSong(song: Song) {
         songDao.updateSong(song)
+    }
+
+    override suspend fun getSongsFromLocations(locations: List<String>): List<Song> {
+        return songDao.getSongsFromLocations(locations)
     }
 }

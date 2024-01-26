@@ -1,8 +1,19 @@
 package com.github.pakka_papad.data.daos
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Transaction
+import androidx.room.Update
 import com.github.pakka_papad.Constants
-import com.github.pakka_papad.data.music.*
+import com.github.pakka_papad.data.music.AlbumArtistWithSongCount
+import com.github.pakka_papad.data.music.ArtistWithSongCount
+import com.github.pakka_papad.data.music.ComposerWithSongCount
+import com.github.pakka_papad.data.music.GenreWithSongCount
+import com.github.pakka_papad.data.music.LyricistWithSongCount
+import com.github.pakka_papad.data.music.Song
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -61,4 +72,7 @@ interface SongDao {
 
     @Query("SELECT * FROM ${Constants.Tables.SONG_TABLE} WHERE favourite = 1")
     fun getAllFavourites(): Flow<List<Song>>
+
+    @Query("SELECT * FROM ${Constants.Tables.SONG_TABLE} WHERE location IN (:locations)")
+    suspend fun getSongsFromLocations(locations: List<String>): List<Song>
 }

@@ -93,6 +93,19 @@ object AppModule {
 
     @Singleton
     @Provides
+    fun providesQueueStateDatastore(
+        @ApplicationContext context: Context,
+    ): DataStore<QueueState> {
+        return DataStoreFactory.create(
+            serializer = QueueStateSerializer,
+            produceFile = {
+                context.dataStoreFile(Constants.QUEUE_STATE_FILE)
+            }
+        )
+    }
+
+    @Singleton
+    @Provides
     fun providesCoroutineScope(): CoroutineScope {
         return CoroutineScope(SupervisorJob() + Dispatchers.Default)
     }

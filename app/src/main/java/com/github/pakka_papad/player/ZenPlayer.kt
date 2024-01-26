@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.core.net.toUri
+import androidx.datastore.core.DataStore
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackException
@@ -24,8 +25,10 @@ import androidx.media3.session.MediaNotification
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import com.github.pakka_papad.Constants
+import com.github.pakka_papad.data.QueueState
 import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.ZenPreferenceProvider
+import com.github.pakka_papad.data.copy
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.data.music.SongExtractor
 import com.github.pakka_papad.data.notification.ZenNotificationManager
@@ -67,6 +70,8 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
     @Inject lateinit var exoPlayer: ExoPlayer
     @Inject lateinit var crashReporter: ZenCrashReporter
     @Inject lateinit var preferencesProvider: ZenPreferenceProvider
+    @Inject lateinit var queueState: DataStore<QueueState>
+    @Inject lateinit var sessionListener: SessionCallback
 
     private var broadcastReceiver: ZenBroadcastReceiver? = null
 
@@ -100,7 +105,9 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
     override fun onCreate() {
         super.onCreate()
         broadcastReceiver = ZenBroadcastReceiver()
-        mediaSession = MediaSession.Builder(applicationContext, exoPlayer).build()
+        mediaSession = MediaSession.Builder(applicationContext, exoPlayer)
+            .setCallback(sessionListener)
+            .build()
         systemNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         isRunning.set(true)
         queueService.addListener(this)
@@ -218,23 +225,43 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
 
     private fun stopService() {
         isRunning.set(false)
-        with(queueService) {
-            clearQueue()
-            removeListener(this@ZenPlayer)
+
+        scope.launch {
+            queueState.updateData {
+                it.copy {
+                    locations.apply {
+                        clear()
+                        addAll(queueService.queue.map { song -> song.location })
+                    }
+                    startIndex = withContext(Dispatchers.Main) { exoPlayer.currentMediaItemIndex }
+                    startPositionMs = withContext(Dispatchers.Main) { exoPlayer.currentPosition }
+                }
+            }
+            withContext(Dispatchers.Main) {
+                with(exoPlayer) {
+                    stop()
+                    clearMediaItems()
+                    removeAnalyticsListener(playbackStatsListener)
+                    removeListener(exoPlayerListener)
+                }
+                showToast("Saved")
+            }
+        }.invokeOnCompletion {
+            with(queueService) {
+                clearQueue()
+                removeListener(this@ZenPlayer)
+            }
+            scope.cancel()
+            job.cancel()
         }
+
         sleepTimerService.cancel()
-        with(exoPlayer) {
-            stop()
-            clearMediaItems()
-            removeAnalyticsListener(playbackStatsListener)
-            removeListener(exoPlayerListener)
-        }
-        mediaSession.release()
+
+//        mediaSession.release()
         broadcastReceiver?.let { unregisterReceiver(it) }
         broadcastReceiver?.stopListening()
         systemNotificationManager?.cancel(ZenNotificationManager.PLAYER_NOTIFICATION_ID)
-        scope.cancel()
-        job.cancel()
+
         systemNotificationManager = null
         broadcastReceiver = null
     }
@@ -370,18 +397,18 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
          * To close the media session, first call mediaSession.release followed by stopSelf()
          * See issue: https://github.com/androidx/media/issues/389#issuecomment-1546611545
          */
-//        mediaSession.release()
-//        stopSelf()
+        mediaSession.release()
+        stopSelf()
 
         /**
          * Not releasing media session on cancel click
          * Instead we pause the player and remove the notification
          */
-        exoPlayer.pause()
-        scope.launch {
-            delay(100)
-            systemNotificationManager?.cancel(ZenNotificationManager.PLAYER_NOTIFICATION_ID)
-        }
+//        exoPlayer.pause()
+//        scope.launch {
+//            delay(100)
+//            systemNotificationManager?.cancel(ZenNotificationManager.PLAYER_NOTIFICATION_ID)
+//        }
     }
 
 }
