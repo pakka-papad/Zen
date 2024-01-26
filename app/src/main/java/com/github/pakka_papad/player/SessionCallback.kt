@@ -12,11 +12,8 @@ import com.google.common.util.concurrent.SettableFuture
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class SessionCallback @Inject constructor(
+class SessionCallback (
     private val queueService: QueueService,
     private val songService: SongService,
     private val scope: CoroutineScope,

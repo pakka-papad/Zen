@@ -71,10 +71,9 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
     @Inject lateinit var crashReporter: ZenCrashReporter
     @Inject lateinit var preferencesProvider: ZenPreferenceProvider
     @Inject lateinit var queueState: DataStore<QueueState>
-    @Inject lateinit var sessionListener: SessionCallback
 
+    private var sessionListener: SessionCallback? = null
     private var broadcastReceiver: ZenBroadcastReceiver? = null
-
     private var systemNotificationManager: NotificationManager? = null
 
     private val job = SupervisorJob()
@@ -105,8 +104,14 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
     override fun onCreate() {
         super.onCreate()
         broadcastReceiver = ZenBroadcastReceiver()
+        sessionListener = SessionCallback(
+            queueService = queueService,
+            songService = songService,
+            scope = scope,
+            queueState = queueState,
+        )
         mediaSession = MediaSession.Builder(applicationContext, exoPlayer)
-            .setCallback(sessionListener)
+            .setCallback(sessionListener!!)
             .build()
         systemNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         isRunning.set(true)
@@ -258,6 +263,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
         sleepTimerService.cancel()
 
 //        mediaSession.release()
+        sessionListener = null
         broadcastReceiver?.let { unregisterReceiver(it) }
         broadcastReceiver?.stopListening()
         systemNotificationManager?.cancel(ZenNotificationManager.PLAYER_NOTIFICATION_ID)
