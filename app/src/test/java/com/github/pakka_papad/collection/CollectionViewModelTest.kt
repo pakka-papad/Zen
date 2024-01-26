@@ -12,12 +12,13 @@ import com.github.pakka_papad.data.services.PlaylistService
 import com.github.pakka_papad.data.services.QueueService
 import com.github.pakka_papad.data.services.SongService
 import com.github.pakka_papad.util.MessageStore
+import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
@@ -40,8 +41,8 @@ class CollectionViewModelTest {
     private val messageStore: MessageStore = mockk()
     private val playlistService: PlaylistService = mockk(relaxed = true)
     private val songService: SongService = mockk(relaxed = true)
-    private val playerService: PlayerService = mockk(relaxed = true)
     private val queueService: QueueService = mockk(relaxed = true)
+    private val playerService: PlayerService = mockk()
     private lateinit var viewModel: CollectionViewModel
 
     private val artistName = "Some artist"
@@ -68,6 +69,9 @@ class CollectionViewModelTest {
         every { queueService.queue } returns queueList
         every { messageStore.getString(any()) } returns mockMessage
         every { messageStore.getString(allAny()) } returns mockMessage
+        coEvery { playerService.startServiceIfNotRunning(any(), any()) } answers {
+            queueService.setQueue(firstArg(), secondArg())
+        }
         viewModel = CollectionViewModel(
             messageStore = messageStore,
             playlistService = playlistService,
@@ -125,13 +129,13 @@ class CollectionViewModelTest {
         viewModel.setQueue(artistWithSongs.songs, 0)
 
         // Then
-        verify(exactly = 1) {
+        coVerify(exactly = 1) {
             queueService.setQueue(artistWithSongs.songs, 0)
             playerService.startServiceIfNotRunning(artistWithSongs.songs, 0)
         }
-        verifyOrder {
-            queueService.setQueue(artistWithSongs.songs, 0)
+        coVerifyOrder {
             playerService.startServiceIfNotRunning(artistWithSongs.songs, 0)
+            queueService.setQueue(artistWithSongs.songs, 0)
         }
     }
 
@@ -146,13 +150,13 @@ class CollectionViewModelTest {
         viewModel.addToQueue(mockSong)
 
         // Then
-        verify(exactly = 1) {
-            queueService.setQueue(listOf(mockSong), 0)
+        coVerify(exactly = 1) {
             playerService.startServiceIfNotRunning(listOf(mockSong), 0)
+            queueService.setQueue(listOf(mockSong), 0)
         }
-        verifyOrder {
-            queueService.setQueue(listOf(mockSong), 0)
+        coVerifyOrder {
             playerService.startServiceIfNotRunning(listOf(mockSong), 0)
+            queueService.setQueue(listOf(mockSong), 0)
         }
     }
 
@@ -202,13 +206,13 @@ class CollectionViewModelTest {
         viewModel.addToQueue(mockSongs)
 
         // Then
-        verify(exactly = 1) {
+        coVerify(exactly = 1) {
             queueService.setQueue(mockSongs, 0)
             playerService.startServiceIfNotRunning(mockSongs, 0)
         }
-        verifyOrder {
-            queueService.setQueue(mockSongs, 0)
+        coVerifyOrder {
             playerService.startServiceIfNotRunning(mockSongs, 0)
+            queueService.setQueue(mockSongs, 0)
         }
     }
 
