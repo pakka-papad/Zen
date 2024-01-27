@@ -8,7 +8,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
@@ -19,8 +18,6 @@ import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.PlaybackStatsListener
-import androidx.media3.session.CommandButton
-import androidx.media3.session.MediaNotification
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import com.github.pakka_papad.Constants
@@ -29,7 +26,6 @@ import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.data.music.SongExtractor
-import com.github.pakka_papad.data.notification.ZenNotificationManager
 import com.github.pakka_papad.data.services.AnalyticsService
 import com.github.pakka_papad.data.services.QueueService
 import com.github.pakka_papad.data.services.SleepTimerService
@@ -37,13 +33,11 @@ import com.github.pakka_papad.data.services.SongService
 import com.github.pakka_papad.toCorrectedParams
 import com.github.pakka_papad.toExoPlayerPlaybackParameters
 import com.github.pakka_papad.widgets.WidgetBroadcast
-import com.google.common.collect.ImmutableList
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -59,7 +53,6 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? = mediaSession
 
-    @Inject lateinit var notificationManager: ZenNotificationManager
     @Inject lateinit var songExtractor: SongExtractor
     @Inject lateinit var queueService: QueueService
     @Inject lateinit var songService: SongService
@@ -70,6 +63,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
     @Inject lateinit var preferencesProvider: ZenPreferenceProvider
     @Inject lateinit var queueStateProvider: QueueStateProvider
     @Inject lateinit var sessionCallback: SessionCallback
+    @Inject lateinit var notificationProvider: NotificationProvider
 
     private var broadcastReceiver: ZenBroadcastReceiver? = null
     private var systemNotificationManager: NotificationManager? = null
@@ -105,6 +99,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
         mediaSession = MediaSession.Builder(applicationContext, exoPlayer)
             .setCallback(sessionCallback)
             .build()
+
         systemNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         isRunning.set(true)
         queueService.addListener(this)
@@ -134,33 +129,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
             }
         }
 
-        setMediaNotificationProvider(object : MediaNotification.Provider {
-            override fun createNotification(
-                mediaSession: MediaSession,
-                customLayout: ImmutableList<CommandButton>,
-                actionFactory: MediaNotification.ActionFactory,
-                onNotificationChangedCallback: MediaNotification.Provider.Callback
-            ): MediaNotification {
-                Timber.d("MediaNotification.Provider.createNotification()")
-                return MediaNotification(
-                    ZenNotificationManager.PLAYER_NOTIFICATION_ID,
-                    notificationManager.getPlayerNotification(
-                        session = mediaSession,
-                        showPlayButton = !mediaSession.player.isPlaying,
-                        isLiked = queueService.getSongAtIndex(exoPlayer.currentMediaItemIndex)
-                            ?.favourite ?: false
-                    )
-                )
-            }
-
-            override fun handleCustomCommand(
-                session: MediaSession,
-                action: String,
-                extras: Bundle
-            ): Boolean {
-                return true
-            }
-        })
+        setMediaNotificationProvider(notificationProvider)
     }
 
     private val exoPlayerListener = object : Player.Listener {
@@ -245,27 +214,10 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
 //        mediaSession.release()
         broadcastReceiver?.let { unregisterReceiver(it) }
         broadcastReceiver?.stopListening()
-        systemNotificationManager?.cancel(ZenNotificationManager.PLAYER_NOTIFICATION_ID)
+        systemNotificationManager?.cancel(NotificationProvider.PLAYER_NOTIFICATION_ID)
 
         systemNotificationManager = null
         broadcastReceiver = null
-    }
-
-    private fun updateNotification() {
-        scope.launch {
-            delay(100)
-            withContext(Dispatchers.Main) {
-                systemNotificationManager?.notify(
-                    ZenNotificationManager.PLAYER_NOTIFICATION_ID,
-                    notificationManager.getPlayerNotification(
-                        session = mediaSession,
-                        showPlayButton = !exoPlayer.isPlaying,
-                        isLiked = queueService.getSongAtIndex(exoPlayer.currentMediaItemIndex)
-                            ?.favourite ?: false
-                    )
-                )
-            }
-        }
     }
 
     private fun setQueue(mediaItems: List<MediaItem>, startPosition: Int){
@@ -303,7 +255,16 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
                 exoPlayer.currentMediaItemIndex == position
             }
             if (!performUpdate) return@launch
-            updateNotification()
+            mediaSession.setCustomLayout(
+                listOf(
+                    if (updatedSong.favourite) ZenCommandButtons.liked
+                    else ZenCommandButtons.unliked,
+                    ZenCommandButtons.previous,
+                    ZenCommandButtons.playPause,
+                    ZenCommandButtons.next,
+                    ZenCommandButtons.cancel,
+                )
+            )
         }
     }
 

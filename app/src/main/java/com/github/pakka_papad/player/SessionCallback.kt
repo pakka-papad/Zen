@@ -13,6 +13,7 @@ import dagger.hilt.android.scopes.ServiceScoped
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @ServiceScoped
@@ -22,6 +23,37 @@ class SessionCallback @Inject constructor(
     private val scope: CoroutineScope,
     private val queueState: DataStore<QueueState>,
 ): MediaSession.Callback {
+
+    override fun onConnect(
+        session: MediaSession,
+        controller: MediaSession.ControllerInfo
+    ): MediaSession.ConnectionResult {
+        val connectionResult = super.onConnect(session, controller)
+        val availableCommands = connectionResult.availableSessionCommands.buildUpon()
+        availableCommands.add(ZenCommandButtons.liked.sessionCommand!!)
+        availableCommands.add(ZenCommandButtons.unliked.sessionCommand!!)
+        availableCommands.add(ZenCommandButtons.cancel.sessionCommand!!)
+        return MediaSession.ConnectionResult.accept(
+            availableCommands.build(),
+            connectionResult.availablePlayerCommands
+        )
+    }
+
+    override fun onPostConnect(session: MediaSession, controller: MediaSession.ControllerInfo) {
+        super.onPostConnect(session, controller)
+        val isLiked = queueService.currentSong.value?.favourite ?: false
+        Timber.d("onPostConnect() -> ${session.player.currentMediaItem?.mediaMetadata?.title} isLiked: $isLiked")
+        session.setCustomLayout(
+            controller,
+            listOf(
+                if (isLiked) ZenCommandButtons.liked else ZenCommandButtons.unliked,
+                ZenCommandButtons.previous,
+                ZenCommandButtons.playPause,
+                ZenCommandButtons.next,
+                ZenCommandButtons.cancel
+            )
+        )
+    }
 
     @UnstableApi
     override fun onPlaybackResumption(

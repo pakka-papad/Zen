@@ -18,7 +18,6 @@ import androidx.room.Room
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.data.*
 import com.github.pakka_papad.data.music.SongExtractor
-import com.github.pakka_papad.data.notification.ZenNotificationManager
 import com.github.pakka_papad.data.services.*
 import com.github.pakka_papad.player.ZenBroadcastReceiver
 import com.github.pakka_papad.util.MessageStore
@@ -49,12 +48,6 @@ object AppModule {
             AppDatabase::class.java,
             Constants.DATABASE_NAME
         ).build()
-    }
-
-    @Singleton
-    @Provides
-    fun providesNotificationManager(@ApplicationContext context: Context): ZenNotificationManager {
-        return ZenNotificationManager(context)
     }
 
     @SuppressLint("UnsafeOptInUsageError")
