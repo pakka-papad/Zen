@@ -62,7 +62,7 @@
     <img src="screenshots/Dark/all_songs_malibu.jpg" style="height: 300px; margin: 10px 0px 10px 0px;"/>
     <img src="screenshots/Dark/all_songs_melrose.jpg" style="height: 300px; margin: 10px 0px 10px 0px;"/>
 </div>
-<h3>Tech Stack and Open-Source Libraries</h3>
+<h3>Tech Stack and Libraries</h3>
 <ul>
   <li>
     Minimum SDK level 23
