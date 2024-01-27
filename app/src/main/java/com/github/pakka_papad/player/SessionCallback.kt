@@ -9,11 +9,14 @@ import com.github.pakka_papad.data.services.QueueService
 import com.github.pakka_papad.data.services.SongService
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.SettableFuture
+import dagger.hilt.android.scopes.ServiceScoped
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SessionCallback (
+@ServiceScoped
+class SessionCallback @Inject constructor(
     private val queueService: QueueService,
     private val songService: SongService,
     private val scope: CoroutineScope,

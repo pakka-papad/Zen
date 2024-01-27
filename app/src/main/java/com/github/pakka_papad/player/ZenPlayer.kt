@@ -11,7 +11,6 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.core.net.toUri
-import androidx.datastore.core.DataStore
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackException
@@ -25,10 +24,9 @@ import androidx.media3.session.MediaNotification
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import com.github.pakka_papad.Constants
-import com.github.pakka_papad.data.QueueState
+import com.github.pakka_papad.data.QueueStateProvider
 import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.ZenPreferenceProvider
-import com.github.pakka_papad.data.copy
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.data.music.SongExtractor
 import com.github.pakka_papad.data.notification.ZenNotificationManager
@@ -70,9 +68,9 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
     @Inject lateinit var exoPlayer: ExoPlayer
     @Inject lateinit var crashReporter: ZenCrashReporter
     @Inject lateinit var preferencesProvider: ZenPreferenceProvider
-    @Inject lateinit var queueState: DataStore<QueueState>
+    @Inject lateinit var queueStateProvider: QueueStateProvider
+    @Inject lateinit var sessionCallback: SessionCallback
 
-    private var sessionListener: SessionCallback? = null
     private var broadcastReceiver: ZenBroadcastReceiver? = null
     private var systemNotificationManager: NotificationManager? = null
 
@@ -104,14 +102,8 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
     override fun onCreate() {
         super.onCreate()
         broadcastReceiver = ZenBroadcastReceiver()
-        sessionListener = SessionCallback(
-            queueService = queueService,
-            songService = songService,
-            scope = scope,
-            queueState = queueState,
-        )
         mediaSession = MediaSession.Builder(applicationContext, exoPlayer)
-            .setCallback(sessionListener!!)
+            .setCallback(sessionCallback)
             .build()
         systemNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         isRunning.set(true)
@@ -230,40 +222,27 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
 
     private fun stopService() {
         isRunning.set(false)
-
-        scope.launch {
-            queueState.updateData {
-                it.copy {
-                    locations.apply {
-                        clear()
-                        addAll(queueService.queue.map { song -> song.location })
-                    }
-                    startIndex = withContext(Dispatchers.Main) { exoPlayer.currentMediaItemIndex }
-                    startPositionMs = withContext(Dispatchers.Main) { exoPlayer.currentPosition }
-                }
-            }
-            withContext(Dispatchers.Main) {
-                with(exoPlayer) {
-                    stop()
-                    clearMediaItems()
-                    removeAnalyticsListener(playbackStatsListener)
-                    removeListener(exoPlayerListener)
-                }
-                showToast("Saved")
-            }
-        }.invokeOnCompletion {
-            with(queueService) {
-                clearQueue()
-                removeListener(this@ZenPlayer)
-            }
-            scope.cancel()
-            job.cancel()
+        queueStateProvider.saveState(
+            queue = queueService.queue.map { it.location },
+            startIndex = exoPlayer.currentMediaItemIndex,
+            startPosition = exoPlayer.currentPosition
+        )
+        with(queueService) {
+            clearQueue()
+            removeListener(this@ZenPlayer)
         }
+        with(exoPlayer) {
+            stop()
+            clearMediaItems()
+            removeAnalyticsListener(playbackStatsListener)
+            removeListener(exoPlayerListener)
+        }
+        scope.cancel()
+        job.cancel()
 
         sleepTimerService.cancel()
 
 //        mediaSession.release()
-        sessionListener = null
         broadcastReceiver?.let { unregisterReceiver(it) }
         broadcastReceiver?.stopListening()
         systemNotificationManager?.cancel(ZenNotificationManager.PLAYER_NOTIFICATION_ID)
