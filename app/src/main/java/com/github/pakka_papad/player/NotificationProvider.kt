@@ -15,7 +15,6 @@ import androidx.media3.session.CommandButton
 import androidx.media3.session.MediaNotification
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaStyleNotificationHelper
-import com.github.pakka_papad.Constants
 import com.github.pakka_papad.MainActivity
 import com.github.pakka_papad.R
 import com.github.pakka_papad.data.services.QueueService
@@ -72,7 +71,6 @@ class NotificationProvider @Inject constructor(
         actionFactory: MediaNotification.ActionFactory,
         onNotificationChangedCallback: MediaNotification.Provider.Callback
     ): MediaNotification {
-        Timber.d("createNotification()")
         val mediaStyle = MediaStyleNotificationHelper.MediaStyle(mediaSession)
             .setShowActionsInCompactView(1,2,3)
 
@@ -80,6 +78,7 @@ class NotificationProvider @Inject constructor(
             .apply {
                 setSmallIcon(R.mipmap.ic_notification)
                 setContentTitle(mediaSession.player.currentMediaItem?.mediaMetadata?.title)
+                setContentText(mediaSession.player.currentMediaItem?.mediaMetadata?.artist)
                 setOngoing(true)
                 priority = NotificationCompat.PRIORITY_MAX
                 setSilent(true)
@@ -92,6 +91,8 @@ class NotificationProvider @Inject constructor(
          */
         val isLiked = queueService.getSongAtIndex(mediaSession.player.currentMediaItemIndex)
             ?.favourite ?: false
+
+        Timber.d("createNotification() ${mediaSession.player.currentMediaItem?.mediaMetadata?.title} isLiked: $isLiked")
 
         customLayout.mapIndexed { index, commandButton ->
             when(index) {
@@ -135,39 +136,9 @@ class NotificationProvider @Inject constructor(
         return MediaNotification(PLAYER_NOTIFICATION_ID, builder.build())
     }
 
-    private val closeAction =  PendingIntent.getBroadcast(
-        context, ZenBroadcastReceiver.CANCEL_ACTION_REQUEST_CODE,
-        Intent(Constants.PACKAGE_NAME).putExtra(
-            ZenBroadcastReceiver.AUDIO_CONTROL,
-            ZenBroadcastReceiver.ZEN_PLAYER_CANCEL
-        ),
-        PendingIntent.FLAG_IMMUTABLE
-    )
-
-    private val likeUnlikeAction = PendingIntent.getBroadcast(
-        context, ZenBroadcastReceiver.LIKE_ACTION_REQUEST_CODE,
-        Intent(Constants.PACKAGE_NAME).putExtra(
-            ZenBroadcastReceiver.AUDIO_CONTROL,
-            ZenBroadcastReceiver.ZEN_PLAYER_LIKE
-        ),
-        PendingIntent.FLAG_IMMUTABLE
-    )
-
     override fun handleCustomCommand(
         session: MediaSession,
         action: String,
         extras: Bundle
-    ): Boolean {
-        when(action) {
-            ZenCommands.LIKE, ZenCommands.UNLIKE -> {
-                likeUnlikeAction.send()
-                return true
-            }
-            ZenCommands.CLOSE -> {
-                closeAction.send()
-                return true
-            }
-        }
-        return false
-    }
+    ): Boolean = false
 }

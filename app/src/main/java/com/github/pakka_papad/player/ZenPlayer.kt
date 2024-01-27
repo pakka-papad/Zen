@@ -95,13 +95,13 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate() {
         super.onCreate()
+        isRunning.set(true)
         broadcastReceiver = ZenBroadcastReceiver()
         mediaSession = MediaSession.Builder(applicationContext, exoPlayer)
             .setCallback(sessionCallback)
             .build()
 
         systemNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        isRunning.set(true)
         queueService.addListener(this)
 
         IntentFilter(Constants.PACKAGE_NAME).also {
@@ -139,6 +139,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
             try {
                 queueService.setCurrentSong(exoPlayer.currentMediaItemIndex)
                 queueService.getSongAtIndex(exoPlayer.currentMediaItemIndex)?.let { song ->
+                    updateNotification(song.favourite)
                     val broadcast = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
                         putExtra(WidgetBroadcast.WIDGET_BROADCAST, WidgetBroadcast.SONG_CHANGED)
                         putExtra("imageUri", song.artUri)
@@ -220,6 +221,18 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
         broadcastReceiver = null
     }
 
+    private fun updateNotification(isLiked: Boolean) {
+        mediaSession.setCustomLayout(
+            listOf(
+                if (isLiked) ZenCommandButtons.liked else ZenCommandButtons.unliked,
+                ZenCommandButtons.previous,
+                ZenCommandButtons.playPause,
+                ZenCommandButtons.next,
+                ZenCommandButtons.cancel
+            )
+        )
+    }
+
     private fun setQueue(mediaItems: List<MediaItem>, startPosition: Int){
         scope.launch {
             val repeatMode = queueService.repeatMode.first()
@@ -255,16 +268,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
                 exoPlayer.currentMediaItemIndex == position
             }
             if (!performUpdate) return@launch
-            mediaSession.setCustomLayout(
-                listOf(
-                    if (updatedSong.favourite) ZenCommandButtons.liked
-                    else ZenCommandButtons.unliked,
-                    ZenCommandButtons.previous,
-                    ZenCommandButtons.playPause,
-                    ZenCommandButtons.next,
-                    ZenCommandButtons.cancel,
-                )
-            )
+            updateNotification(updatedSong.favourite)
         }
     }
 
