@@ -1,9 +1,7 @@
 package com.github.pakka_papad.player
 
 import android.annotation.SuppressLint
-import android.app.NotificationManager
 import android.appwidget.AppWidgetManager
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
@@ -66,7 +64,6 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
     @Inject lateinit var notificationProvider: NotificationProvider
 
     private var broadcastReceiver: ZenBroadcastReceiver? = null
-    private var systemNotificationManager: NotificationManager? = null
 
     private val job = SupervisorJob()
     private val scope = CoroutineScope(job + Dispatchers.Default)
@@ -101,7 +98,6 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
             .setCallback(sessionCallback)
             .build()
 
-        systemNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         queueService.addListener(this)
 
         IntentFilter(Constants.PACKAGE_NAME).also {
@@ -152,7 +148,6 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
             } catch (e: Exception) {
                 Timber.e(e)
             }
-//            updateNotification()
         }
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -162,7 +157,6 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
                 putExtra("isPlaying", isPlaying)
             }
             this@ZenPlayer.applicationContext.sendBroadcast(broadcast)
-//            updateNotification()
         }
 
         override fun onPlayerError(error: PlaybackException) {
@@ -212,12 +206,8 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
 
         sleepTimerService.cancel()
 
-//        mediaSession.release()
         broadcastReceiver?.let { unregisterReceiver(it) }
         broadcastReceiver?.stopListening()
-        systemNotificationManager?.cancel(NotificationProvider.PLAYER_NOTIFICATION_ID)
-
-        systemNotificationManager = null
         broadcastReceiver = null
     }
 
@@ -248,7 +238,6 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
                     .toExoPlayerPlaybackParameters()
                 exoPlayer.play()
             }
-//            updateNotification()
         }
     }
 
@@ -349,16 +338,6 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
          */
         mediaSession.release()
         stopSelf()
-
-        /**
-         * Not releasing media session on cancel click
-         * Instead we pause the player and remove the notification
-         */
-//        exoPlayer.pause()
-//        scope.launch {
-//            delay(100)
-//            systemNotificationManager?.cancel(ZenNotificationManager.PLAYER_NOTIFICATION_ID)
-//        }
     }
 
 }
