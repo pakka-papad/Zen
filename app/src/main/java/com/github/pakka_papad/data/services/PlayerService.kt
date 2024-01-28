@@ -15,6 +15,7 @@ import com.github.pakka_papad.toExoPlayerPlaybackParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import java.util.concurrent.atomic.AtomicLong
 
 interface PlayerService {
     suspend fun startServiceIfNotRunning(songs: List<Song>, startPlayingFromPosition: Int)
@@ -26,9 +27,16 @@ class PlayerServiceImpl(
     private val preferenceProvider: ZenPreferenceProvider,
 ): PlayerService {
 
+    private val lastCallTime = AtomicLong(0)
+
     @SuppressLint("RestrictedApi")
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     override suspend fun startServiceIfNotRunning(songs: List<Song>, startPlayingFromPosition: Int) {
+        synchronized(lastCallTime) {
+            if (lastCallTime.get() + 1000 >= System.currentTimeMillis()) return
+            lastCallTime.set(System.currentTimeMillis())
+        }
+
         queueService.setQueue(songs, startPlayingFromPosition)
         if (ZenPlayer.isRunning.get()) return
         MediaController.Builder(
