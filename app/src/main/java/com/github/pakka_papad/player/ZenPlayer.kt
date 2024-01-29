@@ -102,7 +102,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
 
         IntentFilter(Constants.PACKAGE_NAME).also {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                registerReceiver(broadcastReceiver, it, RECEIVER_NOT_EXPORTED)
+                registerReceiver(broadcastReceiver, it, RECEIVER_EXPORTED)
             } else {
                 registerReceiver(broadcastReceiver, it)
             }
