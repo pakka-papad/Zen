@@ -50,6 +50,7 @@
     "versionName": "1.2.3",
     "date": "29 January, 2024",
     "changes": [
+      "Updated logo",
       "Added support for playback resumption"
     ]
   }
