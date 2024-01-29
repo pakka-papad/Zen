@@ -1,31 +1,29 @@
 package com.github.pakka_papad.player
 
-import android.app.NotificationManager
-import android.app.Service
+import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.media.AudioManager
 import android.net.Uri
-import android.os.IBinder
-import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.MediaSessionCompat
-import android.support.v4.media.session.PlaybackStateCompat
+import android.os.Build
 import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.analytics.PlaybackStatsListener
+import androidx.media3.session.MediaSession
+import androidx.media3.session.MediaSessionService
 import com.github.pakka_papad.Constants
+import com.github.pakka_papad.data.QueueStateProvider
 import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.data.music.SongExtractor
-import com.github.pakka_papad.data.notification.ZenNotificationManager
 import com.github.pakka_papad.data.services.AnalyticsService
 import com.github.pakka_papad.data.services.QueueService
 import com.github.pakka_papad.data.services.SleepTimerService
@@ -38,7 +36,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -48,10 +45,12 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
-@UnstableApi @AndroidEntryPoint
-class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callback {
+@UnstableApi
+@AndroidEntryPoint
+class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastReceiver.Callback {
 
-    @Inject lateinit var notificationManager: ZenNotificationManager
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? = mediaSession
+
     @Inject lateinit var songExtractor: SongExtractor
     @Inject lateinit var queueService: QueueService
     @Inject lateinit var songService: SongService
@@ -60,10 +59,11 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
     @Inject lateinit var exoPlayer: ExoPlayer
     @Inject lateinit var crashReporter: ZenCrashReporter
     @Inject lateinit var preferencesProvider: ZenPreferenceProvider
+    @Inject lateinit var queueStateProvider: QueueStateProvider
+    @Inject lateinit var sessionCallback: SessionCallback
+    @Inject lateinit var notificationProvider: NotificationProvider
 
     private var broadcastReceiver: ZenBroadcastReceiver? = null
-
-    private var systemNotificationManager: NotificationManager? = null
 
     private val job = SupervisorJob()
     private val scope = CoroutineScope(job + Dispatchers.Default)
@@ -87,9 +87,46 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
         val isRunning = AtomicBoolean(false)
     }
 
-    private lateinit var mediaSession: MediaSessionCompat
+    private lateinit var mediaSession: MediaSession
 
-    override fun onBind(intent: Intent?): IBinder? = null
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
+    override fun onCreate() {
+        super.onCreate()
+        isRunning.set(true)
+        broadcastReceiver = ZenBroadcastReceiver()
+        mediaSession = MediaSession.Builder(applicationContext, exoPlayer)
+            .setCallback(sessionCallback)
+            .build()
+
+        queueService.addListener(this)
+
+        IntentFilter(Constants.PACKAGE_NAME).also {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(broadcastReceiver, it, RECEIVER_EXPORTED)
+            } else {
+                registerReceiver(broadcastReceiver, it)
+            }
+        }
+        broadcastReceiver?.startListening(this)
+        exoPlayer.addListener(exoPlayerListener)
+        exoPlayer.addAnalyticsListener(playbackStatsListener)
+
+        scope.launch {
+            preferencesProvider.playbackParams.collect {
+                val params = it.toCorrectedParams().toExoPlayerPlaybackParameters()
+                withContext(Dispatchers.Main){
+                    exoPlayer.playbackParameters = params
+                }
+            }
+        }
+        scope.launch {
+            queueService.repeatMode.collect {
+                withContext(Dispatchers.Main) { exoPlayer.repeatMode = it.toExoPlayerRepeatMode() }
+            }
+        }
+
+        setMediaNotificationProvider(notificationProvider)
+    }
 
     private val exoPlayerListener = object : Player.Listener {
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
@@ -98,6 +135,7 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
             try {
                 queueService.setCurrentSong(exoPlayer.currentMediaItemIndex)
                 queueService.getSongAtIndex(exoPlayer.currentMediaItemIndex)?.let { song ->
+                    updateNotification(song.favourite)
                     val broadcast = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
                         putExtra(WidgetBroadcast.WIDGET_BROADCAST, WidgetBroadcast.SONG_CHANGED)
                         putExtra("imageUri", song.artUri)
@@ -110,8 +148,6 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
             } catch (e: Exception) {
                 Timber.e(e)
             }
-            updateMediaSessionState()
-            updateMediaSessionMetadata()
         }
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -121,8 +157,6 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
                 putExtra("isPlaying", isPlaying)
             }
             this@ZenPlayer.applicationContext.sendBroadcast(broadcast)
-            updateMediaSessionState()
-            updateMediaSessionMetadata()
         }
 
         override fun onPlayerError(error: PlaybackException) {
@@ -140,95 +174,9 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
         }
     }
 
-    private val mediaSessionCallback = object : MediaSessionCompat.Callback() {
-        override fun onPlay() {
-            super.onPlay()
-            onBroadcastPausePlay()
-        }
-
-        override fun onPause() {
-            super.onPause()
-            onBroadcastPausePlay()
-        }
-
-        override fun onSkipToNext() {
-            super.onSkipToNext()
-            onBroadcastNext()
-        }
-
-        override fun onSkipToPrevious() {
-            super.onSkipToPrevious()
-            onBroadcastPrevious()
-        }
-
-        override fun onSeekTo(pos: Long) {
-            super.onSeekTo(pos)
-            exoPlayer.seekTo(pos)
-            updateMediaSessionState()
-            updateMediaSessionMetadata()
-        }
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        broadcastReceiver = ZenBroadcastReceiver()
-        mediaSession = MediaSessionCompat(this, MEDIA_SESSION)
-        systemNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        isRunning.set(true)
-        queueService.addListener(this)
-        if (intent == null) Toast.makeText(this, "null intent", Toast.LENGTH_SHORT).show()
-        intent?.let {
-            val locations = it.getStringArrayExtra("locations") ?: return@let
-            val startPosition = it.getIntExtra("startPosition", 0)
-            if (locations.isEmpty()) return@let
-            val mediaItems = locations.map { location ->
-                MediaItem.Builder().apply {
-                    setUri(Uri.fromFile(File(location)))
-                    setTag(location)
-                }.build()
-            }
-            setQueue(mediaItems, startPosition)
-        }
-
-        IntentFilter(Constants.PACKAGE_NAME).also {
-            registerReceiver(broadcastReceiver, it)
-        }
-        broadcastReceiver?.startListening(this)
-        mediaSession.setCallback(mediaSessionCallback)
-        exoPlayer.addListener(exoPlayerListener)
-        exoPlayer.addAnalyticsListener(playbackStatsListener)
-
-        startForeground(
-            ZenNotificationManager.PLAYER_NOTIFICATION_ID,
-            notificationManager.getPlayerNotification(
-                session = mediaSession,
-                showPlayButton = false,
-                isLiked = queueService.getSongAtIndex(exoPlayer.currentMediaItemIndex)?.favourite ?: false
-            )
-        )
-
-        scope.launch {
-            preferencesProvider.playbackParams.collect {
-                updateMediaSessionState()
-                val params = it.toCorrectedParams().toExoPlayerPlaybackParameters()
-                withContext(Dispatchers.Main){
-                    exoPlayer.playbackParameters = params
-                }
-            }
-        }
-        scope.launch {
-            queueService.repeatMode.collect {
-                withContext(Dispatchers.Main) { exoPlayer.repeatMode = it.toExoPlayerRepeatMode() }
-            }
-        }
-
-        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        audioManager.isSpeakerphoneOn = true
-
-        return START_NOT_STICKY
-    }
-
     override fun onDestroy() {
         super.onDestroy()
+        Timber.d("onDestroy")
         stopService()
     }
 
@@ -238,94 +186,41 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
 
     private fun stopService() {
         isRunning.set(false)
-        queueService.clearQueue()
-        queueService.removeListener(this)
-        sleepTimerService.cancel()
-        exoPlayer.stop()
-        exoPlayer.clearMediaItems()
-        exoPlayer.removeListener(exoPlayerListener)
-        exoPlayer.removeAnalyticsListener(playbackStatsListener)
-        unregisterReceiver(broadcastReceiver)
-        mediaSession.release()
-        broadcastReceiver?.stopListening()
-        systemNotificationManager?.cancel(ZenNotificationManager.PLAYER_NOTIFICATION_ID)
+        queueStateProvider.saveState(
+            queue = queueService.queue.map { it.location },
+            startIndex = exoPlayer.currentMediaItemIndex,
+            startPosition = exoPlayer.currentPosition
+        )
+        with(queueService) {
+            clearQueue()
+            removeListener(this@ZenPlayer)
+        }
+        with(exoPlayer) {
+            stop()
+            clearMediaItems()
+            removeAnalyticsListener(playbackStatsListener)
+            removeListener(exoPlayerListener)
+        }
         scope.cancel()
         job.cancel()
-        systemNotificationManager = null
+
+        sleepTimerService.cancel()
+
+        broadcastReceiver?.let { unregisterReceiver(it) }
+        broadcastReceiver?.stopListening()
         broadcastReceiver = null
-        val broadcast = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
-            putExtra(WidgetBroadcast.WIDGET_BROADCAST, WidgetBroadcast.SONG_CHANGED)
-            putExtra("imageUri", "")
-            putExtra("title", "")
-            putExtra("artist", "")
-            putExtra("album", "")
-        }
-        applicationContext.sendBroadcast(broadcast)
     }
 
-    private fun updateMediaSessionMetadata() {
-        scope.launch {
-            var currentSong: Song? = null
-            withContext(Dispatchers.Main) {
-                currentSong = queueService.getSongAtIndex(exoPlayer.currentMediaItemIndex)
-            }
-            if (currentSong == null) return@launch
-            mediaSession.setMetadata(
-                MediaMetadataCompat.Builder().apply {
-                    putString(
-                        MediaMetadataCompat.METADATA_KEY_TITLE,
-                        currentSong!!.title
-                    )
-                    putString(
-                        MediaMetadataCompat.METADATA_KEY_ARTIST,
-                        currentSong!!.artist
-                    )
-                    putString(
-                        MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI,
-                        currentSong!!.artUri
-                    )
-                    putLong(
-                        MediaMetadataCompat.METADATA_KEY_DURATION,
-                        currentSong!!.durationMillis
-                    )
-                }.build()
+    private fun updateNotification(isLiked: Boolean) {
+        mediaSession.setCustomLayout(
+            listOf(
+                if (isLiked) ZenCommandButtons.liked else ZenCommandButtons.unliked,
+                ZenCommandButtons.previous,
+                ZenCommandButtons.playPause,
+                ZenCommandButtons.next,
+                ZenCommandButtons.cancel
             )
-            delay(100)
-            withContext(Dispatchers.Main) {
-                systemNotificationManager?.notify(
-                    ZenNotificationManager.PLAYER_NOTIFICATION_ID,
-                    notificationManager.getPlayerNotification(
-                        session = mediaSession,
-                        showPlayButton = !exoPlayer.isPlaying,
-                        isLiked = queueService.getSongAtIndex(exoPlayer.currentMediaItemIndex)?.favourite ?: false
-                    )
-                )
-            }
-        }
-    }
-
-    private fun updateMediaSessionState() {
-        scope.launch {
-            delay(100)
-            val speed = preferencesProvider.playbackParams.value.playbackSpeed
-            withContext(Dispatchers.Main) {
-                mediaSession.setPlaybackState(
-                    PlaybackStateCompat.Builder().apply {
-                        setState(
-                            if (exoPlayer.isPlaying) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED,
-                            exoPlayer.currentPosition,
-                            if (speed < 1 || speed > 200) 1f else speed.toFloat()/100,
-                        )
-                        setActions(
-                            (if (exoPlayer.isPlaying) PlaybackStateCompat.ACTION_PAUSE else PlaybackStateCompat.ACTION_PLAY)
-                                    or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
-                                    or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
-                                    or PlaybackStateCompat.ACTION_SEEK_TO
-                        )
-                    }.build()
-                )
-            }
-        }
+        )
     }
 
     private fun setQueue(mediaItems: List<MediaItem>, startPosition: Int){
@@ -343,28 +238,16 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
                     .toExoPlayerPlaybackParameters()
                 exoPlayer.play()
             }
-            updateMediaSessionState()
-            updateMediaSessionMetadata()
         }
     }
 
     override fun onAppend(song: Song) {
-        exoPlayer.addMediaItem(
-            MediaItem.Builder().apply {
-                setUri(Uri.fromFile(File(song.location)))
-                setTag(song.location)
-            }.build()
-        )
+        exoPlayer.addMediaItem(song.toMediaItem())
     }
 
     override fun onAppend(songs: List<Song>) {
         exoPlayer.addMediaItems(
-            songs.map {
-                MediaItem.Builder().apply {
-                    setUri(Uri.fromFile(File(it.location)))
-                    setTag(it.location)
-                }.build()
-            }
+            songs.map(Song::toMediaItem)
         )
     }
 
@@ -374,8 +257,7 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
                 exoPlayer.currentMediaItemIndex == position
             }
             if (!performUpdate) return@launch
-            updateMediaSessionState()
-            updateMediaSessionMetadata()
+            updateNotification(updatedSong.favourite)
         }
     }
 
@@ -388,12 +270,7 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
     }
 
     override fun onSetQueue(songs: List<Song>, startPlayingFromPosition: Int) {
-        val mediaItems = songs.map {
-            MediaItem.Builder().apply {
-                setUri(Uri.fromFile(File(it.location)))
-                setTag(it.location)
-            }.build()
-        }
+        val mediaItems = songs.map(Song::toMediaItem)
         setQueue(mediaItems, startPlayingFromPosition)
     }
 
@@ -402,6 +279,7 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
      * Player.Listener onIsPlayingChanged gets called.
      */
     override fun onBroadcastPausePlay() {
+        Timber.d("onBroadcastPausePlay()")
         if (exoPlayer.isPlaying) exoPlayer.pause() else exoPlayer.play()
     }
 
@@ -411,6 +289,7 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
      * Player.Listener onMediaItemTransition gets called.
      */
     override fun onBroadcastNext() {
+        Timber.d("onBroadcastNext()")
         if (!exoPlayer.hasNextMediaItem()) {
             showToast("No next song in queue")
             return
@@ -424,6 +303,7 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
      * Player.Listener onMediaItemTransition gets called.
      */
     override fun onBroadcastPrevious() {
+        Timber.d("onBroadcastPrevious()")
         if (!exoPlayer.hasPreviousMediaItem()) {
             showToast("No previous song in queue")
             return
@@ -437,10 +317,10 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
      * DataManager then calls updateNotification of DataManager.Callback
      */
     override fun onBroadcastLike() {
+        Timber.d("onBroadcastLike()")
         val currentSong = queueService.getSongAtIndex(exoPlayer.currentMediaItemIndex) ?: return
         val updatedSong = currentSong.copy(favourite = !currentSong.favourite)
         scope.launch {
-//            onUpdateCurrentSong()
             queueService.update(updatedSong)
             songService.updateSong(updatedSong)
         }
@@ -451,8 +331,29 @@ class ZenPlayer : Service(), QueueService.Listener, ZenBroadcastReceiver.Callbac
      * This stops the service and onDestroy is called
      */
     override fun onBroadcastCancel() {
-        // Deprecated in api level 33
-//        stopForeground(true)
+        Timber.d("onBroadcastCancel()")
+        /**
+         * To close the media session, first call mediaSession.release followed by stopSelf()
+         * See issue: https://github.com/androidx/media/issues/389#issuecomment-1546611545
+         */
+        mediaSession.release()
         stopSelf()
     }
+
+}
+
+fun Song.toMediaItem(): MediaItem {
+    return MediaItem.Builder().apply {
+        setUri(Uri.fromFile(File(this@toMediaItem.location)))
+        setTag(this@toMediaItem.location)
+        setMediaMetadata(
+            MediaMetadata.Builder().apply {
+                setArtworkUri(this@toMediaItem.artUri?.toUri())
+                setTitle(this@toMediaItem.title)
+                setArtist(this@toMediaItem.artist)
+                setIsBrowsable(false)
+                setIsPlayable(true)
+            }.build()
+        )
+    }.build()
 }

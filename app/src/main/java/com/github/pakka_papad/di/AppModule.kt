@@ -18,7 +18,6 @@ import androidx.room.Room
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.data.*
 import com.github.pakka_papad.data.music.SongExtractor
-import com.github.pakka_papad.data.notification.ZenNotificationManager
 import com.github.pakka_papad.data.services.*
 import com.github.pakka_papad.player.ZenBroadcastReceiver
 import com.github.pakka_papad.util.MessageStore
@@ -51,12 +50,6 @@ object AppModule {
         ).build()
     }
 
-    @Singleton
-    @Provides
-    fun providesNotificationManager(@ApplicationContext context: Context): ZenNotificationManager {
-        return ZenNotificationManager(context)
-    }
-
     @SuppressLint("UnsafeOptInUsageError")
     @Singleton
     @Provides
@@ -87,6 +80,19 @@ object AppModule {
             serializer = userPreferencesSerializer,
             produceFile = {
                 context.dataStoreFile("user_preferences.pb")
+            }
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun providesQueueStateDatastore(
+        @ApplicationContext context: Context,
+    ): DataStore<QueueState> {
+        return DataStoreFactory.create(
+            serializer = QueueStateSerializer,
+            produceFile = {
+                context.dataStoreFile(Constants.QUEUE_STATE_FILE)
             }
         )
     }
@@ -197,10 +203,14 @@ object AppModule {
     @Singleton
     @Provides
     fun providesPlayerService(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
+        queueService: QueueService,
+        preferenceProvider: ZenPreferenceProvider,
     ): PlayerService {
         return PlayerServiceImpl(
-            context = context
+            context = context,
+            queueService = queueService,
+            preferenceProvider = preferenceProvider,
         )
     }
 

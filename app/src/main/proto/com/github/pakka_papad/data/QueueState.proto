@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option java_package = "com.github.pakka_papad.data";
+option java_multiple_files = true;
+
+message QueueState {
+  repeated string locations = 1;
+  int32 startIndex = 2;
+  int64 startPositionMs = 3;
+}

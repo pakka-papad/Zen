@@ -1,8 +1,4 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
-import com.google.protobuf.gradle.builtins
-import com.google.protobuf.gradle.generateProtoTasks
-import com.google.protobuf.gradle.protobuf
-import com.google.protobuf.gradle.protoc
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -12,7 +8,7 @@ plugins {
     id("dagger.hilt.android.plugin")
     id("androidx.navigation.safeargs.kotlin")
     id("kotlin-parcelize")
-    id("com.google.protobuf") version "0.8.19"
+    id("com.google.protobuf") version "0.9.1"
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
     id("dev.shreyaspatil.compose-compiler-report-generator") version "1.1.0"
@@ -101,14 +97,14 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
-        dataBinding = true
+        buildConfig = true
     }
 
     composeOptions {
         kotlinCompilerExtensionVersion = Versions.androidxComposeCompiler
     }
 
-    packagingOptions {
+    packaging {
         resources {
             excludes.add("/META-INF/{AL2.0,LGPL2.1}")
         }
@@ -174,10 +170,11 @@ dependencies {
     implementation(platform(Libraries.firebaseBom))
     implementation(Libraries.firebaseCrashlytics)
 
-    implementation(Libraries.exoPlayer)
+//    implementation(Libraries.exoPlayer)
     implementation(Libraries.media3ExoPlayer)
-    implementation(Libraries.media3Transformer)
-    implementation(Libraries.exoPlayerUi)
+    implementation(Libraries.media3Session)
+//    implementation(Libraries.media3Transformer)
+//    implementation(Libraries.exoPlayerUi)
 
     implementation(Libraries.coilCompose)
     implementation(Libraries.palette)

@@ -1,6 +1,7 @@
 package com.github.pakka_papad
 
 object Constants {
+    const val QUEUE_STATE_FILE = "queue_state.pb"
     const val DATABASE_NAME = "zen_app_db"
     object Tables {
         const val SONG_TABLE = "song_table"

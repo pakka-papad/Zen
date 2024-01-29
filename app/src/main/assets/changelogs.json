@@ -36,13 +36,22 @@
     ]
   },
   {
-    "versionCode": 102002,
+    "versionCode": 10202,
     "versionName": "1.2.2",
     "date": "6 January, 2024",
     "changes": [
       "Added sleep timer",
       "Updated player screen UI",
       "Updated playlist tab UI"
+    ]
+  },
+  {
+    "versionCode": 10203,
+    "versionName": "1.2.3",
+    "date": "29 January, 2024",
+    "changes": [
+      "Updated logo",
+      "Added support for playback resumption"
     ]
   }
 ]

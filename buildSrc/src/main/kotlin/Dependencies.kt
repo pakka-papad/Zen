@@ -40,7 +40,7 @@ object Versions {
     const val timber = "5.0.1"
 
     const val exoPlayer = "2.18.1"
-    const val media3 = "1.0.0-beta02"
+    const val media3 = "1.2.1"
 
     const val coilCompose = "2.2.2"
     const val palette = "1.0.0"
@@ -119,6 +119,7 @@ object Libraries {
     const val exoPlayer = "com.google.android.exoplayer:exoplayer:${Versions.exoPlayer}"
     const val media3ExoPlayer = "androidx.media3:media3-exoplayer:${Versions.media3}"
     const val media3Transformer = "androidx.media3:media3-transformer:${Versions.media3}"
+    const val media3Session = "androidx.media3:media3-session:${Versions.media3}"
     const val exoPlayerUi = "com.google.android.exoplayer:exoplayer-ui:${Versions.exoPlayer}"
 
     const val coilCompose = "io.coil-kt:coil-compose:${Versions.coilCompose}"
@@ -132,9 +133,9 @@ object Libraries {
 }
 
 object Api {
-    const val compileSdk = 33
+    const val compileSdk = 34
     const val minSdk = 23
-    const val targetSdk = 33
+    const val targetSdk = 34
 }
 
 object AnnotationProcessors {
@@ -146,7 +147,7 @@ object AnnotationProcessors {
 object AppVersion {
     private const val Major = 1
     private const val Minor = 2
-    private const val Patch = 2
+    private const val Patch = 3
     const val Code = Major*10000 + Minor*100 + Patch
     const val Name = "$Major.$Minor.$Patch"
 }

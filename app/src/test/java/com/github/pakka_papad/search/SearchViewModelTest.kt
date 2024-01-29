@@ -8,10 +8,10 @@ import com.github.pakka_papad.data.services.QueueService
 import com.github.pakka_papad.data.services.SearchService
 import com.github.pakka_papad.util.MessageStore
 import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.coVerifyOrder
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
-import io.mockk.verifyOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -54,6 +54,9 @@ class SearchViewModelTest {
         }
         coEvery { searchService.searchSongs(query) } returns songs
         coEvery { searchService.searchAlbums(query) } returns albums
+        coEvery { playerService.startServiceIfNotRunning(any(), any()) } answers {
+            queueService.setQueue(firstArg(), secondArg())
+        }
         viewModel = SearchViewModel(
             messageStore = messageStore,
             playerService = playerService,
@@ -103,19 +106,18 @@ class SearchViewModelTest {
         // Given
         startCollection()
         every { queueService.setQueue(songs, 0) } returns Unit
-        every { playerService.startServiceIfNotRunning(songs, 0) } returns Unit
 
         // When
         viewModel.setQueue(songs, 0)
 
         // Then
-        verify(exactly = 1) {
+        coVerify(exactly = 1) {
             queueService.setQueue(songs, 0)
             playerService.startServiceIfNotRunning(songs, 0)
         }
-        verifyOrder {
-            queueService.setQueue(songs, 0)
+        coVerifyOrder {
             playerService.startServiceIfNotRunning(songs, 0)
+            queueService.setQueue(songs, 0)
         }
     }
 }

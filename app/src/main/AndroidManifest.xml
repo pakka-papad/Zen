@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
     <application
         android:name=".ZenApp"
@@ -22,7 +23,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:theme="@style/Theme.Zen">
+            android:theme="@style/Theme.AppSplash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -42,7 +43,14 @@
 
         <service
             android:name=".player.ZenPlayer"
-            android:foregroundServiceType="mediaPlayback" />
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="true"
+            tools:ignore="ExportedService">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
 
         <receiver android:name=".widgets.MusicControlWidgetReceiver"
             android:exported="true">
@@ -52,6 +60,13 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/music_control_widget_info" />
+        </receiver>
+
+        <receiver android:name="androidx.media3.session.MediaButtonReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
         </receiver>
 
         <provider
