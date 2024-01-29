@@ -39,7 +39,9 @@ class CollectionViewModel @Inject constructor(
 ) : ViewModel() {
 
     val currentSong = queueService.currentSong
-    private val queue = queueService.queue
+
+    private val isQueueEmpty: Boolean
+        get() = currentSong.value == null
 
     private val _collectionType = MutableStateFlow<CollectionType?>(null)
 
@@ -195,7 +197,7 @@ class CollectionViewModel @Inject constructor(
     }
 
     fun addToQueue(song: Song) {
-        if (queue.isEmpty()) {
+        if (isQueueEmpty) {
 //            queueService.setQueue(listOf(song), 0)
             viewModelScope.launch {
                 playerService.startServiceIfNotRunning(listOf(song), 0)
@@ -210,7 +212,7 @@ class CollectionViewModel @Inject constructor(
     }
 
     fun addToQueue(songs: List<Song>) {
-        if (queue.isEmpty()) {
+        if (isQueueEmpty) {
 //            queueService.setQueue(songs, 0)
             viewModelScope.launch {
                 playerService.startServiceIfNotRunning(songs, 0)
