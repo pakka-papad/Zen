@@ -4,20 +4,22 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.github.pakka_papad.R
+import com.github.pakka_papad.components.Snackbar
 import com.github.pakka_papad.components.TopBarWithBackArrow
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.ui.theme.ZenTheme
@@ -65,6 +67,14 @@ class SettingsFragment : Fragment() {
                     }
                 } }
 
+                val snackbarHostState = remember { SnackbarHostState() }
+
+                val message by viewModel.message.collectAsStateWithLifecycle()
+                LaunchedEffect(key1 = message){
+                    if (message.isEmpty()) return@LaunchedEffect
+                    snackbarHostState.showSnackbar(message)
+                }
+
                 ZenTheme(themePreference) {
                     Scaffold(
                         topBar = {
@@ -75,15 +85,8 @@ class SettingsFragment : Fragment() {
                             )
                         },
                         content = { paddingValues ->
-                            val insetsPadding =
-                                WindowInsets.systemBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal).asPaddingValues()
                             SettingsList(
-                                paddingValues = PaddingValues(
-                                    top = paddingValues.calculateTopPadding(),
-                                    start = insetsPadding.calculateStartPadding(LayoutDirection.Ltr),
-                                    end = insetsPadding.calculateEndPadding(LayoutDirection.Ltr),
-                                    bottom = insetsPadding.calculateBottomPadding()
-                                ),
+                                paddingValues = paddingValues,
                                 themePreference = themePreference,
                                 onThemePreferenceChanged = preferenceProvider::updateTheme,
                                 scanStatus = scanStatus,
@@ -97,6 +100,14 @@ class SettingsFragment : Fragment() {
                                 onTabsSelectChange = viewModel::onTabsSelectChanged,
                                 onTabsOrderChanged = viewModel::onTabsOrderChanged,
                                 onTabsOrderConfirmed = viewModel::saveTabsOrder
+                            )
+                        },
+                        snackbarHost = {
+                            SnackbarHost(
+                                hostState = snackbarHostState,
+                                snackbar = {
+                                    Snackbar(it)
+                                }
                             )
                         }
                     )
