@@ -218,6 +218,7 @@ class CollectionViewModel @Inject constructor(
         if (isQueueEmpty) {
             viewModelScope.launch {
                 playerService.startServiceIfNotRunning(songs, 0)
+                showMessage(messageStore.getString(R.string.playing))
             }
         } else {
             val result = queueService.append(songs)

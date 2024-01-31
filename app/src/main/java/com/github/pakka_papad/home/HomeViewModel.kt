@@ -293,6 +293,7 @@ class HomeViewModel @Inject constructor(
         if (queue.isEmpty()) {
             viewModelScope.launch {
                 playerService.startServiceIfNotRunning(listOf(song), 0)
+                showMessage(messageStore.getString(R.string.playing))
             }
         } else {
             val result = queueService.append(song)
