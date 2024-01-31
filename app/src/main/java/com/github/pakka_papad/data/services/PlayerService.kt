@@ -34,12 +34,14 @@ class PlayerServiceImpl(
     @SuppressLint("RestrictedApi")
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     override suspend fun startServiceIfNotRunning(songs: List<Song>, startPlayingFromPosition: Int) {
+        crashReporter.logData("PlayerService.startServiceIfNotRunning() " +
+                "currentTime:${System.currentTimeMillis()} lastCallTime:${lastCallTime.get()}")
         synchronized(lastCallTime) {
             if (lastCallTime.get() + 1000 >= System.currentTimeMillis()) return
             lastCallTime.set(System.currentTimeMillis())
         }
         crashReporter.logData("PlayerService.startServiceIfNotRunning() " +
-                "lastCallTime:${lastCallTime.get()} ZenPlayer.isRunning:${ZenPlayer.isRunning.get()}")
+                "ZenPlayer.isRunning:${ZenPlayer.isRunning.get()}")
 
         queueService.setQueue(songs, startPlayingFromPosition)
         if (ZenPlayer.isRunning.get()) return

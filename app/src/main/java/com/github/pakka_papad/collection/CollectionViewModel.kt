@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.R
 import com.github.pakka_papad.components.SortOptions
+import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.data.services.PlayerService
 import com.github.pakka_papad.data.services.PlaylistService
@@ -36,6 +37,7 @@ class CollectionViewModel @Inject constructor(
     private val songService: SongService,
     private val playerService: PlayerService,
     private val queueService: QueueService,
+    private val crashReporter: ZenCrashReporter,
 ) : ViewModel() {
 
     val currentSong = queueService.currentSong
@@ -189,16 +191,16 @@ class CollectionViewModel @Inject constructor(
 
     fun setQueue(songs: List<Song>?, startPlayingFromIndex: Int = 0) {
         if (songs == null) return
-//        queueService.setQueue(songs, startPlayingFromIndex)
         viewModelScope.launch {
+            crashReporter.logData("CollectionViewModel.setQueue()")
             playerService.startServiceIfNotRunning(songs, startPlayingFromIndex)
         }
         showMessage(messageStore.getString(R.string.playing))
     }
 
     fun addToQueue(song: Song) {
+        crashReporter.logData("CollectionViewModel.addToQueue(Song) isQueueEmpty:$isQueueEmpty")
         if (isQueueEmpty) {
-//            queueService.setQueue(listOf(song), 0)
             viewModelScope.launch {
                 playerService.startServiceIfNotRunning(listOf(song), 0)
             }
@@ -212,8 +214,8 @@ class CollectionViewModel @Inject constructor(
     }
 
     fun addToQueue(songs: List<Song>) {
+        crashReporter.logData("CollectionViewModel.addToQueue(List<Song>) isQueueEmpty:$isQueueEmpty")
         if (isQueueEmpty) {
-//            queueService.setQueue(songs, 0)
             viewModelScope.launch {
                 playerService.startServiceIfNotRunning(songs, 0)
             }
