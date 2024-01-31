@@ -6,6 +6,7 @@ import android.content.Context
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.work.await
+import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.player.ZenPlayer
@@ -25,6 +26,7 @@ class PlayerServiceImpl(
     private val context: Context,
     private val queueService: QueueService,
     private val preferenceProvider: ZenPreferenceProvider,
+    private val crashReporter: ZenCrashReporter,
 ): PlayerService {
 
     private val lastCallTime = AtomicLong(0)
@@ -36,6 +38,8 @@ class PlayerServiceImpl(
             if (lastCallTime.get() + 1000 >= System.currentTimeMillis()) return
             lastCallTime.set(System.currentTimeMillis())
         }
+        crashReporter.logData("PlayerService.startServiceIfNotRunning() " +
+                "lastCallTime:${lastCallTime.get()} ZenPlayer.isRunning:${ZenPlayer.isRunning.get()}")
 
         queueService.setQueue(songs, startPlayingFromPosition)
         if (ZenPlayer.isRunning.get()) return

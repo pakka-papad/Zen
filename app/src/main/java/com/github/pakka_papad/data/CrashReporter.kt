@@ -11,6 +11,10 @@ class ZenCrashReporter @Inject constructor(private val firebase: FirebaseCrashly
         }
     }
 
+    fun logData(message: String) {
+        firebase.log(message)
+    }
+
     fun sendCrashData(reportData: Boolean){
         firebase.setCrashlyticsCollectionEnabled(reportData)
     }

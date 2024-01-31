@@ -11,6 +11,7 @@ import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionResult
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.data.QueueState
+import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.data.services.QueueService
 import com.github.pakka_papad.data.services.SongService
@@ -31,6 +32,7 @@ class SessionCallback @Inject constructor(
     private val songService: SongService,
     private val scope: CoroutineScope,
     private val queueState: DataStore<QueueState>,
+    private val crashReporter: ZenCrashReporter,
 ): MediaSession.Callback {
 
     override fun onConnect(
@@ -38,6 +40,7 @@ class SessionCallback @Inject constructor(
         controller: MediaSession.ControllerInfo
     ): MediaSession.ConnectionResult {
         val connectionResult = super.onConnect(session, controller)
+        crashReporter.logData("SessionCallback.onConnect() connectionResult:${connectionResult.isAccepted}")
         val availableCommands = connectionResult.availableSessionCommands.buildUpon()
         availableCommands.add(ZenCommandButtons.liked.sessionCommand!!)
         availableCommands.add(ZenCommandButtons.unliked.sessionCommand!!)
@@ -106,6 +109,7 @@ class SessionCallback @Inject constructor(
         mediaSession: MediaSession,
         controller: MediaSession.ControllerInfo
     ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> {
+        crashReporter.logData("SessionCallback.onPlaybackResumption()")
         val result = SettableFuture.create<MediaSession.MediaItemsWithStartPosition>()
         scope.launch {
             val state = queueState.data.first()
