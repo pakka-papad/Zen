@@ -176,31 +176,33 @@ class HomeViewModel @Inject constructor(
 
     private val queueServiceListener = object : QueueService.Listener {
         override fun onAppend(song: Song) {
-            queue.add(song)
+            viewModelScope.launch(Dispatchers.Default) { queue.add(song) }
         }
 
         override fun onAppend(songs: List<Song>) {
-            queue.addAll(songs)
+            viewModelScope.launch(Dispatchers.Default){ queue.addAll(songs) }
         }
 
         override fun onUpdate(updatedSong: Song, position: Int) {
             if (position < 0 || position >= queue.size) return
-            queue[position] = updatedSong
+            viewModelScope.launch(Dispatchers.Default) { queue[position] = updatedSong }
         }
 
         override fun onMove(from: Int, to: Int) {
             if (from < 0 || to < 0 || from >= queue.size || to >= queue.size) return
-            queue.apply { add(to, removeAt(from)) }
+            viewModelScope.launch(Dispatchers.Default){ queue.apply { add(to, removeAt(from)) } }
         }
 
         override fun onClear() {
-            queue.clear()
+            viewModelScope.launch(Dispatchers.Default){ queue.clear() }
         }
 
         override fun onSetQueue(songs: List<Song>, startPlayingFromPosition: Int) {
-            queue.apply {
-                clear()
-                addAll(songs)
+            viewModelScope.launch(Dispatchers.Default) {
+                queue.apply {
+                    clear()
+                    addAll(songs)
+                }
             }
         }
     }
@@ -287,7 +289,7 @@ class HomeViewModel @Inject constructor(
      * Adds a song to the end of queue
      */
     fun addToQueue(song: Song) {
-        crashReporter.logData("HomeViewModel.setQueue(Song) isQueueEmpty:${queue.isEmpty()}")
+        crashReporter.logData("HomeViewModel.addToQueue(Song) isQueueEmpty:${queue.isEmpty()}")
         if (queue.isEmpty()) {
             viewModelScope.launch {
                 playerService.startServiceIfNotRunning(listOf(song), 0)
