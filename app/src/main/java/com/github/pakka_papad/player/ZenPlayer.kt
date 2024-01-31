@@ -91,8 +91,8 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate() {
-        crashReporter.logData("ZenPlayer.onCreate() isRunning:${isRunning.get()}")
         super.onCreate()
+        crashReporter.logData("ZenPlayer.onCreate() isRunning:${isRunning.get()}")
         isRunning.set(true)
         broadcastReceiver = ZenBroadcastReceiver()
         mediaSession = MediaSession.Builder(applicationContext, exoPlayer)
