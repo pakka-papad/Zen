@@ -95,6 +95,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
         broadcastReceiver = ZenBroadcastReceiver()
         mediaSession = MediaSession.Builder(applicationContext, exoPlayer)
             .setCallback(sessionCallback)
+            .setId(System.currentTimeMillis().toString())
             .build()
 
         queueService.addListener(this)
