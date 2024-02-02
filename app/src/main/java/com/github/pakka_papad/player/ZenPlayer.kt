@@ -74,9 +74,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
         if (playbackStats.totalPlayTimeMs < playTimeThresholdMs) return@PlaybackStatsListener
         val window = eventTime.timeline.getWindow(eventTime.windowIndex, Timeline.Window())
         try {
-            window.mediaItem.localConfiguration?.tag?.let {
-                analyticsService.logSongPlay(it as String, playbackStats.totalPlayTimeMs)
-            }
+            analyticsService.logSongPlay(window.mediaItem.mediaId, playbackStats.totalPlayTimeMs)
         } catch (e : Exception){
             crashReporter.logException(e)
         }
@@ -354,7 +352,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
 fun Song.toMediaItem(): MediaItem {
     return MediaItem.Builder().apply {
         setUri(Uri.fromFile(File(this@toMediaItem.location)))
-        setTag(this@toMediaItem.location)
+        setMediaId(this@toMediaItem.location)
         setMediaMetadata(
             MediaMetadata.Builder().apply {
                 setArtworkUri(this@toMediaItem.artUri?.toUri())
