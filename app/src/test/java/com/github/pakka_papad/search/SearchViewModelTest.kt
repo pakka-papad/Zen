@@ -62,6 +62,7 @@ class SearchViewModelTest {
             playerService = playerService,
             queueService = queueService,
             searchService = searchService,
+            crashReporter = mockk(relaxed = true)
         )
     }
 
