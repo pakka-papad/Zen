@@ -206,11 +206,13 @@ object AppModule {
         @ApplicationContext context: Context,
         queueService: QueueService,
         preferenceProvider: ZenPreferenceProvider,
+        crashReporter: ZenCrashReporter,
     ): PlayerService {
         return PlayerServiceImpl(
             context = context,
             queueService = queueService,
             preferenceProvider = preferenceProvider,
+            crashReporter = crashReporter,
         )
     }
 

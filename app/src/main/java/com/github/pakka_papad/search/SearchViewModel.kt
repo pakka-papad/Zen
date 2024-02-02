@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.R
+import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.data.services.PlayerService
 import com.github.pakka_papad.data.services.QueueService
@@ -28,6 +29,7 @@ class SearchViewModel @Inject constructor(
     private val playerService: PlayerService,
     private val queueService: QueueService,
     private val searchService: SearchService,
+    private val crashReporter: ZenCrashReporter,
 ) : ViewModel() {
 
     private val _query = MutableStateFlow("")
@@ -78,7 +80,7 @@ class SearchViewModel @Inject constructor(
 
     fun setQueue(songs: List<Song>?, startPlayingFromIndex: Int = 0) {
         if (songs == null) return
-//        queueService.setQueue(songs, startPlayingFromIndex)
+        crashReporter.logData("SearchViewModel.setQueue()")
         viewModelScope.launch {
             playerService.startServiceIfNotRunning(songs, startPlayingFromIndex)
         }

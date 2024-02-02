@@ -2,20 +2,28 @@ package com.github.pakka_papad.search
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.components.SongCardV3
-import com.github.pakka_papad.data.music.*
+import com.github.pakka_papad.data.music.Album
+import com.github.pakka_papad.data.music.AlbumArtist
+import com.github.pakka_papad.data.music.Artist
+import com.github.pakka_papad.data.music.Composer
+import com.github.pakka_papad.data.music.Genre
+import com.github.pakka_papad.data.music.Lyricist
+import com.github.pakka_papad.data.music.Playlist
+import com.github.pakka_papad.data.music.Song
 import com.github.pakka_papad.home.AlbumCard
 
 @Composable
@@ -25,16 +33,14 @@ fun TextCard(
 ) {
     Text(
         text = text,
-        maxLines = 1,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 10.dp, bottom = 5.dp, start = 10.dp, end = 10.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .padding(10.dp)
+            .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick)
             .background(MaterialTheme.colorScheme.secondaryContainer)
             .padding(12.dp),
-        style = MaterialTheme.typography.titleLarge,
-        overflow = TextOverflow.Ellipsis
+        style = MaterialTheme.typography.titleMedium,
     )
 }
 

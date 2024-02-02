@@ -74,11 +74,9 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
         if (playbackStats.totalPlayTimeMs < playTimeThresholdMs) return@PlaybackStatsListener
         val window = eventTime.timeline.getWindow(eventTime.windowIndex, Timeline.Window())
         try {
-            window.mediaItem.localConfiguration?.tag?.let {
-                analyticsService.logSongPlay(it as String, playbackStats.totalPlayTimeMs)
-            }
-        } catch (_ : Exception){
-
+            analyticsService.logSongPlay(window.mediaItem.mediaId, playbackStats.totalPlayTimeMs)
+        } catch (e : Exception){
+            crashReporter.logException(e)
         }
     }
 
@@ -92,10 +90,12 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate() {
         super.onCreate()
+        crashReporter.logData("ZenPlayer.onCreate() isRunning:${isRunning.get()}")
         isRunning.set(true)
         broadcastReceiver = ZenBroadcastReceiver()
         mediaSession = MediaSession.Builder(applicationContext, exoPlayer)
             .setCallback(sessionCallback)
+            .setId(System.currentTimeMillis().toString())
             .build()
 
         queueService.addListener(this)
@@ -177,6 +177,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
     override fun onDestroy() {
         super.onDestroy()
         Timber.d("onDestroy")
+        crashReporter.logData("ZenPlayer.onDestroy() isRunning:${isRunning.get()}")
         stopService()
     }
 
@@ -224,6 +225,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
     }
 
     private fun setQueue(mediaItems: List<MediaItem>, startPosition: Int){
+        crashReporter.logData("ZenPlayer.setQueue(List<MediaItem>,Int)")
         scope.launch {
             val repeatMode = queueService.repeatMode.first()
             withContext(Dispatchers.Main){
@@ -266,10 +268,11 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
     }
 
     override fun onClear() {
-
+        crashReporter.logData("ZenPlayer.onClear()")
     }
 
     override fun onSetQueue(songs: List<Song>, startPlayingFromPosition: Int) {
+        crashReporter.logData("ZenPlayer.onSetQueue(List<Song>,Int)")
         val mediaItems = songs.map(Song::toMediaItem)
         setQueue(mediaItems, startPlayingFromPosition)
     }
@@ -280,6 +283,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
      */
     override fun onBroadcastPausePlay() {
         Timber.d("onBroadcastPausePlay()")
+        crashReporter.logData("ZenPlayer.onBroadcastPausePlay()")
         if (exoPlayer.isPlaying) exoPlayer.pause() else exoPlayer.play()
     }
 
@@ -290,6 +294,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
      */
     override fun onBroadcastNext() {
         Timber.d("onBroadcastNext()")
+        crashReporter.logData("ZenPlayer.onBroadcastNext()")
         if (!exoPlayer.hasNextMediaItem()) {
             showToast("No next song in queue")
             return
@@ -304,6 +309,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
      */
     override fun onBroadcastPrevious() {
         Timber.d("onBroadcastPrevious()")
+        crashReporter.logData("ZenPlayer.onBroadcastPrevious()")
         if (!exoPlayer.hasPreviousMediaItem()) {
             showToast("No previous song in queue")
             return
@@ -318,6 +324,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
      */
     override fun onBroadcastLike() {
         Timber.d("onBroadcastLike()")
+        crashReporter.logData("ZenPlayer.onBroadcastLike()")
         val currentSong = queueService.getSongAtIndex(exoPlayer.currentMediaItemIndex) ?: return
         val updatedSong = currentSong.copy(favourite = !currentSong.favourite)
         scope.launch {
@@ -332,6 +339,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
      */
     override fun onBroadcastCancel() {
         Timber.d("onBroadcastCancel()")
+        crashReporter.logData("ZenPlayer.onBroadcastCancel()")
         /**
          * To close the media session, first call mediaSession.release followed by stopSelf()
          * See issue: https://github.com/androidx/media/issues/389#issuecomment-1546611545
@@ -345,7 +353,7 @@ class ZenPlayer : MediaSessionService(), QueueService.Listener, ZenBroadcastRece
 fun Song.toMediaItem(): MediaItem {
     return MediaItem.Builder().apply {
         setUri(Uri.fromFile(File(this@toMediaItem.location)))
-        setTag(this@toMediaItem.location)
+        setMediaId(this@toMediaItem.location)
         setMediaMetadata(
             MediaMetadata.Builder().apply {
                 setArtworkUri(this@toMediaItem.artUri?.toUri())

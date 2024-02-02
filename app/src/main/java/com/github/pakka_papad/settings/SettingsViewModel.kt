@@ -1,14 +1,16 @@
 package com.github.pakka_papad.settings
 
-import android.app.Application
-import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.pakka_papad.Constants
+import com.github.pakka_papad.R
 import com.github.pakka_papad.Screens
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.ScanStatus
 import com.github.pakka_papad.data.music.SongExtractor
+import com.github.pakka_papad.util.MessageStore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,9 +21,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val context: Application,
     private val songExtractor: SongExtractor,
-    private val prefs: ZenPreferenceProvider
+    private val prefs: ZenPreferenceProvider,
+    private val messageStore: MessageStore,
 ) : ViewModel() {
 
     val scanStatus = songExtractor.scanStatus
@@ -33,6 +35,17 @@ class SettingsViewModel @Inject constructor(
             ),
             initialValue = ScanStatus.ScanNotRunning
         )
+
+    private val _message = MutableStateFlow("")
+    val message = _message.asStateFlow()
+
+    private fun showMessage(message: String){
+        viewModelScope.launch {
+            _message.update { message }
+            delay(Constants.MESSAGE_DURATION)
+            _message.update { "" }
+        }
+    }
 
     fun scanForMusic() {
         songExtractor.scanForMusic()
@@ -86,13 +99,14 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             val order = _tabsSelection.value.filter { it.second }.map { it.first.ordinal }
             if (order.isEmpty()){
-                Toast.makeText(context, "Minimum one tab selection is required", Toast.LENGTH_SHORT).show()
+                showMessage(messageStore.getString(R.string.minimum_one_tab_selection_is_required))
             } else if (order.size > 5){
-                Toast.makeText(context, "Maximum of five tab selections are allowed", Toast.LENGTH_SHORT).show()
+                showMessage(messageStore.getString(R.string.maximum_of_five_tab_selections_are_allowed))
             } else if(!order.contains(Screens.Songs.ordinal)) {
-                Toast.makeText(context, "Songs tab cannot be removed", Toast.LENGTH_SHORT).show()
+                showMessage(messageStore.getString(R.string.songs_tab_cannot_be_removed))
             } else {
                 prefs.updateSelectedTabs(order)
+                showMessage(messageStore.getString(R.string.done))
             }
         }
     }

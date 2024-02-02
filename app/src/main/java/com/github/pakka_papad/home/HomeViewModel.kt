@@ -8,6 +8,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.github.pakka_papad.Constants
 import com.github.pakka_papad.R
 import com.github.pakka_papad.components.SortOptions
+import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.MiniSong
 import com.github.pakka_papad.data.music.PlaylistWithSongCount
@@ -49,6 +50,7 @@ class HomeViewModel @Inject constructor(
     private val songService: SongService,
     private val queueService: QueueService,
     private val playerService: PlayerService,
+    private val crashReporter: ZenCrashReporter,
 ) : ViewModel() {
 
     val songs = songService.songs
@@ -174,31 +176,33 @@ class HomeViewModel @Inject constructor(
 
     private val queueServiceListener = object : QueueService.Listener {
         override fun onAppend(song: Song) {
-            queue.add(song)
+            viewModelScope.launch(Dispatchers.Default) { queue.add(song) }
         }
 
         override fun onAppend(songs: List<Song>) {
-            queue.addAll(songs)
+            viewModelScope.launch(Dispatchers.Default){ queue.addAll(songs) }
         }
 
         override fun onUpdate(updatedSong: Song, position: Int) {
             if (position < 0 || position >= queue.size) return
-            queue[position] = updatedSong
+            viewModelScope.launch(Dispatchers.Default) { queue[position] = updatedSong }
         }
 
         override fun onMove(from: Int, to: Int) {
             if (from < 0 || to < 0 || from >= queue.size || to >= queue.size) return
-            queue.apply { add(to, removeAt(from)) }
+            viewModelScope.launch(Dispatchers.Default){ queue.apply { add(to, removeAt(from)) } }
         }
 
         override fun onClear() {
-            queue.clear()
+            viewModelScope.launch(Dispatchers.Default){ queue.clear() }
         }
 
         override fun onSetQueue(songs: List<Song>, startPlayingFromPosition: Int) {
-            queue.apply {
-                clear()
-                addAll(songs)
+            viewModelScope.launch(Dispatchers.Default) {
+                queue.apply {
+                    clear()
+                    addAll(songs)
+                }
             }
         }
     }
@@ -285,11 +289,11 @@ class HomeViewModel @Inject constructor(
      * Adds a song to the end of queue
      */
     fun addToQueue(song: Song) {
+        crashReporter.logData("HomeViewModel.addToQueue(Song) isQueueEmpty:${queue.isEmpty()}")
         if (queue.isEmpty()) {
-//            manager.setQueue(listOf(song), 0)
-//            queueService.setQueue(listOf(song),0)
             viewModelScope.launch {
                 playerService.startServiceIfNotRunning(listOf(song), 0)
+                showMessage(messageStore.getString(R.string.playing))
             }
         } else {
             val result = queueService.append(song)
@@ -315,8 +319,7 @@ class HomeViewModel @Inject constructor(
      */
     fun setQueue(songs: List<Song>?, startPlayingFromIndex: Int = 0) {
         if (songs == null) return
-//        manager.setQueue(songs, startPlayingFromIndex)
-//        queueService.setQueue(songs, startPlayingFromIndex)
+        crashReporter.logData("HomeViewModel.setQueue()")
         viewModelScope.launch {
             playerService.startServiceIfNotRunning(songs, startPlayingFromIndex)
         }
@@ -330,7 +333,6 @@ class HomeViewModel @Inject constructor(
         if (song == null) return
         val updatedSong = song.copy(favourite = !song.favourite)
         viewModelScope.launch(Dispatchers.IO) {
-//            manager.updateSong(updatedSong)
             queueService.update(updatedSong)
             songService.updateSong(updatedSong)
         }

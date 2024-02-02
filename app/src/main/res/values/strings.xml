@@ -122,6 +122,9 @@
     <string name="start_timer">Start timer</string>
     <string name="stopping_in">Stopping in %1$s</string>
     <string name="playlist_art">Playlist art</string>
+    <string name="songs_tab_cannot_be_removed">Songs tab cannot be removed</string>
+    <string name="maximum_of_five_tab_selections_are_allowed">Maximum of five tab selections are allowed</string>
+    <string name="minimum_one_tab_selection_is_required">Minimum one tab selection is required</string>
 
     <!-- plural strings -->
     <plurals name="song_count">
