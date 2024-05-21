@@ -1,11 +1,14 @@
 package com.github.pakka_papad.data.music
 
+import android.Manifest
 import android.content.ContentUris
 import android.content.Context
+import android.content.pm.PackageManager
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import androidx.core.content.ContextCompat
 import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.daos.AlbumArtistDao
 import com.github.pakka_papad.data.daos.AlbumDao
@@ -78,6 +81,17 @@ class SongExtractor(
         }
     }
 
+    private fun checkReadStoragePermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                Manifest.permission.READ_MEDIA_AUDIO
+            } else {
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            }
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
     private val projection = arrayOf(
         MediaStore.Audio.Media._ID,
         MediaStore.Audio.Media.TITLE,
@@ -90,6 +104,7 @@ class SongExtractor(
     )
 
     fun resolveSong(location: String): Song? {
+        if (!checkReadStoragePermission()) return null
         val selection = MediaStore.Audio.Media.DATA + " LIKE ?"
         val selectionArgs = arrayOf(location)
         val cursor = context.contentResolver.query(
@@ -136,6 +151,7 @@ class SongExtractor(
     }
 
     suspend fun extract(folderPath: String? = null): List<Song> {
+        if (!checkReadStoragePermission()) return emptyList()
         val selection = MediaStore.Audio.Media.DATA + " LIKE ?"
         val selectionArgs = folderPath?.let {
             arrayOf("$it%")
@@ -190,6 +206,7 @@ class SongExtractor(
     }
 
     fun extractMini(folderPath: String? = null): List<MiniSong> {
+        if (!checkReadStoragePermission()) return emptyList()
         val projectionForMini = arrayOf(
             MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE,
@@ -240,6 +257,7 @@ class SongExtractor(
     val scanStatus = _scanStatus.receiveAsFlow()
 
     fun scanForMusic() {
+        if (!checkReadStoragePermission()) return
         scope.launch {
             _scanStatus.send(ScanStatus.ScanStarted)
             val blacklistedSongLocations = blacklistDao
