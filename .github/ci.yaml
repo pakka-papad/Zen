@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  unit-test:
+    name: Perform Unit Testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+      - name: Run tests
+        uses: ./gradlew test
+
+      - name: Upload test report
+        uses: actions.upload-artifact@v2
+        with:
+          name: unit_test_report
+          path: app/build/reports/test/testDebugUnitTest/
