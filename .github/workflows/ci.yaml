@@ -14,11 +14,38 @@ jobs:
       - name: Checkout the code
         uses: actions/checkout@v4
 
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+          cache: 'gradle'
+
+      - name: Load Google Service file
+        env:
+          DATA: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: echo $DATA | base64 -di > app/google-services.json
+
+      - name: Setup Local properties
+        env:
+          STORE_FILE: ${{ secrets.STORE_FILE }}
+          IR_STORE_FILE: ${{ secrets.IR_STORE_FILE }}
+        run: echo $STORE_FILE | base64 -di > keys/store_key.jks && \
+            echo $IR_STORE_FILE | base64 -di > keys/ir_store_key.jks && \
+            echo 'STORE_FILE=keys/store_key.jks' > ./local.properties && \
+            echo 'STORE_PASSWORD=${{ secrets.STORE_PASSWORD }}' > ./local.properties && \
+            echo 'KEY_ALIAS=${{ secrets.KEY_ALIAS }}' > ./local.properties && \
+            echo 'KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}' > ./local.properties && \
+            echo 'IR_STORE_FILE=keys/ir_store_key.jks' > ./local.properties && \
+            echo 'IR_STORE_PASSWORD=${{ secrets.IR_STORE_PASSWORD }}' > ./local.properties && \
+            echo 'IR_KEY_ALIAS=${{ secrets.IR_KEY_ALIAS }}' > ./local.properties && \
+            echo 'IR_KEY_PASSWORD=${{ secrets.IR_KEY_PASSWORD }}' > ./local.properties
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Run unit tests
-        run: ./gradlew test
+        run: ./gradlew testDebug
 
       - name: Upload test report
         uses: actions/upload-artifact@v4
