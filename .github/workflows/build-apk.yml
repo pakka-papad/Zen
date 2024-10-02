@@ -44,6 +44,9 @@ jobs:
           IR_KEY_ALIAS=${{ secrets.IR_KEY_ALIAS }}\n
           IR_KEY_PASSWORD=${{ secrets.IR_KEY_PASSWORD }}\n' > ./local.properties
 
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v3
 
