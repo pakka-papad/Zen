@@ -1,0 +1,60 @@
+name: build-apk
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build IR apk
+    runs-on: ubuntu-latest
+    needs: [unit-test]
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+          cache: 'gradle'
+
+      - name: Load Google Service file
+        env:
+          DATA: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: echo $DATA | base64 -di > app/google-services.json
+
+      - name: Setup Local properties
+        env:
+          STORE_FILE: ${{ secrets.STORE_FILE }}
+          IR_STORE_FILE: ${{ secrets.IR_STORE_FILE }}
+        run: mkdir keys &&
+          echo $STORE_FILE | base64 -di > keys/store_key.jks &&
+          echo $IR_STORE_FILE | base64 -di > keys/ir_store_key.jks &&
+          echo $'STORE_FILE=${{ github.workspace }}/keys/store_key.jks\n
+          STORE_PASSWORD=${{ secrets.STORE_PASSWORD }}\n
+          KEY_ALIAS=${{ secrets.KEY_ALIAS }}\n
+          KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}\n
+          IR_STORE_FILE=${{ github.workspace }}/keys/ir_store_key.jks\n
+          IR_STORE_PASSWORD=${{ secrets.IR_STORE_PASSWORD }}\n
+          IR_KEY_ALIAS=${{ secrets.IR_KEY_ALIAS }}\n
+          IR_KEY_PASSWORD=${{ secrets.IR_KEY_PASSWORD }}\n' > ./local.properties
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+
+      - name: Build apk
+        run: ./gradlew assembleInternalRelease
+
+      - name: Rename apk
+        run: mv ./app/build/outputs/apk/internalRelease/app-internalRelease.apk ./app/build/outputs/apk/internalRelease/zen-music-ir-build-${{ github.run_number }}.apk
+
+      - name: Upload apk
+        uses: actions/upload-artifact@v4
+        with:
+          name: zen-music-ir-build-${{ github.run_number }}.apk
+          path: app/build/outputs/apk/internalRelease/

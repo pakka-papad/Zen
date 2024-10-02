@@ -1,4 +1,4 @@
-name: CI
+name: unit-test
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main, dev]
 
 jobs:
-  unit-test:
+  test:
     name: Perform Unit Testing
     runs-on: ubuntu-latest
     steps:
@@ -42,8 +42,8 @@ jobs:
               IR_KEY_ALIAS=${{ secrets.IR_KEY_ALIAS }}\n
               IR_KEY_PASSWORD=${{ secrets.IR_KEY_PASSWORD }}\n' > ./local.properties
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
 
       - name: Run unit tests
         run: ./gradlew testDebug
