@@ -1,8 +1,12 @@
 package com.github.pakka_papad.home
 
+import android.Manifest
 import android.app.PendingIntent
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -34,8 +38,10 @@ import androidx.compose.material3.LocalAbsoluteTonalElevation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.material3.surfaceColorAtElevation
@@ -64,6 +70,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.github.pakka_papad.Constants
+import com.github.pakka_papad.R
 import com.github.pakka_papad.Screens
 import com.github.pakka_papad.components.BottomSheet
 import com.github.pakka_papad.components.Snackbar
@@ -74,6 +81,9 @@ import com.github.pakka_papad.nowplaying.PlayerHelper
 import com.github.pakka_papad.nowplaying.Queue
 import com.github.pakka_papad.player.ZenBroadcastReceiver
 import com.github.pakka_papad.ui.theme.ZenTheme
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -93,7 +103,7 @@ class HomeFragment : Fragment() {
 
     @OptIn(
         ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
-        ExperimentalMaterialApi::class
+        ExperimentalMaterialApi::class, ExperimentalPermissionsApi::class
     )
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -186,6 +196,32 @@ class HomeFragment : Fragment() {
                     LaunchedEffect(key1 = message){
                         if (message.isEmpty()) return@LaunchedEffect
                         snackbarHostState.showSnackbar(message)
+                    }
+
+                    val readStoragePermissionState =
+                        rememberPermissionState(
+                            permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                Manifest.permission.READ_MEDIA_AUDIO
+                            } else {
+                                Manifest.permission.READ_EXTERNAL_STORAGE
+                            }
+                        )
+
+                    LaunchedEffect(key1 = readStoragePermissionState) {
+                        if (readStoragePermissionState.status.isGranted) return@LaunchedEffect
+                        val snackbarResult = snackbarHostState.showSnackbar(
+                            context.getString(R.string.grant_access_to_read_storage),
+                            context.getString(R.string.settings),
+                            true,
+                            SnackbarDuration.Indefinite
+                        )
+                        if (snackbarResult != SnackbarResult.ActionPerformed) return@LaunchedEffect
+                        Intent(
+                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                            Uri.fromParts("package", context.packageName, null)
+                        ).apply {
+                            startActivity(this)
+                        }
                     }
 
                     val bottomBarYOffset by remember {
