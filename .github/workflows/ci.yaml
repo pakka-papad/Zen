@@ -32,15 +32,15 @@ jobs:
           IR_STORE_FILE: ${{ secrets.IR_STORE_FILE }}
         run: mkdir keys && 
             echo $STORE_FILE | base64 -di > keys/store_key.jks && 
-            echo $IR_STORE_FILE | base64 -di > keys/ir_store_key.jks && 
-            echo 'STORE_FILE=${{ github.workspace }}/keys/store_key.jks' > ./local.properties && 
-            echo 'STORE_PASSWORD=${{ secrets.STORE_PASSWORD }}' > ./local.properties && 
-            echo 'KEY_ALIAS=${{ secrets.KEY_ALIAS }}' > ./local.properties && 
-            echo 'KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}' > ./local.properties && 
-            echo 'IR_STORE_FILE=${{ github.workspace }}/keys/ir_store_key.jks' > ./local.properties && 
-            echo 'IR_STORE_PASSWORD=${{ secrets.IR_STORE_PASSWORD }}' > ./local.properties && 
-            echo 'IR_KEY_ALIAS=${{ secrets.IR_KEY_ALIAS }}' > ./local.properties && 
-            echo 'IR_KEY_PASSWORD=${{ secrets.IR_KEY_PASSWORD }}' > ./local.properties
+            echo $IR_STORE_FILE | base64 -di > keys/ir_store_key.jks &&  
+            echo 'STORE_FILE=${{ github.workspace }}/keys/store_key.jks
+              STORE_PASSWORD=${{ secrets.STORE_PASSWORD }}
+              KEY_ALIAS=${{ secrets.KEY_ALIAS }}
+              KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}
+              IR_STORE_FILE=${{ github.workspace }}/keys/ir_store_key.jks 
+              IR_STORE_PASSWORD=${{ secrets.IR_STORE_PASSWORD }} 
+              IR_KEY_ALIAS=${{ secrets.IR_KEY_ALIAS }} 
+              IR_KEY_PASSWORD=${{ secrets.IR_KEY_PASSWORD }}' > ./local.properties
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
