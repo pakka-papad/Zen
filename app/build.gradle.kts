@@ -113,6 +113,7 @@ android {
 
 dependencies {
     implementation(project(":m3utils"))
+    implementation(Libraries.kotlinxCollectionsImmutable)
     implementation(Libraries.androidxCore)
 
     implementation(Libraries.androidxLifecycle)

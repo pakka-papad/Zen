@@ -1,6 +1,7 @@
 object Versions {
     const val kotlin = "1.8.0"
     const val coroutines = "1.7.1"
+    const val kotlinxCollectionsImmutable = "0.3.8"
 
     const val androidxComposeUi = "1.3.3"
     const val androidxComposeCompiler = "1.4.1"
@@ -61,6 +62,7 @@ object Plugins {
 }
 
 object Libraries {
+    const val kotlinxCollectionsImmutable = "org.jetbrains.kotlinx:kotlinx-collections-immutable:${Versions.kotlinxCollectionsImmutable}"
     const val coroutinesTest = "org.jetbrains.kotlinx:kotlinx-coroutines-test:${Versions.coroutines}"
 
     const val androidxCore = "androidx.core:core-ktx:${Versions.androidxCore}"
