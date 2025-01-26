@@ -413,57 +413,57 @@ private fun ThemeSelectorDialog(
                     .fillMaxWidth()
                     .selectableGroup()
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(
-                        selected = (themePreference.theme == UserPreferences.Theme.LIGHT_MODE || themePreference.theme == UserPreferences.Theme.UNRECOGNIZED),
-                        onClick = {
-                            onPreferenceChanged(themePreference.copy(theme = UserPreferences.Theme.LIGHT_MODE))
-                        }
-                    )
-                    Text(
-                        text = stringResource(R.string.light_mode),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(
-                        selected = (themePreference.theme == UserPreferences.Theme.DARK_MODE),
-                        onClick = {
-                            onPreferenceChanged(themePreference.copy(theme = UserPreferences.Theme.DARK_MODE))
-                        }
-                    )
-                    Text(
-                        text = stringResource(R.string.dark_mode),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(
-                        selected = (themePreference.theme == UserPreferences.Theme.USE_SYSTEM_MODE),
-                        onClick = {
-                            onPreferenceChanged(themePreference.copy(theme = UserPreferences.Theme.USE_SYSTEM_MODE))
-                        }
-                    )
-                    Text(
-                        text = stringResource(R.string.system_mode),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
+                ThemeMode(
+                    isSelected = (themePreference.theme == UserPreferences.Theme.LIGHT_MODE),
+                    text = stringResource(R.string.light_mode),
+                    onClick = {
+                        onPreferenceChanged(themePreference.copy(theme = UserPreferences.Theme.LIGHT_MODE))
+                    }
+                )
+                ThemeMode(
+                    isSelected = (themePreference.theme == UserPreferences.Theme.DARK_MODE),
+                    text = stringResource(R.string.dark_mode),
+                    onClick = {
+                        onPreferenceChanged(themePreference.copy(theme = UserPreferences.Theme.DARK_MODE))
+                    }
+                )
+                ThemeMode(
+                    isSelected = (themePreference.theme == UserPreferences.Theme.USE_SYSTEM_MODE),
+                    text = stringResource(R.string.system_mode),
+                    onClick = {
+                        onPreferenceChanged(themePreference.copy(theme = UserPreferences.Theme.USE_SYSTEM_MODE))
+                    }
+                )
             }
         }
     )
+}
+
+@Composable
+private fun ThemeMode(
+    isSelected: Boolean,
+    text: String,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(45.dp)
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        RadioButton(
+            selected = isSelected,
+            onClick = null,
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleMedium
+        )
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
