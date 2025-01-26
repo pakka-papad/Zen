@@ -14,7 +14,7 @@ object Versions {
     const val androidxEspresso = "3.4.0"
     const val androidxComposeConstraintLayout = "1.0.1"
     const val androidxSplashScreen = "1.0.0-beta02"
-    const val androidxGlance = "1.0.0-beta01"
+    const val androidxGlance = "1.1.1"
     const val androidxWorkManager = "2.8.1"
 
     const val appCompat = "1.4.2"
@@ -26,6 +26,7 @@ object Versions {
 
     const val firebaseBom = "31.2.3"
     const val googleServices = "4.3.15"
+    const val appUpdate = "2.1.0"
     const val crashlyticsGradlePlugin = "2.9.4"
 
     const val material3 = "1.1.2"
@@ -92,6 +93,7 @@ object Libraries {
 
     const val firebaseBom = "com.google.firebase:firebase-bom:${Versions.firebaseBom}"
     const val firebaseCrashlytics = "com.google.firebase:firebase-crashlytics-ktx"
+    const val appUpdate = "com.google.android.play:app-update-ktx:${Versions.appUpdate}"
 
     const val androidxComposeMaterial = "androidx.compose.material:material:${Versions.androidxComposeMaterial}"
 

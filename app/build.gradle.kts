@@ -170,6 +170,7 @@ dependencies {
 
     implementation(platform(Libraries.firebaseBom))
     implementation(Libraries.firebaseCrashlytics)
+    implementation(Libraries.appUpdate)
 
 //    implementation(Libraries.exoPlayer)
     implementation(Libraries.media3ExoPlayer)
