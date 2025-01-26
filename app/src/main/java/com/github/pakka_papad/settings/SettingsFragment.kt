@@ -22,6 +22,7 @@ import androidx.navigation.fragment.findNavController
 import com.github.pakka_papad.R
 import com.github.pakka_papad.components.Snackbar
 import com.github.pakka_papad.components.TopBarWithBackArrow
+import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.ui.theme.ZenTheme
 import com.google.android.play.core.appupdate.AppUpdateManager
@@ -37,11 +38,11 @@ class SettingsFragment : Fragment() {
 
     private lateinit var navController: NavController
 
-    @Inject
-    lateinit var preferenceProvider: ZenPreferenceProvider
+    @Inject lateinit var preferenceProvider: ZenPreferenceProvider
 
-    @Inject
-    lateinit var appUpdateManager: AppUpdateManager
+    @Inject lateinit var appUpdateManager: AppUpdateManager
+
+    @Inject lateinit var crashReporter: ZenCrashReporter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -132,12 +133,16 @@ class SettingsFragment : Fragment() {
     private fun onAppUpdateClicked() {
         val appUpdateInfo = viewModel.appUpdateInfo.value
         viewModel.consumeAppUpdateInfo()
-        appUpdateInfo?.let {
-            appUpdateManager.startUpdateFlow(
-                it,
-                requireActivity(),
-                AppUpdateOptions.defaultOptions(AppUpdateType.IMMEDIATE)
-            )
+        try {
+            appUpdateInfo?.let {
+                appUpdateManager.startUpdateFlow(
+                    it,
+                    requireActivity(),
+                    AppUpdateOptions.defaultOptions(AppUpdateType.IMMEDIATE)
+                )
+            }
+        } catch (e: Exception) {
+            crashReporter.logException(e)
         }
     }
 }
