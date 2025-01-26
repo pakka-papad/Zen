@@ -80,6 +80,8 @@ import timber.log.Timber
 @Composable
 fun SettingsList(
     paddingValues: PaddingValues,
+    isAppUpdateAvailable: Boolean,
+    onAppUpdateClicked: () -> Unit,
     themePreference: ThemePreference,
     onThemePreferenceChanged: (ThemePreference) -> Unit,
     scanStatus: ScanStatus,
@@ -101,6 +103,11 @@ fun SettingsList(
         contentPadding = paddingValues,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
+        if (isAppUpdateAvailable) {
+            item {
+                UpdateAvailable(onClick = onAppUpdateClicked)
+            }
+        }
         item {
             GroupTitle(title = stringResource(R.string.look_and_feel))
         }
@@ -143,7 +150,35 @@ fun SettingsList(
 }
 
 @Composable
-fun GroupTitle(
+private fun UpdateAvailable(
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .group()
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(R.string.new_version_available),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .weight(1f),
+        )
+        Button(
+            onClick = onClick,
+            modifier = Modifier.padding(end = 6.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.update),
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+    }
+}
+
+@Composable
+private fun GroupTitle(
     title: String,
 ){
     Text(

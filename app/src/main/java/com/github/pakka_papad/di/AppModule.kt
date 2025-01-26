@@ -16,12 +16,37 @@ import androidx.media3.extractor.DefaultExtractorsFactory
 import androidx.media3.extractor.mp3.Mp3Extractor
 import androidx.room.Room
 import com.github.pakka_papad.Constants
-import com.github.pakka_papad.data.*
+import com.github.pakka_papad.data.AppDatabase
+import com.github.pakka_papad.data.QueueState
+import com.github.pakka_papad.data.QueueStateSerializer
+import com.github.pakka_papad.data.UserPreferences
+import com.github.pakka_papad.data.UserPreferencesSerializer
+import com.github.pakka_papad.data.ZenCrashReporter
+import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.SongExtractor
-import com.github.pakka_papad.data.services.*
+import com.github.pakka_papad.data.services.AnalyticsService
+import com.github.pakka_papad.data.services.AnalyticsServiceImpl
+import com.github.pakka_papad.data.services.BlacklistService
+import com.github.pakka_papad.data.services.BlacklistServiceImpl
+import com.github.pakka_papad.data.services.PlayerService
+import com.github.pakka_papad.data.services.PlayerServiceImpl
+import com.github.pakka_papad.data.services.PlaylistService
+import com.github.pakka_papad.data.services.PlaylistServiceImpl
+import com.github.pakka_papad.data.services.QueueService
+import com.github.pakka_papad.data.services.QueueServiceImpl
+import com.github.pakka_papad.data.services.SearchService
+import com.github.pakka_papad.data.services.SearchServiceImpl
+import com.github.pakka_papad.data.services.SleepTimerService
+import com.github.pakka_papad.data.services.SleepTimerServiceImpl
+import com.github.pakka_papad.data.services.SongService
+import com.github.pakka_papad.data.services.SongServiceImpl
+import com.github.pakka_papad.data.services.ThumbnailService
+import com.github.pakka_papad.data.services.ThumbnailServiceImpl
 import com.github.pakka_papad.player.ZenBroadcastReceiver
 import com.github.pakka_papad.util.MessageStore
 import com.github.pakka_papad.util.MessageStoreImpl
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.Module
 import dagger.Provides
@@ -282,5 +307,13 @@ object AppModule {
             context = context,
             thumbnailDao = db.thumbnailDao(),
         )
+    }
+
+    @Singleton
+    @Provides
+    fun providesAppUpdateManager(
+        @ApplicationContext context: Context,
+    ): AppUpdateManager {
+        return AppUpdateManagerFactory.create(context)
     }
 }

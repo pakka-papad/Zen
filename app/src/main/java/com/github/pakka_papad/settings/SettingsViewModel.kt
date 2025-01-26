@@ -9,6 +9,9 @@ import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.data.music.ScanStatus
 import com.github.pakka_papad.data.music.SongExtractor
 import com.github.pakka_papad.util.MessageStore
+import com.google.android.play.core.appupdate.AppUpdateInfo
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.install.model.UpdateAvailability
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +27,7 @@ class SettingsViewModel @Inject constructor(
     private val songExtractor: SongExtractor,
     private val prefs: ZenPreferenceProvider,
     private val messageStore: MessageStore,
+    private val appUpdateManager: AppUpdateManager,
 ) : ViewModel() {
 
     val scanStatus = songExtractor.scanStatus
@@ -111,4 +115,19 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    private val _appUpdateInfo = MutableStateFlow<AppUpdateInfo?>(null)
+    val appUpdateInfo = _appUpdateInfo.asStateFlow()
+
+    init {
+        val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+        appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
+                _appUpdateInfo.update { appUpdateInfo }
+            }
+        }
+    }
+
+    fun consumeAppUpdateInfo() {
+        _appUpdateInfo.update { null }
+    }
 }
