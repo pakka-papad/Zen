@@ -1,20 +1,14 @@
 package com.github.pakka_papad.settings
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -60,17 +54,14 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.BuildConfig
@@ -677,14 +668,14 @@ private fun ReportBug(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+//@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MadeBy(
     onWhatsNewClicked: () -> Unit,
 ) {
-    val githubUrl = "https://github.com/pakka-papad"
-    val linkedinUrl = "https://www.linkedin.com/in/sumitzbera/"
-    val context = LocalContext.current
+//    val githubUrl = "https://github.com/pakka-papad"
+//    val linkedinUrl = "https://www.linkedin.com/in/sumitzbera/"
+//    val context = LocalContext.current
     val appVersion = stringResource(id = R.string.app_version_name)
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -701,86 +692,84 @@ private fun MadeBy(
             },
             style = MaterialTheme.typography.titleSmall,
         )
-        Text(
-            text = stringResource(R.string.check_what_s_new),
-            modifier = Modifier
-                .alpha(0.5f)
-                .clickable(onClick = onWhatsNewClicked),
-            style = MaterialTheme.typography.titleSmall.copy(textDecoration = TextDecoration.Underline)
-        )
-        Spacer(Modifier.height(6.dp))
-        Text(
-            text = buildAnnotatedString {
-                withStyle(semiTransparentSpanStyle) {
-                    append("${stringResource(R.string.made_by)} ")
-                }
-                append("Sumit Bera")
-            },
-            style = MaterialTheme.typography.titleMedium,
-        )
-        val iconModifier = Modifier
-            .size(30.dp)
-            .alpha(0.5f)
-//            .clip(CircleShape)
-//            .border(1.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            Image(
-                painter = painterResource(R.drawable.github_mark),
-                contentDescription = "github",
-                modifier = iconModifier
-                    .combinedClickable(
-                        onClick = {
-                            val intent = Intent(Intent.ACTION_VIEW)
-                            intent.data = Uri.parse(githubUrl)
-                            try {
-                                context.startActivity(intent)
-                            } catch (_: Exception){
-                                Toast.makeText(context,"Error opening url. Long press to copy.",Toast.LENGTH_SHORT).show()
-                            }
-                        },
-                        onLongClick = {
-                            val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
-                            if (clipboardManager == null){
-                                Toast.makeText(context,"Error",Toast.LENGTH_SHORT).show()
-                            } else {
-                                clipboardManager.setPrimaryClip(ClipData.newPlainText("Github url",githubUrl))
-                                Toast.makeText(context,"Copied",Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    ),
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                contentScale = ContentScale.Inside,
-            )
-            Image(
-                painter = painterResource(R.drawable.linkedin),
-                contentDescription = "linkedin",
-                modifier = iconModifier
-                    .combinedClickable(
-                        onClick = {
-                            val intent = Intent(Intent.ACTION_VIEW)
-                            intent.data = Uri.parse(linkedinUrl)
-                            try {
-                                context.startActivity(intent)
-                            } catch (_: Exception){
-                                Toast.makeText(context,"Error opening url. Long press to copy.",Toast.LENGTH_SHORT).show()
-                            }
-                        },
-                        onLongClick = {
-                            val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
-                            if (clipboardManager == null){
-                                Toast.makeText(context,"Error",Toast.LENGTH_SHORT).show()
-                            } else {
-                                clipboardManager.setPrimaryClip(ClipData.newPlainText("Linkedin url",linkedinUrl))
-                                Toast.makeText(context,"Copied",Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    ),
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                contentScale = ContentScale.Inside,
-            )
-        }
+//        Text(
+//            text = stringResource(R.string.check_what_s_new),
+//            modifier = Modifier
+//                .alpha(0.5f)
+//                .clickable(onClick = onWhatsNewClicked),
+//            style = MaterialTheme.typography.titleSmall.copy(textDecoration = TextDecoration.Underline)
+//        )
+//        Spacer(Modifier.height(6.dp))
+//        Text(
+//            text = buildAnnotatedString {
+//                withStyle(semiTransparentSpanStyle) {
+//                    append("${stringResource(R.string.made_by)} ")
+//                }
+//                append("Sumit Bera")
+//            },
+//            style = MaterialTheme.typography.titleMedium,
+//        )
+//        val iconModifier = Modifier
+//            .size(30.dp)
+//            .alpha(0.5f)
+//        Row(
+//            horizontalArrangement = Arrangement.spacedBy(24.dp)
+//        ) {
+//            Image(
+//                painter = painterResource(R.drawable.github_mark),
+//                contentDescription = "github",
+//                modifier = iconModifier
+//                    .combinedClickable(
+//                        onClick = {
+//                            val intent = Intent(Intent.ACTION_VIEW)
+//                            intent.data = Uri.parse(githubUrl)
+//                            try {
+//                                context.startActivity(intent)
+//                            } catch (_: Exception){
+//                                Toast.makeText(context,"Error opening url. Long press to copy.",Toast.LENGTH_SHORT).show()
+//                            }
+//                        },
+//                        onLongClick = {
+//                            val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
+//                            if (clipboardManager == null){
+//                                Toast.makeText(context,"Error",Toast.LENGTH_SHORT).show()
+//                            } else {
+//                                clipboardManager.setPrimaryClip(ClipData.newPlainText("Github url",githubUrl))
+//                                Toast.makeText(context,"Copied",Toast.LENGTH_SHORT).show()
+//                            }
+//                        }
+//                    ),
+//                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+//                contentScale = ContentScale.Inside,
+//            )
+//            Image(
+//                painter = painterResource(R.drawable.linkedin),
+//                contentDescription = "linkedin",
+//                modifier = iconModifier
+//                    .combinedClickable(
+//                        onClick = {
+//                            val intent = Intent(Intent.ACTION_VIEW)
+//                            intent.data = Uri.parse(linkedinUrl)
+//                            try {
+//                                context.startActivity(intent)
+//                            } catch (_: Exception){
+//                                Toast.makeText(context,"Error opening url. Long press to copy.",Toast.LENGTH_SHORT).show()
+//                            }
+//                        },
+//                        onLongClick = {
+//                            val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
+//                            if (clipboardManager == null){
+//                                Toast.makeText(context,"Error",Toast.LENGTH_SHORT).show()
+//                            } else {
+//                                clipboardManager.setPrimaryClip(ClipData.newPlainText("Linkedin url",linkedinUrl))
+//                                Toast.makeText(context,"Copied",Toast.LENGTH_SHORT).show()
+//                            }
+//                        }
+//                    ),
+//                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+//                contentScale = ContentScale.Inside,
+//            )
+//        }
         Spacer(Modifier.height(36.dp))
     }
 }
