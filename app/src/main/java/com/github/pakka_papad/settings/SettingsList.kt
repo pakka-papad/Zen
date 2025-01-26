@@ -643,11 +643,13 @@ private fun MusicLibrarySettings(
         Setting(
             title = stringResource(R.string.restore_blacklisted_songs),
             icon = R.drawable.baseline_settings_backup_restore_40,
+            description = stringResource(R.string.add_songs_back_to_the_library),
             onClick = onRestoreClicked
         )
         Setting(
             title = stringResource(R.string.restore_blacklisted_folders),
             icon = R.drawable.baseline_settings_backup_restore_40,
+            description = stringResource(R.string.add_folders_back_to_the_library),
             onClick = onRestoreFoldersClicked
         )
     }
