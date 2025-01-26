@@ -8,6 +8,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
@@ -21,8 +22,12 @@ import androidx.navigation.fragment.findNavController
 import com.github.pakka_papad.R
 import com.github.pakka_papad.components.Snackbar
 import com.github.pakka_papad.components.TopBarWithBackArrow
+import com.github.pakka_papad.data.ZenCrashReporter
 import com.github.pakka_papad.data.ZenPreferenceProvider
 import com.github.pakka_papad.ui.theme.ZenTheme
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateOptions
+import com.google.android.play.core.install.model.AppUpdateType
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -33,8 +38,11 @@ class SettingsFragment : Fragment() {
 
     private lateinit var navController: NavController
 
-    @Inject
-    lateinit var preferenceProvider: ZenPreferenceProvider
+    @Inject lateinit var preferenceProvider: ZenPreferenceProvider
+
+    @Inject lateinit var appUpdateManager: AppUpdateManager
+
+    @Inject lateinit var crashReporter: ZenCrashReporter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -50,6 +58,10 @@ class SettingsFragment : Fragment() {
                 val isCrashlyticsDisabled by preferenceProvider.isCrashlyticsDisabled.collectAsStateWithLifecycle()
 
                 val tabsSelection by viewModel.tabsSelection.collectAsStateWithLifecycle()
+
+                val isAppUpdateAvailable by remember { derivedStateOf {
+                    viewModel.appUpdateInfo.value != null
+                } }
 
                 val restoreClicked = remember{ {
                     if (navController.currentDestination?.id == R.id.settingsFragment){
@@ -87,6 +99,8 @@ class SettingsFragment : Fragment() {
                         content = { paddingValues ->
                             SettingsList(
                                 paddingValues = paddingValues,
+                                isAppUpdateAvailable = isAppUpdateAvailable,
+                                onAppUpdateClicked = ::onAppUpdateClicked,
                                 themePreference = themePreference,
                                 onThemePreferenceChanged = preferenceProvider::updateTheme,
                                 scanStatus = scanStatus,
@@ -113,6 +127,22 @@ class SettingsFragment : Fragment() {
                     )
                 }
             }
+        }
+    }
+
+    private fun onAppUpdateClicked() {
+        val appUpdateInfo = viewModel.appUpdateInfo.value
+        viewModel.consumeAppUpdateInfo()
+        try {
+            appUpdateInfo?.let {
+                appUpdateManager.startUpdateFlow(
+                    it,
+                    requireActivity(),
+                    AppUpdateOptions.defaultOptions(AppUpdateType.IMMEDIATE)
+                )
+            }
+        } catch (e: Exception) {
+            crashReporter.logException(e)
         }
     }
 }

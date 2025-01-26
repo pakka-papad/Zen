@@ -1,16 +1,28 @@
 package com.github.pakka_papad.settings
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -19,24 +31,37 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.github.pakka_papad.BuildConfig
@@ -55,6 +80,8 @@ import timber.log.Timber
 @Composable
 fun SettingsList(
     paddingValues: PaddingValues,
+    isAppUpdateAvailable: Boolean,
+    onAppUpdateClicked: () -> Unit,
     themePreference: ThemePreference,
     onThemePreferenceChanged: (ThemePreference) -> Unit,
     scanStatus: ScanStatus,
@@ -76,6 +103,11 @@ fun SettingsList(
         contentPadding = paddingValues,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
+        if (isAppUpdateAvailable) {
+            item {
+                UpdateAvailable(onClick = onAppUpdateClicked)
+            }
+        }
         item {
             GroupTitle(title = stringResource(R.string.look_and_feel))
         }
@@ -118,7 +150,35 @@ fun SettingsList(
 }
 
 @Composable
-fun GroupTitle(
+private fun UpdateAvailable(
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .group()
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(R.string.new_version_available),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .weight(1f),
+        )
+        Button(
+            onClick = onClick,
+            modifier = Modifier.padding(end = 6.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.update),
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+    }
+}
+
+@Composable
+private fun GroupTitle(
     title: String,
 ){
     Text(
@@ -203,7 +263,7 @@ private fun LookAndFeelSettings(
         AccentSelectorDialog(
             themePreference = themePreference,
             onPreferenceChanged = onPreferenceChanged,
-            onDismissRequest = { showAccentSelector = false }
+            onDismissRequest = { showAccentSelector = false },
         )
     }
     if (showSelectorDialog) {
@@ -233,7 +293,6 @@ private fun AccentSelectorDialog(
     onPreferenceChanged: (ThemePreference) -> Unit,
     onDismissRequest: () -> Unit,
 ){
-    val sizeModifier = Modifier.size(50.dp)
     AlertDialog(
         title = {
             Text(
@@ -263,63 +322,89 @@ private fun AccentSelectorDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Canvas(
-                        modifier = sizeModifier
-                            .clickable {
-                                onPreferenceChanged(themePreference.copy(accent = Accent.Default))
-                            }
-                    ) {
-                        drawCircle(Accent.Default.getSeedColor())
-                    }
-                    Canvas(
-                        modifier = sizeModifier
-                            .clickable {
-                                onPreferenceChanged(themePreference.copy(accent = Accent.Malibu))
-                            }
-                    ) {
-                        drawCircle(Accent.Malibu.getSeedColor())
-                    }
-                    Canvas(
-                        modifier = sizeModifier
-                            .clickable {
-                                onPreferenceChanged(themePreference.copy(accent = Accent.Melrose))
-                            }
-                    ) {
-                        drawCircle(Accent.Melrose.getSeedColor())
-                    }
+                    DrawAccentCircle(
+                        accentColour = Accent.Default.getSeedColor(),
+                        isSelected = themePreference.accent == Accent.Default,
+                        onClick = {
+                            onPreferenceChanged(themePreference.copy(accent = Accent.Default))
+                        }
+                    )
+                    DrawAccentCircle(
+                        accentColour = Accent.Malibu.getSeedColor(),
+                        isSelected = themePreference.accent == Accent.Malibu,
+                        onClick = {
+                            onPreferenceChanged(themePreference.copy(accent = Accent.Malibu))
+                        }
+                    )
+                    DrawAccentCircle(
+                        accentColour = Accent.Melrose.getSeedColor(),
+                        isSelected = themePreference.accent == Accent.Melrose,
+                        onClick = {
+                            onPreferenceChanged(themePreference.copy(accent = Accent.Melrose))
+                        }
+                    )
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Canvas(
-                        modifier = sizeModifier
-                            .clickable {
-                                onPreferenceChanged(themePreference.copy(accent = Accent.Elm))
-                            }
-                    ) {
-                        drawCircle(Accent.Elm.getSeedColor())
-                    }
-                    Canvas(
-                        modifier = sizeModifier
-                            .clickable {
-                                onPreferenceChanged(themePreference.copy(accent = Accent.Magenta))
-                            }
-                    ) {
-                        drawCircle(Accent.Magenta.getSeedColor())
-                    }
-                    Canvas(
-                        modifier = sizeModifier
-                            .clickable {
-                                onPreferenceChanged(themePreference.copy(accent = Accent.JacksonsPurple))
-                            }
-                    ) {
-                        drawCircle(Accent.JacksonsPurple.getSeedColor())
-                    }
+                    DrawAccentCircle(
+                        accentColour = Accent.Elm.getSeedColor(),
+                        isSelected = themePreference.accent == Accent.Elm,
+                        onClick = {
+                            onPreferenceChanged(themePreference.copy(accent = Accent.Elm))
+                        }
+                    )
+                    DrawAccentCircle(
+                        accentColour = Accent.Magenta.getSeedColor(),
+                        isSelected = themePreference.accent == Accent.Magenta,
+                        onClick = {
+                            onPreferenceChanged(themePreference.copy(accent = Accent.Magenta))
+                        }
+                    )
+                    DrawAccentCircle(
+                        accentColour = Accent.JacksonsPurple.getSeedColor(),
+                        isSelected = themePreference.accent == Accent.JacksonsPurple,
+                        onClick = {
+                            onPreferenceChanged(themePreference.copy(accent = Accent.JacksonsPurple))
+                        }
+                    )
                 }
             }
         }
     )
+}
+
+@Composable
+private fun DrawAccentCircle(
+    accentColour: Color,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
+    val borderColour = MaterialTheme.colorScheme.primary
+    Canvas(
+        modifier = Modifier
+            .size(56.dp)
+            .clickable(
+                onClick = onClick,
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ),
+    ) {
+        if (isSelected) {
+            drawArc(
+                color = borderColour,
+                startAngle = 0f,
+                sweepAngle = 360f,
+                useCenter = true,
+                style = Stroke(width = 3.dp.toPx()),
+            )
+        }
+        drawCircle(
+            color = accentColour,
+            radius = size.minDimension * 0.45f,
+        )
+    }
 }
 
 @Composable
@@ -354,57 +439,57 @@ private fun ThemeSelectorDialog(
                     .fillMaxWidth()
                     .selectableGroup()
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(
-                        selected = (themePreference.theme == UserPreferences.Theme.LIGHT_MODE || themePreference.theme == UserPreferences.Theme.UNRECOGNIZED),
-                        onClick = {
-                            onPreferenceChanged(themePreference.copy(theme = UserPreferences.Theme.LIGHT_MODE))
-                        }
-                    )
-                    Text(
-                        text = stringResource(R.string.light_mode),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(
-                        selected = (themePreference.theme == UserPreferences.Theme.DARK_MODE),
-                        onClick = {
-                            onPreferenceChanged(themePreference.copy(theme = UserPreferences.Theme.DARK_MODE))
-                        }
-                    )
-                    Text(
-                        text = stringResource(R.string.dark_mode),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(
-                        selected = (themePreference.theme == UserPreferences.Theme.USE_SYSTEM_MODE),
-                        onClick = {
-                            onPreferenceChanged(themePreference.copy(theme = UserPreferences.Theme.USE_SYSTEM_MODE))
-                        }
-                    )
-                    Text(
-                        text = stringResource(R.string.system_mode),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
+                ThemeMode(
+                    isSelected = (themePreference.theme == UserPreferences.Theme.LIGHT_MODE),
+                    text = stringResource(R.string.light_mode),
+                    onClick = {
+                        onPreferenceChanged(themePreference.copy(theme = UserPreferences.Theme.LIGHT_MODE))
+                    }
+                )
+                ThemeMode(
+                    isSelected = (themePreference.theme == UserPreferences.Theme.DARK_MODE),
+                    text = stringResource(R.string.dark_mode),
+                    onClick = {
+                        onPreferenceChanged(themePreference.copy(theme = UserPreferences.Theme.DARK_MODE))
+                    }
+                )
+                ThemeMode(
+                    isSelected = (themePreference.theme == UserPreferences.Theme.USE_SYSTEM_MODE),
+                    text = stringResource(R.string.system_mode),
+                    onClick = {
+                        onPreferenceChanged(themePreference.copy(theme = UserPreferences.Theme.USE_SYSTEM_MODE))
+                    }
+                )
             }
         }
     )
+}
+
+@Composable
+private fun ThemeMode(
+    isSelected: Boolean,
+    text: String,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(45.dp)
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        RadioButton(
+            selected = isSelected,
+            onClick = null,
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleMedium
+        )
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -558,11 +643,13 @@ private fun MusicLibrarySettings(
         Setting(
             title = stringResource(R.string.restore_blacklisted_songs),
             icon = R.drawable.baseline_settings_backup_restore_40,
+            description = stringResource(R.string.add_songs_back_to_the_library),
             onClick = onRestoreClicked
         )
         Setting(
             title = stringResource(R.string.restore_blacklisted_folders),
             icon = R.drawable.baseline_settings_backup_restore_40,
+            description = stringResource(R.string.add_folders_back_to_the_library),
             onClick = onRestoreFoldersClicked
         )
     }
@@ -618,14 +705,14 @@ private fun ReportBug(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+//@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MadeBy(
     onWhatsNewClicked: () -> Unit,
 ) {
-    val githubUrl = "https://github.com/pakka-papad"
-    val linkedinUrl = "https://www.linkedin.com/in/sumitzbera/"
-    val context = LocalContext.current
+//    val githubUrl = "https://github.com/pakka-papad"
+//    val linkedinUrl = "https://www.linkedin.com/in/sumitzbera/"
+//    val context = LocalContext.current
     val appVersion = stringResource(id = R.string.app_version_name)
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -642,86 +729,84 @@ private fun MadeBy(
             },
             style = MaterialTheme.typography.titleSmall,
         )
-        Text(
-            text = stringResource(R.string.check_what_s_new),
-            modifier = Modifier
-                .alpha(0.5f)
-                .clickable(onClick = onWhatsNewClicked),
-            style = MaterialTheme.typography.titleSmall.copy(textDecoration = TextDecoration.Underline)
-        )
-        Spacer(Modifier.height(6.dp))
-        Text(
-            text = buildAnnotatedString {
-                withStyle(semiTransparentSpanStyle) {
-                    append("${stringResource(R.string.made_by)} ")
-                }
-                append("Sumit Bera")
-            },
-            style = MaterialTheme.typography.titleMedium,
-        )
-        val iconModifier = Modifier
-            .size(30.dp)
-            .alpha(0.5f)
-//            .clip(CircleShape)
-//            .border(1.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            Image(
-                painter = painterResource(R.drawable.github_mark),
-                contentDescription = "github",
-                modifier = iconModifier
-                    .combinedClickable(
-                        onClick = {
-                            val intent = Intent(Intent.ACTION_VIEW)
-                            intent.data = Uri.parse(githubUrl)
-                            try {
-                                context.startActivity(intent)
-                            } catch (_: Exception){
-                                Toast.makeText(context,"Error opening url. Long press to copy.",Toast.LENGTH_SHORT).show()
-                            }
-                        },
-                        onLongClick = {
-                            val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
-                            if (clipboardManager == null){
-                                Toast.makeText(context,"Error",Toast.LENGTH_SHORT).show()
-                            } else {
-                                clipboardManager.setPrimaryClip(ClipData.newPlainText("Github url",githubUrl))
-                                Toast.makeText(context,"Copied",Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    ),
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                contentScale = ContentScale.Inside,
-            )
-            Image(
-                painter = painterResource(R.drawable.linkedin),
-                contentDescription = "linkedin",
-                modifier = iconModifier
-                    .combinedClickable(
-                        onClick = {
-                            val intent = Intent(Intent.ACTION_VIEW)
-                            intent.data = Uri.parse(linkedinUrl)
-                            try {
-                                context.startActivity(intent)
-                            } catch (_: Exception){
-                                Toast.makeText(context,"Error opening url. Long press to copy.",Toast.LENGTH_SHORT).show()
-                            }
-                        },
-                        onLongClick = {
-                            val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
-                            if (clipboardManager == null){
-                                Toast.makeText(context,"Error",Toast.LENGTH_SHORT).show()
-                            } else {
-                                clipboardManager.setPrimaryClip(ClipData.newPlainText("Linkedin url",linkedinUrl))
-                                Toast.makeText(context,"Copied",Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    ),
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                contentScale = ContentScale.Inside,
-            )
-        }
+//        Text(
+//            text = stringResource(R.string.check_what_s_new),
+//            modifier = Modifier
+//                .alpha(0.5f)
+//                .clickable(onClick = onWhatsNewClicked),
+//            style = MaterialTheme.typography.titleSmall.copy(textDecoration = TextDecoration.Underline)
+//        )
+//        Spacer(Modifier.height(6.dp))
+//        Text(
+//            text = buildAnnotatedString {
+//                withStyle(semiTransparentSpanStyle) {
+//                    append("${stringResource(R.string.made_by)} ")
+//                }
+//                append("Sumit Bera")
+//            },
+//            style = MaterialTheme.typography.titleMedium,
+//        )
+//        val iconModifier = Modifier
+//            .size(30.dp)
+//            .alpha(0.5f)
+//        Row(
+//            horizontalArrangement = Arrangement.spacedBy(24.dp)
+//        ) {
+//            Image(
+//                painter = painterResource(R.drawable.github_mark),
+//                contentDescription = "github",
+//                modifier = iconModifier
+//                    .combinedClickable(
+//                        onClick = {
+//                            val intent = Intent(Intent.ACTION_VIEW)
+//                            intent.data = Uri.parse(githubUrl)
+//                            try {
+//                                context.startActivity(intent)
+//                            } catch (_: Exception){
+//                                Toast.makeText(context,"Error opening url. Long press to copy.",Toast.LENGTH_SHORT).show()
+//                            }
+//                        },
+//                        onLongClick = {
+//                            val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
+//                            if (clipboardManager == null){
+//                                Toast.makeText(context,"Error",Toast.LENGTH_SHORT).show()
+//                            } else {
+//                                clipboardManager.setPrimaryClip(ClipData.newPlainText("Github url",githubUrl))
+//                                Toast.makeText(context,"Copied",Toast.LENGTH_SHORT).show()
+//                            }
+//                        }
+//                    ),
+//                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+//                contentScale = ContentScale.Inside,
+//            )
+//            Image(
+//                painter = painterResource(R.drawable.linkedin),
+//                contentDescription = "linkedin",
+//                modifier = iconModifier
+//                    .combinedClickable(
+//                        onClick = {
+//                            val intent = Intent(Intent.ACTION_VIEW)
+//                            intent.data = Uri.parse(linkedinUrl)
+//                            try {
+//                                context.startActivity(intent)
+//                            } catch (_: Exception){
+//                                Toast.makeText(context,"Error opening url. Long press to copy.",Toast.LENGTH_SHORT).show()
+//                            }
+//                        },
+//                        onLongClick = {
+//                            val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
+//                            if (clipboardManager == null){
+//                                Toast.makeText(context,"Error",Toast.LENGTH_SHORT).show()
+//                            } else {
+//                                clipboardManager.setPrimaryClip(ClipData.newPlainText("Linkedin url",linkedinUrl))
+//                                Toast.makeText(context,"Copied",Toast.LENGTH_SHORT).show()
+//                            }
+//                        }
+//                    ),
+//                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+//                contentScale = ContentScale.Inside,
+//            )
+//        }
         Spacer(Modifier.height(36.dp))
     }
 }

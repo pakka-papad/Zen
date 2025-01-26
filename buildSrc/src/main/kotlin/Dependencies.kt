@@ -1,6 +1,7 @@
 object Versions {
     const val kotlin = "1.8.0"
     const val coroutines = "1.7.1"
+    const val kotlinxCollectionsImmutable = "0.3.8"
 
     const val androidxComposeUi = "1.3.3"
     const val androidxComposeCompiler = "1.4.1"
@@ -13,7 +14,7 @@ object Versions {
     const val androidxEspresso = "3.4.0"
     const val androidxComposeConstraintLayout = "1.0.1"
     const val androidxSplashScreen = "1.0.0-beta02"
-    const val androidxGlance = "1.0.0-beta01"
+    const val androidxGlance = "1.1.1"
     const val androidxWorkManager = "2.8.1"
 
     const val appCompat = "1.4.2"
@@ -25,6 +26,7 @@ object Versions {
 
     const val firebaseBom = "31.2.3"
     const val googleServices = "4.3.15"
+    const val appUpdate = "2.1.0"
     const val crashlyticsGradlePlugin = "2.9.4"
 
     const val material3 = "1.1.2"
@@ -61,6 +63,7 @@ object Plugins {
 }
 
 object Libraries {
+    const val kotlinxCollectionsImmutable = "org.jetbrains.kotlinx:kotlinx-collections-immutable:${Versions.kotlinxCollectionsImmutable}"
     const val coroutinesTest = "org.jetbrains.kotlinx:kotlinx-coroutines-test:${Versions.coroutines}"
 
     const val androidxCore = "androidx.core:core-ktx:${Versions.androidxCore}"
@@ -90,6 +93,7 @@ object Libraries {
 
     const val firebaseBom = "com.google.firebase:firebase-bom:${Versions.firebaseBom}"
     const val firebaseCrashlytics = "com.google.firebase:firebase-crashlytics-ktx"
+    const val appUpdate = "com.google.android.play:app-update-ktx:${Versions.appUpdate}"
 
     const val androidxComposeMaterial = "androidx.compose.material:material:${Versions.androidxComposeMaterial}"
 
@@ -147,7 +151,7 @@ object AnnotationProcessors {
 object AppVersion {
     private const val Major = 1
     private const val Minor = 2
-    private const val Patch = 4
+    private const val Patch = 5
     const val Code = Major*10000 + Minor*100 + Patch
     const val Name = "$Major.$Minor.$Patch"
 }

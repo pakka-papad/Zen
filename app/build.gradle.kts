@@ -113,6 +113,7 @@ android {
 
 dependencies {
     implementation(project(":m3utils"))
+    implementation(Libraries.kotlinxCollectionsImmutable)
     implementation(Libraries.androidxCore)
 
     implementation(Libraries.androidxLifecycle)
@@ -169,6 +170,7 @@ dependencies {
 
     implementation(platform(Libraries.firebaseBom))
     implementation(Libraries.firebaseCrashlytics)
+    implementation(Libraries.appUpdate)
 
 //    implementation(Libraries.exoPlayer)
     implementation(Libraries.media3ExoPlayer)

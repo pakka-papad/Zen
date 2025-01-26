@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Zen Music</string>
     <string name="music_control_widget_description">Music Control Widget</string>
 
@@ -125,6 +125,10 @@
     <string name="songs_tab_cannot_be_removed">Songs tab cannot be removed</string>
     <string name="maximum_of_five_tab_selections_are_allowed">Maximum of five tab selections are allowed</string>
     <string name="minimum_one_tab_selection_is_required">Minimum one tab selection is required</string>
+    <string name="new_version_available" tools:ignore="MissingTranslation">A new version is available</string>
+    <string name="update" tools:ignore="MissingTranslation">Update</string>
+    <string name="add_songs_back_to_the_library" tools:ignore="MissingTranslation">Add songs back to the library</string>
+    <string name="add_folders_back_to_the_library" tools:ignore="MissingTranslation">Add folders back to the library</string>
 
     <!-- plural strings -->
     <plurals name="song_count">
